@@ -1,0 +1,28 @@
+// The doubled class lifts these over the app's global link style (underlined, in the ink colour).
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+  margin-bottom: var(--lab-space-4);
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.sections .sections__link.sections__link {
+  min-height: var(--lab-control-h);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--lab-space-3);
+  border-bottom: 2px solid transparent;
+  color: var(--lab-ink-dim);
+  font-weight: var(--lab-fw-control);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--lab-ink);
+  }
+
+  &.sections__link--on {
+    border-bottom-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+}

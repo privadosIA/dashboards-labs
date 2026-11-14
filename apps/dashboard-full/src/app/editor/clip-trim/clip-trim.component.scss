@@ -1,0 +1,33 @@
+.preview {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: var(--lab-space-3);
+  background: var(--lab-player-bg);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-3);
+}
+
+.field {
+  width: 190px;
+}
+
+.note {
+  margin: var(--lab-space-2) 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.server-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: var(--lab-space-2) 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

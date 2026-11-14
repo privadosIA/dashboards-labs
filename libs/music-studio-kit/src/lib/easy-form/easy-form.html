@@ -1,0 +1,24 @@
+<dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false">
+  <ng-template dfSlot="promptCount">
+    <app-char-count data-testid="prompt-count" [length]="promptLength()" [max]="promptMax" />
+  </ng-template>
+
+  <ng-template dfSlot="instrumental">
+    @if (canInstrumental()) {
+      <app-instrumental-switch [checked]="store.instrumental()" (checkedChange)="store.setInstrumental($event)" />
+    }
+  </ng-template>
+
+  <ng-template dfSlot="examples">
+    <section class="examples" [attr.aria-label]="t.easy.examples">
+      <h3>{{ t.easy.examples }}</h3>
+      @for (example of t.easy.exampleList; track $index) {
+        <button type="button" class="example" [attr.data-testid]="'example-' + $index" (click)="store.setPrompt(example)">{{ example }}</button>
+      }
+    </section>
+  </ng-template>
+</dynamic-form>
+
+@if (writer.error(); as e) {
+  <p class="error" data-testid="write-error" role="status">{{ t.custom.errors[e] }}</p>
+}

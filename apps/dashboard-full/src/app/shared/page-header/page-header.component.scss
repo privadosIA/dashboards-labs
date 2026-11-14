@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3) var(--lab-space-5);
+  margin: 0 0 var(--lab-space-5);
+
+  &__text {
+    flex: 1 1 320px;
+    min-width: 0;
+
+    // A short bar in the accent above the title: where the page starts.
+    &::before {
+      content: '';
+      display: block;
+      width: 2.5rem;
+      height: 4px;
+      margin-bottom: var(--lab-space-2);
+      border-radius: var(--lab-radius-pill);
+      background: var(--lab-accent);
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--lab-font-display);
+    font-size: var(--lab-fs-page);
+    font-weight: var(--lab-fw-title);
+    letter-spacing: var(--lab-tracking-tight);
+    line-height: 1.15;
+  }
+
+  &__desc {
+    margin: var(--lab-space-1) 0 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-body);
+    max-width: 70ch;
+  }
+
+  &__actions {
+    display: flex;
+    // Takes what is left of the row; on a wide screen its buttons sit at the right edge and a button with `margin-inline-start: auto` goes to the
+    // far end. On a narrow one they start at the left, where the title is.
+    flex: 1 1 auto;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--lab-space-2);
+
+    @media (min-width: 900px) {
+      justify-content: flex-end;
+    }
+
+    &:empty {
+      display: none;
+    }
+  }
+}

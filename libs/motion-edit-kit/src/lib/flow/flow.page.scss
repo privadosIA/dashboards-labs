@@ -1,0 +1,142 @@
+:host {
+  display: block;
+}
+
+.flow {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: var(--lab-space-3) 0;
+  display: grid;
+  gap: var(--lab-space-4);
+}
+
+header {
+  h1 {
+    margin: 0 0 var(--lab-space-2);
+    font-size: var(--lab-fs-title);
+    font-weight: var(--lab-fw-title);
+  }
+
+  p {
+    margin: 0;
+    color: var(--lab-ink-dim);
+  }
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.prompt {
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border-radius: var(--lab-radius);
+  overflow-wrap: anywhere;
+}
+
+.note,
+.banner {
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-warn);
+  border-radius: var(--lab-radius);
+}
+
+.banner {
+  border-color: var(--lab-danger);
+}
+
+.new {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+// The start of the flow: what is kept (the flows, what to stop at, the importer) in a narrow column on the left, and the new flow (the assistant and the sentence) beside it
+// on the right, so that neither stretches across the whole window; on a narrow window they stack.
+.side {
+  display: grid;
+  gap: var(--lab-space-4);
+}
+
+.home {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--lab-space-5);
+
+  @media (max-width: 56rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.steps {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+
+  &.current {
+    border-color: var(--lab-accent);
+  }
+
+  &[data-status='pending'],
+  &[data-status='stale'] {
+    opacity: 0.7;
+  }
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+}
+
+.status {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.back {
+  margin-inline-start: auto;
+}
+
+.line {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  overflow-wrap: anywhere;
+}
+
+.missing {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+button {
+  padding: var(--lab-space-1) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}

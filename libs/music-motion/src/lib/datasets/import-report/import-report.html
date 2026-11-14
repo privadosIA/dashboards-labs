@@ -1,0 +1,130 @@
+<section class="import" data-testid="import">
+  <h2>{{ t.title }}</h2>
+  <p class="hint">{{ t.intro }}</p>
+
+  @if (phase() === 'idle' || phase() === 'reading' || phase() === 'problems') {
+    <div class="file">
+      <label class="choose" for="dataset-file">{{ t.chooseFile }}</label>
+      <input id="dataset-file" type="file" accept=".json,application/json" data-testid="file" [disabled]="phase() === 'reading'" (change)="choose($event)" />
+      <span class="name" data-testid="file-name">{{ fileName() || t.noFile }}</span>
+      <span class="hint">{{ t.limit }}</span>
+    </div>
+  }
+
+  @switch (phase()) {
+    @case ('reading') {
+      <p class="hint" role="status" data-testid="reading">{{ t.reading }}</p>
+    }
+    @case ('problems') {
+      <div class="problems" role="alert" data-testid="problems">
+        <p>{{ t.problemsTitle }}</p>
+        <ul>
+          @for (p of problems(); track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+      </div>
+    }
+    @default {
+      @if (plan(); as plan) {
+        <h3>{{ phase() === 'done' ? t.doneTitle : t.reportTitle }}</h3>
+        @if (phase() === 'done') {
+          <p class="summary" data-testid="done">{{ t.done(resultCounts()) }}</p>
+          @if (keptHere() && !durable()) {
+            <p class="problem" role="alert" data-testid="not-durable">{{ t.notDurable }}</p>
+          }
+        } @else if (phase() === 'running') {
+          <p class="hint" role="status" data-testid="running">{{ t.running }}</p>
+        } @else {
+          <p class="summary" data-testid="summary">{{ t.summary(counts()!) }}</p>
+        }
+
+        @if (phase() === 'report') {
+          <div class="song" data-testid="song-picker">
+            <label for="song-pick">{{ t.songLabel }}</label>
+            <select id="song-pick" data-testid="song-select" (change)="pickSong($event)">
+              <option value="" [selected]="picked() === ''">{{ t.songOfFile(fileSong().title, fileSong().found) }}</option>
+              @for (s of songs(); track s.key) {
+                <option [value]="s.key" [selected]="picked() === s.key">{{ s.title }} · {{ s.seconds }} s</option>
+              }
+            </select>
+            <span class="hint">{{ t.songHint }}</span>
+          </div>
+        }
+
+        @if (plan.items.length === 0) {
+          <p class="hint" data-testid="nothing">{{ t.nothingToDo }}</p>
+        } @else {
+          <lab-paged-list listId="motion-import-plan" [data]="plan.items" [lang]="lang">
+            <ng-template let-page>
+              <div class="scroll">
+                <table data-testid="report">
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ t.columns.kind }}</th>
+                      <th scope="col">{{ t.columns.item }}</th>
+                      <th scope="col">{{ t.columns.action }}</th>
+                      <th scope="col">{{ t.columns.why }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of page; track item.kind + ':' + item.index) {
+                      <tr [attr.data-testid]="'row-' + item.kind + '-' + item.index" [class]="'action-' + item.action">
+                        <td>{{ kindText(item) }}</td>
+                        <td class="item">{{ item.label }}</td>
+                        @if (phase() === 'report') {
+                          <td data-testid="action">{{ actionText(item) }}</td>
+                          <td class="why">
+                            {{ reason(item) }}
+                            @if (item.reason === 'part-no-text') {
+                              @if (asked().has(item.index)) {
+                                <span class="done" data-testid="asked">{{ t.asked }} <a [routerLink]="link('parts')">→</a></span>
+                              } @else {
+                                <button type="button" data-testid="ask-assistant" (click)="askAssistant(item)">{{ t.askAssistant }}</button>
+                              }
+                            }
+                          </td>
+                        } @else {
+                          <td data-testid="state" [class.failed]="outcome(item).failed">{{ outcome(item).state }}</td>
+                          <td class="why">{{ outcome(item).why }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </ng-template>
+          </lab-paged-list>
+        }
+
+        @if (phase() === 'report') {
+          @if (askRefused()) {
+            <p class="problem" role="alert" data-testid="ask-refused">{{ askRefused() }}</p>
+          }
+          <p class="hint">{{ t.approvalNote }} {{ t.assistantNote }}</p>
+          @if (unsupported()) {
+            <label class="drop" data-testid="drop-animate">
+              <input type="checkbox" data-testid="drop-animate-check" [checked]="dropAnimate()" (change)="dropAnimate.set($any($event.target).checked)" />
+              {{ t.dropAnimate }}
+            </label>
+          }
+          <div class="actions">
+            <button type="button" class="submit" data-testid="confirm" [disabled]="!canConfirm()" (click)="confirm()">{{ t.confirm }}</button>
+            <button type="button" data-testid="cancel" (click)="cancel()">{{ t.cancel }}</button>
+          </div>
+        } @else if (phase() === 'running') {
+          <div class="actions">
+            <button type="button" data-testid="stop" (click)="stop()">{{ t.stop }}</button>
+          </div>
+        } @else {
+          <div class="actions">
+            @if (made(); as id) {
+              <a class="open" data-testid="open-animation" [routerLink]="link('pieces', id)">{{ t.openAnimation }}</a>
+            }
+            <button type="button" data-testid="another" (click)="another()">{{ t.another }}</button>
+          </div>
+        }
+      }
+    }
+  }
+</section>

@@ -1,0 +1,126 @@
+.look {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: var(--lab-space-2) 0 0;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+}
+
+.hint,
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  margin: 0;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.ok {
+  margin: 0;
+  color: var(--lab-success);
+}
+
+.grid,
+.styles {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid {
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+}
+
+.styles {
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+
+.card {
+  display: grid;
+  gap: var(--lab-space-1);
+  width: 100%;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 2px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  color: var(--lab-ink);
+  text-align: left;
+  cursor: pointer;
+
+  &.on {
+    border-color: var(--lab-accent);
+  }
+
+  &:disabled,
+  &.waiting {
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+}
+
+.ref img,
+.blank {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--lab-radius);
+  background: var(--lab-line);
+}
+
+.state {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+
+  &.failed {
+    color: var(--lab-danger);
+  }
+}
+
+.badge {
+  margin-left: var(--lab-space-2);
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.address {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.add {
+  justify-self: start;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    background: transparent;
+    border-color: var(--lab-line);
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+}

@@ -1,0 +1,58 @@
+@if (found(); as it) {
+  <section class="panel" data-testid="item-panel">
+    <h2>{{ t.item.title(layer(), item() + 1) }}</h2>
+
+    @if (problems().length > 0) {
+      <ul class="marks" data-testid="item-problems" role="alert">
+        @for (p of problems(); track $index) {
+          <li>{{ p }}</li>
+        }
+      </ul>
+    }
+
+    <label class="field">
+      <span>{{ t.item.part }}</span>
+      <select class="ctl part" data-testid="item-part" [disabled]="locked()" (change)="choose(value($event))">
+        @for (c of choices(); track c.name) {
+          <option [value]="c.name" [selected]="c.name === it.part" [disabled]="c.why !== null" [attr.title]="c.why">{{ c.name }}</option>
+        }
+      </select>
+    </label>
+    @if (part(); as part) {
+      <p class="meta">{{ part.description }}</p>
+      <app-collapsible [title]="t.params" key="item-params">
+        @if (part.params.length === 0) {
+          <p class="meta">{{ t.noParams }}</p>
+        } @else {
+          <lab-part-params [part]="part" [values]="it.params" [level]="level()" [locked]="locked()" (paramsChange)="params($event)" />
+        }
+      </app-collapsible>
+      <app-animate-panel [script]="script()" [layer]="{ id: layer(), item: item() }" [part]="part" [catalog]="catalog()" [playhead]="playhead()" [selected]="keyframe()" [locked]="locked()" (edit)="edit.emit($event)" (pick)="pick.emit($event)" />
+    } @else {
+      <p class="warn" data-testid="not-in-catalog">{{ t.notInCatalog }}</p>
+    }
+
+    <div class="range">
+      <label class="field">
+        <span>{{ t.item.from }}</span>
+        <input class="ctl" type="number" step="0.01" min="0" data-testid="item-from" [value]="it.start" [disabled]="locked()" (change)="setRange('start', value($event))" />
+      </label>
+      <label class="field">
+        <span>{{ t.item.to }}</span>
+        <input class="ctl" type="number" step="0.01" min="0" data-testid="item-to" [value]="it.end" [disabled]="locked()" (change)="setRange('end', value($event))" />
+      </label>
+    </div>
+    <p class="meta">{{ t.item.length(length()) }}</p>
+    @if (notice()) {
+      <p class="warn" role="alert" data-testid="item-notice">{{ notice() }}</p>
+    }
+    @if (heavy() > 0) {
+      <p class="meta" data-testid="item-heavy">{{ t.item.heavy(heavy(), maxParts) }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" class="ctl danger" data-testid="item-remove" [disabled]="locked()" (click)="remove()">{{ t.item.remove }}</button>
+      <button type="button" class="ctl danger" data-testid="item-remove-layer" [disabled]="locked()" (click)="removeLayer()">{{ t.item.removeLayer }}</button>
+    </div>
+  </section>
+}

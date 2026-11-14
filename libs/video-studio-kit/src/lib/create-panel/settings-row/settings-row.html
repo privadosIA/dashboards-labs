@@ -1,0 +1,18 @@
+<button type="button" class="row" [class.bad]="error()" [attr.data-testid]="testId() || null" [matMenuTriggerFor]="menu" aria-haspopup="listbox">
+  <span class="text">
+    <span class="label">{{ label() }}</span>
+    <span class="value">{{ value() }}</span>
+  </span>
+  <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+</button>
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+<mat-menu #menu="matMenu" class="settings-menu">
+  @for (o of options(); track o.value) {
+    <button mat-menu-item type="button" [class.current]="o.value === selected()" [attr.aria-current]="o.value === selected() ? 'true' : null" [disabled]="o.disabled" (click)="choose.emit(o.value)">
+      {{ o.label }}
+    </button>
+  }
+  <ng-content />
+</mat-menu>

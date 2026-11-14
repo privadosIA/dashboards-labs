@@ -1,0 +1,114 @@
+.card {
+  --state: var(--lab-ink-dim);
+
+  // Title, state, specs, progress and buttons share one row and wrap only when the card is narrow.
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3) var(--lab-space-2) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-left: 6px solid var(--state);
+  border-radius: var(--lab-radius-panel);
+
+  &.state-queued {
+    --state: var(--lab-warn);
+  }
+
+  &.state-running {
+    --state: var(--lab-accent);
+  }
+
+  &.state-done {
+    --state: var(--lab-success);
+  }
+
+  &.state-failed {
+    --state: var(--lab-danger);
+  }
+}
+
+.head {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: baseline;
+  gap: var(--lab-space-2);
+  min-width: 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.state {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--state);
+  border-radius: var(--lab-radius-pill);
+  color: var(--state);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  white-space: nowrap;
+}
+
+.meta,
+.error {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.meta {
+  color: var(--lab-ink-dim);
+}
+
+.error {
+  flex: 1 1 100%;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.progress {
+  flex: 0 1 8rem;
+  height: 0.5rem;
+  overflow: hidden;
+  background: var(--lab-surface-high);
+  border-radius: var(--lab-radius-pill);
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--lab-accent);
+    transition: width 0.4s ease;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+  margin-left: auto;
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}
+
+.open {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+// The link looks like the other links of the page: the host styles links.
+.edit-link {
+  white-space: nowrap;
+}

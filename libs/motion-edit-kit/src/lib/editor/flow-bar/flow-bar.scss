@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+.flow-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  margin-bottom: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius);
+}
+
+.hint {
+  flex: 1;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.back {
+  margin-inline-start: auto;
+  color: var(--lab-accent);
+}
+
+button {
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &.primary {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

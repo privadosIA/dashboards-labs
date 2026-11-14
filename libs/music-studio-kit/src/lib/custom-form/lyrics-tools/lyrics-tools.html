@@ -1,0 +1,12 @@
+<div class="tools">
+  <button type="button" class="tool" [matMenuTriggerFor]="menu" data-testid="structure-tags" [attr.aria-label]="t.custom.structureTags">+ {{ t.custom.structureTags }}</button>
+  <button type="button" class="tool ai" data-testid="ai-generator" (click)="write.emit()">✦ {{ t.custom.aiGenerator }}</button>
+</div>
+
+<mat-menu #menu="matMenu" class="structure-menu">
+  <p class="menu-hint">{{ t.custom.structureTagsHint }}</p>
+  @for (tag of tags; track tag) {
+    <button mat-menu-item type="button" [attr.data-testid]="'section-' + tag" (click)="insert.emit(tag)">[{{ tag }}]</button>
+  }
+</mat-menu>
+

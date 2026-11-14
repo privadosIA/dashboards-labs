@@ -1,0 +1,48 @@
+<ul class="tools">
+  @for (tool of tools; track tool.id) {
+    <li>
+      <button type="button" class="tool" [attr.data-testid]="'tool-' + tool.id" (click)="run(tool)">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="tool.icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="text">
+          <span class="name">{{ tool.name(t) }}</span>
+          <span class="hint">{{ tool.hint(t) }}</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </li>
+  }
+  @for (row of videoRows(); track row.info.id) {
+    <li>
+      <button type="button" class="tool" [attr.data-testid]="'tool-' + row.info.id" [attr.data-available]="row.info.available" [disabled]="!row.info.available" (click)="runVideo(row)">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="row.icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="text">
+          <span class="name">{{ row.name }}</span>
+          <span class="hint">{{ row.hint }}</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </li>
+  }
+  <li>
+    <button type="button" class="tool" data-testid="tool-motion-library" (click)="openLibrary()">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 6v12M16 6v12M4 10h4M4 14h4M16 10h4M16 14h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <span class="text">
+        <span class="name">{{ t.motionLibrary.name }}</span>
+        <span class="hint">{{ t.motionLibrary.hint }}</span>
+      </span>
+      <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </button>
+  </li>
+</ul>
+@if (status() === 'loading') {
+  <p class="status" role="status" data-testid="tools-loading">{{ t.videoTools.loading }}</p>
+} @else if (status() === 'error') {
+  <p class="error" role="alert" data-testid="tools-error">
+    {{ t.videoTools.unreadable }}
+    <button type="button" class="retry" data-testid="tools-retry" (click)="load()">{{ t.videoTools.retry }}</button>
+  </p>
+}
+<input #file type="file" accept="image/*" hidden data-testid="tool-file" />
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}

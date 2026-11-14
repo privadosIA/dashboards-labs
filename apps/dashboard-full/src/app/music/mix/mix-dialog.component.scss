@@ -1,0 +1,18 @@
+@use '../../shared/floating-window/floating-window' as fw;
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+// The bar, its hint and buttons, and the grips to move and resize the window.
+@include fw.window('mix-dialog');
+
+// Fills what the window gives it and scrolls inside, so resizing shows more of the mixer.
+.mix-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+}

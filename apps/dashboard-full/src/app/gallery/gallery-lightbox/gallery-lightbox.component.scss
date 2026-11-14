@@ -1,0 +1,26 @@
+.box {
+  &__img {
+    display: block;
+    max-width: 80vw;
+    max-height: 70vh;
+    background: var(--lab-player-bg);
+  }
+
+  &__caption {
+    margin-top: 8px;
+    font-size: var(--lab-fs-meta);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+.prompt {
+  max-width: 72ch;
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+}

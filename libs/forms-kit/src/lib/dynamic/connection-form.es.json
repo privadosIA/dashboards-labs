@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "id": "connection",
+  "title": "Conectar con el servidor",
+  "layout": { "columns": 1 },
+  "fields": [
+    { "key": "baseUrl", "type": "text", "label": "Dirección del servidor", "placeholder": "http://127.0.0.1:4666", "validation": { "required": true } },
+    { "key": "token", "type": "text", "label": "Token", "description": "Solo si el servidor lo pide." }
+  ]
+}

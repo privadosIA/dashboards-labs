@@ -1,0 +1,35 @@
+<section class="done" data-testid="done-card">
+  @if (video()) {
+    <video controls [src]="video()" data-testid="video" [attr.aria-label]="t.video"></video>
+  } @else {
+    <p class="hint" data-testid="no-video">{{ t.noVideo }}</p>
+  }
+  <div class="actions">
+    <button type="button" data-testid="export" [disabled]="exporting()" (click)="exportDataset()">{{ t.exportDataset }}</button>
+    <a class="button" data-testid="open-piece" [routerLink]="pieceLink()">{{ t.openPiece }}</a>
+    <button type="button" class="primary" data-testid="new-flow" (click)="newFlow()">{{ t.newFlow }}</button>
+  </div>
+  @if (saved()) {
+    <p class="ok" role="status" data-testid="saved">{{ saved() }}</p>
+  }
+  @if (exportError()) {
+    <p class="problem" role="alert" data-testid="export-error">{{ exportError() }}</p>
+  }
+  @if (attempts().length) {
+    <div class="attempts" data-testid="attempts">
+      <h4>{{ t.attempts }}</h4>
+      <ul>
+        @for (a of attempts(); track a.kind + a.id) {
+          <li>
+            @if (a.kind === 'song') {
+              <span>{{ t.attemptSong(a.title ?? a.id) }}</span>
+            } @else {
+              <span>{{ t.attemptPiece(a.id) }}</span>
+              <a data-testid="open-attempt" [routerLink]="pieceOf(a.id)">{{ t.open }}</a>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

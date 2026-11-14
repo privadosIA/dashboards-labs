@@ -1,0 +1,84 @@
+<section class="parts">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p>{{ t.intro }}</p>
+  </header>
+
+  <app-ask-part [open]="drafts()?.length === 0" />
+  <p class="scratch">
+    <a class="new" data-testid="new-scratch" [routerLink]="link('parts', 'new')">{{ t.newFromScratch }}</a>
+    @if (vectorCatalog) {
+      <a class="edit-link" data-testid="vector-catalog" [routerLink]="vectorCatalog">{{ links.vectorCatalog }}</a>
+    }
+  </p>
+
+  @if (refused()) {
+    <p class="refused" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  @if (drafts() === null) {
+    <p class="notice" role="status">{{ common.loading }}</p>
+  } @else if (drafts()!.length === 0) {
+    <div class="notice" data-testid="empty">
+      <p>{{ t.empty }}</p>
+    </div>
+  } @else {
+    <lab-paged-list listId="motion-part-drafts" [data]="drafts()!" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (d of page; track d.id) {
+            <li class="card" [class]="'state-' + d.state" [attr.data-testid]="'draft-' + d.id">
+              <div class="head">
+                <h2>{{ d.name ?? (d.request || t.fromText) }}</h2>
+                <span class="state" data-testid="state">{{ stateText(d) }}</span>
+              </div>
+              @if (d.name && d.request) {
+                <p class="meta">{{ d.request }}</p>
+              }
+              @if (d.state === 'writing') {
+                <p class="meta" role="status" data-testid="writing">{{ t.writingNote }}</p>
+              } @else if (d.state === 'failed' && d.error) {
+                <p class="error" data-testid="error">{{ t.failedReason }} {{ d.error }}</p>
+              }
+              <div class="actions">
+                <button type="button" class="open" data-testid="open" (click)="open(d)">{{ t.open }}</button>
+                <button type="button" data-testid="remove" (click)="remove(d)">{{ t.remove }}</button>
+              </div>
+            </li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+
+  <section class="mine" data-testid="mine">
+    <h2 class="mine-title">{{ t.mineTitle }}</h2>
+    <p class="meta">{{ t.mineIntro }}</p>
+    @if (mine() === null) {
+      <p class="notice" role="status">{{ common.loading }}</p>
+    } @else if (mine()!.length === 0) {
+      <div class="notice" data-testid="mine-empty">
+        <p>{{ t.mineEmpty }}</p>
+      </div>
+    } @else {
+      <lab-paged-list listId="motion-parts-mine" [data]="mine()!" [lang]="lang">
+        <ng-template let-page>
+          <ul class="list">
+            @for (p of page; track p.name) {
+              <li class="card state-ready" [attr.data-testid]="'mine-' + p.name">
+                <div class="head">
+                  <h2>{{ p.name }}</h2>
+                </div>
+                <p class="meta">{{ p.description }}</p>
+                <div class="actions">
+                  <button type="button" class="open" data-testid="mine-edit" (click)="edit(p)">{{ t.mineEdit }}</button>
+                  <button type="button" data-testid="mine-remove" (click)="removePart(p)">{{ t.mineRemove }}</button>
+                </div>
+              </li>
+            }
+          </ul>
+        </ng-template>
+      </lab-paged-list>
+    }
+  </section>
+</section>

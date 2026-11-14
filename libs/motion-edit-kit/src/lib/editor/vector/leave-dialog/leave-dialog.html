@@ -1,0 +1,13 @@
+<dialog #dialog class="modal" data-testid="vector-leave" [attr.aria-label]="t.title" (cancel)="cancelled($event)" (click)="backdrop($event)">
+  @if (what(); as what) {
+    <div class="box">
+      <h2>{{ t.title }}</h2>
+      <p data-testid="vector-leave-text">{{ t.text(what) }}</p>
+      <div class="actions">
+        <button type="button" class="ctl primary" data-testid="vector-leave-save" (click)="give('save')">{{ t.save }}</button>
+        <button type="button" class="ctl" data-testid="vector-leave-discard" (click)="give('discard')">{{ t.discard }}</button>
+        <button type="button" class="ctl" data-testid="vector-leave-stay" (click)="give('stay')">{{ t.stay }}</button>
+      </div>
+    </div>
+  }
+</dialog>

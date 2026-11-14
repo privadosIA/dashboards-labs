@@ -1,0 +1,33 @@
+.confirm {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+h2,
+p {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lab-space-2);
+}
+
+button {
+  padding: var(--lab-space-1) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.danger {
+  background: var(--lab-danger);
+  border-color: var(--lab-danger);
+  color: var(--lab-bg);
+}

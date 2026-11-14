@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+mat-paginator {
+  background: transparent;
+  border-top: 1px solid var(--lab-line);
+  font-size: var(--lab-fs-meta);
+}
+
+// Items never make the page move sideways, and the list shows no scrollbar of its own (clip, unlike auto, adds none).
+.items {
+  overflow-x: clip;
+  max-width: 100%;
+}

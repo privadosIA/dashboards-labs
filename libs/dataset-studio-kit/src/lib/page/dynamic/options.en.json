@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "id": "dataset-options",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "variants",
+      "type": "number",
+      "label": "Variants per picture",
+      "defaultValue": 1,
+      "validation": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    {
+      "key": "instrumental",
+      "type": "checkbox",
+      "label": "Instrumental (no lyrics)",
+      "defaultValue": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<div class="card">
+  <div class="text">
+    <span class="name" id="instrumental-name">{{ t.easy.instrumental }}</span>
+    <span class="hint" id="instrumental-hint">{{ t.easy.instrumentalHint }}</span>
+  </div>
+  <button type="button" role="switch" class="switch" [class.on]="checked()" [attr.aria-checked]="checked()" aria-labelledby="instrumental-name" aria-describedby="instrumental-hint" data-testid="instrumental" (click)="checkedChange.emit(!checked())">
+    <span class="knob"></span>
+  </button>
+</div>

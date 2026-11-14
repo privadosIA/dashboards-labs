@@ -1,0 +1,85 @@
+<section class="import" data-testid="import">
+  <h2>{{ t.title }}</h2>
+  <p class="hint">{{ t.intro }}</p>
+
+  @if (phase() === 'idle' || phase() === 'reading' || phase() === 'problems') {
+    <div class="file">
+      <label class="choose" for="dataset-file">{{ t.chooseFile }}</label>
+      <input id="dataset-file" type="file" accept=".json,application/json" data-testid="file" [disabled]="phase() === 'reading'" (change)="choose($event)" />
+      <span class="name" data-testid="file-name">{{ fileName() || t.noFile }}</span>
+      <span class="hint">{{ t.limit }}</span>
+    </div>
+  }
+
+  @switch (phase()) {
+    @case ('reading') {
+      <p class="hint" role="status" data-testid="reading">{{ t.reading }}</p>
+    }
+    @case ('problems') {
+      <div class="problems" role="alert" data-testid="problems">
+        <p>{{ t.problemsTitle }}</p>
+        <ul>
+          @for (p of problems(); track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+      </div>
+    }
+    @default {
+      @if (plan(); as plan) {
+        <h3>{{ phase() === 'done' ? t.doneTitle : t.reportTitle }}</h3>
+        @if (phase() === 'done') {
+          <p class="summary" data-testid="done">{{ t.done(resultCounts()) }}</p>
+        } @else if (phase() === 'running') {
+          <p class="hint" role="status" data-testid="running">{{ t.running }}</p>
+        } @else {
+          <p class="summary" data-testid="summary">{{ t.summary(counts()!) }}</p>
+        }
+
+        @if (phase() === 'report') {
+          <div class="song" data-testid="song-picker">
+            <label for="song-pick">{{ t.songLabel }}</label>
+            <select id="song-pick" data-testid="song-select" (change)="pickSong($event)">
+              <option value="" [selected]="picked() === ''">{{ t.songOfFile(fileSong().title, fileSong().found) }}</option>
+              @for (s of songs(); track s.key) {
+                <option [value]="s.key" [selected]="picked() === s.key">{{ s.title }} · {{ s.seconds }} s</option>
+              }
+            </select>
+            <span class="hint">{{ t.songHint }}</span>
+          </div>
+        }
+
+        @if (plan.items.length === 0) {
+          <p class="hint" data-testid="nothing">{{ t.nothingToDo }}</p>
+        } @else {
+          <app-report-list [plan]="plan" [outcomes]="phase() !== 'report'" [results]="results()" />
+        }
+
+        @if (phase() === 'report') {
+          <p class="hint">{{ t.approvalNote }}</p>
+          @if (unsupported()) {
+            <label class="drop" data-testid="drop-animate">
+              <input type="checkbox" data-testid="drop-animate-check" [checked]="dropAnimate()" (change)="dropAnimate.set($any($event.target).checked)" />
+              {{ t.dropAnimate }}
+            </label>
+          }
+          <div class="actions">
+            <button type="button" class="submit" data-testid="confirm" [disabled]="!canConfirm()" (click)="confirm()">{{ t.confirm }}</button>
+            <button type="button" data-testid="cancel" (click)="cancel()">{{ t.cancel }}</button>
+          </div>
+        } @else if (phase() === 'running') {
+          <div class="actions">
+            <button type="button" data-testid="stop" (click)="stop()">{{ t.stop }}</button>
+          </div>
+        } @else {
+          <div class="actions">
+            @if (made(); as id) {
+              <button type="button" class="submit" data-testid="open-animation" (click)="open(id)">{{ t.openAnimation }}</button>
+            }
+            <button type="button" data-testid="another" (click)="another()">{{ t.another }}</button>
+          </div>
+        }
+      }
+    }
+  }
+</section>

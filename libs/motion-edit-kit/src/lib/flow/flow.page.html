@@ -1,0 +1,82 @@
+<section class="flow">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p>{{ t.intro }}</p>
+    @if (notice()) {
+      <p class="note" role="status" data-testid="notice">{{ noticeText() }} <button type="button" data-testid="notice-close" (click)="clearNotice()">×</button></p>
+    }
+  </header>
+
+  @if (!id()) {
+    <div class="home">
+      <div class="side">
+        <app-flow-list />
+        <ng-template [cdkPortalOutlet]="slots.add()" />
+      </div>
+      <section class="new">
+        <h2>{{ t.list.newTitle }}</h2>
+        <app-plan-card (started)="start($event)" />
+      </section>
+    </div>
+  } @else if (missing()) {
+    <section class="missing" data-testid="missing">
+      <p>{{ p.notFound(id()!) }}</p>
+      <p class="hint">{{ p.notFoundHint }}</p>
+      <a [routerLink]="list">{{ p.toList }}</a>
+    </section>
+  } @else if (flow(); as f) {
+    <p class="prompt" data-testid="prompt">{{ f.prompt }}</p>
+    @if (resuming()) {
+      <p class="hint" role="status" data-testid="resuming">{{ p.resuming }}</p>
+    }
+    @if (failed(); as step) {
+      <p class="banner" role="alert" data-testid="failed-banner">
+        {{ p.failedBanner(p.steps[step]) }} {{ why(f.steps[step].reason) }}
+        @if (before(); as b) {
+          <button type="button" data-testid="go-back" (click)="back(b)">{{ p.goBack(p.steps[b]) }}</button>
+        }
+      </p>
+    }
+    <ol class="steps">
+      @for (step of steps; track step) {
+        <li class="step" [class.current]="step === current()" [attr.data-step]="step" [attr.data-status]="status(step)">
+          <div class="head">
+            <h2>{{ p.steps[step] }}</h2>
+            <span class="status" [attr.data-testid]="'status-' + step">{{ p.status[status(step)] }}</span>
+            @if (step !== current() && canGoBack(step)) {
+              <button type="button" class="back" [attr.data-testid]="'back-' + step" (click)="back(step)">{{ p.back }}</button>
+            }
+          </div>
+          @if (step === current()) {
+            @switch (step) {
+              @case ('song') {
+                <app-song-card />
+              }
+              @case ('map') {
+                <app-map-card />
+              }
+              @case ('design') {
+                <app-design-card />
+              }
+              @case ('script') {
+                <app-script-card />
+              }
+              @case ('parts') {
+                <app-parts-card />
+              }
+              @case ('render') {
+                <app-render-card />
+              }
+              @case ('done') {
+                <app-done-card />
+              }
+            }
+          } @else if (line(step, f)) {
+            <p class="line" [attr.data-testid]="'line-' + step">{{ line(step, f) }}</p>
+          }
+        </li>
+      }
+    </ol>
+    <a class="all" data-testid="all-flows" [routerLink]="list">{{ p.toList }}</a>
+  }
+</section>

@@ -1,0 +1,25 @@
+<article class="card" [attr.data-testid]="'song-' + group().id">
+  @if (cover(); as src) {
+    <img class="cover" [src]="src" alt="" />
+  }
+  <div class="body">
+    <div class="title">
+      <h2>{{ song().title }}</h2>
+      <p class="meta">{{ clock(song().seconds) }}@if (song().instrumental) { · {{ t.instrumental }} }</p>
+    </div>
+    @if (group().versions.length > 1) {
+      <label class="version">
+        <span>{{ t.version }}</span>
+        <select data-testid="version" (change)="choose($event)">
+          @for (v of group().versions; track v.key; let i = $index) {
+            <option [value]="i" [selected]="v === song()">{{ versionLabel(i) }}</option>
+          }
+        </select>
+      </label>
+    }
+    @if (audio(); as src) {
+      <audio controls preload="none" [src]="src" [attr.aria-label]="t.listen + ': ' + song().title"></audio>
+    }
+  </div>
+  <button type="button" class="animate" data-testid="animate" (click)="animate.emit(song())">{{ t.animate }}</button>
+</article>

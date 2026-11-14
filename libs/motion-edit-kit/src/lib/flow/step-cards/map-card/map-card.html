@@ -1,0 +1,35 @@
+<section class="map" data-testid="map-card">
+  <p class="sent" data-testid="sent">{{ sent() }}</p>
+
+  @switch (step()?.status) {
+    @case ('running') {
+      <p class="hint" role="status" data-testid="making">{{ t.making }}</p>
+    }
+    @case ('failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failed(why(step()?.reason)) }}</p>
+      <button type="button" data-testid="retry" (click)="make()">{{ t.retry }}</button>
+    }
+    @case ('waiting') {
+      @if (summary(); as s) {
+        <div class="review" data-testid="review">
+          <p data-testid="summary">{{ t.summary(s.seconds, s.bpm, s.sections, s.words) }}</p>
+          <p class="hint" data-testid="words-note">{{ s.wordsEstimated ? t.estimated : t.heard }}</p>
+          @if (s.notice) {
+            <p class="hint" data-testid="notice">{{ s.notice }}</p>
+          }
+          @if (s.wordsEstimated) {
+            <button type="button" data-testid="transcribe" [disabled]="transcribing()" (click)="transcribe()">{{ transcribing() ? t.transcribing : t.transcribe }}</button>
+          }
+          @if (transcribeError()) {
+            <p class="problem" role="alert" data-testid="transcribe-error">{{ t.transcribeFailed(transcribeError()) }}</p>
+          }
+          <label class="auto">
+            <input type="checkbox" data-testid="auto" [checked]="auto()" (change)="setAuto($any($event.target).checked)" />
+            {{ t.auto }}
+          </label>
+          <button type="button" class="primary" data-testid="continue" (click)="continue()">{{ t.continue }}</button>
+        </div>
+      }
+    }
+  }
+</section>

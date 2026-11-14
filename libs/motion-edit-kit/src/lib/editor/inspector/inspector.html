@@ -1,0 +1,41 @@
+@if (selectedItem(); as item) {
+  <button type="button" class="ctl to-song" data-testid="to-song" (click)="deselect.emit()">← {{ t.editing.songDesign }}</button>
+  <app-item-panel
+    [script]="doc().script"
+    [catalog]="catalog()"
+    [level]="piece().level"
+    [layer]="item.layer"
+    [item]="item.item"
+    [locked]="locked()"
+    [playhead]="playhead()"
+    [keyframe]="itemKeyframe()"
+    (pick)="pickItemKeyframe(item, $event)"
+    (edit)="edit.emit($event)"
+  />
+} @else if (selected(); as sel) {
+  <button type="button" class="ctl to-song" data-testid="to-song" (click)="deselect.emit()">← {{ t.editing.songDesign }}</button>
+  <app-piece-panel
+    [script]="doc().script"
+    [songDesign]="doc().design"
+    [songMap]="piece().songMap"
+    [level]="piece().level"
+    [catalog]="catalog()"
+    [pieceId]="sel.piece"
+    [extra]="sel.extra"
+    [locked]="locked()"
+    [refused]="refusedPieces()[sel.piece] ?? ''"
+    [warnings]="warnings()"
+    [playhead]="playhead()"
+    [keyframe]="keyframe()"
+    [review]="review()"
+    (pick)="pickKeyframe(sel, $event)"
+    (writeScene)="writeScene.emit($event)"
+    (editScene)="editScene.emit($event)"
+    (edit)="edit.emit($event)"
+  />
+} @else {
+  <app-collapsible look="panel" key="song-design" [title]="t.editing.songDesign" [open]="false">
+    <app-design-panel [design]="doc().design" [script]="doc().script" [tags]="tags()" [catalog]="catalog()" [locked]="locked()" [refused]="refusedDesign()" (edit)="edit.emit($event)" />
+  </app-collapsible>
+  <p class="hint">{{ t.inspector.hint }}</p>
+}

@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "id": "add-reference",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "url",
+      "type": "text",
+      "label": "Dirección de YouTube",
+      "validation": {
+        "pattern": "^https?://\\S+$",
+        "messages": {
+          "pattern": "Escribe una dirección que empiece por http:// o https://."
+        }
+      }
+    },
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Título (opcional)",
+      "validation": {
+        "maxLength": 120,
+        "messages": {
+          "maxLength": "El título puede tener hasta 120 caracteres."
+        }
+      }
+    },
+    {
+      "key": "notes",
+      "type": "textarea",
+      "label": "Notas (opcional)",
+      "props": {
+        "rows": 2
+      },
+      "validation": {
+        "maxLength": 2000,
+        "messages": {
+          "maxLength": "Las notas pueden tener hasta 2000 caracteres."
+        }
+      }
+    },
+    {
+      "key": "tags",
+      "type": "text",
+      "label": "Etiquetas, separadas por comas (opcional)"
+    }
+  ]
+}

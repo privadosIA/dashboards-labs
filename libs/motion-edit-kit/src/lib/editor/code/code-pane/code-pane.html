@@ -1,0 +1,14 @@
+<div class="code-pane" [attr.data-state]="state()">
+  <div #host class="code-pane-host" data-testid="code-host"></div>
+  @switch (state()) {
+    @case ('loading') {
+      <p class="code-pane-note" role="status" data-testid="code-loading">{{ t.loading }}</p>
+    }
+    @case ('failed') {
+      <p class="code-pane-note" role="alert" data-testid="code-failed">
+        {{ t.failed }} {{ failure() }}
+        <button type="button" class="code-pane-retry" (click)="retry()">{{ t.retry }}</button>
+      </p>
+    }
+  }
+</div>

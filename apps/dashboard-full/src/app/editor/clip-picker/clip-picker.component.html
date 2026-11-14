@@ -1,0 +1,75 @@
+<div class="row">
+  <mat-form-field class="select">
+    <mat-label i18n="@@clip.label">Video</mat-label>
+    <mat-select data-testid="clip-select" [value]="value()" (selectionChange)="choose($event.value)">
+      @if (missing()) {
+        <mat-option [value]="value()">
+          <span class="mo-data">{{ value() }}</span>
+          <span class="missing" i18n="@@picture.gone"> ⚠ not on disk</span>
+        </mat-option>
+      }
+      @for (v of videos(); track v.name) {
+        <mat-option [value]="v.name"><span class="mo-data">{{ v.name }}</span></mat-option>
+      }
+      @if (kept().length > 0) {
+        <mat-optgroup label="Clips from other projects" i18n-label="@@clip.otherProjects">
+          @for (c of kept(); track keptValue(c)) {
+            <mat-option [value]="keptValue(c)"><span class="mo-data">{{ keptLabel(c) }}</span></mat-option>
+          }
+        </mat-optgroup>
+      }
+    </mat-select>
+    @if (error(); as err) {
+      <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+    } @else {
+      <mat-hint i18n="@@clip.hint">It is fitted to the project resolution; if it is longer than the scene it is cut.</mat-hint>
+    }
+  </mat-form-field>
+  <input #pick type="file" accept=".mp4,.mov,.webm,.mkv,video/*" hidden (change)="upload(pick)" />
+  <button mat-stroked-button type="button" data-testid="clip-upload" [disabled]="store.sourceBusy()" (click)="pick.click()">
+    <mat-icon>upload_file</mat-icon>
+    <ng-container i18n="@@clip.upload">Upload video</ng-container>
+  </button>
+</div>
+@if (copiedFrom(); as from) {
+  <p class="note" data-testid="clip-copied">
+    <ng-container i18n="@@clip.copied">This is a copy of the clip from {{ from }}: deleting that project does not affect this scene.</ng-container>
+  </p>
+}
+@if (store.sourceError(); as msg) {
+  <p class="server-error" role="alert" data-testid="clip-error">
+    <mat-icon inline>error</mat-icon>
+    <span class="mo-data">{{ msg }}</span>
+  </p>
+}
+@if (value() && !missing()) {
+  <app-clip-trim
+    [src]="url(value())"
+    [start]="start()"
+    [end]="end()"
+    [speed]="speed()"
+    [error]="trimError()"
+    [speedError]="speedError()"
+    (trimmed)="trimmed.emit($event)"
+  />
+}
+@if (unused().length > 0) {
+  <div class="unused" data-testid="clip-unused">
+    <p class="note" i18n="@@clip.unusedTitle">Videos no scene uses (they can be deleted):</p>
+    @for (u of unused(); track u.name) {
+      <div class="unused__row">
+        <span class="mo-data">{{ u.name }}</span>
+        <button
+          mat-icon-button
+          type="button"
+          [attr.data-testid]="'clip-delete-' + u.name"
+          (click)="remove(u.name)"
+          i18n-aria-label="@@clip.delete"
+          aria-label="Delete this video"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+}

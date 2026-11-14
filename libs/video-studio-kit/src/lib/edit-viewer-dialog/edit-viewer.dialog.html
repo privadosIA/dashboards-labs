@@ -1,0 +1,11 @@
+<div class="viewer">
+  <h2>{{ t.videoTools.edit.viewerTitle }}: {{ name }}</h2>
+  <div class="frame" [style.aspect-ratio]="ratio">
+    <video controls playsinline preload="auto" [src]="source()"></video>
+  </div>
+  <div class="actions">
+    <a [href]="download()" download>{{ t.history.download }}</a>
+    <button type="button" (click)="close('remove')">{{ t.history.remove }}</button>
+    <button type="button" class="close" (click)="close()">{{ t.viewer.close }}</button>
+  </div>
+</div>

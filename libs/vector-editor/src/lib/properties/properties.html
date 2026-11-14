@@ -1,0 +1,361 @@
+<div class="props" data-testid="vector-properties" role="region" [attr.aria-label]="t.props.label">
+  @if (node(); as n) {
+    @if (problem(); as p) {
+      <p class="problem" role="alert" data-testid="problem">{{ p }}</p>
+    }
+    <h3 class="title">{{ n.name }}</h3>
+
+    <section class="group cols" role="group" [attr.aria-label]="t.props.transform">
+      <h4 class="heading">{{ t.props.transform }}</h4>
+      @for (f of transformFields; track f.property) {
+        <div class="field" [class.animated]="animated(f.property)" [class.keyed]="keyed(f.property)">
+          <label [for]="'p-' + f.property">{{ t.properties[f.property] }}</label>
+          <input
+            type="number"
+            [id]="'p-' + f.property"
+            [attr.data-testid]="'field-' + f.property"
+            [attr.step]="f.step"
+            [value]="value(f.property)"
+            [attr.placeholder]="mixed(f.property) ? '—' : null"
+            [attr.title]="mixed(f.property) ? t.props.mixed : null"
+            (input)="setNumber(f.property, $event)"
+          />
+          <button
+            type="button"
+            class="key"
+            [attr.data-testid]="'key-' + f.property"
+            [attr.aria-pressed]="keyed(f.property)"
+            [attr.aria-label]="(keyed(f.property) ? t.props.removeKeyframe : t.props.addKeyframe) + ': ' + t.properties[f.property]"
+            (click)="toggle(f.property)"
+          >
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+          </button>
+        </div>
+      }
+      <div class="field">
+        <label for="p-anchorX">{{ t.props.anchorX }}</label>
+        <input type="number" id="p-anchorX" data-testid="field-anchorX" step="1" [value]="anchor('anchorX')" (input)="setAnchor('anchorX', $event)" />
+      </div>
+      <div class="field">
+        <label for="p-anchorY">{{ t.props.anchorY }}</label>
+        <input type="number" id="p-anchorY" data-testid="field-anchorY" step="1" [value]="anchor('anchorY')" (input)="setAnchor('anchorY', $event)" />
+      </div>
+    </section>
+
+    @if (shapeFields().length || textNode() || imageNode() || lineNode()) {
+      <section class="group cols" role="group" [attr.aria-label]="t.props.shape" data-testid="shape-section">
+        <h4 class="heading">{{ t.props.shape }}</h4>
+        @for (f of shapeFields(); track f.property) {
+          <div class="field" [class.animated]="animated(f.property)" [class.keyed]="keyed(f.property)">
+            <label [for]="'p-' + f.property">{{ t.properties[f.property] }}</label>
+            @if (parametrised(f.property)) {
+              <span class="badge" data-testid="is-parameter">{{ t.props.isParameter }}</span>
+              <button type="button" class="link" [attr.data-testid]="'remove-param-' + f.property" (click)="removeParam($any(f.property))">{{ t.props.removeParameter }}</button>
+            } @else {
+              <input
+                type="number"
+                min="0"
+                [id]="'p-' + f.property"
+                [attr.data-testid]="'field-' + f.property"
+                [attr.step]="f.step"
+                [value]="value(f.property)"
+                [attr.placeholder]="mixed(f.property) ? '—' : null"
+                [attr.title]="mixed(f.property) ? t.props.mixed : null"
+                (input)="setNumber(f.property, $event)"
+              />
+              <button
+                type="button"
+                class="key"
+                [attr.data-testid]="'key-' + f.property"
+                [attr.aria-pressed]="keyed(f.property)"
+                [attr.aria-label]="(keyed(f.property) ? t.props.removeKeyframe : t.props.addKeyframe) + ': ' + t.properties[f.property]"
+                (click)="toggle(f.property)"
+              >
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+              </button>
+            }
+          </div>
+          @if (f.property !== 'rx' && !parametrised(f.property) && !animated(f.property)) {
+            <div class="field sub">
+              <button type="button" class="link" [attr.data-testid]="'param-' + f.property" (click)="openParam($any(f.property))">{{ t.props.parameter }}</button>
+            </div>
+          }
+        }
+        @if (lineNode(); as line) {
+          <div class="field">
+            <label for="p-x2">{{ t.props.x2 }}</label>
+            <input type="number" id="p-x2" data-testid="field-x2" step="1" [value]="line.x2" (input)="setLine('x2', $event)" />
+          </div>
+          <div class="field">
+            <label for="p-y2">{{ t.props.y2 }}</label>
+            <input type="number" id="p-y2" data-testid="field-y2" step="1" [value]="line.y2" (input)="setLine('y2', $event)" />
+          </div>
+        }
+        @if (textNode(); as text) {
+          <div class="field">
+            <label for="p-content">{{ t.props.content }}</label>
+            <input type="text" id="p-content" data-testid="field-content" [value]="text.content" (input)="setContent($event)" />
+          </div>
+          <div class="field">
+            <label for="p-font">{{ t.props.font }}</label>
+            <select id="p-font" data-testid="field-font" (change)="setFont($event)">
+              @for (name of fonts; track name) {
+                <option [value]="name" [selected]="text.font === name">{{ t.props.fonts[name] }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="p-weight">{{ t.props.weight }}</label>
+            <input type="number" id="p-weight" data-testid="field-weight" min="100" max="900" step="100" [value]="text.fontWeight" (input)="setWeight($event)" />
+          </div>
+          <div class="field">
+            <label for="p-text-align">{{ t.props.textAlign }}</label>
+            <select id="p-text-align" data-testid="field-text-align" (change)="setTextAlign($event)">
+              @for (name of textAligns; track name) {
+                <option [value]="name" [selected]="text.align === name">{{ t.props.textAligns[name] }}</option>
+              }
+            </select>
+          </div>
+        }
+        @if (imageNode(); as image) {
+          <div class="field">
+            <label for="p-preserve">{{ t.props.preserve }}</label>
+            <select id="p-preserve" data-testid="field-preserve" (change)="setPreserve($event)">
+              @for (name of preserves; track name) {
+                <option [value]="name" [selected]="image.preserve === name">{{ t.props.preserves[name] }}</option>
+              }
+            </select>
+          </div>
+        }
+      </section>
+    }
+
+    <section class="group" role="group" [attr.aria-label]="t.beat.title" data-testid="beat-section">
+      <h4 class="heading">{{ t.beat.title }}</h4>
+      @if (!hasBeat()) {
+        <p class="note" data-testid="beat-silent">{{ t.beat.silent }}</p>
+      } @else if (!hasLoudness() && hasLoudnessLink()) {
+        <p class="note" data-testid="beat-no-curve">{{ t.beat.noCurve }}</p>
+      }
+      @for (link of links(); track link[0]) {
+        <div class="beat-link" [attr.data-testid]="'beat-' + link[0]">
+          <div class="field">
+            <span class="label">{{ t.properties[link[0]] }}</span>
+            <select [attr.data-testid]="'beat-kind-' + link[0]" [attr.aria-label]="t.beat.kind + ': ' + t.properties[link[0]]" [disabled]="link[0] === 'fill' || link[0] === 'stroke'" (change)="setKind(link[0], $event)">
+              @for (kind of beatKinds; track kind) {
+                <option [value]="kind" [selected]="link[1].kind === kind">{{ t.beat.kinds[kind] }}</option>
+              }
+            </select>
+            <button type="button" class="link-button" [attr.data-testid]="'beat-remove-' + link[0]" [attr.aria-label]="t.beat.remove(t.properties[link[0]])" [attr.title]="t.beat.remove(t.properties[link[0]])" (click)="dropLink(link[0])">×</button>
+          </div>
+          @switch (link[1].kind) {
+            @case ('pulse') {
+              <div class="field sub">
+                <label [for]="'beat-amount-' + link[0]">{{ t.beat.amount }}</label>
+                <input type="number" step="0.05" [id]="'beat-amount-' + link[0]" [attr.data-testid]="'beat-amount-' + link[0]" [value]="$any(link[1]).amount" (input)="setLinkNumber(link[0], 'amount', $event)" />
+              </div>
+              <div class="field sub">
+                <label [for]="'beat-decay-' + link[0]">{{ t.beat.decay }}</label>
+                <input type="number" [attr.min]="decay.min" [attr.max]="decay.max" step="1" [id]="'beat-decay-' + link[0]" [attr.data-testid]="'beat-decay-' + link[0]" [value]="$any(link[1]).decay" (input)="setLinkNumber(link[0], 'decay', $event)" />
+              </div>
+            }
+            @case ('loudness') {
+              <div class="field sub">
+                <label [for]="'beat-amount-' + link[0]">{{ t.beat.amount }}</label>
+                <input type="number" step="0.05" [id]="'beat-amount-' + link[0]" [attr.data-testid]="'beat-amount-' + link[0]" [value]="$any(link[1]).amount" (input)="setLinkNumber(link[0], 'amount', $event)" />
+              </div>
+            }
+            @case ('alternate') {
+              @for (which of [0, 1]; track which) {
+                <div class="field sub">
+                  <label [for]="'beat-value-' + link[0] + '-' + which">{{ which === 0 ? t.beat.even : t.beat.odd }}</label>
+                  @if (link[0] === 'fill' || link[0] === 'stroke') {
+                    <input type="color" [id]="'beat-value-' + link[0] + '-' + which" [attr.data-testid]="'beat-value-' + link[0] + '-' + which" [value]="linkColour($any(link[1]).values[which])" (input)="setLinkValue(link[0], $any(which), $event)" />
+                  } @else {
+                    <input type="number" step="0.05" [id]="'beat-value-' + link[0] + '-' + which" [attr.data-testid]="'beat-value-' + link[0] + '-' + which" [value]="$any(link[1]).values[which]" (input)="setLinkValue(link[0], $any(which), $event)" />
+                  }
+                </div>
+              }
+            }
+          }
+          <p class="note hint">{{ t.beat.hints[link[1].kind] }}</p>
+        </div>
+      } @empty {
+        <p class="note" data-testid="beat-none">{{ t.beat.none }}</p>
+      }
+      @if (linkable().length) {
+        <form class="field add-link" data-testid="beat-add-form" (submit)="addLink($event)">
+          <select name="property" data-testid="beat-add-property" [attr.aria-label]="t.beat.property">
+            @for (property of linkable(); track property) {
+              <option [value]="property">{{ t.properties[property] }}</option>
+            }
+          </select>
+          <button type="submit" class="tool" data-testid="beat-add">{{ t.beat.add }}</button>
+        </form>
+      }
+    </section>
+
+    @if (canAlign()) {
+      <section class="group" role="group" [attr.aria-label]="t.align.label" data-testid="align-section">
+        <h4 class="heading">{{ t.align.label }}</h4>
+        <div class="buttons">
+          @for (mode of alignModes; track mode) {
+            <button type="button" class="tool icon" [attr.data-testid]="'align-' + mode" [attr.title]="t.align.modes[mode]" [attr.aria-label]="t.align.modes[mode]" (click)="align(mode)">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="alignIcons[mode]" /></svg>
+            </button>
+          }
+          <span class="gap" aria-hidden="true"></span>
+          @for (mode of distributeModes; track mode) {
+            <button
+              type="button"
+              class="tool icon"
+              [attr.data-testid]="'distribute-' + mode"
+              [disabled]="!canDistribute()"
+              [attr.title]="t.align.distribute[mode]"
+              [attr.aria-label]="t.align.distribute[mode]"
+              (click)="distribute(mode)"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="distributeIcon(mode)" /></svg>
+            </button>
+          }
+          <label class="check end">
+            <input type="checkbox" data-testid="align-artboard" [checked]="alignToArtboard()" [disabled]="!many()" (change)="setToArtboard($event)" />
+            {{ t.align.toArtboard }}
+          </label>
+        </div>
+      </section>
+    }
+
+    <section class="group" role="group" [attr.aria-label]="t.props.appearance">
+      <h4 class="heading">{{ t.props.appearance }}</h4>
+      <div class="field" [class.animated]="animated('opacity')" [class.keyed]="keyed('opacity')">
+        <label for="p-opacity">{{ t.properties['opacity'] }}</label>
+        <input type="range" min="0" max="1" step="0.01" id="p-opacity" data-testid="field-opacity-range" [value]="value('opacity')" (input)="setNumber('opacity', $event)" />
+        <input type="number" min="0" max="1" step="0.05" class="small" data-testid="field-opacity" [attr.aria-label]="t.properties['opacity']" [value]="value('opacity')" (input)="setNumber('opacity', $event)" />
+        <button
+          type="button"
+          class="key"
+          data-testid="key-opacity"
+          [attr.aria-pressed]="keyed('opacity')"
+          [attr.aria-label]="(keyed('opacity') ? t.props.removeKeyframe : t.props.addKeyframe) + ': ' + t.properties['opacity']"
+          (click)="toggle('opacity')"
+        >
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+        </button>
+      </div>
+
+      @for (property of paints; track property) {
+        <div class="paint" [class.animated]="animated(property)" [class.keyed]="keyed(property)" [attr.data-testid]="'paint-' + property">
+          <div class="field">
+            <label [for]="'p-' + property + '-mode'">{{ t.properties[property] }}</label>
+            @if (parametrised(property)) {
+              <span class="badge" data-testid="is-parameter">{{ t.props.isParameter }}</span>
+              <button type="button" class="link" [attr.data-testid]="'remove-param-' + property" (click)="removeParam(property)">{{ t.props.removeParameter }}</button>
+            } @else {
+              <select [id]="'p-' + property + '-mode'" [attr.data-testid]="'mode-' + property" [disabled]="animated(property)" (change)="setMode(property, $event)">
+                <option value="keep" [selected]="mode(property) === 'keep'">{{ t.props.paintKeep }}</option>
+                <option value="none" [selected]="mode(property) === 'none'">{{ t.props.paintNone }}</option>
+                <option value="color" [selected]="mode(property) === 'color'">{{ t.props.colour }}</option>
+                <option value="var" [selected]="mode(property) === 'var'">{{ t.props.paintVar }}</option>
+              </select>
+              <button
+                type="button"
+                class="key"
+                [attr.data-testid]="'key-' + property"
+                [attr.aria-pressed]="keyed(property)"
+                [attr.aria-label]="(keyed(property) ? t.props.removeKeyframe : t.props.addKeyframe) + ': ' + t.properties[property]"
+                (click)="toggle(property)"
+              >
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+              </button>
+            }
+          </div>
+          @if (!parametrised(property)) {
+            <div class="field sub">
+              @if (mode(property) === 'color') {
+                <input
+                  type="color"
+                  [attr.aria-label]="t.props.colour + ': ' + t.properties[property]"
+                  [attr.data-testid]="'colour-' + property"
+                  [value]="colour(property)"
+                  (input)="setColour(property, $event)"
+                />
+              }
+              @if (mode(property) === 'var') {
+                <select [attr.aria-label]="t.props.paintVar" [attr.data-testid]="'var-' + property" (change)="setVar(property, $event)">
+                  @for (name of vars; track name) {
+                    <option [value]="name" [selected]="varOf(property) === name">{{ t.props.vars[name] }}</option>
+                  }
+                </select>
+              }
+              <button type="button" class="link" [attr.data-testid]="'param-' + property" (click)="openParam(property)">{{ t.props.parameter }}</button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="field" [class.animated]="animated('strokeWidth')" [class.keyed]="keyed('strokeWidth')">
+        <label for="p-strokeWidth">{{ t.properties['strokeWidth'] }}</label>
+        <input type="number" min="0" step="0.5" id="p-strokeWidth" data-testid="field-strokeWidth" [value]="value('strokeWidth')" (input)="setNumber('strokeWidth', $event)" />
+        <button
+          type="button"
+          class="key"
+          data-testid="key-strokeWidth"
+          [attr.aria-pressed]="keyed('strokeWidth')"
+          [attr.aria-label]="(keyed('strokeWidth') ? t.props.removeKeyframe : t.props.addKeyframe) + ': ' + t.properties['strokeWidth']"
+          (click)="toggle('strokeWidth')"
+        >
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+        </button>
+      </div>
+
+      @if (isText()) {
+        <div class="field">
+          <span class="label">{{ t.props.text }}</span>
+          @if (textParam(); as param) {
+            <span class="badge" data-testid="is-parameter-text">{{ t.props.isParameter }}</span>
+            <button type="button" class="link" data-testid="remove-param-text" (click)="removeTextParam(param.name)">{{ t.props.removeParameter }}</button>
+          } @else {
+            <button type="button" class="link" data-testid="param-text" (click)="openParam('text')">{{ t.props.parameter }}</button>
+          }
+        </div>
+      }
+    </section>
+
+  } @else {
+    <p class="none" data-testid="props-none">{{ t.props.none }}</p>
+  }
+
+  <dialog #paramDialog class="modal" data-testid="param-dialog" [attr.aria-label]="t.props.parameter" (close)="draft.set(undefined)" (click)="backdrop($event)">
+      @if (draft(); as d) {
+        <form class="param-form" data-testid="param-form" (submit)="createParam($event)">
+          <label class="wide">
+            {{ t.props.paramName }}
+            <input type="text" name="name" data-testid="param-name" [value]="d.name" (input)="setDraft('name', $event)" />
+          </label>
+          <label class="wide">
+            {{ t.props.paramDescription }}
+            <input type="text" name="description" data-testid="param-description" [value]="d.description" (input)="setDraft('description', $event)" />
+          </label>
+          <label [class.wide]="!isNumberDraft(d)">
+            {{ t.props.paramDefault }}
+            <input [type]="isNumberDraft(d) ? 'number' : 'text'" name="default" data-testid="param-default" [value]="d.default" (input)="setDraft('default', $event)" />
+          </label>
+          @if (isNumberDraft(d)) {
+            <label>
+              {{ t.props.paramMin }}
+              <input type="number" name="min" data-testid="param-min" [value]="d.min" (input)="setDraft('min', $event)" />
+            </label>
+            <label>
+              {{ t.props.paramMax }}
+              <input type="number" name="max" data-testid="param-max" [value]="d.max" (input)="setDraft('max', $event)" />
+            </label>
+          }
+          <div class="actions">
+            <button type="submit" class="primary" data-testid="param-create">{{ t.props.paramCreate }}</button>
+            <button type="button" data-testid="param-cancel" (click)="draft.set(undefined)">{{ t.props.cancel }}</button>
+          </div>
+        </form>
+      }
+  </dialog>
+</div>

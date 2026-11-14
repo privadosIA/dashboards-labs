@@ -1,0 +1,19 @@
+:host {
+  display: contents;
+}
+
+.edit {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  padding: 0 var(--lab-space-1);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius);
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  line-height: 1.1;
+  resize: none;
+  overflow: hidden;
+  white-space: pre;
+  outline: none;
+}

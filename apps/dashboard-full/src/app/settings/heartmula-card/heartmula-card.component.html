@@ -1,0 +1,103 @@
+@if (heartmula(); as h) {
+  <mo-panel heading="HeartMuLa music generator" i18n-heading="@@heartmula.title">
+    <p class="note" i18n="@@heartmula.intro">
+      HeartMuLa is a song generator of higher quality than ACE-Step, but slower. It runs in a container on this machine if there is one; here you can give the address of one on another machine. While there is none, the option does not appear in music projects.
+    </p>
+    @if (engines.heartmula(); as e) {
+      @if (e.available) {
+        <p class="current" data-testid="heartmula-current">
+          <mat-icon inline>check_circle</mat-icon>
+          @if (e.mode === 'external') {
+            <span i18n="@@heartmula.modeExternal">External service</span>
+          } @else {
+            <span i18n="@@heartmula.modeLocal">Local container</span>
+          }
+          @if (e.version) {
+            <span class="mo-data">v{{ e.version }}</span>
+          }
+        </p>
+      } @else if (e.detail) {
+        <p class="note" data-testid="heartmula-state"><span class="mo-data">{{ e.detail }}</span></p>
+      }
+    }
+    <mat-form-field class="wide">
+      <mat-label i18n="@@heartmula.host">Address of another machine</mat-label>
+      <input
+        matInput
+        data-testid="heartmula-host"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="192.0.2.50:8787"
+        [value]="host()"
+        (input)="host.set($any($event.target).value)"
+      />
+      <mat-hint i18n="@@heartmula.hint">Empty: the local container, if there is one.</mat-hint>
+    </mat-form-field>
+    <mat-form-field class="wide">
+      <mat-label i18n="@@heartmula.token">Key (optional)</mat-label>
+      <input
+        matInput
+        type="password"
+        data-testid="heartmula-token"
+        autocomplete="off"
+        [value]="token()"
+        (input)="token.set($any($event.target).value)"
+        [placeholder]="h.token_set ? '••••••••' : ''"
+      />
+      @if (h.token_set) {
+        <mat-hint i18n="@@heartmula.tokenSet">A key is saved; type another to change it.</mat-hint>
+      }
+    </mat-form-field>
+    @if (needsConsent()) {
+      <p class="warning" role="alert" data-testid="heartmula-remote-warning">
+        <mat-icon inline>warning</mat-icon>
+        <span i18n="@@heartmula.remoteWarning">That address is not this machine: the lyrics and tags of your songs will be sent there.</span>
+      </p>
+      <mat-checkbox data-testid="heartmula-accept" [checked]="accept()" (change)="accept.set($event.checked)" i18n="@@heartmula.accept">
+        I agree to send them to that machine
+      </mat-checkbox>
+    }
+    @if (test(); as t) {
+      @if (t.ok) {
+        <p class="current" data-testid="heartmula-test-ok">
+          <mat-icon inline>check_circle</mat-icon>
+          <span i18n="@@heartmula.testOk">It answers.</span>
+          @if (t.gpu) {
+            <span class="mo-data">{{ t.gpu }} · {{ t.free_mb }} MB</span>
+          }
+        </p>
+      } @else {
+        <p class="error" role="alert" data-testid="heartmula-test-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ t.error }}</span>
+        </p>
+      }
+    }
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="heartmula-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+    <div class="actions">
+      <button mat-stroked-button type="button" data-testid="heartmula-test" [disabled]="testing() || !host().trim()" (click)="runTest()" i18n="@@heartmula.testBtn">
+        Test
+      </button>
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="heartmula-save"
+        [disabled]="saving() || (host().trim() === h.saved && !token()) || (needsConsent() && !accept())"
+        (click)="save(host().trim())"
+        i18n="@@heartmula.save"
+      >
+        Save
+      </button>
+      @if (h.saved) {
+        <button mat-button type="button" data-testid="heartmula-reset" [disabled]="saving()" (click)="host.set(''); save('')" i18n="@@heartmula.reset">
+          Remove and use the local one
+        </button>
+      }
+    </div>
+  </mo-panel>
+}

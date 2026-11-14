@@ -1,0 +1,73 @@
+@if (available()) {
+<div class="assist" [attr.data-testid]="'assist-' + field()">
+  @if (busyHere()) {
+    <span class="assist__wait" role="status" data-testid="assist-wait">
+      <mat-progress-spinner mode="indeterminate" diameter="16" />
+      <span>
+        <ng-container i18n="@@assist.working">Generating…</ng-container>
+        <span class="mo-data" data-testid="assist-elapsed">{{ assist.elapsed() }} s</span>
+        <span class="assist__note" i18n="@@assist.cpuNote">uses the CPU, takes a few seconds</span>
+      </span>
+    </span>
+    <button data-cancel mat-button type="button" data-testid="assist-cancel" (click)="assist.cancel()" i18n="@@assist.cancel">
+      Cancel
+    </button>
+  } @else {
+    <app-assist-model />
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="assist-ask"
+      [disabled]="!!reason() || !!assist.busy()"
+      (click)="ask()"
+    >
+      <mat-icon>auto_awesome</mat-icon>
+      @if (field() === 'prompt') {
+        <ng-container i18n="@@assist.improve">Improve with AI</ng-container>
+      } @else {
+        <ng-container i18n="@@assist.suggestMotion">Suggest motion</ng-container>
+      }
+    </button>
+    <app-provider-badge tasks="assistant" />
+    @if (reason() === 'empty') {
+      <span class="assist__note" data-testid="assist-reason">
+        @if (field() === 'prompt') {
+          <ng-container i18n="@@assist.reasonEmpty">Write something in the prompt so it can be improved</ng-container>
+        } @else {
+          <ng-container i18n="@@assist.reasonEmptyMotion"
+            >The scene prompt is empty: the assistant starts from it to suggest the motion</ng-container
+          >
+        }
+      </span>
+    } @else if (reason() === 'tooLong') {
+      <span class="assist__note" data-testid="assist-reason">
+        <ng-container i18n="@@assist.reasonTooLong">The text exceeds the assistant's limit</ng-container>
+        ({{ maxChars }})
+      </span>
+    }
+  }
+</div>
+} @else if (field() === 'prompt') {
+  <app-model-notice task="assistant" />
+}
+
+@if (proposal(); as p) {
+  <div class="proposal" [attr.data-testid]="'assist-proposal-' + field()">
+    <p class="proposal__label" i18n="@@assist.proposal">Proposal</p>
+    <p class="proposal__text mo-data">{{ p.text }}</p>
+    <div class="proposal__actions">
+      <button mat-flat-button type="button" data-testid="assist-use" (click)="use()" i18n="@@assist.use">Use</button>
+      <button mat-button type="button" data-testid="assist-discard" (click)="assist.discard()" i18n="@@assist.discard">
+        Discard
+      </button>
+    </div>
+  </div>
+}
+
+@if (failure(); as f) {
+  <p class="assist__error" role="alert" data-testid="assist-error" [attr.data-refused]="f.refused">
+    <mat-icon inline>error</mat-icon>
+    <span>{{ f.message }}</span>
+    <button mat-button type="button" (click)="assist.dismissFailure()" i18n="@@assist.dismiss">Close</button>
+  </p>
+}

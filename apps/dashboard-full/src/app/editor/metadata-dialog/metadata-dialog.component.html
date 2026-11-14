@@ -1,0 +1,63 @@
+<h2 mat-dialog-title i18n="@@meta.title">This image carries generation data</h2>
+<mat-dialog-content>
+  <p class="intro" i18n="@@meta.intro">I can use it in this scene. Check what you want to apply.</p>
+
+  @if (data.metadata.prompt; as p) {
+    <div class="field" data-testid="meta-prompt">
+      <mat-checkbox [checked]="prompt()" (change)="prompt.set($event.checked)" i18n="@@meta.prompt">Prompt</mat-checkbox>
+      <p class="value mo-data">{{ p }}</p>
+      @if (data.hasPrompt) {
+        <p class="warn" data-testid="meta-replace" i18n="@@meta.replace">The scene already has a prompt: if you apply this, it will be replaced.</p>
+      }
+    </div>
+  }
+  @if (data.metadata.negative_prompt; as n) {
+    <div class="field" data-testid="meta-negative">
+      <mat-checkbox [checked]="negative()" (change)="negative.set($event.checked)" i18n="@@meta.negative">Negative prompt</mat-checkbox>
+      <p class="value mo-data">{{ n }}</p>
+    </div>
+  }
+  @if (data.metadata.seed !== undefined) {
+    <div class="field" data-testid="meta-seed">
+      <mat-checkbox [checked]="seed()" (change)="seed.set($event.checked)">seed</mat-checkbox>
+      <p class="value mo-data">{{ data.metadata.seed }}</p>
+    </div>
+  }
+  @if (data.metadata.steps !== undefined) {
+    <div class="field" data-testid="meta-steps">
+      <mat-checkbox [checked]="steps()" (change)="steps.set($event.checked)">steps</mat-checkbox>
+      <p class="value mo-data">{{ data.metadata.steps }}</p>
+      <p class="hint" i18n="@@meta.renderHint">Saved as a setting specific to this scene.</p>
+    </div>
+  }
+  @if (data.metadata.cfg_scale !== undefined) {
+    <div class="field" data-testid="meta-cfg">
+      <mat-checkbox [checked]="cfg()" (change)="cfg.set($event.checked)">cfg_scale</mat-checkbox>
+      <p class="value mo-data">{{ data.metadata.cfg_scale }}</p>
+    </div>
+  }
+  @if (data.metadata.model; as model) {
+    <div class="field info" data-testid="meta-model">
+      <strong i18n="@@meta.model">Model</strong>
+      <p class="value mo-data">{{ model }}</p>
+      @if (data.modelInstalled === true) {
+        <p class="hint" i18n="@@meta.modelInstalled">Installed. It is not applied automatically: choose it in the project settings.</p>
+      } @else if (data.modelInstalled === false) {
+        <p class="hint" i18n="@@meta.modelMissing">Not installed. Shown for information only.</p>
+      }
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="meta-decline" [mat-dialog-close]="null" i18n="@@meta.decline">Don't apply</button>
+  <button
+    mat-flat-button
+    type="button"
+    data-testid="meta-apply"
+    [disabled]="!any()"
+    [mat-dialog-close]="selection()"
+    i18n="@@meta.apply"
+  >
+    Apply to scene
+  </button>
+</mat-dialog-actions>

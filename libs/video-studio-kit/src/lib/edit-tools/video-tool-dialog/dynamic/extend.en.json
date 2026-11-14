@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "id": "extend",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "seconds",
+      "type": "number",
+      "label": "Seconds to add (2 to 10)",
+      "defaultValue": 4,
+      "props": {
+        "step": 1
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What happens next",
+      "placeholder": "Describe how the video goes on.",
+      "props": {
+        "rows": 3
+      }
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Engine",
+      "defaultValue": "minimax-h3",
+      "options": [
+        {
+          "value": "minimax-h3",
+          "label": "MiniMax H3"
+        },
+        {
+          "value": "ltx",
+          "label": "LTX"
+        }
+      ]
+    }
+  ]
+}

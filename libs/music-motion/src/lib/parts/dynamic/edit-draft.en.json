@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "id": "edit-draft",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "manifest",
+      "type": "textarea",
+      "label": "manifest.json",
+      "props": {
+        "rows": 8
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "manifest.json"
+        }
+      }
+    },
+    {
+      "key": "fragment",
+      "type": "textarea",
+      "label": "part.html",
+      "props": {
+        "rows": 14
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "part.html"
+        }
+      }
+    }
+  ]
+}

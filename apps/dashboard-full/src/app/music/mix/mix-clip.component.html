@@ -1,0 +1,35 @@
+<div
+  class="clip__body"
+  cdkDrag
+  cdkDragLockAxis="x"
+  cdkDragBoundary=".mix-lane"
+  data-testid="clip-body"
+  (cdkDragEnded)="onMoved($event)"
+>
+  <app-song-wave [peaks]="peaks()" [from]="range().from" [to]="range().to" />
+  <span class="clip__label mo-data">
+    @if (clip().mute) {<mat-icon inline>volume_off</mat-icon>}
+    {{ label() }}
+  </span>
+  @if (peaks() === null) {
+    <span class="clip__note" i18n="@@mix.noAudio">no audio</span>
+  }
+</div>
+<span
+  class="clip__handle clip__handle--start"
+  cdkDrag
+  cdkDragLockAxis="x"
+  data-testid="clip-trim-start"
+  (cdkDragEnded)="onTrimStart($event)"
+  i18n-aria-label="@@mix.trimStart"
+  aria-label="Trim the start"
+></span>
+<span
+  class="clip__handle clip__handle--end"
+  cdkDrag
+  cdkDragLockAxis="x"
+  data-testid="clip-trim-end"
+  (cdkDragEnded)="onTrimEnd($event)"
+  i18n-aria-label="@@mix.trimEnd"
+  aria-label="Trim the end"
+></span>

@@ -1,0 +1,54 @@
+<div class="retouch">
+  <h2>{{ t.retouch.title }}</h2>
+
+  <div class="work">
+    <figure class="original">
+      <img [src]="image.dataUrl" [alt]="image.name" />
+      <figcaption>{{ t.retouch.original }}</figcaption>
+    </figure>
+
+    <dynamic-form
+      [schema]="schema()"
+      [(model)]="model"
+      [showDefaultActions]="false"
+      showErrors="always"
+      (statusChange)="valid.set($event === 'VALID')"
+      (formSubmit)="retouch()"
+    >
+      <div dfActions class="go">
+        <button type="submit" class="primary" [disabled]="!valid() || working()">{{ working() ? t.retouch.retouching : t.retouch.retouch }}</button>
+      </div>
+    </dynamic-form>
+  </div>
+
+  @if (simulated) {
+    <p class="note">{{ t.retouch.simulated }}</p>
+  }
+
+  @if (error()) {
+    <p class="error" role="alert">{{ t.retouch.failed }} {{ error() }}</p>
+  }
+
+  @if (working()) {
+    <p class="status" role="status">{{ t.retouch.retouching }}</p>
+  } @else if (results().length) {
+    <section class="results">
+      <h3>{{ t.retouch.variants }}</h3>
+      <ul>
+        @for (r of results(); track r.seed; let i = $index) {
+          <li>
+            <button type="button" class="variant" [class.selected]="selected() === i" [attr.aria-pressed]="selected() === i" (click)="selected.set(i)">
+              <img [src]="r.image.dataUrl" [alt]="t.retouch.variant + ' ' + (i + 1)" />
+              <span>{{ t.retouch.variant }} {{ i + 1 }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <div class="actions">
+    <button type="button" class="primary" [disabled]="!canUse()" (click)="use()">{{ t.retouch.use }}</button>
+    <button type="button" (click)="cancel()">{{ t.retouch.cancel }}</button>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+.card {
+  display: grid;
+  gap: var(--lab-space-1);
+  align-content: start;
+  min-width: 9rem;
+  max-width: 14rem;
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+
+  &[data-verdict='pass'] {
+    border-color: var(--lab-success);
+  }
+
+  &[data-verdict='weak'] {
+    border-color: var(--lab-warn);
+  }
+
+  &[data-verdict='fail'],
+  &[data-state='failed'] {
+    border-color: var(--lab-danger);
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--lab-space-2);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.state {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.score {
+  font-weight: var(--lab-fw-control);
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  color: var(--lab-danger);
+}

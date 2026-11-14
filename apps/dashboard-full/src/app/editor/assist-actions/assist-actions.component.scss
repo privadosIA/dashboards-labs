@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  grid-column: 1 / -1;
+  margin: -8px 0 12px;
+}
+
+.assist {
+  display: flex;
+  // The model field can carry a note under its box: the button and the texts line up with the box, not with the whole.
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// Everything in the row that is not the field is as tall as the field's box (40 px) and centred in it.
+.assist > button,
+.assist > app-provider-badge,
+.assist > .assist__note,
+.assist > .assist__wait {
+  min-height: 40px;
+}
+
+.assist > app-provider-badge,
+.assist > .assist__note {
+  display: inline-flex;
+  align-items: center;
+}
+
+.assist__wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--lab-fs-meta);
+}
+
+.assist__note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.proposal {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px dashed var(--lab-accent);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface);
+}
+
+.proposal__label {
+  margin: 0 0 4px;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: 600;
+}
+
+.proposal__text {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.proposal__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.assist__error mat-icon {
+  flex: none;
+}
+
+.assist__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  max-width: 80ch;
+}

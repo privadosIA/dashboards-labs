@@ -1,0 +1,34 @@
+.modal {
+  width: min(30rem, 92vw);
+  padding: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+
+  &::backdrop {
+    background: color-mix(in srgb, black 60%, transparent);
+  }
+}
+
+.box {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3) var(--lab-space-4);
+
+  h2 {
+    margin: 0;
+    font-size: var(--lab-fs-section);
+    font-weight: var(--lab-fw-title);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}

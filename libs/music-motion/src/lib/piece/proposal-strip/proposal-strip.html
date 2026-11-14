@@ -1,0 +1,24 @@
+@if (proposal(); as p) {
+  <section class="strip" [class.running]="running()" [class.failed]="p.state === 'failed'" role="status" data-testid="proposal-strip" [attr.data-state]="p.state">
+    <h2>{{ t.title }}</h2>
+    <p class="state" data-testid="proposal-state">{{ t.states[p.state] }}</p>
+    <p class="meta">
+      @if (p.model) {
+        <span data-testid="proposal-model">{{ t.model(p.model) }}</span>
+      }
+      <span data-testid="proposal-elapsed">{{ elapsed() }}</span>
+    </p>
+    @if (p.state === 'failed' && p.error) {
+      <p class="problem" data-testid="proposal-error">{{ t.error(p.error) }}</p>
+    }
+    @if (parts().length) {
+      <ul data-testid="proposal-parts">
+        @for (part of parts(); track part.key) {
+          <li [attr.data-testid]="'proposal-' + part.key" [class.rule]="part.source.source === 'fallback'">
+            <strong>{{ part.label }}</strong>: {{ who(part.source) }}
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

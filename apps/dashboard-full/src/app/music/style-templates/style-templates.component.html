@@ -1,0 +1,26 @@
+<mat-expansion-panel class="panel" [attr.data-testid]="testId()">
+  <mat-expansion-panel-header>
+    <mat-panel-title i18n="@@music.tpl.title">Style templates</mat-panel-title>
+    <mat-panel-description i18n="@@music.tpl.hint">They add text to the style; you can edit it</mat-panel-description>
+  </mat-expansion-panel-header>
+  @for (g of groups; track g.label) {
+    <section class="group">
+      <h4>{{ g.label }}</h4>
+      <div class="chips">
+        @for (t of g.templates; track t.id) {
+          <button
+            type="button"
+            class="chip"
+            [class.chip--on]="chosen(t)"
+            [attr.aria-pressed]="chosen(t)"
+            [attr.data-testid]="testId() + '-' + t.id"
+            [attr.title]="t.text"
+            (click)="toggle(t)"
+          >
+            {{ t.label }}
+          </button>
+        }
+      </div>
+    </section>
+  }
+</mat-expansion-panel>

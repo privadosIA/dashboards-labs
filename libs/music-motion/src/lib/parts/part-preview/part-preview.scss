@@ -1,0 +1,52 @@
+.preview {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}
+
+.play {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  max-width: 48rem;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-player-bg);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  margin: 0;
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}

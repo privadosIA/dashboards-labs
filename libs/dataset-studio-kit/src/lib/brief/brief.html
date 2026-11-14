@@ -1,0 +1,25 @@
+<section class="brief" data-testid="brief">
+  <h3>{{ t.title }}</h3>
+  <p class="mode" data-testid="brief-mode">
+    <strong>{{ kinds.mode[mode()] }}</strong> — {{ kinds.modeWhy[mode()] }}
+  </p>
+
+  <dynamic-form [schema]="schema()" [(model)]="form" [showDefaultActions]="false" />
+
+  <p class="counter" [class.counter--over]="!fits().ok" data-testid="brief-counter">{{ t.counter(fits().length, kind().limit) }}</p>
+  @if (!fits().ok) {
+    <p class="problem" role="alert" data-testid="brief-over">{{ t.over(kind().limit) }}</p>
+  }
+  @if (mode() === 'lines') {
+    <p class="hint" data-testid="brief-calls">{{ t.scenes(scenes()) }} → {{ t.calls(scenes()) }}</p>
+    <p class="hint">{{ t.styleLineHint }}</p>
+  }
+  @if (kind().panels.look) {
+    <p class="hint">{{ t.lookNote }}</p>
+    @if (recommended(); as r) {
+      <p class="hint" data-testid="look-recommended">{{ t.recommended(r.name) }}</p>
+    } @else if (noRecommended()) {
+      <p class="hint" data-testid="look-none">{{ t.noRecommended }}</p>
+    }
+  }
+</section>

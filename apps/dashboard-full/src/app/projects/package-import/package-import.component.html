@@ -1,0 +1,179 @@
+<h2 mat-dialog-title i18n="@@pkg.title">Import full project</h2>
+<mat-dialog-content>
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <p i18n="@@pkg.hint">
+    Choose the .zip another machine exported (Projects &gt; Export &gt; Full project). You will see what the project uses, what you already have and what is missing, and you can install what is missing with one click. After that, all that is left is to generate.
+  </p>
+  <input #file type="file" accept=".zip" hidden (change)="onFile(file)" data-testid="package-file" />
+  <div class="upload-row">
+    <button mat-stroked-button type="button" (click)="file.click()">
+      <mat-icon>folder_zip</mat-icon>
+      <ng-container i18n="@@pkg.choose">Choose the .zip</ng-container>
+    </button>
+    @if (fileName()) {
+      <span class="mo-data">{{ fileName() }}</span>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="warn" data-testid="package-error">{{ error() }}</p>
+  }
+
+  @if (report(); as r) {
+    <p data-testid="package-summary">
+      <strong>{{ r.project }}</strong> ·
+      @if (r.mode === 'music') {
+        <span i18n="@@pkg.tracks">{{ r.tracks }} songs</span>
+      } @else {
+        <span i18n="@@pkg.scenes">{{ r.scenes }} scenes</span>
+      }
+      @if (r.sources > 0) {
+        · <span i18n="@@pkg.sources">{{ r.sources }} own files</span>
+      }
+    </p>
+
+    <mat-form-field class="field">
+      <mat-label i18n="@@projectName.label">Project identifier</mat-label>
+      <input matInput [formControl]="projectId" autocomplete="off" data-testid="package-id" />
+      @if (projectId.hasError('pattern')) {
+        <mat-error i18n="@@projectName.pattern">Use letters, numbers and “._-”, starting with a letter or number (max. 64)</mat-error>
+      }
+      @if (r.id_taken) {
+        <mat-hint class="warn" i18n="@@pkg.idTaken">A project with that name already exists: choose another identifier</mat-hint>
+      }
+    </mat-form-field>
+
+    <h3 i18n="@@pkg.settingsTitle">What settings it generates with</h3>
+    <p class="mo-data" data-testid="package-settings">
+      @if (r.recipe.settings.resolution) {
+        {{ r.recipe.settings.resolution }}
+      }
+      @if (r.recipe.settings.steps) {
+        · <ng-container i18n="@@pkg.steps">{{ r.recipe.settings.steps }} steps</ng-container>
+      }
+      @if (r.recipe.settings.cfg_scale !== undefined) {
+        · cfg {{ r.recipe.settings.cfg_scale }}
+      }
+      @if (r.recipe.settings.sampler) {
+        · {{ r.recipe.settings.sampler }}
+      }
+      @if (r.recipe.settings.animate; as a) {
+        <br />
+        <ng-container i18n="@@pkg.animation">Animation</ng-container>: {{ a.engine }} · {{ a.resolution }} · {{ a.frames }}
+        <ng-container i18n="@@pkg.frames">frames</ng-container> · {{ a.steps }}
+        <ng-container i18n="@@pkg.steps2">steps</ng-container>
+        @if (a.turbo_lora) {
+          · <ng-container i18n="@@pkg.turbo">with the turbo LoRA (draft)</ng-container>
+        }
+      }
+      @if (r.recipe.settings.music; as m) {
+        <ng-container i18n="@@pkg.music">Music</ng-container>: {{ m.inference_steps }}
+        <ng-container i18n="@@pkg.steps3">steps</ng-container> {{ m.output_format }}
+      }
+    </p>
+
+    @if (r.recipe.presets?.length) {
+      <h3 i18n="@@pkg.presetsTitle">Recommended settings of the catalog</h3>
+      <ul class="presets" data-testid="package-presets">
+        @for (p of r.recipe.presets; track p.for) {
+          <li>
+            <strong>{{ p.for }}</strong> ({{ p.catalog_name }}):
+            @if (p.matches) {
+              <span class="ok" i18n="@@pkg.presetMatches">the project uses the recommended ones</span>
+            } @else {
+              <span class="warn" i18n="@@pkg.presetDiffers">the project changed them: {{ (p.differences ?? []).join(', ') }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    <h3 i18n="@@pkg.filesTitle">What it uses and what you have</h3>
+    <table class="files" data-testid="package-files">
+      <thead>
+        <tr>
+          <th i18n="@@pkg.colWhat">What for</th>
+          <th i18n="@@pkg.colFile">File</th>
+          <th i18n="@@pkg.colState">State</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of r.recipe.files; track f.path) {
+          <tr>
+            <td>{{ f.label }}</td>
+            <td class="mo-data">{{ f.name }}</td>
+            <td class="state">
+              @if (f.installed) {
+                <span class="ok"><mat-icon inline>check_circle</mat-icon> <ng-container i18n="@@pkg.have">you have it</ng-container></span>
+              } @else if (f.catalog_id) {
+                <span class="warn"><mat-icon inline>warning</mat-icon> <ng-container i18n="@@pkg.missing">missing</ng-container></span>
+              } @else {
+                <span class="warn"><mat-icon inline>warning</mat-icon> <ng-container i18n="@@pkg.missingUnknown">missing (not in the catalog)</ng-container></span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (r.install?.length) {
+      <h3 i18n="@@pkg.installTitle">Install what is missing</h3>
+      <div class="install-bar">
+        <button mat-flat-button type="button" data-testid="package-install-all" [disabled]="installing().size > 0" (click)="installAll()">
+          <mat-icon>download</mat-icon>
+          <ng-container i18n="@@pkg.installAll">Install everything that is missing</ng-container>
+        </button>
+      </div>
+      <ul class="presets">
+        @for (g of r.install; track g.catalog_id) {
+          <li data-testid="package-install-group">
+            {{ g.name }}
+            @if (g.missing.length < g.total_files) {
+              <span class="dim" i18n="@@pkg.partial">({{ g.missing.length }} of {{ g.total_files }} files are missing)</span>
+            } @else {
+              <span class="dim">({{ g.size_bytes | moBytes }})</span>
+            }
+            @if (g.requires_token) {
+              <span class="dim" i18n="@@pkg.needsKey">· needs your {{ g.requires_token }} key (Models &gt; Keys)</span>
+            }
+            @if (installing().has(g.catalog_id)) {
+              @if (progress(g.catalog_id); as pct) {
+                <mat-progress-bar mode="determinate" [value]="pct" />
+              } @else {
+                <mat-progress-bar mode="indeterminate" />
+              }
+            } @else {
+              <button mat-button type="button" (click)="install(g)" i18n="@@pkg.installOne">Install</button>
+            }
+          </li>
+        }
+      </ul>
+    }
+    @if (r.unknown?.length) {
+      <p class="warn" data-testid="package-unknown" i18n="@@pkg.unknown">
+        These files are not in the catalog: look them up by name and put them in their folder: {{ (r.unknown ?? []).join(', ') }}
+      </p>
+    }
+    @if (r.problems?.length) {
+      <h3 i18n="@@pkg.problemsTitle">What has to be fixed in the project</h3>
+      <ul class="presets warn" data-testid="package-problems">
+        @for (m of r.problems; track m) {
+          <li>{{ m }}</li>
+        }
+      </ul>
+    }
+    @if (r.ready) {
+      <p class="ok" data-testid="package-ready" i18n="@@pkg.ready">You have everything it needs: once created, all that is left is to launch the generation.</p>
+    } @else {
+      <p class="dim" i18n="@@pkg.notReady">You can create the project now; you will not be able to generate until all the files are there.</p>
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-flat-button type="button" data-testid="package-create" [disabled]="!report() || busy() || projectId.invalid || (report()?.id_taken && projectId.value === report()?.suggested_id)" (click)="create()">
+    <ng-container i18n="@@pkg.create">Create project</ng-container>
+  </button>
+</mat-dialog-actions>

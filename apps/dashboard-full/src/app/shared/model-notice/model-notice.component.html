@@ -1,0 +1,23 @@
+@if (missing(); as m) {
+  <p class="notice" role="status" data-testid="model-notice" [attr.data-reason]="m.reason">
+    <mat-icon inline>info</mat-icon>
+    <span>
+      @if (m.provider.type === 'ollama') {
+        @if (vision()) {
+          <ng-container i18n="@@notice.noVisionOllama">{{ m.provider.name }} has no model that reads pictures. Install one, for example</ng-container>
+        } @else {
+          <ng-container i18n="@@notice.noTextOllama">{{ m.provider.name }} has no text model. Install one, for example</ng-container>
+        }
+        <code class="mo-data" data-testid="model-notice-command">{{ command() }}</code>,
+        <ng-container i18n="@@notice.orOther">or choose another provider in</ng-container>
+      } @else {
+        @if (vision()) {
+          <ng-container i18n="@@notice.noVisionOther">The provider {{ m.provider.name }} has no vision model: set it in</ng-container>
+        } @else {
+          <ng-container i18n="@@notice.noTextOther">The provider {{ m.provider.name }} has no text model: set it in</ng-container>
+        }
+      }
+      <a routerLink="/settings" data-testid="model-notice-link" i18n="@@notice.settings">Settings</a>.
+    </span>
+  </p>
+}

@@ -1,0 +1,7 @@
+<div class="tabs" role="tablist" [attr.aria-label]="t.tabs.label">
+  @for (name of tabs; track name) {
+    <button type="button" role="tab" [id]="'tab-' + name" [attr.aria-selected]="tab() === name" [attr.aria-controls]="'panel-' + name" [class.on]="tab() === name" (click)="tab.set(name)">
+      {{ label(name) }}
+    </button>
+  }
+</div>

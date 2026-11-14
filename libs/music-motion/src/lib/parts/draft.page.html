@@ -1,0 +1,124 @@
+<section class="draft">
+  <a class="back" [routerLink]="link('parts')">← {{ t.back }}</a>
+
+  @if (approved(); as part) {
+    <div class="panel approved" role="status" data-testid="approved">
+      <p>{{ replaced() ? t.replaced : t.approved }} <strong>{{ part.name }}</strong></p>
+      <p class="meta">{{ part.description }}</p>
+      <h2>{{ t.parameters }}</h2>
+      @if (part.params.length) {
+        <ul data-testid="approved-params">
+          @for (q of part.params; track q.name) {
+            <li>{{ q.name }} ({{ q.type }})</li>
+          }
+        </ul>
+      } @else {
+        <p class="meta" data-testid="approved-no-params">{{ t.noParameters }}</p>
+      }
+      <a [routerLink]="link('parts')">{{ t.back }}</a>
+    </div>
+  } @else if (draft() === undefined) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (draft(); as d) {
+    <header>
+      <h1>{{ d.name ?? (d.request || t.fromText) }}</h1>
+      <span class="state" [class]="'state-' + d.state" data-testid="state">{{ t.states[d.state] }}</span>
+    </header>
+    @if (d.request) {
+      <p class="meta" data-testid="request">{{ d.request }}</p>
+    }
+
+    @if (d.state === 'writing') {
+      <p class="note" role="status" data-testid="writing">{{ t.writingNote }}</p>
+    } @else if (d.state === 'failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failedReason }} {{ d.error }}</p>
+      @if (lost()) {
+        <p class="note" data-testid="picture-lost">{{ t.pictureLost }}</p>
+      }
+    }
+
+    <section class="info" data-testid="info">
+      <p class="meta">{{ attempts(d) }}</p>
+      @if (d.withPicture) {
+        <p class="meta" data-testid="source"><strong>{{ t.picture }}:</strong> {{ sourceText() }}</p>
+        @if (d.description) {
+          <p class="meta" data-testid="seen">{{ t.seen }} {{ d.description }}</p>
+        }
+      }
+      @if (d.problems.length) {
+        <div data-testid="last-problems">
+          <p class="meta">{{ t.problems }}</p>
+          <ul>
+            @for (p of d.problems; track $index) {
+              <li>{{ p }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+
+    @if (d.preview.length) {
+      <section class="preview" data-testid="preview">
+        <h2>{{ t.preview }}</h2>
+        <ul>
+          @for (f of d.preview; track $index) {
+            <li><img [src]="src(f)" alt="" loading="lazy" /></li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (d.manifest !== undefined) {
+      <section class="edit" data-testid="edit">
+        <h2>{{ t.edit }}</h2>
+        <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+        <app-part-preview [manifest]="manifestText()" [fragment]="fragmentText()" />
+        @if (!writing()) {
+          <app-ask-change [manifest]="manifestText()" [fragment]="fragmentText()" />
+        }
+        @if (problems().length) {
+          <div class="problem" role="alert" data-testid="problems">
+            <ul>
+              @for (p of problems(); track $index) {
+                <li>{{ p }}</li>
+              }
+            </ul>
+          </div>
+        }
+        @if (saved() && !problems().length) {
+          <p class="ok" role="status" data-testid="saved">{{ t.saved }}</p>
+        }
+        <button type="button" class="save" data-testid="save" [disabled]="!valid() || saving() || writing()" (click)="save()">{{ saving() ? t.saving : t.save }}</button>
+      </section>
+    }
+
+    @if (refused()) {
+      <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+      @if (nameTaken()) {
+        <p class="note" data-testid="name-taken">{{ t.nameTaken }}</p>
+      }
+    }
+
+    <div class="actions">
+      @if (d.state === 'ready') {
+        @if (target(); as part) {
+          <button type="button" class="approve" data-testid="replace" [disabled]="working() !== null" (click)="replace()">{{ working() === 'replace' ? t.replacing : t.replace }}: {{ part.name }}</button>
+        } @else {
+          <button type="button" class="approve" data-testid="approve" [disabled]="working() !== null" (click)="approve()">{{ working() === 'approve' ? t.approving : t.approve }}</button>
+        }
+      }
+      @if (d.state === 'failed' && !lost()) {
+        <button type="button" class="approve" data-testid="retry" [disabled]="working() !== null" (click)="retry()">{{ working() === 'retry' ? t.retrying : t.retry }}</button>
+      }
+      <button type="button" data-testid="remove" (click)="remove()">{{ t.remove }}</button>
+    </div>
+  } @else {
+    <div class="panel" role="alert" data-testid="missing">
+      <p>{{ error() ? t.loadFailed : t.missing }}</p>
+      @if (error()) {
+        <p class="reason" data-testid="reason">{{ error() }}</p>
+      }
+      <a [routerLink]="link('parts')">{{ common.back }}</a>
+    </div>
+  }
+</section>

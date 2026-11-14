@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.picked {
+  margin-bottom: var(--lab-space-2);
+}
+
+.none {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.category {
+  margin: var(--lab-space-3) 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: 600;
+}

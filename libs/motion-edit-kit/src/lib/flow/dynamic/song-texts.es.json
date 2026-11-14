@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "id": "flow-song-texts",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Título",
+      "validation": {
+        "required": true,
+        "maxLength": 80,
+        "messages": {
+          "required": "Escribe el título."
+        }
+      }
+    },
+    {
+      "key": "lyrics",
+      "type": "textarea",
+      "label": "Letra",
+      "props": {
+        "rows": 6
+      }
+    },
+    {
+      "key": "style",
+      "type": "text",
+      "label": "Estilo"
+    }
+  ]
+}

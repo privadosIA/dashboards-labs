@@ -1,0 +1,23 @@
+// The start frame takes the left half of the panel; the end frame, when there is one, takes the right half.
+.frames {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lab-space-2);
+  align-items: start;
+}
+
+// The note about the end frame is a bubble on a small ⓘ, at the end of the line of the frames' labels, so that it takes no room of its own.
+.frames {
+  position: relative;
+}
+
+.note {
+  position: absolute;
+  top: -0.125rem;
+  right: 0;
+}
+
+// A model with no end frame has the start frame alone: while it is empty its zone takes the whole width (with a picture it keeps half, as before).
+app-start-image:only-child:has(.drop) {
+  grid-column: 1 / -1;
+}

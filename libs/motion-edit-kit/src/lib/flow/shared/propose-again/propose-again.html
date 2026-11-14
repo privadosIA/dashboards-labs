@@ -1,0 +1,9 @@
+<section class="again" data-testid="propose-again">
+  <h4>{{ t.againTitle }}</h4>
+  <dynamic-form [schema]="schema" [(model)]="value" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+  <lab-assistant-picker [(value)]="assistant" [routingModels]="routingModels()" [allowAdd]="false" />
+  <div class="actions">
+    <button type="button" class="primary" data-testid="again-submit" [disabled]="!valid()" (click)="submit()">{{ t.againSubmit }}</button>
+    <button type="button" data-testid="again-cancel" (click)="cancelled.emit()">{{ t.againCancel }}</button>
+  </div>
+</section>

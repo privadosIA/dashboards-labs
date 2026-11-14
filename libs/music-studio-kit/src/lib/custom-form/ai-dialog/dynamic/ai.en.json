@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "id": "ai",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "props": {
+        "rows": 9,
+        "attributes": {
+          "data-testid": "ai-prompt",
+          "aria-label": "Lyrics description"
+        }
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Describe the lyrics."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "promptCount"
+    }
+  ]
+}

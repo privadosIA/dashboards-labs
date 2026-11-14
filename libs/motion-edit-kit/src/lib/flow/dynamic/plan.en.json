@@ -1,0 +1,123 @@
+{
+  "version": "1.0",
+  "id": "flow-plan",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Song title",
+      "validation": {
+        "maxLength": 120,
+        "messages": {
+          "maxLength": "The title can have up to 120 characters."
+        }
+      }
+    },
+    {
+      "key": "lyrics",
+      "type": "textarea",
+      "label": "Lyrics (empty: the assistant writes none, or the song is instrumental)",
+      "props": {
+        "rows": 4
+      }
+    },
+    {
+      "key": "style",
+      "type": "text",
+      "label": "Song style"
+    },
+    {
+      "key": "generator",
+      "type": "select",
+      "label": "Generator",
+      "defaultValue": "ace-step"
+    },
+    {
+      "key": "instrumental",
+      "type": "checkbox",
+      "label": "Instrumental (no voice)",
+      "defaultValue": false
+    },
+    {
+      "key": "seconds",
+      "type": "number",
+      "label": "Length in seconds (empty: the default, two minutes)",
+      "validation": {
+        "min": 10,
+        "max": 600,
+        "messages": {
+          "min": "From 10 to 600 seconds.",
+          "max": "From 10 to 600 seconds."
+        }
+      }
+    },
+    {
+      "key": "animStyle",
+      "type": "radio",
+      "label": "Animation style",
+      "defaultValue": "typographic",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "level",
+      "type": "radio",
+      "label": "Level",
+      "defaultValue": "simple",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "fps",
+      "type": "radio",
+      "label": "Frame rate (fps)",
+      "defaultValue": "30",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "resolution",
+      "type": "text",
+      "label": "Resolution",
+      "defaultValue": "1280x720",
+      "validation": {
+        "required": true,
+        "pattern": "^[0-9]{3,4}x[0-9]{3,4}$",
+        "messages": {
+          "required": "The resolution is needed, like 1280x720.",
+          "pattern": "Write the resolution as width x height, like 1280x720."
+        }
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What the animation should be like (the proposals read this)",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Write what the animation should be like.",
+          "maxLength": "The text can have up to 2000 characters."
+        }
+      }
+    },
+    {
+      "key": "parts",
+      "type": "textarea",
+      "label": "Parts wanted, one per line as name: what it does (optional)",
+      "props": {
+        "rows": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<svg
+  class="chart"
+  [attr.viewBox]="'0 0 ' + W + ' ' + H"
+  role="group"
+  [attr.aria-label]="ariaLabel()"
+  data-testid="line-chart"
+  (pointermove)="onMove($event)"
+  (pointerleave)="active.set(null)"
+>
+  @for (t of yTicks(); track $index) {
+    <line class="grid" [attr.x1]="L" [attr.x2]="W - R" [attr.y1]="t.y" [attr.y2]="t.y" />
+    <text class="tick" [attr.x]="L - 6" [attr.y]="t.y + 4" text-anchor="end">{{ t.text }}</text>
+  }
+  @for (t of xTicks(); track $index) {
+    <text class="tick" [attr.x]="t.x" [attr.y]="H - B + 16" [attr.text-anchor]="t.anchor">{{ t.text }}</text>
+  }
+  @if (refY() !== null) {
+    <line class="ref" [attr.x1]="L" [attr.x2]="W - R" [attr.y1]="refY()" [attr.y2]="refY()" data-testid="chart-reference" />
+    <text class="ref-label" [attr.x]="W - R" [attr.y]="refY()! - 4" text-anchor="end">{{ reference()?.label }}</text>
+  }
+  @for (l of lines(); track l.name) {
+    <path [class]="'line line--' + l.kind" [attr.d]="l.d" [attr.stroke-dasharray]="l.dash" />
+    @for (q of l.pts; track q.pi) {
+      <circle
+        [class]="'pt pt--' + l.kind"
+        [class.pt--on]="active()?.s === q.si && active()?.p === q.pi"
+        [attr.cx]="q.cx"
+        [attr.cy]="q.cy"
+        r="3"
+        [attr.tabindex]="l.focusable ? 0 : null"
+        [attr.role]="l.focusable ? 'img' : null"
+        [attr.aria-label]="l.focusable ? textOf(q.si, q.pi) : null"
+        (focus)="active.set({ s: q.si, p: q.pi })"
+        (blur)="active.set(null)"
+      />
+    }
+  }
+</svg>
+@if (series().length > 1) {
+  <ul class="legend" data-testid="chart-legend">
+    @for (l of lines(); track l.name) {
+      <li><span [class]="'swatch swatch--' + l.kind" aria-hidden="true"></span>{{ l.name }}</li>
+    }
+  </ul>
+}
+<p class="readout mo-data" role="status" aria-live="polite" data-testid="chart-readout">{{ readout() }}</p>

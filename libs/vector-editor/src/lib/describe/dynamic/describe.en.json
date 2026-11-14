@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "id": "describe",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "description",
+      "type": "textarea",
+      "label": "What should it draw?",
+      "placeholder": "A green ring with a dot in the middle",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Say in a few words what to draw.",
+          "maxLength": "The description can have up to 2000 characters."
+        }
+      }
+    }
+  ]
+}

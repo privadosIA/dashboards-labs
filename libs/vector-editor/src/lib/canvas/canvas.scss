@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  min-height: 12rem;
+}
+
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  overflow: hidden;
+  background: var(--lab-surface);
+  border-radius: var(--lab-radius);
+  outline: none;
+  touch-action: none;
+  user-select: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: -2px;
+  }
+
+  &.drawing {
+    cursor: crosshair;
+  }
+}
+
+.stage,
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stage {
+  overflow: hidden;
+}
+
+.artboard {
+  fill: var(--lab-player-bg);
+  stroke: var(--lab-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+.box {
+  fill: none;
+  stroke: var(--lab-accent);
+  stroke-width: 1;
+}
+
+.stem {
+  stroke: var(--lab-accent);
+  stroke-width: 1;
+}
+
+.handle {
+  fill: var(--lab-bg);
+  stroke: var(--lab-accent);
+  stroke-width: 1.5;
+  pointer-events: all;
+
+  &.rotate {
+    cursor: grab;
+  }
+}
+
+.handle[data-handle='nw'],
+.handle[data-handle='se'] {
+  cursor: nwse-resize;
+}
+
+.handle[data-handle='ne'],
+.handle[data-handle='sw'] {
+  cursor: nesw-resize;
+}
+
+.handle[data-handle='n'],
+.handle[data-handle='s'] {
+  cursor: ns-resize;
+}
+
+.handle[data-handle='e'],
+.handle[data-handle='w'] {
+  cursor: ew-resize;
+}
+
+.anchor {
+  cursor: move;
+  pointer-events: all;
+}
+
+.anchor-hit {
+  fill: transparent;
+}
+
+.anchor-dot {
+  fill: var(--lab-accent);
+}
+
+.anchor-cross {
+  fill: none;
+  stroke: var(--lab-accent);
+  stroke-width: 1;
+}
+
+.guide {
+  stroke: var(--lab-danger);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.marquee {
+  fill: var(--lab-accent);
+  fill-opacity: 0.12;
+  stroke: var(--lab-accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}

@@ -1,0 +1,127 @@
+:host {
+  display: block;
+}
+
+.engines {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.hint,
+.meta,
+.detail {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem,
+.reason {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.source {
+  color: var(--lab-ink-dim);
+}
+
+// The catalog's descriptions are paragraphs: the card shows the first lines and the whole text is its tooltip.
+.detail {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow-wrap: anywhere;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--lab-space-3);
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+}
+
+.card--chosen {
+  border-color: var(--lab-accent);
+  box-shadow: inset 0 0 0 1px var(--lab-accent);
+}
+
+.card--off .name {
+  color: var(--lab-ink-dim);
+}
+
+.pick {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-2);
+  cursor: pointer;
+  border-radius: var(--lab-radius);
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.name {
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.state {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.start {
+  justify-self: start;
+  height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink);
+  cursor: pointer;
+}
+
+.piece {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  margin: 0;
+
+  dt {
+    color: var(--lab-ink-dim);
+  }
+
+  dd {
+    margin: 0;
+  }
+}

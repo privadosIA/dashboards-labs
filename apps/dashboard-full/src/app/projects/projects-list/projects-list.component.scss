@@ -1,0 +1,117 @@
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-4);
+  flex-wrap: wrap;
+}
+
+
+.empty {
+  padding: var(--lab-space-7) var(--lab-space-4);
+  text-align: center;
+  color: var(--lab-ink-dim);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+
+  p:first-child {
+    color: var(--lab-ink);
+    font-size: var(--lab-fs-section);
+  }
+}
+
+.invalid {
+  color: var(--lab-danger);
+}
+
+.row-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.danger {
+  --mat-icon-button-icon-color: var(--lab-danger);
+}
+
+.disk {
+  margin: var(--lab-space-3) 0 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.disk__dir {
+  overflow-wrap: anywhere;
+}
+
+.disk--low {
+  color: var(--lab-warn);
+}
+
+.modes {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--lab-space-3);
+}
+
+// The line that says the list shows one mode on its own, with the way back to the modes the user chose.
+.only-mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-ink-dim);
+}
+
+// The glyph that says a button opens a new tab.
+.new-tab {
+  margin-inline-start: var(--lab-space-2);
+  opacity: 0.7;
+}
+
+.hidden-modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  color: var(--lab-ink-dim);
+}
+
+.adult-badge {
+  margin-inline-start: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--mat-sys-error);
+  color: var(--mat-sys-error);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// Long identifiers and names are cut with an ellipsis; the tooltip shows them whole.
+.clip {
+  display: inline-block;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+// The library right-aligns number columns; the scenes/tracks count reads better on the left.
+:host ::ng-deep td[data-type='number'] {
+  text-align: left;
+}
+
+// The links that open a section in a new tab are a group of their own at the right end of the line, apart from the buttons that create or import.
+@media (min-width: 900px) {
+  [data-testid='open-animation'] {
+    margin-inline-start: auto;
+  }
+}
+
+// The actions of the page header, compact (32 px) and with a narrow label padding so that the five that create or import and the three links that
+// open a section in a new tab fit on one line at desktop widths.
+.mo-compact {
+  --mat-button-filled-horizontal-padding: var(--lab-space-3);
+  --mat-button-outlined-horizontal-padding: var(--lab-space-3);
+  --mat-button-text-horizontal-padding: var(--lab-space-3);
+}

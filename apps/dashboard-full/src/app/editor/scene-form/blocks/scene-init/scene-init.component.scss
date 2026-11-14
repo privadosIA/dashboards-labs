@@ -1,0 +1,27 @@
+@use '../block';
+
+:host {
+  display: block;
+}
+
+section {
+  @include block.section;
+  margin-bottom: var(--lab-space-3);
+
+  h3 {
+    font-size: var(--lab-fs-body);
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.init__strength {
+  margin-top: var(--lab-space-2);
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}

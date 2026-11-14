@@ -1,0 +1,293 @@
+<mo-page-header
+  title="Projects"
+  i18n-title="@@projects.title"
+  description="Each project is a collection of scenes with its settings, its cache and its results."
+  i18n-description="@@projects.desc"
+>
+  <button moActions mat-flat-button class="mo-compact" data-testid="create-project" (click)="createProject()" i18n-aria-label="@@projects.createAction" aria-label="Create project">
+    <mat-icon>add</mat-icon>
+    <ng-container i18n="@@projects.createShort">Create</ng-container>
+  </button>
+  <button moActions mat-stroked-button class="mo-compact" data-testid="create-music-project" (click)="createMusicProject()" i18n-aria-label="@@projects.newMusicAction" aria-label="Music project">
+    <mat-icon>library_music</mat-icon>
+    <ng-container i18n="@@projects.musicShort">Music</ng-container>
+  </button>
+  @if (availability.available('motion_graphics')) {
+    <button moActions mat-stroked-button class="mo-compact" data-testid="create-motion-project" (click)="createMotionProject()" i18n-aria-label="@@projects.newMotionAction" aria-label="Motion graphics project">
+      <mat-icon>movie_filter</mat-icon>
+      <ng-container i18n="@@projects.motionShort">Motion graphics</ng-container>
+    </button>
+  }
+  <button moActions mat-stroked-button class="mo-compact" data-testid="import-package" (click)="openPackageImport()" i18n-aria-label="@@projects.importPackageAction" aria-label="Import full project">
+    <mat-icon>folder_zip</mat-icon>
+    <ng-container i18n="@@projects.importFullShort">Import full</ng-container>
+  </button>
+  <button moActions mat-stroked-button class="mo-compact" data-testid="import-project" (click)="openImport()">
+    <mat-icon>upload_file</mat-icon>
+    <ng-container i18n="@@projects.importAction">Import dataset</ng-container>
+  </button>
+  @if (!simple.simple() && links.shown('animation')) {
+    <a
+      moActions
+      mat-stroked-button
+      class="mo-compact"
+      routerLink="/animation"
+      target="_blank"
+      (click)="openSection($event)"
+      data-testid="open-animation"
+      i18n-aria-label="@@projects.openAnimationAria"
+      aria-label="Animation, opens in a new tab"
+    >
+      <mat-icon>animation</mat-icon>
+      <ng-container i18n="@@projects.openAnimation">Animation</ng-container>
+      <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+    </a>
+  }
+  @if (!simple.simple() && links.shown('video')) {
+    <a
+      moActions
+      mat-stroked-button
+      class="mo-compact"
+      routerLink="/video"
+      target="_blank"
+      (click)="openSection($event)"
+      data-testid="open-video"
+      i18n-aria-label="@@projects.openVideoAria"
+      aria-label="Video, opens in a new tab"
+    >
+      <mat-icon>movie</mat-icon>
+      <ng-container i18n="@@projects.openVideo">Video</ng-container>
+      <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+    </a>
+  }
+  @if (!simple.simple() && links.shown('music')) {
+    <a
+      moActions
+      mat-stroked-button
+      class="mo-compact"
+      routerLink="/music"
+      target="_blank"
+      (click)="openSection($event)"
+      data-testid="open-music"
+      i18n-aria-label="@@projects.openMusicAria"
+      aria-label="Music, opens in a new tab"
+    >
+      <mat-icon>music_note</mat-icon>
+      <ng-container i18n="@@projects.openMusic">Music</ng-container>
+      <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+    </a>
+  }
+  @if (!simple.simple() && links.shown('flow')) {
+    <a
+      moActions
+      mat-stroked-button
+      class="mo-compact"
+      routerLink="/animation/motion-edit/flow"
+      target="_blank"
+      (click)="openSection($event)"
+      data-testid="open-flow"
+      i18n-aria-label="@@projects.openFlowAria"
+      aria-label="Guided flow, opens in a new tab"
+    >
+      <mat-icon>route</mat-icon>
+      <ng-container i18n="@@projects.openFlow">Guided flow</ng-container>
+      <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+    </a>
+  }
+  @if (!simple.simple() && links.shown('dataset')) {
+    <a
+      moActions
+      mat-stroked-button
+      class="mo-compact"
+      routerLink="/dataset"
+      target="_blank"
+      (click)="openSection($event)"
+      data-testid="open-dataset"
+      i18n-aria-label="@@projects.openDatasetAria"
+      aria-label="Dataset, opens in a new tab"
+    >
+      <mat-icon>dataset</mat-icon>
+      <ng-container i18n="@@projects.openDataset">Dataset</ng-container>
+      <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+    </a>
+  }
+</mo-page-header>
+
+@if (store.loaded() && only(); as mode) {
+  <p class="only-mode" role="status" data-testid="projects-only">
+    <mat-icon inline>filter_alt</mat-icon>
+    <span i18n="@@projects.onlyIntro">Showing only the projects of mode <strong>{{ modeLabel(mode) }}</strong>.</span>
+    <button mat-button type="button" data-testid="projects-only-clear" (click)="clearOnly()" i18n="@@projects.onlyClear">Show my chosen modes</button>
+  </p>
+}
+
+@if (store.loaded() && store.projects().length > 0) {
+  <div class="modes" data-testid="projects-modes">
+    <app-mode-select />
+  </div>
+}
+@if (store.loaded() && store.projects().length === 0) {
+  <mo-empty-state
+    icon="video_library"
+    message="There are no projects yet."
+    i18n-message="@@projects.emptyTitle"
+    hint="Create an empty one with “Create project” or convert a JSON/HTML dataset with “Import dataset”."
+    i18n-hint="@@projects.emptyHint"
+  >
+    <button mat-flat-button (click)="createProject()">
+      <mat-icon>add</mat-icon>
+      <ng-container i18n="@@projects.createAction">Create project</ng-container>
+    </button>
+    <button mat-stroked-button (click)="openPackageImport()">
+      <mat-icon>folder_zip</mat-icon>
+      <ng-container i18n="@@projects.importPackageAction">Import full project</ng-container>
+    </button>
+    <button mat-stroked-button (click)="openImport()">
+      <mat-icon>upload_file</mat-icon>
+      <ng-container i18n="@@projects.importAction">Import dataset</ng-container>
+    </button>
+  </mo-empty-state>
+} @else if (store.loaded() && visible().length === 0 && only(); as mode) {
+  <p class="hidden-modes" role="status" data-testid="projects-none">
+    <mat-icon inline>visibility_off</mat-icon>
+    <span i18n="@@projects.noneOfMode">There are no projects of mode <strong>{{ modeLabel(mode) }}</strong>.</span>
+    @if (mode === 'music') {
+      <button mat-stroked-button type="button" data-testid="projects-none-create" (click)="createMusicProject()">
+        <mat-icon>library_music</mat-icon>
+        <ng-container i18n="@@projects.newMusicAction">Music project</ng-container>
+      </button>
+    }
+  </p>
+} @else if (store.loaded() && visible().length === 0) {
+  <p class="hidden-modes" role="status" data-testid="projects-hidden">
+    <mat-icon inline>visibility_off</mat-icon>
+    <span i18n="@@projects.hiddenIntro">The chosen modes have no projects. Hidden:</span>
+    @for (h of hidden(); track h.mode; let last = $last) {
+      <span class="mo-data">{{ modeLabel(h.mode) }} ({{ h.count }})</span>@if (!last) {<span>,</span>}
+    }
+    <button mat-button type="button" data-testid="projects-show-all" (click)="modes.showAll()" i18n="@@projects.showAllModes">Show all modes</button>
+  </p>
+} @else if (store.loaded()) {
+  <!-- the table is drawn by the forms library: its rows are what changes, so the animation goes on its tbody -->
+  <div appAutoAnimate appAutoAnimateTarget=".df-table__table tbody">
+    <dynamic-form [schema]="tables" [model]="tableModel()" [showDefaultActions]="false">
+      <ng-template dfCell="id" let-p>
+        <span class="clip" [matTooltip]="p.id">{{ p.id }}</span>
+      </ng-template>
+      <ng-template dfCell="name" let-p>
+              @if (p.invalid) {
+                <span class="invalid" [matTooltip]="p.error" i18n="@@projects.invalid"
+                  >Invalid scenes.yaml</span
+                >
+              } @else {
+                <span class="clip" [matTooltip]="p.name">{{ p.name }}</span>
+              }
+              @if (p.adult === true) {
+                <span class="adult-badge" data-testid="adult-badge" i18n="@@projects.adult">+18</span>
+              }
+      </ng-template>
+      <ng-template dfCell="size" let-p>
+        <span class="mo-data" data-testid="project-size">{{ p.sizeBytes === null ? '' : (p.sizeBytes | moBytes) }}</span>
+      </ng-template>
+      <ng-template dfCell="actions" let-p>
+        <span class="row-actions">
+              <a
+                mat-icon-button
+                [routerLink]="editLink(p)"
+                i18n-matTooltip="@@projects.edit"
+                matTooltip="Edit scenes or tracks"
+                i18n-aria-label="@@projects.edit"
+                aria-label="Edit scenes or tracks"
+              >
+                <mat-icon>edit</mat-icon>
+              </a>
+              @if (p.mode === 'video') {
+                <a
+                  mat-icon-button
+                  [routerLink]="['/projects', p.id, 'review']"
+                  [attr.data-testid]="'review-' + p.id"
+                  i18n-matTooltip="@@projects.review"
+                  matTooltip="Review the clips"
+                  i18n-aria-label="@@projects.review"
+                  aria-label="Review the clips"
+                >
+                  <mat-icon>fact_check</mat-icon>
+                </a>
+              }
+              <button
+                mat-icon-button
+                type="button"
+                [attr.data-testid]="'storage-' + p.id"
+                (click)="openStorage(p)"
+                i18n-matTooltip="@@projects.storageAction"
+                matTooltip="Storage: what takes space, and clean"
+                i18n-aria-label="@@projects.storageAction"
+                aria-label="Storage: what takes space, and clean"
+              >
+                <mat-icon>hard_drive</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="duplicateProject(p)"
+                i18n-matTooltip="@@projects.duplicateAction"
+                matTooltip="Duplicate project"
+                i18n-aria-label="@@projects.duplicateAction"
+                aria-label="Duplicate project"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="exportMenu"
+                [attr.data-testid]="'export-' + p.id"
+                i18n-matTooltip="@@projects.exportAction"
+                matTooltip="Export project"
+                i18n-aria-label="@@projects.exportAction"
+                aria-label="Export project"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+              <mat-menu #exportMenu="matMenu">
+                <button mat-menu-item type="button" [attr.data-testid]="'export-zip-' + p.id" (click)="exportProject(p, 'zip')">
+                  <mat-icon>folder_zip</mat-icon>
+                  <span i18n="@@projects.exportZip">Full project (.zip: settings, models used and recipe)</span>
+                </button>
+                <button mat-menu-item type="button" [attr.data-testid]="'export-dataset-' + p.id" (click)="exportProject(p, 'dataset')">
+                  <mat-icon>data_object</mat-icon>
+                  <span i18n="@@projects.exportDataset">Scenes only (JSON, without settings or models)</span>
+                </button>
+              </mat-menu>
+              <button
+                mat-icon-button
+                class="danger"
+                (click)="deleteProject(p)"
+                i18n-matTooltip="@@projects.deleteAction"
+                matTooltip="Delete project"
+                i18n-aria-label="@@projects.deleteAction"
+                aria-label="Delete project"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+        </span>
+      </ng-template>
+    </dynamic-form>
+  </div>
+  @if (freeBytes(); as free) {
+    <p class="disk" [class.disk--low]="diskLow()" data-testid="disk-free">
+      @if (diskLow()) {
+        <mat-icon inline>warning</mat-icon>
+      }
+      <ng-container i18n="@@projects.diskFree">Free space on the projects disk:</ng-container>
+      <span class="mo-data">{{ free | moBytes }}</span>
+      @if (mediaDir(); as dir) {
+        <span class="disk__dir" data-testid="media-dir">
+          <ng-container i18n="@@projects.mediaDir">· media folder:</ng-container>
+          <span class="mo-data">{{ dir }}</span>
+        </span>
+      }
+      @if (diskLow()) {
+        <ng-container i18n="@@projects.diskLow">(low: free some with the storage button of each project)</ng-container>
+      }
+    </p>
+  }
+}

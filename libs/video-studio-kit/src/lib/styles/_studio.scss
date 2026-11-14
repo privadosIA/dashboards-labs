@@ -1,0 +1,22 @@
+// The global rules the studio needs and no component stylesheet can hold: the menus of its settings rows live in the
+// overlay, and the form library draws its fields outside the component. A host includes this once in its global styles
+// (`@use '.../video-studio-kit/src/lib/styles/studio'; @include studio.studio();`). How the fields themselves look (filled
+// or outlined, their height) stays the host's: it comes from the host's tokens and Material pins. The rules for the form
+// library's fields are scoped to `.studio-kit`, the class of the page and of the dialogs of the studio that have a form, so
+// a host's own forms are not touched.
+@mixin studio {
+  // The menus of the settings rows.
+  .settings-menu .mat-mdc-menu-item.current {
+    color: var(--lab-accent);
+  }
+
+  // A checkbox row (Audio) takes less height than Material's 40px touch area.
+  .studio-kit .df-form {
+    --mat-checkbox-state-layer-size: 32px;
+  }
+
+  // The prompt and the sound text are tall boxes: they get more room under them than a one-line field.
+  .studio-kit .df-form .mat-mdc-form-field:has(textarea) {
+    margin-bottom: var(--lab-space-4);
+  }
+}

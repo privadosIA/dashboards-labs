@@ -1,0 +1,15 @@
+<section class="preview" data-testid="part-preview">
+  <div class="bar">
+    <button type="button" class="play" data-testid="preview-button" (click)="preview()">{{ t.previewButton }}</button>
+    @if (shown()) {
+      <button type="button" data-testid="preview-toggle" [attr.aria-pressed]="!playing()" (click)="toggle()">{{ playing() ? t.previewPause : t.previewResume }}</button>
+    }
+  </div>
+  @if (problem()) {
+    <p class="problem" role="alert" data-testid="preview-problem">{{ t.previewFailed }} {{ problem() }}</p>
+  }
+  @if (shown()) {
+    <iframe #frame class="frame" sandbox="allow-scripts" [attr.title]="t.previewFrame" tabindex="-1" data-testid="preview-frame"></iframe>
+    <p class="note" data-testid="preview-note">{{ t.previewNote }}</p>
+  }
+</section>

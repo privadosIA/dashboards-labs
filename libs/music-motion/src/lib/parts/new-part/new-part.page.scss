@@ -1,0 +1,50 @@
+.new-part {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lab-space-4);
+}
+
+.back {
+  color: var(--lab-accent);
+}
+
+h1 {
+  margin: 0 0 var(--lab-space-1);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+header p {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.problem {
+  margin: 0;
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}

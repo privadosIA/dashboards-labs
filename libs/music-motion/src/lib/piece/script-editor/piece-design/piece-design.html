@@ -1,0 +1,10 @@
+<section class="own" data-testid="piece-design">
+  @if (shown()) {
+    <h4>{{ t.pieceDesign }}</h4>
+    <p class="hint">{{ t.pieceDesignHint }}</p>
+    <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (valueChange)="changed($event)" />
+    <button type="button" class="back" data-testid="design-back" [disabled]="locked()" (click)="reset()">{{ t.backToSong }}</button>
+  } @else {
+    <button type="button" class="give" data-testid="design-give" [disabled]="locked()" (click)="open()">{{ t.giveDesign }}</button>
+  }
+</section>

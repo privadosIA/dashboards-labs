@@ -1,0 +1,40 @@
+<ul class="library">
+  @for (m of motions(); track m.id) {
+    <li [attr.data-state]="m.state" [class.chosen]="chosen() === m.id" [attr.data-testid]="'motion-' + m.id">
+      @if (m.state === 'ready') {
+        <video
+          #preview
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          [autoplay]="chosen() === m.id"
+          [src]="tickets.withTicket(m.preview)"
+          (mouseenter)="play(preview)"
+          (mouseleave)="stop(preview, chosen() === m.id)"
+        ></video>
+      }
+      <span class="title">{{ m.title }}</span>
+      @if (m.tags.length) {
+        <span class="tags">{{ m.tags.join(' · ') }}</span>
+      }
+      @if (m.state === 'ready') {
+        <span class="meta">{{ seconds(m.duration) }} · {{ people(m.people) }}</span>
+      } @else if (m.state === 'processing') {
+        <span class="status">{{ t.videoTools.dialog.motionPreparing }}</span>
+      } @else {
+        <span class="status failed">{{ t.videoTools.dialog.motionFailed }} {{ m.error }}</span>
+      }
+      <span class="row">
+        @if (mode() === 'select' && m.state === 'ready') {
+          <button type="button" class="use" [attr.aria-pressed]="chosen() === m.id" [attr.data-testid]="'use-' + m.id" (click)="choose.emit(chosen() === m.id ? null : m.id)">
+            {{ chosen() === m.id ? t.videoTools.dialog.motionChosen : t.videoTools.dialog.motionUse }}
+          </button>
+        }
+        @if (mode() === 'manage') {
+          <button type="button" [attr.data-testid]="'remove-' + m.id" (click)="remove.emit(m)">{{ t.videoTools.dialog.motionRemove }}</button>
+        }
+      </span>
+    </li>
+  }
+</ul>

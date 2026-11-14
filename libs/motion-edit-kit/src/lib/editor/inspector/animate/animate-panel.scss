@@ -1,0 +1,113 @@
+:host {
+  display: block;
+}
+
+.animate {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin-top: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.row {
+  display: grid;
+  gap: var(--lab-space-1);
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-2);
+
+  .name {
+    flex: 1 1 4rem;
+    min-width: 0;
+    font-weight: var(--lab-fw-control);
+    overflow-wrap: anywhere;
+  }
+
+  // The value at the playhead goes on its own line under the name, so it never squeezes it.
+  .now {
+    order: 3;
+    flex: 1 0 100%;
+    color: var(--lab-accent);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.frames {
+  display: grid;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.frame {
+  width: 100%;
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--lab-accent);
+  }
+
+  &.on {
+    border-color: var(--lab-accent);
+    background: color-mix(in srgb, var(--lab-accent) 14%, transparent);
+  }
+}
+
+.edit {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-2);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+}
+
+.field {
+  display: grid;
+  gap: var(--lab-space-1);
+
+  span {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.warn {
+  margin: 0;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}
+
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.ctl.add {
+  justify-self: start;
+}

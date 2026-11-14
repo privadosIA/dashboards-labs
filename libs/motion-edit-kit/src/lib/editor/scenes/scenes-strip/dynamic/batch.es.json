@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "id": "motion-edit-scenes-batch",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "briefMode",
+      "type": "radio",
+      "label": "Cómo las piensa",
+      "defaultValue": "metaphor",
+      "props": {
+        "inline": true
+      },
+      "options": [
+        {
+          "value": "metaphor",
+          "label": "Metáfora"
+        },
+        {
+          "value": "literal",
+          "label": "Literal"
+        }
+      ]
+    },
+    {
+      "key": "review",
+      "type": "checkbox",
+      "label": "Revisar con el modelo de visión",
+      "defaultValue": true
+    },
+    {
+      "key": "reviewMin",
+      "type": "number",
+      "label": "Nota mínima (1 a 10)",
+      "defaultValue": 7,
+      "validation": {
+        "min": 1,
+        "max": 10,
+        "messages": {
+          "min": "De 1 a 10.",
+          "max": "De 1 a 10."
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "review",
+          "operator": "eq",
+          "value": true
+        }
+      }
+    },
+    {
+      "key": "reviewAttempts",
+      "type": "number",
+      "label": "Reescrituras como mucho (0 a 3)",
+      "defaultValue": 2,
+      "validation": {
+        "min": 0,
+        "max": 3,
+        "messages": {
+          "min": "De 0 a 3.",
+          "max": "De 0 a 3."
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "review",
+          "operator": "eq",
+          "value": true
+        }
+      }
+    }
+  ]
+}

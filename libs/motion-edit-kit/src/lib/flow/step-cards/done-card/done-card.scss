@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.done {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+p {
+  margin: 0;
+}
+
+.hint {
+  color: var(--lab-ink-dim);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.problem {
+  color: var(--lab-danger);
+}
+
+video {
+  width: 100%;
+  max-width: 48rem;
+  border-radius: var(--lab-radius);
+}
+
+h4 {
+  margin: 0 0 var(--lab-space-2);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+}
+
+ul {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  gap: var(--lab-space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+button,
+a.button {
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  text-decoration: none;
+  cursor: pointer;
+
+  &.primary {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

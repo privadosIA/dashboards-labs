@@ -1,0 +1,99 @@
+@let l = learning();
+<div class="view" data-testid="learning-view" [attr.data-state]="l.state">
+  @if (l.state === 'failed') {
+    <p class="problem" role="alert" data-testid="learning-failed">{{ t.failed }} {{ l.reason }}</p>
+  } @else if (l.state === 'running') {
+    <p class="meta" role="status" data-testid="learning-running">{{ t.runningNote }}</p>
+  } @else {
+    <p class="meta" data-testid="learning-strictness">{{ t.strictnessUsed }}: {{ t.strictnesses[l.strictness] }}</p>
+
+    <section data-testid="learned-styles">
+      <h3>{{ t.styles }}</h3>
+      @if (l.styles.length === 0) {
+        <p class="meta">{{ t.none }}</p>
+      }
+      <ul class="items">
+        @for (s of l.styles; track s.id) {
+          <li [class.gone]="!exists(s)" data-testid="learned-style">
+            <div class="line">
+              <strong>{{ s.name }}</strong>
+              <span class="state" [attr.data-state]="s.state">{{ stateText(s) }}</span>
+              @if (s.novel) {
+                <span class="novel">{{ t.novel }}</span>
+              }
+              @if (exists(s)) {
+                <a class="open" [routerLink]="link('presets', s.id)" data-testid="open-style">{{ t.openStyle }}</a>
+              }
+            </div>
+            @if (s.similarTo; as sim) {
+              <p class="meta" data-testid="similar">{{ t.similar }} {{ t.kinds[sim.kind] }} «{{ sim.name }}» ({{ t.distance }} {{ distance(sim.distance) }}): {{ sim.reason }}</p>
+            }
+            @if (!exists(s)) {
+              <p class="meta">{{ t.gone }}</p>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section data-testid="learned-parts">
+      <h3>{{ t.parts }}</h3>
+      @if (l.partDrafts.length === 0) {
+        <p class="meta">{{ t.none }}</p>
+      }
+      <ul class="items">
+        @for (p of l.partDrafts; track p.id) {
+          <li [class.gone]="!exists(p)" data-testid="learned-part">
+            <div class="line">
+              <strong>{{ p.name }}</strong>
+              <span class="state" [attr.data-state]="p.state">{{ stateText(p) }}</span>
+              @if (p.novel) {
+                <span class="novel">{{ t.novel }}</span>
+              }
+              @if (exists(p)) {
+                <a class="open" [routerLink]="link('parts', p.id)" data-testid="open-part">{{ t.openPart }}</a>
+              }
+            </div>
+            @if (p.state === 'failed' && p.reason) {
+              <p class="problem">{{ p.reason }}</p>
+            }
+            @if (p.similarTo; as sim) {
+              <p class="meta" data-testid="similar">{{ t.similar }} {{ t.kinds[sim.kind] }} «{{ sim.name }}» ({{ t.distance }} {{ distance(sim.distance) }}): {{ sim.reason }}</p>
+            }
+            @if (!exists(p)) {
+              <p class="meta">{{ t.gone }}</p>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section data-testid="learned-discarded">
+      <h3>{{ t.discarded }}</h3>
+      @if (l.discarded.length === 0) {
+        <p class="meta">{{ t.discardedNone }}</p>
+      }
+      <ul class="items">
+        @for (d of l.discarded; track $index) {
+          <li data-testid="discarded">
+            <div class="line"><strong>{{ d.idea ?? d.name }}</strong></div>
+            <p class="meta">{{ t.similar }} {{ t.kinds[d.similarTo.kind] }} «{{ d.similarTo.name }}» ({{ t.distance }} {{ distance(d.similarTo.distance) }}): {{ d.similarTo.reason }}</p>
+            <p class="meta">{{ d.reason }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section data-testid="learned-skipped">
+      <h3>{{ t.skipped }}</h3>
+      @if (l.skipped.length === 0) {
+        <p class="meta">{{ t.skippedNone }}</p>
+      }
+      <ul class="items">
+        @for (s of l.skipped; track $index) {
+          <li data-testid="skipped"><strong>{{ s.what }}</strong>: {{ s.reason }}</li>
+        }
+      </ul>
+    </section>
+  }
+</div>

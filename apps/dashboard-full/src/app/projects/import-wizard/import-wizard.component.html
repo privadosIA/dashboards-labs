@@ -1,0 +1,124 @@
+<h2 mat-dialog-title i18n="@@import.title">Import dataset</h2>
+<mat-dialog-content>
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <mat-stepper linear #stepper>
+    <!-- Paso 1: subir -->
+    <mat-step [completed]="!!fileContent()">
+      <ng-template matStepLabel i18n="@@import.stepUpload">Upload</ng-template>
+      <mat-button-toggle-group
+        class="mode"
+        data-testid="import-mode"
+        [value]="mode()"
+        (change)="setMode($event.value)"
+        i18n-aria-label="@@import.modeLabel"
+        aria-label="What to import"
+      >
+        <mat-button-toggle value="video" i18n="@@import.modeVideo">Video scenes</mat-button-toggle>
+        <mat-button-toggle value="motion" i18n="@@import.modeMotion">Animated graphics</mat-button-toggle>
+        <mat-button-toggle value="music" i18n="@@import.modeMusic">Songs</mat-button-toggle>
+      </mat-button-toggle-group>
+      <p i18n="@@import.uploadHint">
+        Accepts a JSON of [id, title, lora, prompt] tuples or an HTML with
+        <span class="mo-data">const data = [...]</span> — the same format as
+        <span class="mo-data">orchestrator import</span>.
+      </p>
+      @if (mode() === 'motion') {
+        <p class="dim" data-testid="motion-hint" i18n="@@import.motionHint">
+          In animated graphics, the lines before the markers describe what the graphic shows (or a “Graphic:” line); “Duration:” sets its length in seconds, “Dialogue:” narrates it and “Overlay:” (with Overlay position, start and end) adds a title over it. The pages are written by the model when the project runs, not when it is imported.
+        </p>
+      }
+      @if (mode() === 'music') {
+        <p class="dim" data-testid="music-hint" i18n="@@import.musicHint">
+          For songs, the prompt is the style; a “Lyrics:” line starts the lyrics, “Instrumental” leaves it without voice, and BPM, Duration, Key, Language, Seed and Variants set their fields.
+        </p>
+      }
+      <input #file type="file" accept=".json,.html,.htm" hidden (change)="onFile(file)" />
+      <div class="upload-row">
+        <button mat-stroked-button type="button" (click)="file.click()">
+          <mat-icon>upload_file</mat-icon>
+          <ng-container i18n="@@import.chooseFile">Choose file</ng-container>
+        </button>
+        @if (fileName()) {
+          <span class="mo-data">{{ fileName() }}</span>
+        }
+      </div>
+      <mat-form-field class="field">
+        <mat-label i18n="@@projectName.label">Project identifier</mat-label>
+        <input matInput [formControl]="projectId" autocomplete="off" />
+        @if (projectId.hasError('pattern')) {
+          <mat-error i18n="@@projectName.pattern"
+            >Use letters, numbers and “._-”, starting with a letter or number (max. 64)</mat-error
+          >
+        }
+      </mat-form-field>
+      <div class="step-actions">
+        <button mat-flat-button [disabled]="!fileContent() || busy()" (click)="runPreview()">
+          <ng-container i18n="@@import.toReport">Generate report</ng-container>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- Paso 2: informe -->
+    <mat-step [completed]="!!preview()">
+      <ng-template matStepLabel i18n="@@import.stepReport">Report</ng-template>
+      @if (preview(); as p) {
+        <p class="totals">
+          <span i18n="@@import.totalImported">Imported: {{ p.imported }}</span> ·
+          @if (mode() === 'music') {
+            <span i18n="@@import.totalInstrumental">instrumental: {{ p.instrumental ?? 0 }}</span> ·
+          } @else {
+            <span i18n="@@import.totalSilent">silent: {{ p.silent }}</span> ·
+          }
+          <span class="rejected" i18n="@@import.totalRejected">rejected: {{ p.rejected }}</span>
+        </p>
+        <h3 i18n="@@import.entriesTitle">What was mapped and what was discarded</h3>
+        <ul class="entries">
+          @for (e of p.entries; track e.id) {
+            <li>
+              <span class="mo-data">{{ e.id }}</span>
+              @if (e.rejected) {
+                <span class="rejected"> — {{ e.rejected }}</span>
+              } @else {
+                <ul>
+                  @for (m of e.mapped; track m) {
+                    <li class="mapped">{{ m }}</li>
+                  }
+                  @for (d of e.discarded; track d) {
+                    <li class="discarded" i18n="@@import.discarded">discarded: {{ d }}</li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+        </ul>
+        <h3 i18n="@@import.yamlTitle">Resulting scenes.yaml</h3>
+        <pre class="yaml mo-data">{{ p.yaml }}</pre>
+        <div class="step-actions">
+          <button mat-button matStepperPrevious i18n="@@import.back">Back</button>
+          <button mat-flat-button (click)="toConfirm()" i18n="@@import.toConfirm">
+            Continue to confirmation
+          </button>
+        </div>
+      }
+    </mat-step>
+
+    <!-- Paso 3: confirmar -->
+    <mat-step>
+      <ng-template matStepLabel i18n="@@import.stepConfirm">Confirm</ng-template>
+      <p i18n="@@import.confirmHint">
+        The project “{{ projectId.value }}” will be created with the scenes.yaml from the report. Nothing has been created yet.
+      </p>
+      <div class="step-actions">
+        <button mat-button matStepperPrevious i18n="@@import.back">Back</button>
+        <button mat-flat-button [disabled]="busy()" (click)="confirm()">
+          <ng-container i18n="@@import.confirmAction">Create imported project</ng-container>
+        </button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+</mat-dialog-actions>

@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.hint {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  color: var(--lab-danger);
+}
+
+.defaults {
+  display: grid;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+  }
+}
+
+.flows {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--lab-space-3);
+    padding: var(--lab-space-3);
+    background: var(--lab-surface);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius);
+  }
+}
+
+.what {
+  display: grid;
+  gap: var(--lab-space-1);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.import input {
+  display: none;
+}
+
+button,
+.button {
+  display: inline-block;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  text-decoration: none;
+  cursor: pointer;
+
+  &.primary {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+}

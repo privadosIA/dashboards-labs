@@ -1,0 +1,34 @@
+<div class="transport" data-testid="vector-transport" role="group" [attr.aria-label]="t.transport.label">
+  <button type="button" data-testid="to-start" [attr.aria-label]="t.transport.start" [title]="t.transport.start" (click)="store().seek(0)">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3v10M13 3 6.5 8 13 13Z" /></svg>
+  </button>
+  <button type="button" data-testid="step-back" [attr.aria-label]="t.transport.stepBack" [title]="t.transport.stepBack" (click)="store().step(-1)">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+  </button>
+  <button type="button" class="play" data-testid="play" [attr.aria-label]="playing() ? t.transport.pause : t.transport.play" [attr.aria-pressed]="playing()" (click)="store().togglePlay()">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      @if (playing()) {
+        <path d="M5 3v10M11 3v10" />
+      } @else {
+        <path d="M5 3 13 8 5 13Z" />
+      }
+    </svg>
+  </button>
+  <button type="button" data-testid="step-forward" [attr.aria-label]="t.transport.stepForward" [title]="t.transport.stepForward" (click)="store().step(1)">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+  </button>
+  <button type="button" data-testid="to-end" [attr.aria-label]="t.transport.end" [title]="t.transport.end" (click)="store().seek(store().doc().duration)">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.5 3v10M3 3l6.5 5L3 13Z" /></svg>
+  </button>
+  <button type="button" class="loop" data-testid="loop" [attr.aria-pressed]="loop()" [attr.aria-label]="t.transport.loop" [title]="t.transport.loop" (click)="store().loop.set(!loop())">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h7m0 0-2-2m2 2-2 2M13 9v1a2 2 0 0 1-2 2H4m0 0 2 2m-2-2 2-2" /></svg>
+  </button>
+  <label class="fps">
+    <span class="sr">{{ t.transport.fps }}</span>
+    <select data-testid="fps" [attr.aria-label]="t.transport.fps" (change)="setFps($event)">
+      <option value="30" [selected]="fps() === 30">30 fps</option>
+      <option value="60" [selected]="fps() === 60">60 fps</option>
+    </select>
+  </label>
+  <output class="time" data-testid="time" [attr.aria-label]="t.transport.time">{{ time() }}</output>
+</div>

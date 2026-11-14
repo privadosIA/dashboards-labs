@@ -1,0 +1,40 @@
+{
+  "_": "The part of the page that moves parameters, as the server writes it at mediaOrquestator 7b98bd4 (`internal/music/musicmotion/page.go` and `animate.go`: the constants animateValue and animateSeek, joined as animationScript joins them). `animate`, `handOver` and `seekStart` are excerpts of the page it builds (POST /api/music-motion/pieces/{id}/preview?scenes=p4) for a piece whose counter animates `from` and `step`. The evaluator reads a part's time through `__animateOff` since the layers commit (a part that is not a layer item has none, and reads the piece's time as before).",
+  "animate": "<script>window.__animate=[{\"from\":{\"k\":[{\"t\":0,\"value\":0,\"ease\":\"in\"},{\"t\":0.715,\"value\":5000,\"ease\":\"out\"},{\"t\":1.43,\"value\":100}],\"int\":true},\"step\":{\"k\":[{\"t\":0,\"value\":1},{\"t\":1.43,\"value\":3000,\"ease\":\"in-out\"}],\"int\":true}}];</script>",
+  "handOver": "window.__partParams=window.__partParams||{};window.__partParams[0]=window.__params;",
+  "animationScript": "<script>(function(){\n  window.__animateValue = function(kfs, t){\n    var n = kfs.length;\n    if (t <= kfs[0].t) return kfs[0].value;\n    if (t >= kfs[n - 1].t) return kfs[n - 1].value;\n    var i = 0; while (i < n - 1 && t >= kfs[i + 1].t) i++;\n    var a = kfs[i], b = kfs[i + 1], e = a.ease || 'linear';\n    if (typeof a.value !== 'number' || typeof b.value !== 'number' || e === 'step') return a.value;\n    var p = (t - a.t) / (b.t - a.t);\n    if (e === 'in') p = p * p * p; else if (e === 'out') p = 1 - Math.pow(1 - p, 3);\n    else if (e === 'in-out') p = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;\n    return a.value + (b.value - a.value) * p;\n  };\n  window.__setAnimated = function(t){\n    var AN = window.__animate, PP = window.__partParams || [], AO = window.__animateOff || {};\n    if (AN) for (var ai = 0; ai < AN.length; ai++) { if (AN[ai] && PP[ai]) { var at = AO[ai] === undefined ? t : ((window.__scene && window.__scene.song_start) || 0) + t - AO[ai]; for (var pn in AN[ai]) { var v = window.__animateValue(AN[ai][pn].k, at); PP[ai][pn] = (AN[ai][pn].int && typeof v === 'number') ? Math.round(v) : v; } } }\n  };\n})();</script>",
+  "seekStart": "window.__seek = function(t){\n    window.__setAnimated(t);\n",
+  "scene": {
+    "duration": 1.43,
+    "part": "counter",
+    "animate": {
+      "from": [
+        {
+          "t": 0,
+          "value": 0,
+          "ease": "in"
+        },
+        {
+          "t": 0.715,
+          "value": 5000,
+          "ease": "out"
+        },
+        {
+          "t": 1.43,
+          "value": 100
+        }
+      ],
+      "step": [
+        {
+          "t": 0,
+          "value": 1
+        },
+        {
+          "t": 1.43,
+          "value": 3000,
+          "ease": "in-out"
+        }
+      ]
+    }
+  }
+}

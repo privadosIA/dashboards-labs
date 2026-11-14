@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+// The button groups are as tall as a thumb (the toggle's default is 40 px).
+.group {
+  --mat-button-toggle-height: 44px;
+
+  &--fill {
+    width: 100%;
+
+    .mat-button-toggle {
+      flex: 1;
+    }
+  }
+
+  &--wrap {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+// The phone's single line: the field's name, its current value and a chevron.
+.line {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-control);
+  background: none;
+  color: var(--lab-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-accent);
+    outline-offset: 2px;
+  }
+
+  &__label {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__value {
+    flex: 1;
+    min-width: 0;
+    text-align: right;
+    font-weight: var(--lab-fw-title);
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "id": "easy",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Music Prompt",
+      "placeholder": "Describe the music you want to create… (e.g., A soothing piano melody with gentle rain sounds)",
+      "props": {
+        "rows": 6,
+        "attributes": {
+          "data-testid": "prompt"
+        }
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Describe the music."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "promptCount"
+    },
+    {
+      "key": "instrumental",
+      "type": "hidden",
+      "defaultValue": false
+    },
+    {
+      "type": "slot",
+      "name": "instrumental"
+    },
+    {
+      "key": "gender",
+      "type": "select",
+      "label": "Vocal Gender",
+      "defaultValue": "random",
+      "options": [
+        {
+          "value": "random",
+          "label": "Random"
+        },
+        {
+          "value": "female",
+          "label": "Female"
+        },
+        {
+          "value": "male",
+          "label": "Male"
+        }
+      ],
+      "logic": {
+        "disabledWhen": {
+          "field": "instrumental",
+          "operator": "truthy"
+        }
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "gender"
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "examples"
+    }
+  ]
+}

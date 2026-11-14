@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "id": "learn-reference",
+  "layout": { "columns": 1 },
+  "fields": [
+    { "key": "strictness", "type": "select", "label": "Exigencia", "defaultValue": "normal", "options": [] }
+  ]
+}

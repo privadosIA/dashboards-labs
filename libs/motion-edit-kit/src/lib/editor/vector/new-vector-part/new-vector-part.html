@@ -1,0 +1,2 @@
+<button type="button" class="ctl open" data-testid="new-vector-open" [attr.title]="t.openHint" (click)="file.click()">{{ t.open }}</button>
+<input #file class="sr" type="file" accept=".svg,image/svg+xml" tabindex="-1" aria-hidden="true" data-testid="new-vector-file" (change)="pick($event)" />

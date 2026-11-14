@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "address",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "address",
+      "type": "text",
+      "label": "YouTube address",
+      "validation": {
+        "required": true,
+        "pattern": "^https://(www\\.|m\\.|music\\.)?(youtube\\.com|youtu\\.be)/\\S+$",
+        "messages": {
+          "required": "Paste the address of a YouTube video.",
+          "pattern": "It must be an https address of YouTube, like https://youtu.be/…"
+        }
+      }
+    }
+  ]
+}

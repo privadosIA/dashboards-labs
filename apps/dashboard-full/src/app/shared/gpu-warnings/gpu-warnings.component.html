@@ -1,0 +1,27 @@
+@if (gpu().ollama_mb) {
+  <div class="warn" data-testid="gpu-ollama-warning">
+    <mat-icon inline>warning</mat-icon>
+    <span class="warn__text">
+      {{ prefix() }}<ng-container i18n="@@gpu.ollama">Ollama holds {{ gpu().ollama_mb }} MB of VRAM with a loaded model (it drops it a few minutes after use) and can leave the render without memory.</ng-container>
+    </span>
+    <button mat-stroked-button type="button" class="warn__free" [disabled]="freeing()" (click)="free()" data-testid="gpu-free-ollama" i18n="@@gpu.free">Free Ollama's VRAM</button>
+  </div>
+}
+@if (freed(); as f) {
+  <p class="ok" data-testid="gpu-freed">
+    <mat-icon inline>check</mat-icon>
+    @if (f.length) {
+      <ng-container i18n="@@gpu.freed">Freed: {{ f.join(', ') }}.</ng-container>
+    } @else {
+      <ng-container i18n="@@gpu.nothingLoaded">Ollama had no model loaded.</ng-container>
+    }
+  </p>
+}
+@if (gpu().low_vram) {
+  <p class="warn" data-testid="gpu-low-vram">
+    <mat-icon inline>warning</mat-icon>
+    <span class="warn__text">
+      {{ prefix() }}<ng-container i18n="@@gpu.lowVram">Little free VRAM ({{ gpu().free_vram_mb }} MB): a render may run out of memory.</ng-container>
+    </span>
+  </p>
+}

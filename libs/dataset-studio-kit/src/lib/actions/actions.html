@@ -1,0 +1,35 @@
+<section class="actions" data-testid="dataset-actions">
+  <h3>{{ t.title }}</h3>
+
+  @if (tuple()) {
+    <dynamic-form class="project-id" [schema]="schema" [(model)]="form" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+    @if (badName()) {
+      <p class="problem" role="alert" data-testid="bad-name">{{ t.failures.invalidName }}</p>
+    }
+    @if (kind().images) {
+      <p class="hint" data-testid="images-mode">{{ t.imagesMode }}</p>
+    }
+  }
+
+  <div class="buttons">
+    <button type="button" data-testid="download" [disabled]="!raw().trim()" (click)="download()">{{ t.download }}</button>
+    <button type="button" class="primary" data-testid="create" [disabled]="!canCreate()" (click)="create()">{{ creating() ? t.creating : t.create }}</button>
+    <button type="button" data-testid="save-preset" [disabled]="!canSavePreset() || !raw().trim()" (click)="save()">{{ t.savePreset }}</button>
+  </div>
+
+  @if (blocked()) {
+    <p class="hint" data-testid="blocked">{{ blocked() }}</p>
+  }
+  @if (failure()) {
+    <p class="problem" role="alert" data-testid="create-failed">{{ failure() }}</p>
+  }
+  @if (done()) {
+    <p class="ok" role="status" data-testid="created">{{ done() }}</p>
+  }
+  @if (presetNote()) {
+    <p class="ok" role="status" data-testid="preset-note">{{ presetNote() }}</p>
+  }
+  @if (presetProblem()) {
+    <p class="problem" role="alert" data-testid="preset-problem">{{ presetProblem() }}</p>
+  }
+</section>

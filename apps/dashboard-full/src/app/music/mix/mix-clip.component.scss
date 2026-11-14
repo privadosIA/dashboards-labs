@@ -1,0 +1,87 @@
+:host {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  display: block;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  overflow: visible;
+  cursor: grab;
+  touch-action: none;
+}
+
+:host(:focus-visible) {
+  outline: 2px solid var(--lab-accent);
+  outline-offset: 1px;
+}
+
+:host(.clip--selected) {
+  border-color: var(--lab-accent);
+  box-shadow: 0 0 0 1px var(--lab-accent);
+}
+
+:host(.clip--muted) {
+  opacity: 0.5;
+}
+
+:host(.clip--unreadable) {
+  border-style: dashed;
+  color: var(--lab-ink-dim);
+}
+
+.clip__body {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.clip__label,
+.clip__note {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  padding: 2px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--lab-fs-meta);
+}
+
+.clip__note {
+  display: block;
+  color: var(--lab-ink-dim);
+}
+
+.clip__handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: var(--lab-accent);
+  opacity: 0;
+  cursor: ew-resize;
+  border-radius: 2px;
+
+  &--start {
+    left: -4px;
+  }
+
+  &--end {
+    right: -4px;
+  }
+}
+
+:host(:hover) .clip__handle,
+:host(:focus-within) .clip__handle,
+:host(.clip--selected) .clip__handle {
+  opacity: 0.85;
+}
+
+app-song-wave {
+  position: absolute;
+  inset: 0;
+  height: auto;
+}

@@ -1,0 +1,13 @@
+<section class="box" [class.panel]="look() === 'panel'" [class.folded]="!open()" [attr.data-testid]="'collapsible-' + (key() || title())">
+  <h3 class="head">
+    <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="toggle()">
+      <span class="chevron" aria-hidden="true">{{ open() ? '▾' : '▸' }}</span>
+      <span class="name">{{ title() }}</span>
+    </button>
+  </h3>
+  @if (open()) {
+    <div class="body">
+      <ng-content />
+    </div>
+  }
+</section>

@@ -1,0 +1,129 @@
+{
+  "version": "1.0",
+  "id": "capture",
+  "layout": {
+    "columns": 12
+  },
+  "fields": [
+    {
+      "key": "method",
+      "type": "select",
+      "label": "How to recognise the song",
+      "defaultValue": "whisper",
+      "options": [],
+      "props": {
+        "attributes": {
+          "data-testid": "capture-method"
+        }
+      },
+      "layout": {
+        "col": 6
+      }
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": "Language of the lyrics",
+      "defaultValue": "",
+      "options": [
+        {
+          "value": "",
+          "label": "— detect it —"
+        },
+        {
+          "value": "es",
+          "label": "Español"
+        },
+        {
+          "value": "en",
+          "label": "English"
+        },
+        {
+          "value": "fr",
+          "label": "Français"
+        },
+        {
+          "value": "de",
+          "label": "Deutsch"
+        },
+        {
+          "value": "it",
+          "label": "Italiano"
+        },
+        {
+          "value": "pt",
+          "label": "Português"
+        },
+        {
+          "value": "ja",
+          "label": "日本語"
+        },
+        {
+          "value": "ko",
+          "label": "한국어"
+        },
+        {
+          "value": "zh",
+          "label": "中文"
+        },
+        {
+          "value": "ru",
+          "label": "Русский"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "capture-language"
+        }
+      },
+      "layout": {
+        "col": 6
+      }
+    },
+    {
+      "key": "hint",
+      "type": "textarea",
+      "label": "What you know about the song (optional)",
+      "placeholder": "The genre, the instruments, the mood… it helps to propose the style.",
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "capture-hint"
+        }
+      },
+      "validation": {
+        "maxLength": 500
+      },
+      "layout": {
+        "col": 12
+      }
+    },
+    {
+      "key": "url",
+      "type": "text",
+      "label": "YouTube address",
+      "placeholder": "https://www.youtube.com/watch?v=…",
+      "props": {
+        "attributes": {
+          "data-testid": "capture-url"
+        }
+      },
+      "validation": {
+        "pattern": "^\\s*https://((www|m|music)\\.)?(youtube\\.com/(watch\\?v=|shorts/|embed/|live/)|youtu\\.be/)[^\\s]+\\s*$",
+        "messages": {
+          "pattern": "Paste the address of a YouTube video."
+        }
+      },
+      "layout": {
+        "col": 12
+      }
+    },
+    {
+      "type": "slot",
+      "name": "actions",
+      "layout": {
+        "col": 12
+      }
+    }
+  ]
+}

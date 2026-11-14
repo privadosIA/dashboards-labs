@@ -1,0 +1,183 @@
+@if (scene(); as s) {
+  <div class="form">
+    @for (segment of segments(); track segment.id) {
+      @if (segment.kind === 'form') {
+        <dynamic-form [schema]="segment.schema" [model]="formInput()" [context]="context()" [showDefaultActions]="false" [validateOnInit]="true" (valueChange)="onFormChange($event)" (statusChange)="onFormStatus()" />
+      } @else if (slotVisible(segment)) {
+        <ng-container *ngTemplateOutlet="slots.templates()[segment.name] ?? null; context: { $implicit: segment }" />
+      }
+    }
+
+    <ng-template moSlot="serverError">
+      @if (serverErrorHere(); as msg) {
+        <p class="server-error" role="alert">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ msg }}</span>
+        </p>
+      }
+    </ng-template>
+
+    <ng-template moSlot="preview">
+      <app-scene-preview [sceneId]="s.id" />
+    </ng-template>
+
+    <ng-template moSlot="picture">
+      <app-scene-picture-mode [mode]="pictureMode()" [motionAllowed]="motionAvailable() || motionScene()" [partAllowed]="partAllowed()" (modeChange)="setPictureMode($event)" />
+    </ng-template>
+
+    <ng-template moSlot="motionPart">
+      <app-scene-motion-part [errors]="errors()" />
+    </ng-template>
+
+    <ng-template moSlot="pictureSource">
+      <app-scene-picture-source />
+    </ng-template>
+
+    <ng-template moSlot="pictures">
+      <app-scene-pictures [sceneId]="s.id" />
+    </ng-template>
+
+    <ng-template moSlot="assistPrompt">
+    <app-assist-actions
+      field="prompt"
+      [sceneId]="s.id"
+      [text]="s.prompt"
+      (accepted)="patch({ prompt: $event })"
+    />
+    </ng-template>
+
+    <ng-template moSlot="describe">
+    <app-describe-reference [sceneId]="s.id" [animates]="animates()" (accepted)="applyDescription($event)" />
+    </ng-template>
+
+    <ng-template moSlot="init">
+      <app-scene-init [error]="errors().init" />
+    </ng-template>
+
+    <ng-template moSlot="quality" let-seg>
+      <app-scene-quality [schema]="seg.schema" [model]="formInput()" [context]="context()" [error]="errors().quality" (formChange)="onFormChange($event)" (formStatus)="onFormStatus()" />
+    </ng-template>
+
+    <ng-template moSlot="narrationHead">
+      <section class="narration">
+        <h3 i18n="@@scene.narration">Narration</h3>
+        <mat-button-toggle-group
+          [value]="narrationMode()"
+          (change)="setNarration($event.value)"
+          i18n-aria-label="@@scene.narrationLabel"
+          aria-label="Narration type"
+        >
+          <mat-button-toggle value="tts" i18n="@@scene.narrationTts">Narrated</mat-button-toggle>
+          <mat-button-toggle value="silence" i18n="@@scene.narrationSilence"
+            >Silent</mat-button-toggle
+          >
+        </mat-button-toggle-group>
+      </section>
+    </ng-template>
+
+    <ng-template moSlot="listen">
+      <app-scene-listen [sceneId]="s.id" [text]="s.tts_text" [voice]="effectiveVoice()" [speaker]="effectiveSpeaker()" [speed]="s.speed || 1" />
+    </ng-template>
+
+    <ng-template moSlot="cameraHead">
+      <h3 i18n="@@scene.motion">Camera motion</h3>
+    </ng-template>
+
+    <ng-template moSlot="cameraIntensity">
+      <mo-slider-field
+        label="intensity"
+        i18n-label="@@scene.intensity"
+        [value]="s.motion?.intensity ?? 0.5"
+        (valueChange)="setMotionIntensity($event)"
+      />
+    </ng-template>
+
+    <ng-template moSlot="animateHead">
+      <section data-testid="scene-animate">
+        <h3 i18n="@@scene.animate">Animation</h3>
+      </section>
+    </ng-template>
+
+    <ng-template moSlot="assistMotion">
+          <app-assist-actions
+            field="motion_prompt"
+            [sceneId]="s.id"
+            [text]="s.prompt"
+            (accepted)="setMotionPrompt($event)"
+          />
+    </ng-template>
+
+    <ng-template moSlot="animTrim">
+          <h4 class="trim-title" i18n="@@scene.animTrim">Part of the animation that is used (seconds, only the first half: the forward part)</h4>
+          <app-clip-trim
+            testId="anim"
+            [src]="animationUrl(s.id)"
+            [half]="true"
+            [start]="s.clip_start"
+            [end]="s.clip_end"
+            [speed]="s.clip_speed"
+            [error]="errors().clipTrim"
+            [speedError]="errors().clipSpeed"
+            (trimmed)="patch($event)"
+          />
+    </ng-template>
+
+    <ng-template moSlot="animateMotionNote">
+            <p class="note" data-testid="animate-motion-note" i18n="@@scene.animateMotionNote">
+              Camera motion is ignored in an animated scene: the video already moves.
+            </p>
+    </ng-template>
+
+    <ng-template moSlot="animateError">
+      @if (errors().animate; as err) {
+        <p class="error">{{ err }}</p>
+      }
+    </ng-template>
+
+    <ng-template moSlot="overlayHead">
+      <section data-testid="scene-overlay">
+        <h3 i18n="@@scene.overlay">Overlay on the scene</h3>
+      </section>
+    </ng-template>
+
+    <ng-template moSlot="overlayPage">
+          <app-motion-page [sceneId]="s.id" [overlay]="true" [described]="(s.overlay?.text ?? '').trim() !== ''">
+            <button slot="actions" mat-button type="button" data-testid="overlay-remove" (click)="setOverlay(false)" i18n="@@scene.overlayRemove">Remove the overlay</button>
+          </app-motion-page>
+    </ng-template>
+
+    <ng-template moSlot="overlayAdd">
+        @if (motionAvailable()) {
+          <button mat-stroked-button type="button" data-testid="overlay-add" (click)="setOverlay(true)">
+            <mat-icon>title</mat-icon>
+            <ng-container i18n="@@scene.overlayAdd">Add an overlay</ng-container>
+          </button>
+        } @else {
+          <app-model-notice task="motion_graphics" />
+        }
+    </ng-template>
+
+    <ng-template moSlot="transitionHead">
+      <section data-testid="scene-transition">
+        <h3 i18n="@@scene.transition">Fade in</h3>
+      </section>
+    </ng-template>
+
+    <ng-template moSlot="lookHead">
+      <section>
+        <h3 i18n="@@scene.look">Finish</h3>
+      </section>
+    </ng-template>
+
+    <ng-template moSlot="grain">
+      <mo-slider-field label="grain" i18n-label="@@scene.grain" [value]="s.look?.grain ?? 0" (valueChange)="setGrain($event)" />
+    </ng-template>
+
+    <ng-template moSlot="animateImagesNote">
+      <p class="note" data-testid="animate-images-note" i18n="@@scene.animateImagesNote">
+        This scene has animation enabled, but it is not used in images mode.
+      </p>
+    </ng-template>
+
+  </div>
+}

@@ -1,0 +1,103 @@
+@if (diffrhythm2(); as h) {
+  <mo-panel heading="DiffRhythm2 music generator" i18n-heading="@@diffrhythm2.title">
+    <p class="note" i18n="@@diffrhythm2.intro">
+      DiffRhythm2 makes full songs in about 30 seconds, from English lyrics only and with no instrumentals. It runs in a container on this machine when there is one; here you can name the one on another computer. While there is none, the option does not appear in music projects.
+    </p>
+    @if (engines.diffrhythm2(); as e) {
+      @if (e.available) {
+        <p class="current" data-testid="diffrhythm2-current">
+          <mat-icon inline>check_circle</mat-icon>
+          @if (e.mode === 'external') {
+            <span i18n="@@diffrhythm2.modeExternal">External service</span>
+          } @else {
+            <span i18n="@@diffrhythm2.modeLocal">Local container</span>
+          }
+          @if (e.version) {
+            <span class="mo-data">v{{ e.version }}</span>
+          }
+        </p>
+      } @else if (e.detail) {
+        <p class="note" data-testid="diffrhythm2-state"><span class="mo-data">{{ e.detail }}</span></p>
+      }
+    }
+    <mat-form-field class="wide">
+      <mat-label i18n="@@diffrhythm2.host">Address of another computer</mat-label>
+      <input
+        matInput
+        data-testid="diffrhythm2-host"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="192.0.2.50:8788"
+        [value]="host()"
+        (input)="host.set($any($event.target).value)"
+      />
+      <mat-hint i18n="@@diffrhythm2.hint">Empty: the local container, if there is one.</mat-hint>
+    </mat-form-field>
+    <mat-form-field class="wide">
+      <mat-label i18n="@@diffrhythm2.token">Key (optional)</mat-label>
+      <input
+        matInput
+        type="password"
+        data-testid="diffrhythm2-token"
+        autocomplete="off"
+        [value]="token()"
+        (input)="token.set($any($event.target).value)"
+        [placeholder]="h.token_set ? '••••••••' : ''"
+      />
+      @if (h.token_set) {
+        <mat-hint i18n="@@diffrhythm2.tokenSet">A key is saved; type another to change it.</mat-hint>
+      }
+    </mat-form-field>
+    @if (needsConsent()) {
+      <p class="warning" role="alert" data-testid="diffrhythm2-remote-warning">
+        <mat-icon inline>warning</mat-icon>
+        <span i18n="@@diffrhythm2.remoteWarning">That address is not this computer: the lyrics and the style of your songs will be sent there.</span>
+      </p>
+      <mat-checkbox data-testid="diffrhythm2-accept" [checked]="accept()" (change)="accept.set($event.checked)" i18n="@@diffrhythm2.accept">
+        I accept sending them to that computer
+      </mat-checkbox>
+    }
+    @if (test(); as t) {
+      @if (t.ok) {
+        <p class="current" data-testid="diffrhythm2-test-ok">
+          <mat-icon inline>check_circle</mat-icon>
+          <span i18n="@@diffrhythm2.testOk">It answers.</span>
+          @if (t.gpu) {
+            <span class="mo-data">{{ t.gpu }} · {{ t.free_mb }} MB</span>
+          }
+        </p>
+      } @else {
+        <p class="error" role="alert" data-testid="diffrhythm2-test-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ t.error }}</span>
+        </p>
+      }
+    }
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="diffrhythm2-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+    <div class="actions">
+      <button mat-stroked-button type="button" data-testid="diffrhythm2-test" [disabled]="testing() || !host().trim()" (click)="runTest()" i18n="@@diffrhythm2.testBtn">
+        Test
+      </button>
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="diffrhythm2-save"
+        [disabled]="saving() || (host().trim() === h.saved && !token()) || (needsConsent() && !accept())"
+        (click)="save(host().trim())"
+        i18n="@@diffrhythm2.save"
+      >
+        Save
+      </button>
+      @if (h.saved) {
+        <button mat-button type="button" data-testid="diffrhythm2-reset" [disabled]="saving()" (click)="host.set(''); save('')" i18n="@@diffrhythm2.reset">
+          Remove and use the local one
+        </button>
+      }
+    </div>
+  </mo-panel>
+}

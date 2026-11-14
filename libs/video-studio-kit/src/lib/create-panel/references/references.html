@@ -1,0 +1,60 @@
+<section data-testid="references">
+  <h3>{{ t.inputs.references }} <app-info-tip [text]="t.inputs.referencesHint" /></h3>
+  <div class="grid">
+    @for (e of entries(); track e.file.blob) {
+      <div class="tile" [attr.data-testid]="'reference-' + e.kind">
+        <div class="label">
+          <span class="title">{{ e.kind === 'images' ? t.inputs.picture.replace('{n}', '' + (e.index + 1)) : e.kind === 'videos' ? t.inputs.video : t.inputs.audio }}</span>
+          @if (e.kind === 'images') {
+            <button type="button" class="move" [title]="t.inputs.moveUp" [disabled]="e.index === 0" (click)="move(e.kind, e.index, -1)">←</button>
+            <button type="button" class="move" [title]="t.inputs.moveDown" [disabled]="e.index === files(e.kind).length - 1" (click)="move(e.kind, e.index, 1)">→</button>
+          }
+        </div>
+        <div class="preview" [title]="e.file.name">
+          @if (e.kind === 'images') {
+            <img [src]="url(e.file)" [alt]="e.file.name" />
+          } @else if (e.kind === 'videos') {
+            <video [src]="url(e.file)" muted preload="metadata" controls></video>
+          } @else {
+            <audio [src]="url(e.file)" preload="metadata" controls></audio>
+          }
+          @if (e.file.seconds !== undefined) {
+            <span class="seconds">{{ e.file.seconds.toFixed(1) }} s</span>
+          }
+        </div>
+        <div class="actions" [class.single]="e.kind !== 'images'">
+          @if (e.kind === 'images') {
+            <button type="button" class="btn retouch" [title]="t.retouch.button" (click)="retouch(e.index)">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16l-1 4zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span class="sr">{{ t.retouch.button }}</span>
+            </button>
+          }
+          <button type="button" class="btn remove" [title]="t.inputs.remove" (click)="remove(e.kind, e.index)">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2m-7 0 1 12h8l1-12M10 11v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <span class="sr">{{ t.inputs.remove }}</span>
+          </button>
+        </div>
+      </div>
+    }
+    <label class="drop" [class.disabled]="allFull()" [class.dragging]="dragging()" [title]="allFull() ? t.inputs.allFull : t.inputs.add" (dragover)="onDragOver($event)" (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
+      <input type="file" multiple [accept]="accept()" [disabled]="allFull()" (change)="add($event)" />
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="sr">{{ t.inputs.add }}</span>
+    </label>
+  </div>
+  <div class="counts">
+    @for (k of kinds(); track k.kind) {
+      <span [attr.data-testid]="'references-' + k.kind" [class.full]="full(k.kind, k.limit)">
+        {{ k.title }} <span data-testid="count">{{ count(k.kind, k.limit) }}</span>@if (limitNote(k.limit)) { · {{ limitNote(k.limit) }} }
+      </span>
+    }
+  </div>
+  @if (allFull()) {
+    <p class="note" data-testid="max-note">{{ t.inputs.allFull }}</p>
+  }
+  @if (error()) {
+    <p class="error" role="alert" data-testid="references-error">{{ error() }}</p>
+  }
+</section>

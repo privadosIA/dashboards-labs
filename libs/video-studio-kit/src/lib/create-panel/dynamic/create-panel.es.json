@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "id": "create-panel",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "soundable",
+      "type": "hidden",
+      "defaultValue": true
+    },
+    {
+      "type": "slot",
+      "name": "frames"
+    },
+    {
+      "key": "startImage",
+      "type": "hidden"
+    },
+    {
+      "key": "endImage",
+      "type": "hidden"
+    },
+    {
+      "key": "references",
+      "type": "hidden"
+    },
+    {
+      "key": "reuse",
+      "type": "hidden"
+    },
+    {
+      "key": "firstImage",
+      "type": "hidden"
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Prompt",
+      "placeholder": "Describe el vídeo que quieres, p. ej. «un zorro corre por la nieve al amanecer».",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "messages": {
+          "required": "Escribe un prompt o elige una imagen inicial."
+        }
+      },
+      "logic": {
+        "requiredWhen": {
+          "field": "firstImage",
+          "operator": "empty"
+        }
+      }
+    },
+    {
+      "key": "model",
+      "type": "hidden"
+    },
+    {
+      "type": "slot",
+      "name": "modelRow"
+    },
+    {
+      "key": "duration",
+      "type": "hidden",
+      "defaultValue": 5
+    },
+    {
+      "type": "slot",
+      "name": "durationRow"
+    },
+    {
+      "key": "aspectRatio",
+      "type": "hidden",
+      "defaultValue": "16:9"
+    },
+    {
+      "type": "slot",
+      "name": "aspectRow"
+    },
+    {
+      "key": "quality",
+      "type": "hidden",
+      "defaultValue": "720p"
+    },
+    {
+      "type": "slot",
+      "name": "qualityRow"
+    },
+    {
+      "key": "audio",
+      "type": "checkbox",
+      "label": "Audio",
+      "defaultValue": true,
+      "logic": {
+        "disabledWhen": {
+          "field": "soundable",
+          "operator": "falsy"
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "audioNote"
+    },
+    {
+      "key": "sound",
+      "type": "textarea",
+      "label": "Sonido (opcional)",
+      "placeholder": "Qué se debe oír, p. ej. «lluvia y un piano suave».",
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "sound"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "soundable",
+              "operator": "truthy"
+            },
+            {
+              "field": "audio",
+              "operator": "truthy"
+            }
+          ]
+        },
+        "resetOnHide": false
+      }
+    },
+    {
+      "type": "slot",
+      "name": "soundCount"
+    }
+  ]
+}

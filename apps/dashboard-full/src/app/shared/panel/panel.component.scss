@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.panel {
+  // Fills its host, so panels of a stretched grid row have the same height (it is the content height elsewhere).
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--lab-space-5);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-grad);
+  // Raised: a resting elevation from the tokens (lighter in the light theme), under the fine border.
+  box-shadow: var(--lab-elev-1);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--lab-space-2) var(--lab-space-4);
+    margin-bottom: var(--lab-space-4);
+  }
+
+  &__text {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--lab-font-display);
+    font-size: var(--lab-fs-section);
+    font-weight: var(--lab-fw-title);
+    letter-spacing: var(--lab-tracking-tight);
+  }
+
+  &__desc {
+    margin: var(--lab-space-1) 0 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+    max-width: 75ch;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__body {
+    min-width: 0;
+  }
+}

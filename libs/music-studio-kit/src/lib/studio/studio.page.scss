@@ -1,0 +1,58 @@
+.studio {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: var(--lab-space-4);
+  align-items: start;
+}
+
+.songs {
+  overflow-y: auto;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--studio-offset, 6.5rem));
+  min-height: 30rem;
+}
+
+.songs {
+  height: calc(100vh - var(--studio-offset, 6.5rem));
+  min-height: 30rem;
+}
+
+.composer,
+.songs {
+  box-sizing: border-box;
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  padding: var(--lab-space-4);
+  min-height: 24rem;
+}
+
+@media (max-width: 900px) {
+  .studio {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .composer,
+  .songs {
+    height: auto;
+    min-height: 0;
+  }
+
+  .songs {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  .composer,
+  .songs {
+    padding: var(--lab-space-3);
+    min-height: 0;
+  }
+}

@@ -1,0 +1,14 @@
+<div class="stage" data-testid="stage">
+  <h4>{{ t.title }}</h4>
+  <p class="hint">{{ t.hint }}</p>
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (valueChange)="changed($event)" />
+  @if (!characters().length) {
+    <p class="hint" data-testid="no-characters">{{ t.empty }}</p>
+  }
+  <div class="actions">
+    @for (c of characters(); track $index; let i = $index) {
+      <button type="button" data-testid="remove-character" [disabled]="locked()" (click)="remove(i)">{{ t.remove }} {{ i + 1 }}</button>
+    }
+    <button type="button" class="add" data-testid="add-character" [disabled]="locked() || !catalog().characters.length" (click)="add()">{{ t.add }}</button>
+  </div>
+</div>

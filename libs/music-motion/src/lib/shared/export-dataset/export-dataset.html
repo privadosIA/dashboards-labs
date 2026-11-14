@@ -1,0 +1,7 @@
+<button type="button" class="export" data-testid="export-dataset" [disabled]="working()" (click)="export()">{{ working() ? workingText : t.exportDataset }}</button>
+@if (saved()) {
+  <p class="saved" role="status" data-testid="export-saved">{{ saved() }}</p>
+}
+@if (refused()) {
+  <p class="problem" role="alert" data-testid="export-refused">{{ refused() }}</p>
+}

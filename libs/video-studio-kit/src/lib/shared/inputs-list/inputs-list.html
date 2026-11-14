@@ -1,0 +1,13 @@
+@if (inputs().length) {
+  <ul class="inputs" [attr.aria-label]="t.inputs.historyTitle" data-testid="inputs-list">
+    @for (i of inputs(); track $index) {
+      <li [attr.data-kind]="i.kind" [title]="t.inputs.kinds[i.kind] + ' · ' + i.name">
+        @if (isImage(i) && src(i); as url) {
+          <img [src]="url" [alt]="t.inputs.kinds[i.kind] + ' · ' + i.name" />
+        } @else {
+          <span class="chip">{{ t.inputs.kinds[i.kind] }} · {{ i.name }}</span>
+        }
+      </li>
+    }
+  </ul>
+}

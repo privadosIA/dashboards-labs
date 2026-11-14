@@ -1,0 +1,30 @@
+<section class="references">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p>{{ t.intro }}</p>
+  </header>
+
+  <app-add-reference />
+
+  @if (refused()) {
+    <p class="refused" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  @if (references() === null) {
+    <p class="notice" role="status">{{ common.loading }}</p>
+  } @else if (references()!.length === 0) {
+    <div class="notice" data-testid="empty">
+      <p>{{ t.empty }}</p>
+    </div>
+  } @else {
+    <lab-paged-list listId="motion-references" [data]="references()!" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (r of page; track r.id) {
+            <li><app-reference-card [reference]="r" [taught]="taught()[r.id] ?? null" (open)="open($event)" (remove)="remove($event)" /></li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+</section>

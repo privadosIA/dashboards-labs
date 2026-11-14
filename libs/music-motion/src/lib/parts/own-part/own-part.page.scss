@@ -1,0 +1,83 @@
+.own-part {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lab-space-4);
+}
+
+.back {
+  color: var(--lab-accent);
+}
+
+h1 {
+  margin: 0 0 var(--lab-space-1);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+header p {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.meta {
+  font-size: var(--lab-fs-meta);
+}
+
+.panel,
+.problem {
+  margin: 0;
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+
+  ul,
+  p {
+    margin: 0;
+  }
+}
+
+.panel {
+  display: grid;
+  gap: var(--lab-space-2);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  border-color: var(--lab-line);
+
+  a {
+    color: var(--lab-accent);
+  }
+}
+
+.ok {
+  margin: 0;
+  color: var(--lab-success);
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+// The link looks like the other links of the page: the host styles links.
+.edit-link {
+  white-space: nowrap;
+}

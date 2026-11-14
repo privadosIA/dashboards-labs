@@ -1,0 +1,12 @@
+<section class="panel" [attr.aria-label]="heading()">
+  <header class="panel__head">
+    <div class="panel__text">
+      <h2 class="panel__title" data-testid="panel-title">{{ heading() }}</h2>
+      @if (description(); as d) {
+        <p class="panel__desc" data-testid="panel-desc">{{ d }}</p>
+      }
+    </div>
+    <div class="panel__actions"><ng-content select="[moPanelActions]" /></div>
+  </header>
+  <div class="panel__body"><ng-content /></div>
+</section>

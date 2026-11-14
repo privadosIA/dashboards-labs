@@ -1,0 +1,26 @@
+<section class="pictures" data-testid="scene-pictures">
+  @if (pictures().length > 0) {
+    <ul class="pictures__list">
+      @for (img of pictures(); track img.file; let i = $index) {
+        <li>
+          <button
+            type="button"
+            class="pictures__thumb"
+            [attr.data-testid]="'scene-picture-' + img.variant"
+            (click)="open(i)"
+            i18n-aria-label="@@scene.pictureOpen"
+            aria-label="View the picture larger"
+          >
+            <img [src]="url(img)" loading="lazy" [alt]="img.prompt" />
+            <span class="mo-data pictures__variant">v{{ img.variant + 1 }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="pictures__none" data-testid="pictures-none">
+      <ng-container i18n="@@scene.picturesNone">There are no pictures of this scene yet: they are made when a run is launched.</ng-container>
+      <button mat-button type="button" (click)="retry()" i18n="@@scene.previewRetry">Check again</button>
+    </p>
+  }
+</section>

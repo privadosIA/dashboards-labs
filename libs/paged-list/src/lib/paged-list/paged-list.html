@@ -1,0 +1,13 @@
+<div class="items" data-testid="paged-list-items">
+  <ng-container *ngTemplateOutlet="itemsTpl(); context: { $implicit: page() }" />
+</div>
+@if (needed()) {
+  <mat-paginator
+    [length]="data().length"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions()"
+    (page)="onPage($event)"
+    [showFirstLastButtons]="!phone()"
+  />
+}

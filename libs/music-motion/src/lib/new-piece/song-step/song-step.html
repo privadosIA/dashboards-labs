@@ -1,0 +1,33 @@
+<section class="song-step" data-testid="song-step">
+  <p class="hint">{{ t.intro }}</p>
+
+  @if (chosen(); as s) {
+    <p class="chosen" data-testid="song-chosen"><span>{{ t.chosen }}:</span> <strong>{{ s.title }}</strong> · {{ clock(s.seconds) }}</p>
+  } @else {
+    <p class="hint" data-testid="song-none">{{ t.none }}</p>
+  }
+
+  @if (error()) {
+    <div class="notice" role="alert" data-testid="song-load-failed">
+      <p>{{ t.loadFailed }}</p>
+      <p class="reason">{{ error() }}</p>
+    </div>
+  } @else if (songs() === null) {
+    <p class="notice" role="status">…</p>
+  } @else if (groups().length === 0) {
+    <div class="notice" data-testid="song-empty">
+      <p>{{ t.empty }}</p>
+      <p class="reason">{{ t.emptyHint }}</p>
+    </div>
+  } @else {
+    <lab-paged-list listId="motion-new-songs" [data]="groups()" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (g of page; track g.id) {
+            <li><app-song-card [group]="g" (animate)="picked.emit($event)" /></li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+</section>

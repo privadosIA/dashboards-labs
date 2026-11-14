@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "id": "motion-add",
+  "layout": { "columns": 1 },
+  "fields": [
+    { "key": "title", "type": "text", "label": "Title (optional)", "placeholder": "Slow walk" },
+    { "key": "tags", "type": "text", "label": "Tags (optional, separated by commas)", "placeholder": "walk, slow" },
+    { "key": "source", "type": "text", "label": "Or the address of a YouTube video", "placeholder": "https://www.youtube.com/watch?v=…" }
+  ]
+}

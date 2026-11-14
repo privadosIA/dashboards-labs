@@ -1,0 +1,90 @@
+<section class="song" data-testid="song-card">
+  @if (sent()) {
+    <p class="sent" data-testid="sent">{{ sent() }}</p>
+  }
+
+  @switch (step()?.status) {
+    @case ('pending') {
+      @if (stopped()) {
+        <div class="engine" data-testid="engine-down">
+          <p class="problem">{{ t.engineDown(engines()!.generator, engines()!.reason ?? '') }}{{ engines()!.detail ? ' ' + engines()!.detail : '' }}</p>
+          @if (canStart(engines()!)) {
+            <button type="button" data-testid="start-engine" [disabled]="starting()" (click)="start(engines()!.generator)">{{ t.startEngine(engines()!.generator) }}</button>
+          }
+          @for (g of engines()!.others; track g) {
+            <button type="button" data-testid="use-other" (click)="useOther(g)">{{ t.useOther(g) }}</button>
+          }
+          <button type="button" data-testid="check-again" (click)="check()">{{ retryLabel }}</button>
+          @if (starting()) {
+            <p class="hint" role="status">{{ t.starting }}</p>
+          }
+          @if (engineError()) {
+            <p class="problem" role="alert" data-testid="engine-error">{{ engineError() }}</p>
+          }
+        </div>
+      } @else {
+        <p class="hint" role="status" data-testid="checking">{{ t.checking }}</p>
+      }
+    }
+    @case ('running') {
+      <p class="hint" role="status" data-testid="progress">{{ phaseText() }}</p>
+    }
+    @case ('failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failed(failedReason()) }}</p>
+      <div class="actions">
+        <button type="button" data-testid="retry" (click)="check()">{{ retryLabel }}</button>
+        <button type="button" data-testid="edit-texts" (click)="openEdit()">{{ t.editTexts }}</button>
+      </div>
+    }
+    @case ('waiting') {
+      <div class="review" data-testid="review">
+        <p>
+          <strong>{{ result()?.title }}</strong>
+          · {{ t.length(result()?.seconds ?? 0) }}
+        </p>
+        @if (audio()) {
+          <audio controls [src]="audio()" data-testid="player" [attr.aria-label]="t.listen"></audio>
+        }
+        <div class="actions">
+          <button type="button" data-testid="regenerate" (click)="make()">{{ t.regenerate }}</button>
+          <button type="button" data-testid="edit-texts" (click)="openEdit()">{{ t.editTexts }}</button>
+          <button type="button" data-testid="pick-existing" (click)="openPick()">{{ t.pickExisting }}</button>
+          <button type="button" class="primary" data-testid="continue" [disabled]="waiting() !== null" (click)="continue()">{{ t.continue }}</button>
+        </div>
+        @if (waiting() !== null) {
+          <p class="hint" role="status" data-testid="waiting-library">{{ t.waitingLibrary(waiting()!) }}</p>
+        }
+        @if (lag()) {
+          <p class="problem" role="alert" data-testid="lag">{{ t.lag }} <button type="button" data-testid="lag-retry" (click)="continue()">{{ retryLabel }}</button></p>
+        }
+      </div>
+    }
+  }
+
+  @if (editing()) {
+    <div class="edit" data-testid="edit-form">
+      <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+      <div class="actions">
+        <button type="button" class="primary" data-testid="apply" [disabled]="!valid()" (click)="applyAndRegenerate()">{{ t.applyAndRegenerate }}</button>
+        <button type="button" data-testid="cancel-edit" (click)="editing.set(false)">{{ t.cancelEdit }}</button>
+      </div>
+    </div>
+  }
+
+  @if (picking()) {
+    <div class="pick" data-testid="pick-list">
+      <h4>{{ t.pickTitle }}</h4>
+      @if (library().length === 0) {
+        <p class="hint" data-testid="no-library-songs">{{ t.noLibrarySongs }}</p>
+      }
+      <ul>
+        @for (s of library(); track s.key) {
+          <li>
+            <span>{{ s.title }} · {{ t.length(s.seconds) }}</span>
+            <button type="button" [attr.data-testid]="'pick-' + s.key" (click)="pick(s)">{{ t.pick }}</button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

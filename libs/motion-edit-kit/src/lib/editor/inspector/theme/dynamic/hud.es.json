@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "id": "motion-edit-theme-hud",
+  "layout": {
+    "columns": 2
+  },
+  "fields": [
+    {
+      "key": "tl",
+      "type": "text",
+      "label": "Arriba izquierda",
+      "validation": {
+        "maxLength": 40,
+        "messages": {
+          "maxLength": "Como mucho 40 caracteres."
+        }
+      }
+    },
+    {
+      "key": "tr",
+      "type": "text",
+      "label": "Arriba derecha",
+      "validation": {
+        "maxLength": 40,
+        "messages": {
+          "maxLength": "Como mucho 40 caracteres."
+        }
+      }
+    },
+    {
+      "key": "bl",
+      "type": "text",
+      "label": "Abajo izquierda",
+      "validation": {
+        "maxLength": 40,
+        "messages": {
+          "maxLength": "Como mucho 40 caracteres."
+        }
+      }
+    },
+    {
+      "key": "br",
+      "type": "text",
+      "label": "Abajo derecha",
+      "validation": {
+        "maxLength": 40,
+        "messages": {
+          "maxLength": "Como mucho 40 caracteres."
+        }
+      }
+    }
+  ]
+}

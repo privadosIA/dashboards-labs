@@ -1,0 +1,59 @@
+@if (browser(); as b) {
+  <mo-panel heading="Browser" i18n-heading="@@browser.title">
+    <p class="note" i18n="@@browser.intro">
+      Motion graphics and overlays are drawn with Chrome or Chromium. It is found by itself; here you can choose another.
+    </p>
+    @if (b.found) {
+      <p class="current" data-testid="browser-current">
+        <mat-icon inline>check_circle</mat-icon>
+        <span i18n="@@browser.inUse">In use:</span>
+        <span class="mo-data">{{ b.path }}</span>
+        @if (b.version) {
+          <span class="mo-data">{{ b.version }}</span>
+        }
+      </p>
+    } @else {
+      <p class="error" role="alert" data-testid="browser-missing">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ b.error }}</span>
+      </p>
+    }
+    <mat-form-field class="wide">
+      <mat-label i18n="@@browser.path">Browser path</mat-label>
+      <input
+        matInput
+        data-testid="browser-input"
+        autocomplete="off"
+        spellcheck="false"
+        i18n-placeholder="@@browser.placeholder"
+        placeholder="/usr/bin/chromium"
+        [value]="input()"
+        (input)="input.set($any($event.target).value)"
+      />
+      <mat-hint i18n="@@browser.hint">Empty: google-chrome-stable, google-chrome, chromium or chromium-browser is looked for.</mat-hint>
+    </mat-form-field>
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="browser-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+    <div class="actions">
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="browser-save"
+        [disabled]="saving() || input().trim() === b.saved"
+        (click)="save(input().trim())"
+        i18n="@@browser.save"
+      >
+        Save
+      </button>
+      @if (b.saved) {
+        <button mat-button type="button" data-testid="browser-reset" [disabled]="saving()" (click)="save('')" i18n="@@browser.reset">
+          Find it by itself
+        </button>
+      }
+    </div>
+  </mo-panel>
+}

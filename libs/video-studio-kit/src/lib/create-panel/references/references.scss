@@ -1,0 +1,231 @@
+section {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+}
+
+.hint,
+.note,
+.counts {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+// Two to a row, the size of the start and end frames; the add zone is one more cell after the last file.
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lab-space-3) var(--lab-space-2);
+  align-items: start;
+}
+
+.tile {
+  display: grid;
+  gap: var(--lab-space-2);
+  min-width: 0;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+
+  .title {
+    flex: 1;
+  }
+}
+
+.move {
+  min-width: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lab-ink-dim);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: var(--lab-accent);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.preview {
+  position: relative;
+  display: grid;
+  align-items: center;
+  box-sizing: border-box;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+
+  img,
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  audio {
+    width: 100%;
+  }
+}
+
+.seconds {
+  position: absolute;
+  right: var(--lab-space-1);
+  bottom: var(--lab-space-1);
+  padding: 0 var(--lab-space-1);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink);
+  pointer-events: none;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lab-space-2);
+
+  &.single {
+    grid-template-columns: 1fr;
+  }
+}
+
+.glyph {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: var(--lab-control-h);
+  padding: 0;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+
+  &.retouch {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+}
+
+// The add zone has the look of an empty frame: a dashed box with the upload icon.
+.drop {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  position: relative;
+  box-sizing: border-box;
+  min-height: 5rem;
+  padding: var(--lab-space-2);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+  color: var(--lab-ink-dim);
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  // With nothing chosen yet it is the only cell, and takes the whole width.
+  &:only-child {
+    grid-column: 1 / -1;
+  }
+
+  &:hover,
+  &.dragging {
+    border-color: var(--lab-accent);
+    color: var(--lab-ink);
+  }
+
+  &.dragging {
+    background: color-mix(in srgb, var(--lab-accent) 12%, transparent);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--lab-control-line);
+      color: var(--lab-ink-dim);
+    }
+  }
+}
+
+.error {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  color: var(--lab-danger);
+}
+
+// How many files of each kind are in, and the limit: one line per kind, on the right, flush with the edge of the grid above (as the notes of the panel).
+.counts {
+  text-align: right;
+
+  > span {
+    display: block;
+  }
+}

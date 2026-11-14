@@ -1,0 +1,52 @@
+<section class="map" data-testid="song-map">
+  <header>
+    <h2>{{ t.title }}</h2>
+    <span class="tempo" data-testid="tempo">{{ tempo() }}</span>
+  </header>
+  <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="none" role="img" [attr.aria-label]="t.legend + ' ' + summary()">
+    @if (marked(); as m) {
+      <rect class="span" data-testid="span" [attr.x]="m.x" y="0" [attr.width]="m.width" [attr.height]="height" />
+    }
+    @for (s of geometry().sections; track $index) {
+      <rect class="section" [class.odd]="$index % 2 === 1" [attr.x]="s.x" y="0" [attr.width]="s.width" [attr.height]="band">
+        <title>{{ s.tag }}</title>
+      </rect>
+    }
+    @for (b of geometry().beats; track $index) {
+      <line class="beat" [attr.x1]="b" [attr.x2]="b" [attr.y1]="band" [attr.y2]="height" />
+    }
+    @if (geometry().loudness) {
+      <polyline class="loudness" [attr.points]="geometry().loudness" />
+    }
+    @for (w of geometry().words; track $index) {
+      <circle class="word" [attr.cx]="w.x" [attr.cy]="band + 6" r="2.5"><title>{{ w.text }}</title></circle>
+    }
+  </svg>
+  <ul class="tags" aria-hidden="true">
+    @for (s of geometry().sections; track $index) {
+      <li [style.left.%]="(s.x / width) * 100">{{ s.tag }}</li>
+    }
+  </ul>
+  <p class="summary" data-testid="summary">{{ summary() }}</p>
+  <p class="note" [class.estimated]="map().wordsEstimated" data-testid="words-note">{{ map().wordsEstimated ? t.estimated : t.heard }}</p>
+  @if (canSync()) {
+    <div class="sync">
+      <button type="button" data-testid="sync-words" [disabled]="locked()" (click)="sync()">{{ listening() ? t.syncing : t.sync }}</button>
+      @if (listening()) {
+        <p class="wait" role="status" data-testid="sync-wait">{{ wait() }}</p>
+      }
+      @if (refused()) {
+        <p class="problem" role="alert" data-testid="sync-problem">{{ refused() }}</p>
+      }
+      @if (notice()) {
+        <p class="warning" role="status" data-testid="sync-notice">{{ t.syncNotice }} {{ notice() }}</p>
+      }
+      @if (warning()) {
+        <p class="warning" role="status" data-testid="sync-warning">{{ t.syncWarning }} {{ warning() }}</p>
+      }
+      @if (done()) {
+        <p class="ok" role="status" data-testid="sync-done">{{ t.syncDone }}</p>
+      }
+    </div>
+  }
+</section>

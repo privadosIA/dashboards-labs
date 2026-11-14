@@ -1,0 +1,68 @@
+<section class="review" data-testid="review-panel" [attr.data-state]="review()?.state ?? 'none'">
+  <header class="bar">
+    <strong>{{ t.title }}</strong>
+    @if (review(); as r) {
+      @if (r.state === 'running') {
+        <span class="meta" role="status" data-testid="review-running">{{ t.running }}</span>
+      } @else if (r.state === 'failed') {
+        <span class="problem" role="alert" data-testid="review-failed">{{ t.failed(r.error ?? '') }}</span>
+      } @else {
+        <span class="meta" data-testid="review-done">{{ t.done }}</span>
+        @if (r.overall?.score !== undefined) {
+          <strong data-testid="review-overall">{{ t.overall(r.overall!.score!) }}</strong>
+        }
+      }
+    } @else {
+      <span class="meta" data-testid="review-none">{{ t.none }}</span>
+    }
+    <span class="grow"></span>
+    @if (review()?.state === 'done') {
+      <button type="button" class="ctl" data-testid="review-toggle" [attr.aria-expanded]="shown()" (click)="shown.set(!shown())">{{ shown() ? t.close : t.open }}</button>
+    }
+    <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="review-start" [disabled]="starting() || locked() || review()?.state === 'running'" [attr.title]="t.hint" (click)="start()">{{ t.review }}</button>
+  </header>
+
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="review-refused">{{ refused() }}</p>
+  }
+
+  @if (shown() && review(); as r) {
+    @if (r.state === 'done') {
+      <div class="body" data-testid="review-body">
+        @if (r.overall; as o) {
+          @if (o.error) {
+            <p class="problem" role="status">{{ t.failed(o.error) }}</p>
+          }
+          @if (o.notes.length) {
+            <h3>{{ t.overallNotes }}</h3>
+            <ul class="notes" data-testid="review-overall-notes">
+              @for (n of o.notes; track $index) {
+                <li>{{ n }}</li>
+              }
+            </ul>
+          }
+          @for (group of o.repeated; track $index) {
+            <p class="meta" data-testid="review-repeated">{{ repeated(group) }}</p>
+          }
+        }
+        <ul class="scenes" data-testid="review-scenes">
+          @for (s of r.scenes; track s.scriptPiece) {
+            <li>
+              <button type="button" class="scene" data-testid="review-scene" [attr.data-verdict]="verdict(s)" (click)="select.emit(s.scriptPiece)">
+                <strong>{{ t.block(s.scriptPiece) }}</strong>
+                <span class="score">{{ s.score }} / 10 · {{ t.mark[verdict(s)] }}</span>
+                @if (s.error) {
+                  <span class="problem">{{ t.failed(s.error) }}</span>
+                } @else if (s.notes.length) {
+                  <span class="note">{{ s.notes.join(' · ') }}</span>
+                } @else {
+                  <span class="note">{{ t.noNotes }}</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+</section>

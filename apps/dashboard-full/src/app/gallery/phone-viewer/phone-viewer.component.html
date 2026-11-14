@@ -1,0 +1,34 @@
+<div #frame class="viewer" [moGestures]="handlers" [panEnabled]="canPan" touchAction="none" data-testid="viewer">
+  <img
+    class="viewer__img"
+    [class.viewer__img--still]="theme.reducedMotion()"
+    [src]="url()"
+    [alt]="img().scene_id"
+    [style.transform]="transform()"
+    draggable="false"
+    data-testid="viewer-img"
+  />
+</div>
+
+<header class="bar bar--top">
+  <button mat-icon-button type="button" (click)="close()" aria-label="Close" i18n-aria-label="@@viewer.close" data-testid="viewer-close"><mat-icon>close</mat-icon></button>
+  <span class="bar__pos mo-data" data-testid="viewer-pos">{{ index() + 1 }} / {{ data.images.length }}</span>
+  <button mat-icon-button type="button" (click)="info.set(!info())" [attr.aria-pressed]="info()" aria-label="Details" i18n-aria-label="@@viewer.info" data-testid="viewer-info"><mat-icon>info</mat-icon></button>
+  <a mat-icon-button [href]="url()" [attr.download]="img().scene_id" aria-label="Download" i18n-aria-label="@@lightbox.download" data-testid="viewer-download"><mat-icon>download</mat-icon></a>
+  <button mat-icon-button type="button" [disabled]="sharer.busy() === url()" (click)="sharer.share(url())" aria-label="Share" i18n-aria-label="@@lightbox.share" data-testid="viewer-share"><mat-icon>share</mat-icon></button>
+</header>
+
+@if (info()) {
+  <div class="caption" data-testid="viewer-caption">
+    <span class="mo-data">{{ img().scene_id }} · v{{ img().variant + 1 }} · seed {{ img().effective_seed }}</span>
+    <span class="mo-data dim">{{ img().model }} · {{ img().sampler }} · {{ img().steps }} steps</span>
+    <p class="mo-data">{{ img().prompt }}</p>
+  </div>
+}
+
+<footer class="bar bar--bottom">
+  <button mat-icon-button type="button" (click)="prev()" [disabled]="index() === 0" aria-label="Previous" i18n-aria-label="@@lightbox.prev" data-testid="viewer-prev"><mat-icon>chevron_left</mat-icon></button>
+  <button mat-icon-button type="button" (click)="zoomOut()" [disabled]="!zoomed()" aria-label="Zoom out" i18n-aria-label="@@viewer.zoomOut" data-testid="viewer-zoom-out"><mat-icon>zoom_out</mat-icon></button>
+  <button mat-icon-button type="button" (click)="zoomIn()" [disabled]="scale() >= 4" aria-label="Zoom in" i18n-aria-label="@@viewer.zoomIn" data-testid="viewer-zoom-in"><mat-icon>zoom_in</mat-icon></button>
+  <button mat-icon-button type="button" (click)="next()" [disabled]="index() === data.images.length - 1" aria-label="Next" i18n-aria-label="@@lightbox.next" data-testid="viewer-next"><mat-icon>chevron_right</mat-icon></button>
+</footer>

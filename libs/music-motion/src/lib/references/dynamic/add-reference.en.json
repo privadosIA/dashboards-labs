@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "id": "add-reference",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "url",
+      "type": "text",
+      "label": "YouTube address",
+      "validation": {
+        "pattern": "^https?://\\S+$",
+        "messages": {
+          "pattern": "Write an address that starts with http:// or https://."
+        }
+      }
+    },
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Title (optional)",
+      "validation": {
+        "maxLength": 120,
+        "messages": {
+          "maxLength": "The title can have up to 120 characters."
+        }
+      }
+    },
+    {
+      "key": "notes",
+      "type": "textarea",
+      "label": "Notes (optional)",
+      "props": {
+        "rows": 2
+      },
+      "validation": {
+        "maxLength": 2000,
+        "messages": {
+          "maxLength": "The notes can have up to 2000 characters."
+        }
+      }
+    },
+    {
+      "key": "tags",
+      "type": "text",
+      "label": "Tags, separated by commas (optional)"
+    }
+  ]
+}

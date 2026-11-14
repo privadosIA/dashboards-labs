@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "id": "send",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Name of the part",
+      "placeholder": "spin-logo",
+      "description": "Lower case letters and digits, joined by dashes.",
+      "validation": {
+        "required": true,
+        "maxLength": 48,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "messages": {
+          "required": "The part needs a name.",
+          "maxLength": "The name can have up to 48 characters.",
+          "pattern": "Use lower case letters and digits joined by dashes, like spin-logo."
+        }
+      }
+    },
+    {
+      "key": "description",
+      "type": "text",
+      "label": "Description",
+      "validation": {
+        "required": true,
+        "maxLength": 200,
+        "messages": {
+          "required": "Say in a sentence what the part does.",
+          "maxLength": "The description can have up to 200 characters."
+        }
+      }
+    },
+    { "key": "level_simple", "type": "checkbox", "label": "Simple level", "defaultValue": true },
+    { "key": "level_medium", "type": "checkbox", "label": "Medium level", "defaultValue": true },
+    { "key": "level_advanced", "type": "checkbox", "label": "Advanced level", "defaultValue": true },
+    {
+      "key": "cost_ms",
+      "type": "number",
+      "label": "Cost of drawing a frame (ms)",
+      "defaultValue": 40,
+      "validation": {
+        "required": true,
+        "min": 1,
+        "max": 10000,
+        "messages": {
+          "required": "The cost is needed.",
+          "min": "The cost is at least 1 ms.",
+          "max": "The cost is at most 10000 ms."
+        }
+      }
+    }
+  ]
+}

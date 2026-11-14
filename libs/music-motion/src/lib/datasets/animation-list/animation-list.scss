@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.animations {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  margin: 0;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3) var(--lab-space-2) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.song,
+.state {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

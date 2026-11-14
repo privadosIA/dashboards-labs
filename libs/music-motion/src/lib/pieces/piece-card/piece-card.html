@@ -1,0 +1,25 @@
+<article class="card" [class]="'state-' + piece().state" [attr.data-testid]="'piece-' + piece().id">
+  <div class="head">
+    <h2>{{ piece().title }}</h2>
+    <span class="state" data-testid="state">{{ t.states[piece().state] }}</span>
+  </div>
+  <p class="meta">{{ spec() }}</p>
+  @if (busy()) {
+    <div class="progress" role="progressbar" [attr.aria-label]="t.progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="piece().progress" data-testid="progress">
+      <span [style.width.%]="piece().progress"></span>
+    </div>
+    <p class="meta">{{ piece().progress }}% · {{ forecast() }}</p>
+  } @else if (piece().state === 'done') {
+    <p class="meta" data-testid="size">{{ t.size }}: {{ size() }}</p>
+  } @else if (piece().state === 'failed' && piece().error) {
+    <p class="error" data-testid="error">{{ piece().error }}</p>
+  }
+  <div class="actions">
+    <button type="button" class="open" data-testid="open" (click)="open.emit(piece())">{{ t.open }}</button>
+    @if (editor(); as href) {
+      <a class="edit-link" data-testid="edit-in-motion-edit" [routerLink]="href">{{ links.editInMotionEdit }}</a>
+    }
+    <app-export-dataset [piece]="piece()" />
+    <button type="button" data-testid="remove" (click)="remove.emit(piece())">{{ t.remove }}</button>
+  </div>
+</article>

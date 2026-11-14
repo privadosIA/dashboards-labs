@@ -1,0 +1,276 @@
+<h2 mat-dialog-title i18n="@@extract.title">Take it from a video or audio</h2>
+<mat-dialog-content>
+  <p i18n="@@extract.intro">
+    Choose a song (an mp3 or wav) or a video, and its lyrics, language, tempo and key are read and a style is proposed. It is a proposal: nothing is written into the track until you press “Apply”.
+  </p>
+  <ul class="extract__notes" data-testid="extract-notes">
+    <li i18n="@@extract.noteReview">The lyrics are a transcription: review them. A sung voice is read worse than a spoken one, above all with instruments.</li>
+    <li i18n="@@extract.noteEstimate">The tempo and the key are estimates: they sometimes come out at half or double, or in the relative key.</li>
+    <li i18n="@@extract.noteRights">Use only material you have the rights to.</li>
+  </ul>
+
+  @if (whisperMissing() === 'program') {
+    <p class="extract__alert" role="alert" data-testid="extract-no-whisper">
+      <mat-icon inline>warning</mat-icon>
+      <span i18n="@@extract.noProgram">whisper-cli, the program that reads the lyrics, is missing. Install it with <code>bash scripts/get-whisper.sh --build</code> (or your system's whisper.cpp package).</span>
+    </p>
+  } @else if (whisperMissing() === 'model') {
+    <p class="extract__alert" role="alert" data-testid="extract-no-whisper">
+      <mat-icon inline>warning</mat-icon>
+      <span i18n="@@extract.noModelFile">The Whisper model is missing.</span>
+      <a mat-dialog-close routerLink="/models" data-testid="extract-models" i18n="@@extract.seeModels">Install it in Models (Music tab)</a>
+    </p>
+  }
+
+  <div class="extract__source">
+    <mat-form-field class="extract__file">
+      <mat-label i18n="@@extract.source">Song or video</mat-label>
+      <mat-select data-testid="extract-source" [value]="picked()" (selectionChange)="pick($event.value)" [disabled]="extract.busy()">
+        @for (s of sources(); track s.name) {
+          <mat-option [value]="s.name">
+            <span class="mo-data">{{ s.name }}</span>
+            @if (s.kind === 'video') {
+              <span class="extract__tag" i18n="@@extract.videoTag"> · video</span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+      @if (sources().length === 0) {
+        <mat-hint i18n="@@extract.noSources">Upload an audio or a video, or paste the address of a YouTube video.</mat-hint>
+      }
+    </mat-form-field>
+
+    <input #file type="file" accept=".mp3,.wav,.mp4,.mov,.mkv,.webm,.avi,audio/mpeg,audio/wav,video/*" hidden (change)="upload(file)" />
+    <button mat-stroked-button type="button" data-testid="extract-upload" [disabled]="music.sourceBusy() || extract.busy()" (click)="file.click()">
+      <mat-icon>upload_file</mat-icon>
+      <ng-container i18n="@@extract.upload">Upload audio or video</ng-container>
+    </button>
+    <app-source-url [projectId]="music.projectId()" (added)="useUrlSource($event)" />
+  </div>
+  @if (music.sourceError(); as msg) {
+    <p class="extract__error" role="alert" data-testid="extract-source-error">
+      <mat-icon inline>error</mat-icon>
+      <span class="mo-data">{{ msg }}</span>
+    </p>
+  }
+
+  <fieldset class="extract__method" data-testid="extract-method" [disabled]="extract.busy()">
+    <legend i18n="@@extract.method">How to recognise the song</legend>
+    <mat-radio-group [value]="method()" (change)="method.set($event.value)" aria-label="How to recognise the song" i18n-aria-label="@@extract.methodAria">
+      <mat-radio-button value="whisper" data-testid="extract-method-whisper">
+        <span class="extract__methodname">Whisper</span>
+        <span class="extract__methoddesc" i18n="@@extract.method.whisper">the lyrics and their language (always read)</span>
+      </mat-radio-button>
+      <mat-radio-button value="clap" data-testid="extract-method-clap" [disabled]="!usable('clap')">
+        <span class="extract__methodname">LAION-CLAP</span>
+        <span class="extract__methoddesc" i18n="@@extract.method.clap">also hears the sound: genre, mood and instruments (experimental)</span>
+      </mat-radio-button>
+      @if (!usable('clap')) {
+        <p class="extract__hint extract__methodwhy" data-testid="extract-method-clap-why">
+          {{ whyNot(recognizer('clap')) }}
+          @if (recognizer('clap')?.reason === 'not_running' || recognizer('clap')?.reason === 'no_service') {
+            <a mat-dialog-close routerLink="/environment" i18n="@@extract.method.goEnv">Go to Environment</a>
+          }
+        </p>
+      }
+      <mat-radio-button value="muq" data-testid="extract-method-muq" [disabled]="!usable('muq')">
+        <span class="extract__methodname">MuQ-MuLan</span>
+        <span class="extract__methoddesc" i18n="@@extract.method.muq">compares the sound with the style (English only, non-commercial)</span>
+      </mat-radio-button>
+      @if (!usable('muq')) {
+        <p class="extract__hint extract__methodwhy" data-testid="extract-method-muq-why">{{ whyNot(recognizer('muq')) }}</p>
+      }
+    </mat-radio-group>
+  </fieldset>
+
+  <div class="extract__options">
+    @if (canSeparate()) {
+      <mat-checkbox data-testid="extract-separate" [checked]="separateVoice()" [disabled]="!separationReady() || extract.busy()" (change)="separateVoice.set($event.checked)">
+        <ng-container i18n="@@extract.separate">Separate the voice first</ng-container>
+      </mat-checkbox>
+      <p class="extract__hint" data-testid="extract-separate-hint">
+        @if (separationReady()) {
+          <ng-container i18n="@@extract.separateHint">It can help with songs heavy on instruments, but in the test we did (a 3 minute song) the lyrics came out almost the same: it is hardly ever needed. It is a generation on the GPU with the SFT model (not the turbo), of about 8 s per minute of song.</ng-container>
+        } @else {
+          <ng-container i18n="@@extract.separateNone">Separating the voice needs a synthesis model that is not the turbo one (the SFT), and none is installed.</ng-container>
+        }
+      </p>
+      @if (separateVoice() && canSwitch()) {
+        <mat-checkbox class="extract__sub" data-testid="extract-switch" [checked]="switchLevel()" (change)="switchLevel.set($event.checked)" [disabled]="extract.busy()">
+          <ng-container i18n="@@extract.switch">Switch this project to the “Maximum” level (SFT model)</ng-container>
+        </mat-checkbox>
+        <p class="extract__hint" i18n="@@extract.switchNote">The project's other songs will also come out at that level the next time you create them.</p>
+      }
+    } @else if (isVideo() && !service()) {
+      <p class="extract__hint" data-testid="extract-video-nosep" i18n="@@extract.videoNoSeparate">To separate the voice, upload the video's audio as an mp3: a video is read as it is.</p>
+    }
+
+    @if (isVideo()) {
+      @if (canDescribe()) {
+        <mat-checkbox data-testid="extract-describe" [checked]="describePicture()" [disabled]="extract.busy()" (change)="describePicture.set($event.checked)">
+          <ng-container i18n="@@extract.describe">Describe the picture</ng-container>
+        </mat-checkbox>
+        <p class="extract__hint" i18n="@@extract.describeHint">A vision model looks at a few frames of the video. It waits for no run to be in progress and does not do it if a person who looks under age appears.</p>
+      }
+    }
+
+    <mat-form-field class="extract__lang">
+      <mat-label i18n="@@extract.language">Language of the lyrics</mat-label>
+      <mat-select data-testid="extract-language" [value]="language()" (selectionChange)="language.set($event.value)" [disabled]="extract.busy()">
+        <mat-option value="" i18n="@@extract.languageAuto">— detect it —</mat-option>
+        @for (l of languages; track l.value) {
+          <mat-option [value]="l.value">{{ l.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="extract__hintfield">
+      <mat-label i18n="@@extract.hint">What you know about the song (optional)</mat-label>
+      <textarea matInput rows="2" data-testid="extract-hint" [value]="hint()" [disabled]="extract.busy()" (input)="hint.set($any($event.target).value)"></textarea>
+      <mat-hint i18n="@@extract.hintHint">The genre, the instruments, the mood… it helps to propose the style.</mat-hint>
+    </mat-form-field>
+  </div>
+
+  @if (proposal(); as p) {
+    @if (draft(); as d) {
+      <section class="extract__proposal" data-testid="extract-proposal">
+        <h3 i18n="@@extract.proposal">Proposal</h3>
+        @if (p.heard.length > 0) {
+          <p class="extract__hint" role="note" data-testid="extract-heard">
+            <ng-container i18n="@@extract.heard">LAION-CLAP heard:</ng-container> <span class="mo-data">{{ p.heard.join(', ') }}</span>
+          </p>
+        }
+        @for (n of p.notes; track n) {
+          <p class="extract__hint" role="note" data-testid="extract-note">{{ n }}</p>
+        }
+        @if (p.noWords) {
+          <p class="extract__alert" role="note" data-testid="extract-nowords">
+            <mat-icon inline>info</mat-icon>
+            <span i18n="@@extract.noWords">No words were found: it looks like an instrumental piece.</span>
+          </p>
+          <mat-checkbox data-testid="extract-instrumental" [checked]="d.instrumental" (change)="edit({ instrumental: $event.checked })">
+            <ng-container i18n="@@extract.markInstrumental">Mark the track as instrumental</ng-container>
+          </mat-checkbox>
+        } @else {
+          @if (p.wordsKept) {
+            <p class="extract__hint" role="note" data-testid="extract-wordskept" i18n="@@extract.wordsKept">
+              The assistant wanted to change words of the lyrics, so they were left as they were heard, without sections: add them yourself if you want them.
+            </p>
+          }
+          <mat-form-field class="extract__wide">
+            <mat-label i18n="@@extract.lyrics">Lyrics</mat-label>
+            <textarea matInput rows="8" class="mo-data" data-testid="extract-lyrics" [value]="d.lyrics" (input)="edit({ lyrics: $any($event.target).value })"></textarea>
+            <mat-hint i18n="@@extract.lyricsHint">Review them: this is what was heard.</mat-hint>
+          </mat-form-field>
+        }
+
+        <mat-form-field class="extract__lang">
+          <mat-label i18n="@@extract.languageFound">Language</mat-label>
+          <mat-select data-testid="extract-language-found" [value]="d.language" (selectionChange)="edit({ language: $event.value })">
+            <mat-option value="" i18n="@@extract.languageKeep">— do not change it —</mat-option>
+            @for (l of languages; track l.value) {
+              <mat-option [value]="l.value">{{ l.label }}</mat-option>
+            }
+          </mat-select>
+          @if (p.languageDetected) {
+            <mat-hint i18n="@@extract.languageDetected">Detected by Whisper</mat-hint>
+          }
+        </mat-form-field>
+
+        @if (p.withoutAssistant) {
+          <p class="extract__hint" role="note" data-testid="extract-noassist" i18n="@@extract.noAssist">
+            The assistant is not available: the style and the tags are left blank and the lyrics have no sections.
+          </p>
+        }
+        <mat-form-field class="extract__wide">
+          <mat-label i18n="@@extract.style">Style</mat-label>
+          <textarea matInput rows="2" data-testid="extract-style" [value]="d.caption" (input)="edit({ caption: $any($event.target).value })"></textarea>
+        </mat-form-field>
+        @if (service()) {
+          <mat-form-field class="extract__wide">
+            <mat-label i18n="@@extract.tags">Tags</mat-label>
+            <input matInput class="mo-data" data-testid="extract-tags" [value]="d.tags" (change)="edit({ tags: $any($event.target).value })" />
+            <mat-hint i18n="@@extract.tagsHint">Words in English separated by commas. This generator only reads these.</mat-hint>
+          </mat-form-field>
+        }
+
+        <div class="extract__measures" data-testid="extract-measures">
+          @if (p.bpm === null && p.keyscale === null) {
+            <p class="extract__hint" data-testid="extract-nomeasure" i18n="@@extract.noMeasure">No clear pulse or key was found.</p>
+          } @else {
+            <mat-form-field class="extract__narrow">
+              <mat-label i18n="@@extract.bpm">Tempo (bpm)</mat-label>
+              <input matInput type="number" class="mo-data" data-testid="extract-bpm" [value]="d.bpm" (change)="edit({ bpm: $any($event.target).value })" />
+              @if (p.bpm !== null) {
+                <mat-hint><ng-container i18n="@@extract.confidence">confidence</ng-container> {{ p.bpmConfidence }}</mat-hint>
+              }
+            </mat-form-field>
+            @for (a of p.bpmAlternatives; track a) {
+              <button mat-stroked-button type="button" class="extract__alt" [attr.data-testid]="'extract-bpm-alt-' + a" (click)="useBpm(a)">{{ a }}</button>
+            }
+            <mat-form-field class="extract__narrow">
+              <mat-label i18n="@@extract.key">Key</mat-label>
+              <input matInput class="mo-data" data-testid="extract-key" [value]="d.keyscale" (change)="edit({ keyscale: $any($event.target).value })" />
+              @if (p.keyscale !== null) {
+                <mat-hint><ng-container i18n="@@extract.confidence2">confidence</ng-container> {{ p.keyConfidence }}</mat-hint>
+              }
+            </mat-form-field>
+            @if (!service()) {
+              <mat-checkbox data-testid="extract-use-measures" [checked]="d.useMeasures" (change)="edit({ useMeasures: $event.checked })">
+                <ng-container i18n="@@extract.useMeasures">Write the tempo and the key into the track</ng-container>
+              </mat-checkbox>
+            } @else {
+              <p class="extract__hint" data-testid="extract-measures-shown" i18n="@@extract.measuresShown">This generator does not use the tempo or the key: they are shown, but not written into the track.</p>
+            }
+          }
+        </div>
+
+        @if (p.picture) {
+          <mat-form-field class="extract__wide">
+            <mat-label i18n="@@extract.picture">What the picture shows</mat-label>
+            <textarea matInput rows="3" data-testid="extract-picture" [value]="d.picture" (input)="edit({ picture: $any($event.target).value })"></textarea>
+            <mat-hint i18n="@@extract.pictureHint">It is only shown: it is not written into the track. You can copy it.</mat-hint>
+          </mat-form-field>
+          <button mat-stroked-button type="button" data-testid="extract-copy-picture" (click)="copyPicture()">
+            <mat-icon>content_copy</mat-icon>
+            <ng-container i18n="@@extract.copy">Copy</ng-container>
+          </button>
+        }
+      </section>
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="extract__actions">
+  <div class="extract__status" data-testid="extract-status" aria-live="polite">
+  @if (extract.busy()) {
+      <p class="extract__wait" role="status" data-testid="extract-wait">
+        <mat-progress-spinner mode="indeterminate" diameter="16" />
+        <span>{{ stepText() }}</span>
+        <span class="mo-data" data-testid="extract-elapsed">{{ extract.elapsed() }} s</span>
+      </p>
+    }
+    @if (!proposal() && !chosen() && !extract.busy()) {
+      <p class="extract__hint" data-testid="extract-pick-first" i18n="@@extract.pickFirst">Choose or upload a song or a video to start.</p>
+    }
+    @if (extract.failure(); as msg) {
+      <p class="extract__error" role="alert" data-testid="extract-error">
+        <mat-icon inline>error</mat-icon>
+        <span>{{ msg }}</span>
+        <button mat-button type="button" (click)="extract.dismissFailure()" i18n="@@extract.dismiss">Close</button>
+      </p>
+    }
+  </div>
+  @if (extract.busy()) {
+    <button mat-button type="button" data-testid="extract-cancel" (click)="extract.cancel()" i18n="@@extract.cancel">Cancel</button>
+  } @else {
+    <button mat-stroked-button type="button" data-testid="extract-close" (click)="close()" i18n="@@extract.close">Close</button>
+    @if (proposal()) {
+      <button mat-flat-button type="button" data-testid="extract-apply" (click)="apply()" i18n="@@extract.apply">Apply</button>
+    } @else {
+      <button mat-flat-button type="button" data-testid="extract-start" [disabled]="!canStart()" (click)="start()">
+        <mat-icon>auto_awesome</mat-icon>
+        <ng-container i18n="@@extract.start">Take it</ng-container>
+      </button>
+    }
+  }
+</mat-dialog-actions>

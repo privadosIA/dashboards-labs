@@ -1,0 +1,95 @@
+<div class="scroll">
+  <app-header-card [model]="modelName()" [description]="description()" (change)="modelRow().open()" />
+
+  <dynamic-form
+    [schema]="schema()"
+    [(model)]="model"
+    [showDefaultActions]="false"
+    (statusChange)="valid.set($event === 'VALID')"
+    (formSubmit)="submit()"
+  >
+    <ng-template dfSlot="frames">
+      @if (showFrames()) {
+        <app-frames [start]="image()" (startChange)="setImage($event)" [end]="endImage()" (endChange)="setEnd($event)" [showEnd]="showEnd()" />
+      }
+      @if (showReferences()) {
+        <app-references [references]="refs()" (referencesChange)="setReferences($event)" [limits]="inputs()" />
+      }
+      @if (loadingInputs()) {
+        <p class="note" data-testid="inputs-loading">{{ t.inputs.loading }}</p>
+      }
+      @if (loadFailed()) {
+        <p class="note" role="alert" data-testid="inputs-load-failed">{{ t.inputs.loadFailed }}</p>
+      }
+    </ng-template>
+
+    <ng-template dfSlot="modelRow">
+      <app-settings-row
+        #modelRow
+        testId="row-model"
+        [label]="t.panel.model"
+        [value]="modelName()"
+        [options]="modelOptions()"
+        [selected]="current().model"
+        (choose)="set('model', $event)"
+      />
+    </ng-template>
+
+    <ng-template dfSlot="durationRow">
+      <div class="pair">
+        <app-settings-row
+          testId="row-duration"
+          [label]="t.panel.duration"
+          [value]="durationValue()"
+          [options]="durationOptions"
+          [selected]="durationSelected()"
+          [error]="durationError()"
+          (choose)="set('duration', +$event)"
+        >
+          <label class="free" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+            <span>{{ t.panel.durationOther }}</span>
+            <input type="number" data-testid="duration-input" min="4" max="30" step="1" [value]="current().duration" (input)="typeDuration($event)" />
+          </label>
+        </app-settings-row>
+        <app-settings-row testId="row-aspect" [label]="t.panel.aspectRatio" [value]="current().aspectRatio" [options]="ratioOptions" [selected]="current().aspectRatio" (choose)="set('aspectRatio', $event)" />
+      </div>
+    </ng-template>
+
+    <ng-template dfSlot="aspectRow"></ng-template>
+
+    <ng-template dfSlot="qualityRow">
+      <app-settings-row testId="row-quality" [label]="t.panel.quality" [value]="current().quality" [options]="qualityOptions" [selected]="current().quality" (choose)="set('quality', $event)" />
+    </ng-template>
+
+    <ng-template dfSlot="audioNote">
+      @if (!soundable()) {
+        <p class="note" data-testid="sound-off">{{ t.panel.soundOff }}</p>
+      }
+    </ng-template>
+
+    <ng-template dfSlot="soundCount">
+      @if (soundShown()) {
+        <p class="note count" data-testid="sound-count">{{ countText() }}</p>
+      }
+    </ng-template>
+  </dynamic-form>
+</div>
+
+<div class="foot">
+  @if (inputReason()) {
+    <p class="too-long" role="alert" data-testid="inputs-problem">{{ inputReason() }}</p>
+  }
+  @if (tooLongText()) {
+    <p class="too-long" role="alert" data-testid="prompt-too-long">{{ tooLongText() }}</p>
+  }
+  <button type="button" class="generate" data-testid="generate" [disabled]="blocked()" (click)="press()">
+    <span class="label">{{ t.panel.generate }}</span>
+    <span class="estimate" [title]="t.panel.estimate">
+      @if (estimate(); as e) {
+        <strong>{{ e.time }}</strong> · <strong>{{ e.size }}</strong>
+      } @else {
+        <strong>–</strong>
+      }
+    </span>
+  </button>
+</div>

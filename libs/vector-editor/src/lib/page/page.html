@@ -1,0 +1,103 @@
+<div
+  class="page"
+  data-testid="vector-page"
+  role="group"
+  [attr.aria-label]="t.page.label"
+  [style.--left.px]="left()"
+  [style.--right.px]="right()"
+  [style.--bottom.px]="bottom()"
+>
+  <div class="toolbar" data-testid="toolbar">
+    <ng-content select="[toolbar]" />
+  </div>
+
+  <aside class="panel tree" data-testid="panel-tree">
+    <lab-vector-tree [store]="store()" />
+  </aside>
+  <div
+    class="split vertical"
+    role="separator"
+    tabindex="0"
+    aria-orientation="vertical"
+    data-testid="split-left"
+    [attr.aria-label]="t.page.left"
+    [attr.aria-valuenow]="left()"
+    [attr.aria-valuemin]="limits.sideMin"
+    [attr.aria-valuemax]="limits.sideMax"
+    (pointerdown)="dragStart($event, 'left')"
+    (pointermove)="dragMove($event)"
+    (pointerup)="dragEnd()"
+    (pointercancel)="dragEnd()"
+    (keydown)="key($event, 'left')"
+  ></div>
+
+  <section class="centre" data-testid="panel-centre">
+    <div class="top">
+      <lab-vector-transport [store]="store()" />
+      <nav class="tools" role="toolbar" aria-orientation="horizontal" data-testid="tools" [attr.aria-label]="t.tools.label">
+        @for (tool of tools; track tool) {
+          <button
+            type="button"
+            class="tool"
+            [attr.data-testid]="'tool-' + tool"
+            [attr.aria-pressed]="store().tool() === tool"
+            [attr.aria-label]="t.tools.names[tool]"
+            [attr.title]="t.tools.names[tool]"
+            (click)="store().tool.set(tool)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icon(tool)" /></svg>
+          </button>
+        }
+      </nav>
+    </div>
+    @if (notice(); as message) {
+      <p class="notice" role="status" data-testid="notice">
+        {{ message }}
+        <button type="button" class="dismiss" data-testid="notice-dismiss" [attr.aria-label]="t.tools.dismiss" (click)="store().notice.set(undefined)">×</button>
+      </p>
+    }
+    <div class="stage-row">
+      <lab-vector-canvas [store]="store()" [beatAt]="beatAt()" [loudnessAt]="loudnessAt()" />
+    </div>
+  </section>
+
+  <div
+    class="split vertical"
+    role="separator"
+    tabindex="0"
+    aria-orientation="vertical"
+    data-testid="split-right"
+    [attr.aria-label]="t.page.right"
+    [attr.aria-valuenow]="right()"
+    [attr.aria-valuemin]="limits.sideMin"
+    [attr.aria-valuemax]="limits.sideMax"
+    (pointerdown)="dragStart($event, 'right')"
+    (pointermove)="dragMove($event)"
+    (pointerup)="dragEnd()"
+    (pointercancel)="dragEnd()"
+    (keydown)="key($event, 'right')"
+  ></div>
+  <aside class="panel props" data-testid="panel-properties">
+    <lab-vector-properties [store]="store()" [hasBeat]="!!beatAt()" [hasLoudness]="!!loudnessAt()" />
+  </aside>
+
+  <div
+    class="split horizontal"
+    role="separator"
+    tabindex="0"
+    aria-orientation="horizontal"
+    data-testid="split-bottom"
+    [attr.aria-label]="t.page.bottom"
+    [attr.aria-valuenow]="bottom()"
+    [attr.aria-valuemin]="limits.bottomMin"
+    [attr.aria-valuemax]="limits.bottomMax"
+    (pointerdown)="dragStart($event, 'bottom')"
+    (pointermove)="dragMove($event)"
+    (pointerup)="dragEnd()"
+    (pointercancel)="dragEnd()"
+    (keydown)="key($event, 'bottom')"
+  ></div>
+  <section class="panel time" data-testid="panel-timeline">
+    <lab-vector-timeline [store]="store()" />
+  </section>
+</div>

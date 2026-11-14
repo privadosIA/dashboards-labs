@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "id": "dataset-brief",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "brief",
+      "type": "textarea",
+      "label": "Your brief",
+      "defaultValue": "",
+      "props": {
+        "rows": 8
+      }
+    },
+    {
+      "key": "negative",
+      "type": "textarea",
+      "label": "Negative (what must not appear)",
+      "defaultValue": "",
+      "props": {
+        "rows": 2
+      }
+    },
+    {
+      "key": "look",
+      "type": "select",
+      "label": "Look",
+      "defaultValue": "",
+      "description": "A look is style words plus a recommended model; nothing more.",
+      "options": [
+        {
+          "value": "",
+          "label": "None"
+        },
+        {
+          "value": "realistic",
+          "label": "Realistic"
+        },
+        {
+          "value": "illustration",
+          "label": "Illustration"
+        }
+      ]
+    }
+  ]
+}

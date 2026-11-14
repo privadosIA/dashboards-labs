@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "id": "motion-edit-scene",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "brief",
+      "type": "textarea",
+      "label": "Idea or metaphor",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "maxLength": 500,
+        "messages": {
+          "maxLength": "At most 500 characters."
+        }
+      }
+    },
+    {
+      "key": "review",
+      "type": "checkbox",
+      "label": "Review with the vision model",
+      "defaultValue": true
+    },
+    {
+      "key": "reviewMin",
+      "type": "number",
+      "label": "Minimum score (1 to 10)",
+      "defaultValue": 7,
+      "validation": {
+        "min": 1,
+        "max": 10,
+        "messages": {
+          "min": "From 1 to 10.",
+          "max": "From 1 to 10."
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "review",
+          "operator": "eq",
+          "value": true
+        }
+      }
+    },
+    {
+      "key": "reviewAttempts",
+      "type": "number",
+      "label": "Rewrites at most (0 to 3)",
+      "defaultValue": 2,
+      "validation": {
+        "min": 0,
+        "max": 3,
+        "messages": {
+          "min": "From 0 to 3.",
+          "max": "From 0 to 3."
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "review",
+          "operator": "eq",
+          "value": true
+        }
+      }
+    }
+  ]
+}

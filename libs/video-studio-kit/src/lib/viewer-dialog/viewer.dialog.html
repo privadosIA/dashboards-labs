@@ -1,0 +1,17 @@
+<div class="viewer">
+  <h2>{{ t.viewer.title }}</h2>
+  <div class="frame" [style.aspect-ratio]="ratio">
+    <video controls playsinline preload="auto" [src]="source()"></video>
+  </div>
+  <p class="prompt">{{ generation.settings.prompt || generation.settings.startImage?.name || generation.inputs?.[0]?.name }}</p>
+  <app-inputs-list [inputs]="generation.inputs ?? []" />
+  @if (simulated) {
+    <p class="note">{{ t.history.simulated }}</p>
+  }
+  <div class="actions">
+    <a [href]="download()" download>{{ t.history.download }}</a>
+    <button type="button" (click)="close('repeat')">{{ t.history.repeat }}</button>
+    <button type="button" (click)="close('remove')">{{ t.history.remove }}</button>
+    <button type="button" class="close" (click)="close()">{{ t.viewer.close }}</button>
+  </div>
+</div>

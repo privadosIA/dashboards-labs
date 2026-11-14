@@ -1,0 +1,41 @@
+<section class="catalog" data-testid="catalog-page">
+  <header class="head">
+    <h1>{{ t.title }}</h1>
+    <p class="intro">{{ t.intro }}</p>
+    <button type="button" class="ctl" data-testid="reload" (click)="load()">{{ t.reload }}</button>
+  </header>
+
+  @if (notice(); as n) {
+    <p class="notice" [class.problem]="n.problem" [attr.role]="n.problem ? 'alert' : 'status'" data-testid="notice">{{ n.text }}</p>
+  }
+
+  @switch (state()) {
+    @case ('loading') {
+      <p role="status" data-testid="loading">{{ texts.loading }}</p>
+    }
+    @case ('offline') {
+      <div class="offline" role="alert" data-testid="needs-server">
+        <p>{{ t.needsServer }}</p>
+        <p class="why">{{ why() }}</p>
+        <button type="button" class="ctl" data-testid="retry" (click)="load()">{{ texts.retry }}</button>
+      </div>
+    }
+    @default {
+      @if (items().length === 0) {
+        <p class="empty" data-testid="empty">{{ t.empty }}</p>
+      } @else {
+        <lab-paged-list listId="vector-catalog" [data]="items()" [lang]="lang">
+          <ng-template let-page>
+            <ul class="grid">
+              @for (item of page; track item.name) {
+                <li>
+                  <app-part-card [item]="item" [busy]="busy()[item.name]" (open)="openPart(item.name)" (remove)="removePart(item.name, $event)" />
+                </li>
+              }
+            </ul>
+          </ng-template>
+        </lab-paged-list>
+      }
+    }
+  }
+</section>

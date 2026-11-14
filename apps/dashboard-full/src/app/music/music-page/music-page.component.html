@@ -1,0 +1,685 @@
+<mo-page-header
+  [title]="store.projectId()"
+  description="Describe the style, write your lyrics if you want and create the song. Changes apply when you click Save."
+  i18n-description="@@music.desc"
+>
+  <a moActions mat-stroked-button [routerLink]="['/runs']" [queryParams]="{ project: store.projectId() }">
+    <mat-icon>play_circle</mat-icon>
+    <ng-container i18n="@@music.toRuns">Project runs</ng-container>
+  </a>
+  <button moActions mat-stroked-button [disabled]="!store.dirty() || store.saving()" (click)="discard()">
+    <ng-container i18n="@@music.discard">Discard changes</ng-container>
+  </button>
+  <button moActions mat-stroked-button data-testid="save" [disabled]="!store.canSave()" (click)="save()">
+    <mat-icon>save</mat-icon>
+    <ng-container i18n="@@music.save">Save</ng-container>
+  </button>
+  <button
+    moActions
+    mat-flat-button
+    data-testid="create-all"
+    [disabled]="store.running() || store.loading() || store.tracks().length === 0 || (store.dirty() && !store.canSave()) || containerStopped()"
+    (click)="store.launch()"
+  >
+    <mat-icon>music_note</mat-icon>
+    <ng-container i18n="@@music.createAll">Create</ng-container>
+  </button>
+</mo-page-header>
+
+@if (store.loading() || store.saving() || store.launching()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.setupIssue(); as issue) {
+  <p class="notice" role="status" data-testid="setup-issue">
+    <mat-icon inline>info</mat-icon>
+    <span>
+      @if (issue.engine) {
+        <ng-container i18n="@@music.noEngine">The music engine ({{ store.engineProgram() }}) is not installed.</ng-container>
+        <a routerLink="/environment" i18n="@@music.seeEnvironment">See Environment</a>
+      }
+      @if (issue.models) {
+        <ng-container i18n="@@music.noModels">The music models are missing.</ng-container>
+        <a routerLink="/models" i18n="@@music.seeModels">Install them in Models (Music tab)</a>
+      }
+    </span>
+  </p>
+}
+
+@if (store.launchHelp(); as help) {
+  <p class="server-error" role="alert" data-testid="launch-error">
+    <mat-icon inline>error</mat-icon>
+    <span>
+      <span class="mo-data">{{ help.message }}</span>
+      @if (help.engine) {
+        <a routerLink="/environment" i18n="@@music.seeEnvironment">See Environment</a>
+      }
+      @if (help.models) {
+        <a routerLink="/models" i18n="@@music.seeModels">Install them in Models (Music tab)</a>
+      }
+    </span>
+  </p>
+}
+
+@for (e of projectErrors(); track $index) {
+  <p class="server-error" role="alert">
+    <mat-icon inline>error</mat-icon>
+    <span class="mo-data">{{ e.text }}</span>
+  </p>
+}
+
+@for (w of store.warnings(); track w) {
+  <p class="warning">
+    <mat-icon inline>warning</mat-icon>
+    {{ w }}
+  </p>
+}
+
+@if (store.config(); as cfg) {
+  @if (autoPlan(); as plan) {
+    <mat-expansion-panel class="panel auto-card" data-testid="auto-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@musicAuto.title">I'm lazy: choose everything for me</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p class="note" i18n="@@musicAuto.hint">
+        Chooses the quality, the language model and how many versions to make of each song to get the best that fits in the time you want to wait. You only say how long.
+      </p>
+      <mat-form-field class="auto-budget">
+        <mat-label i18n="@@auto.budgetLabel">How long do you want to wait, roughly?</mat-label>
+        <mat-select data-testid="auto-budget" [value]="budgetIndex()" (selectionChange)="budgetIndex.set($event.value)">
+          @for (b of budgets; track $index) {
+            <mat-option [value]="$index">{{ budgetLabel(b) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (coverEntry()) {
+        <mat-checkbox data-testid="auto-cover" [checked]="autoCover()" (change)="autoCover.set($event.checked)" i18n="@@musicAuto.cover">
+          Make a cover for each song
+        </mat-checkbox>
+      }
+      <ul class="auto-lines" data-testid="auto-lines">
+        @for (l of autoLines(); track l) {
+          <li class="mo-data">{{ l }}</li>
+        }
+      </ul>
+      <p data-testid="auto-time">
+        <strong i18n="@@auto.time">It will take {{ autoTime(plan.seconds) }} or so</strong>{{ ' ' }}
+        <span class="dim" i18n="@@musicAuto.songs">({{ plan.songs }} songs)</span>{{ ' ' }}
+        @if (plan.machine.speedGuessed) {
+          <span class="dim" i18n="@@auto.guessed">(your card is not in my table: this is a rough guess)</span>
+        } @else if (plan.machine.speedMeasured > 0) {
+          <span class="dim" data-testid="auto-measured" i18n="@@auto.measured">(adjusted to your machine from {{ plan.machine.speedMeasured }} of your own renders)</span>
+        }
+      </p>
+      @if (!plan.fits) {
+        <p class="warning" data-testid="auto-over" i18n="@@auto.over">
+          It cannot make it in that time: the fastest I can do takes {{ autoTime(plan.fastest ?? plan.seconds) }}. I propose that.
+        </p>
+      }
+      @for (n of plan.notes; track n) {
+        <p class="warning">{{ n }}</p>
+      }
+      <div class="auto-actions">
+        <button mat-flat-button type="button" data-testid="auto-apply" (click)="store.applyAuto(plan)">
+          <mat-icon>auto_fix_high</mat-icon>
+          <ng-container i18n="@@auto.apply">Apply this</ng-container>
+        </button>
+        <button mat-stroked-button type="button" data-testid="auto-create" [disabled]="store.running() || store.launching() || containerStopped()" (click)="applyAndCreate(plan)">
+          <mat-icon>music_note</mat-icon>
+          <ng-container i18n="@@musicAuto.applyCreate">Apply and create the songs</ng-container>
+        </button>
+      </div>
+      @if (store.autoApplied(); as a) {
+        <p class="note" data-testid="auto-applied">
+          <ng-container i18n="@@auto.applied">Applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ a.note.join(' · ') }}</span>
+          <button mat-button type="button" data-testid="auto-undo" (click)="store.undoAuto()">
+            <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+          </button>
+        </p>
+      }
+    </mat-expansion-panel>
+  }
+  <mat-expansion-panel class="panel" data-testid="engine-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title i18n="@@music.engineTitle">Engine and run</mat-panel-title>
+      <mat-panel-description class="mo-data"
+        >{{ store.config()?.output?.mode ?? 'music' }} · {{ store.settings().output_format ?? 'mp3' }} · {{ store.settings().engine ?? 'cli' }}</mat-panel-description
+      >
+    </mat-expansion-panel-header>
+    <div class="settings">
+      <mat-button-toggle-group
+        [value]="store.settings().output_format ?? 'mp3'"
+        (change)="store.updateSettings({ output_format: $event.value })"
+        i18n-aria-label="@@music.format"
+        aria-label="Audio format"
+        data-testid="format"
+      >
+        <mat-button-toggle value="mp3">mp3</mat-button-toggle>
+        <mat-button-toggle value="wav">wav</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.artist">Artist</mat-label>
+        <input
+          matInput
+          data-testid="artist"
+          [value]="store.settings().artist ?? ''"
+          [placeholder]="store.config()?.project ?? ''"
+          (change)="store.updateSettings({ artist: $any($event.target).value.trim() })"
+        />
+        <mat-hint i18n="@@music.artistHint">It goes in the tags of every mp3 (with the title, the album and the lyrics)</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.cover">Cover</mat-label>
+        <mat-select data-testid="cover" [value]="store.settings().cover ?? 'off'" (selectionChange)="setCover($event.value)">
+          <mat-option value="off" i18n="@@music.coverNone">None</mat-option>
+          <mat-option value="auto" [disabled]="!hasImageModel()" i18n="@@music.coverAuto">Automatic (a picture made from the style of each song)</mat-option>
+        </mat-select>
+        <mat-hint i18n="@@music.coverNote">It takes about 20 s per song and goes inside the mp3; a track can use a picture of your own</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.loudness">Loudness of the songs</mat-label>
+        <mat-select
+          data-testid="loudness"
+          [value]="loudnessValue()"
+          (selectionChange)="store.updateSettings({ loudness_lufs: $event.value === '' ? undefined : +$event.value })"
+        >
+          <mat-option value="" i18n="@@music.loudnessNone">Leave it as the engine makes it</mat-option>
+          <mat-option value="-14" i18n="@@music.loudness14">Even them to −14 LUFS (the level of the music platforms)</mat-option>
+          <mat-option value="-16" i18n="@@music.loudness16">Even them to −16 LUFS (a bit softer)</mat-option>
+        </mat-select>
+        <mat-hint i18n="@@music.loudnessNote">On export every song is raised or lowered to that level; the mp3 is encoded once more</mat-hint>
+      </mat-form-field>
+
+      @if (engines.heartmulaAvailable() || engines.diffrhythm2Available() || service()) {
+        <mat-form-field class="model">
+          <mat-label i18n="@@music.generator">Generator</mat-label>
+          <mat-select data-testid="generator" [value]="store.settings().generator ?? 'ace-step'" (selectionChange)="setGenerator($event.value)">
+            <mat-option value="ace-step" i18n="@@music.generatorAce">ACE-Step (fast, with every feature)</mat-option>
+            <mat-option value="heartmula" [disabled]="!engines.heartmulaAvailable()" i18n="@@music.generatorHeart">HeartMuLa (higher quality, slower, new songs only, with lyrics or instrumental)</mat-option>
+            <mat-option value="diffrhythm2" [disabled]="!engines.diffrhythm2Available()" i18n="@@music.generatorDr2">DiffRhythm2 (full songs in half a minute; English lyrics only, no instrumentals, references or tasks)</mat-option>
+          </mat-select>
+          @if (heart() && !engines.heartmulaAvailable()) {
+            <mat-hint class="error" data-testid="generator-unavailable" i18n="@@music.generatorGone">HeartMuLa is no longer available: check Settings or the container.</mat-hint>
+          } @else if (dr2() && !engines.diffrhythm2Available()) {
+            <mat-hint class="error" data-testid="generator-unavailable" i18n="@@music.generatorGoneDr2">DiffRhythm2 is no longer available: check Settings or the container.</mat-hint>
+          } @else if (dr2()) {
+            <mat-hint i18n="@@music.generatorDr2Hint">It needs style tags on every track, and the lyrics in English.</mat-hint>
+          } @else if (heart()) {
+            <mat-hint i18n="@@music.generatorHeartHint">It needs style tags on each track; it ignores key, time signature, bpm and references.</mat-hint>
+          } @else {
+            <mat-hint i18n="@@music.generatorAceHint">With HeartMuLa songs take longer but sound much better.</mat-hint>
+          }
+        </mat-form-field>
+      } @else if (engines.heartmulaInstallable()) {
+        <p class="note" data-testid="heartmula-install" i18n="@@music.heartInstall">
+          There is a higher-quality generator (HeartMuLa) that is not installed yet: in Models, Music tab, install it from the catalog.
+        </p>
+      }
+      @if (!dr2() && engines.diffrhythm2Installable() && !engines.heartmulaAvailable()) {
+        <p class="note" data-testid="diffrhythm2-install" i18n="@@music.dr2Install">
+          Another generator (DiffRhythm2, songs in English in half a minute) is not installed yet: in Models, Music tab, install it from the catalog.
+        </p>
+      }
+      @if (containerStopped()) {
+        <p class="server-error" role="alert" data-testid="container-stopped">
+          <mat-icon inline>error</mat-icon>
+          <span i18n="@@music.containerStopped">This generator's container is stopped: start it from Environment to create songs.</span>
+          <a routerLink="/environment" i18n="@@music.seeEnvironmentContainer">Go to Environment</a>
+        </p>
+      }
+      @if (dr2()) {
+        <p class="note" role="note" data-testid="dr2-notice" i18n="@@music.dr2Notice">
+          DiffRhythm2 reads English lyrics only, makes no instrumentals and does not transform songs or use references: that is why those controls are not shown.
+        </p>
+        @if (dr2Unmakeable().length > 0) {
+          <p class="server-error" role="alert" data-testid="dr2-unmakeable">
+            <mat-icon inline>error</mat-icon>
+            <span i18n="@@music.dr2Unmakeable">This generator cannot make these tracks, which have not been touched:</span>
+            <span class="mo-data">{{ dr2Unmakeable().join(', ') }}</span>
+          </p>
+        }
+      }
+
+      @if (!service()) {
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.lmModel">Language model</mat-label>
+        <mat-select
+          data-testid="lm-model"
+          [value]="lmValue()"
+          (selectionChange)="store.updateSettings({ lm_model: $event.value })"
+        >
+          <mat-option value="" i18n="@@music.modelDefault">— the default one —</mat-option>
+          @for (o of lmOptions(); track o.value) {
+            <mat-option [value]="o.value">
+              <span class="mo-data">{{ o.value }}</span>
+              @if (o.missing) {
+                <span class="missing" i18n="@@music.notOnDisk"> ⚠ not on disk</span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="model" subscriptSizing="dynamic">
+        <mat-label i18n="@@music.quality">Quality</mat-label>
+        <mat-select data-testid="quality" [value]="tierValue()" (selectionChange)="setTier($event.value)">
+          @if (tierValue() === '') {
+            <mat-option value="" disabled i18n="@@music.tier.custom">Custom (model, steps or shift set by hand)</mat-option>
+          }
+          @for (t of tiers(); track t.id) {
+            <mat-option [value]="t.id" [disabled]="!t.installed && t.id !== tierValue()" [matTooltip]="t.hint">
+              {{ t.label }}
+              @if (!t.installed) {
+                <span class="missing" i18n="@@music.tier.notInstalled"> ⚠ model not installed</span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint i18n="@@music.qualityHint">Picks the synthesis model and steps in one go; you can fine-tune them by hand below.</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.synthModel">Synthesis model</mat-label>
+        <mat-select
+          data-testid="synth-model"
+          [value]="synthValue()"
+          (selectionChange)="store.updateSettings({ synth_model: $event.value })"
+        >
+          <mat-option value="" i18n="@@music.modelDefault">— the default one —</mat-option>
+          @for (o of synthOptions(); track o.value) {
+            <mat-option [value]="o.value">
+              <span class="mo-data">{{ o.value }}</span>
+              @if (o.missing) {
+                <span class="missing" i18n="@@music.notOnDisk"> ⚠ not on disk</span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="model" subscriptSizing="dynamic">
+        <mat-label i18n="@@music.engine">Engine</mat-label>
+        <mat-select data-testid="engine" [value]="store.settings().engine ?? 'cli'" (selectionChange)="store.setEngine($event.value)">
+          <mat-option value="cli" i18n="@@music.engineCli">Programs (one process per phase)</mat-option>
+          <mat-option value="server" i18n="@@music.engineServer">Server (ace-server)</mat-option>
+        </mat-select>
+        <mat-hint i18n="@@music.engineHint">The server keeps the models loaded and synthesizes faster, but holds GPU memory for the whole run.</mat-hint>
+      </mat-form-field>
+
+      @if (store.settings().engine === 'server') {
+        <mat-checkbox
+          data-testid="keep-loaded"
+          [checked]="store.settings().keep_loaded !== false"
+          (change)="store.updateSettings({ keep_loaded: $event.checked ? undefined : false })"
+          i18n="@@music.keepLoaded"
+          >Keep the models loaded</mat-checkbox
+        >
+      }
+
+      <mat-form-field class="narrow">
+        <mat-label i18n="@@music.steps">Steps</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          class="mo-data"
+          data-testid="steps"
+          [value]="store.settings().inference_steps ?? ''"
+          (change)="setNumber('inference_steps', $any($event.target).value)"
+          i18n-placeholder="@@music.autoPlural"
+          placeholder="automatic"
+        />
+      </mat-form-field>
+      }
+
+      <mat-form-field class="prefix">
+        <mat-label i18n="@@music.stylePrefix">Style shared by all tracks</mat-label>
+        <input
+          matInput
+          data-testid="style-prefix"
+          [value]="store.settings().style_prefix ?? ''"
+          (change)="store.updateSettings({ style_prefix: $any($event.target).value })"
+          i18n-placeholder="@@music.stylePrefixPlaceholder"
+          placeholder="warm analog production, no autotune"
+        />
+        <mat-hint i18n="@@music.stylePrefixHint">It is added in front of each track's style.</mat-hint>
+      </mat-form-field>
+
+      <app-style-templates
+        class="prefix-templates"
+        testId="prefix-templates"
+        [text]="store.settings().style_prefix ?? ''"
+        (changed)="store.updateSettings({ style_prefix: $event })"
+      />
+
+      <mat-form-field class="model">
+        <mat-label i18n="@@music.vocalsDefault">Default voice</mat-label>
+        <mat-select
+          data-testid="default-vocals"
+          [value]="store.settings().vocals ?? ''"
+          (selectionChange)="store.updateSettings({ vocals: $event.value })"
+        >
+          <mat-option value="" i18n="@@music.vocalsAuto">Automatic (the model picks it)</mat-option>
+          @for (v of vocalStyles; track v.value) {
+            <mat-option [value]="v.value">{{ v.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint i18n="@@music.vocalsDefaultHint">For tracks that don't pick their own.</mat-hint>
+      </mat-form-field>
+
+      @if (showAdapters()) {
+        <mat-form-field class="model">
+          <mat-label i18n="@@music.adapter">Adapter (LoRA)</mat-label>
+          <mat-select
+            data-testid="adapter"
+            [value]="store.settings().adapter ?? ''"
+            (selectionChange)="store.updateSettings({ adapter: $event.value })"
+          >
+            <mat-option value="" i18n="@@music.adapterNone">— none —</mat-option>
+            @for (o of adapterChoices(); track o.value) {
+              <mat-option [value]="o.value">
+                <span class="mo-data">{{ o.value }}</span>
+                @if (o.missing) {
+                  <span class="missing" i18n="@@music.notOnDisk"> ⚠ not on disk</span>
+                }
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@music.adapterScale">Strength</mat-label>
+          <input
+            matInput
+            type="number"
+            min="0"
+            step="0.1"
+            class="mo-data"
+            data-testid="adapter-scale"
+            [value]="store.settings().adapter_scale ?? ''"
+            (change)="setNumber('adapter_scale', $any($event.target).value)"
+            placeholder="1.0"
+          />
+        </mat-form-field>
+      } @else {
+        <p class="note" data-testid="no-adapters">
+          <ng-container i18n="@@music.noAdapters">Adapters (LoRA): none installed.</ng-container>
+          <a routerLink="/models" i18n="@@music.seeModels">Install them in Models (Music tab)</a>
+        </p>
+      }
+
+      <mat-form-field class="gpu">
+        <mat-label>GPU</mat-label>
+        <mat-select
+          multiple
+          data-testid="gpu"
+          [value]="gpuPicked()"
+          (selectionChange)="setGpu($event.value)"
+          i18n-placeholder="@@music.gpuNone"
+          placeholder="Not set"
+        >
+          @for (g of env.gpus(); track g.index) {
+            <mat-option [value]="'' + g.index">
+              <span class="mo-data">{{ g.index }}</span> · {{ g.name }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint i18n="@@music.gpuHint">Not set: with two or more songs, every card that fits is used at the same time</mat-hint>
+      </mat-form-field>
+
+      <mat-checkbox [checked]="store.force()" (change)="store.force.set($event.checked)" data-testid="force">
+        force
+      </mat-checkbox>
+    </div>
+  </mat-expansion-panel>
+
+  @if (store.stream(); as stream) {
+    <mo-panel heading="Creating" i18n-heading="@@music.running" data-testid="run-panel">
+      <button
+        moPanelActions
+        mat-stroked-button
+        class="danger"
+        data-testid="cancel"
+        [disabled]="!store.running()"
+        data-cancel (click)="cancel()"
+      >
+        <mat-icon>stop_circle</mat-icon>
+        <ng-container i18n="@@music.cancel">Cancel</ng-container>
+      </button>
+      <p class="run-state mo-data" data-testid="run-state">{{ state() }}</p>
+      @if (store.queue(); as q) {
+        @if (q.total > 1) {
+          <p class="run-state mo-data" data-testid="queue" i18n="@@music.queue">Track {{ q.done + 1 }} of {{ q.total }}</p>
+        }
+      }
+      <app-phase-strip [events]="stream.events()" />
+    </mo-panel>
+  }
+
+  @if (store.pinned(); as msg) {
+    <p class="pinned mo-data">{{ msg }} ✓</p>
+  }
+
+  @if (store.tracks().length === 0) {
+    <mo-empty-state
+      icon="library_music"
+      message="This project has no tracks yet."
+      i18n-message="@@music.emptyTitle"
+      hint="Add a track, describe the style and click Create."
+      i18n-hint="@@music.emptyHint"
+    >
+      <button mat-flat-button (click)="addTrack()">
+        <mat-icon>add</mat-icon>
+        <ng-container i18n="@@music.addTrack">Add track</ng-container>
+      </button>
+    </mo-empty-state>
+  } @else {
+    @if (service() && store.results().length > 0) {
+      <p class="note" role="note" data-testid="transform-engine-note" i18n="@@music.transformEngine">
+        Repainting a part and separating into instruments are done by ACE-Step, not by this generator. To do it with one of these songs, upload it as a source to a project that uses ACE-Step.
+      </p>
+    }
+    @if (favoriteTotal() > 0) {
+      <div class="favbar" data-testid="favbar">
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="only-favorites"
+          [attr.aria-pressed]="onlyFavorites()"
+          [class.favbar__on]="onlyFavorites()"
+          (click)="onlyFavorites.set(!onlyFavorites())"
+        >
+          <mat-icon>{{ onlyFavorites() ? 'star' : 'star_border' }}</mat-icon>
+          <ng-container i18n="@@music.onlyFavorites">Only with favorites</ng-container> ({{ favoriteTracks() }})
+        </button>
+      </div>
+    }
+    @if (picked().size > 0) {
+      <div class="pickbar" role="status" data-testid="pickbar">
+        <span class="pickbar__count"
+          >{{ pickedLabel(picked().size) }}</span
+        >
+        <span class="spacer"></span>
+        <button mat-flat-button type="button" data-testid="mix-picked" [disabled]="store.running()" (click)="mixPicked()">
+          <mat-icon>blender</mat-icon>
+          <ng-container i18n="@@music.mixPicked">Mix these</ng-container>
+        </button>
+        <button mat-button type="button" data-testid="clear-picked" (click)="picked.set(emptyPick)">
+          <ng-container i18n="@@music.clearPicked">Clear selection</ng-container>
+        </button>
+      </div>
+    }
+    @for (t of store.tracks(); track $index; let i = $index) {
+      <mat-expansion-panel
+        class="panel track"
+        [class.track--hidden]="onlyFavorites() && store.favoriteCount(t.id) === 0"
+        [attr.data-testid]="'track-' + i"
+        [attr.aria-label]="t.id"
+        [expanded]="openTracks().has(i)"
+        (expandedChange)="setOpen(i, $event)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title class="mo-data">
+            <mat-checkbox
+              class="track__pick"
+              [attr.data-testid]="'pick-track-' + i"
+              [checked]="picked().has(t.id)"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()"
+              (change)="togglePick(t.id)"
+              i18n-aria-label="@@music.pickTrack"
+              aria-label="Pick this track for a mix"
+            />
+            {{ t.id }}
+            @if (store.favoriteCount(t.id) > 0) {
+              <mat-icon class="track__fav" inline data-testid="track-favorite" i18n-aria-label="@@music.hasFavorite" aria-label="Has a favorite song">star</mat-icon>
+            }
+            @if (trackInvalid(i)) {
+              <mat-icon class="track__alert" inline data-testid="track-invalid" i18n-aria-label="@@music.trackInvalid" aria-label="This track has something to fix">error</mat-icon>
+            }
+          </mat-panel-title>
+          <mat-panel-description>{{ excerpt(t.prompt) }}</mat-panel-description>
+        </mat-expansion-panel-header>
+        <header class="track__head">
+          <span class="spacer"></span>
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="i === 0"
+            (click)="moveTrack(i, i - 1)"
+            i18n-aria-label="@@music.moveUp"
+            aria-label="Move track up"
+          >
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="i === store.tracks().length - 1"
+            (click)="moveTrack(i, i + 1)"
+            i18n-aria-label="@@music.moveDown"
+            aria-label="Move track down"
+          >
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            class="danger"
+            data-testid="remove-track"
+            (click)="removeTrack(i)"
+            i18n-aria-label="@@music.removeAction"
+            aria-label="Remove track"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            data-testid="create-track"
+            [disabled]="store.running() || !!store.validation().tracks[i]?.prompt || (store.dirty() && !store.canSave()) || containerStopped()"
+            (click)="store.launch(t.id)"
+          >
+            <mat-icon>music_note</mat-icon>
+            <ng-container i18n="@@music.createTrack">Create this track</ng-container>
+          </button>
+        </header>
+        <app-track-form [index]="i" />
+        <app-track-results [trackId]="t.id" (extended)="showTrack($event)" />
+      </mat-expansion-panel>
+    }
+    <button mat-stroked-button type="button" data-testid="add-track" (click)="addTrack()">
+      <mat-icon>add</mat-icon>
+      <ng-container i18n="@@music.addTrack">Add track</ng-container>
+    </button>
+
+    <mat-expansion-panel class="panel" data-testid="mixes" [expanded]="store.mixes().length > 0">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@mix.title">Mixes</mat-panel-title>
+        <mat-panel-description class="mo-data" data-testid="mixes-count">{{ store.mixes().length }}</mat-panel-description>
+      </mat-expansion-panel-header>
+      <p class="mixes__intro" i18n="@@mix.intro">
+        Combine songs and audio into one: stacked on top of each other or one after another. Drag the tracks in time, trim them and click Mix. For them to sound good together, use the same bpm and the same key in the tracks. Each mix opens in its own mixer.
+      </p>
+      @for (m of store.mixes(); track $index; let i = $index) {
+        <div class="mixrow" [attr.data-testid]="'mixrow-' + i">
+          <mat-icon aria-hidden="true">blender</mat-icon>
+          @if (renaming() === m.id) {
+            <input
+              class="mixrow__rename mo-data"
+              [attr.data-testid]="'rename-mix-input-' + i"
+              [value]="m.id"
+              (keydown.enter)="finishRename(i, $any($event.target).value)"
+              (keydown.escape)="renaming.set(null)"
+              (blur)="finishRename(i, $any($event.target).value)"
+              i18n-aria-label="@@mix.renameField"
+              aria-label="Mix name"
+              autofocus
+            />
+          } @else {
+            <span class="mixrow__name mo-data">{{ m.id }}</span>
+          }
+          <span class="mixrow__meta">{{ tracksLabel(m.clips.length) }}</span>
+          @if (store.mixValidation().mixes[i]?.id; as idError) {
+            <span class="mixrow__error" role="alert">{{ idError }}</span>
+          }
+          @if (store.mixOutdated(m.id)) {
+            <span class="mixrow__outdated" role="status" [attr.data-testid]="'mix-outdated-' + i">
+              <mat-icon inline>update</mat-icon>
+              <ng-container i18n="@@mix.rowOutdated">Out of date: a track changed</ng-container>
+            </span>
+            <button
+              mat-stroked-button
+              type="button"
+              [attr.data-testid]="'remix-mix-' + i"
+              [disabled]="store.running() || (store.dirty() && !store.canSave())"
+              (click)="store.mixNow(m.id)"
+            >
+              <mat-icon>blender</mat-icon>
+              <ng-container i18n="@@mix.remix">Mix again</ng-container>
+            </button>
+          }
+          <span class="spacer"></span>
+          @if (mixSong(m.id)) {
+            <button
+              mat-icon-button
+              type="button"
+              [attr.data-testid]="'listen-mix-' + i"
+              [attr.aria-pressed]="listening() === m.id"
+              (click)="toggleListen(m.id)"
+              i18n-aria-label="@@mix.listen"
+              aria-label="Listen to the mix"
+            >
+              <mat-icon>{{ listening() === m.id ? 'stop_circle' : 'play_circle' }}</mat-icon>
+            </button>
+          }
+          <button mat-icon-button type="button" [attr.data-testid]="'rename-mix-' + i" (click)="renaming.set(m.id)" i18n-aria-label="@@mix.rename" aria-label="Rename">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button type="button" [attr.data-testid]="'duplicate-mix-' + i" (click)="duplicateMix(i)" i18n-aria-label="@@mix.duplicate" aria-label="Duplicate the mix">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+          <button mat-icon-button type="button" class="mixrow__remove" [attr.data-testid]="'remove-mix-' + i" (click)="removeMix(i)" i18n-aria-label="@@mix.removeRow" aria-label="Remove the mix">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button mat-stroked-button type="button" [attr.data-testid]="'open-mix-' + i" (click)="openMix(i)">
+            <mat-icon>open_in_full</mat-icon>
+            <ng-container i18n="@@mix.open">Open mixer</ng-container>
+          </button>
+        </div>
+        @if (listening() === m.id && mixSong(m.id); as song) {
+          <div class="mixrow__player" [attr.data-testid]="'mix-player-' + i">
+            <mo-audio-player [src]="song.url" [label]="m.id" (failed)="store.markMissing(store.mixResult(m.id)!.file)" />
+          </div>
+        }
+      }
+      <button mat-stroked-button type="button" data-testid="add-mix" (click)="addMix()">
+        <mat-icon>add</mat-icon>
+        <ng-container i18n="@@mix.add">Add mix</ng-container>
+      </button>
+    </mat-expansion-panel>
+  }
+}

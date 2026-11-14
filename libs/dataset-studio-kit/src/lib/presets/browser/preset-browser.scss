@@ -1,0 +1,141 @@
+:host {
+  display: block;
+}
+
+.browser {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h3,
+h4 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+h4 {
+  font-size: var(--lab-fs-body);
+}
+
+p {
+  margin: 0;
+}
+
+.hint,
+.tags,
+.source,
+.label {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.chips,
+.pinned {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+}
+
+.chip {
+  height: 1.75rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+}
+
+.chip--on {
+  border-color: var(--lab-accent);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--lab-space-2);
+}
+
+.badge {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.badge--warn {
+  border-color: var(--lab-warn);
+  color: var(--lab-warn);
+}
+
+.line {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+
+  button {
+    height: 2rem;
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: transparent;
+    color: var(--lab-ink);
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+  }
+
+  .primary {
+    border-color: var(--lab-accent);
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  .danger {
+    border-color: var(--lab-danger);
+    color: var(--lab-danger);
+  }
+}

@@ -1,0 +1,132 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+// The form scrolls inside the panel; the switch above it and the Generate bar below it stay where they are.
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline: var(--lab-space-1);
+  margin-inline: calc(-1 * var(--lab-space-1));
+  scrollbar-width: thin;
+  scrollbar-color: var(--lab-control-line) transparent;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lab-space-1);
+  padding: var(--lab-space-1);
+  margin-bottom: var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.mode {
+  min-height: var(--lab-control-h);
+  border: 0;
+  border-radius: calc(var(--lab-radius) - 2px);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &.on {
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.reason,
+.todo,
+.error {
+  margin: 0 0 var(--lab-space-2);
+  font-size: var(--lab-fs-meta);
+}
+
+.reason,
+.todo {
+  color: var(--lab-ink-dim);
+}
+
+.error {
+  color: var(--lab-danger);
+}
+
+.start {
+  min-height: var(--lab-control-h);
+  margin-bottom: var(--lab-space-2);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.go {
+  padding-top: var(--lab-space-3);
+  border-top: 1px solid var(--lab-line);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+}
+
+// The generator is a small select beside the button, so the form above has the whole height of the panel. Material's select
+// is never narrower than 11rem, so in a narrow panel it keeps that much instead of running over the button.
+.generator {
+  flex: 0 0 max(38%, 11rem);
+  min-width: 0;
+}
+
+.generate {
+  flex: 1;
+  // as tall as the generator select beside it: the height the host gave Material's fields (3rem when it gave none)
+  height: var(--mat-form-field-container-height, 3rem);
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  // Disabled is a quiet surface with a reason beside it, not a washed-out accent (which also failed contrast in light).
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    box-shadow: inset 0 0 0 1px var(--lab-control-line);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 3px;
+  }
+}

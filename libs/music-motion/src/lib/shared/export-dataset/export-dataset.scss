@@ -1,0 +1,35 @@
+:host {
+  display: contents;
+}
+
+.export {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.6;
+  }
+}
+
+.saved,
+.problem {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.saved {
+  color: var(--lab-success);
+}
+
+.problem {
+  color: var(--lab-danger);
+}

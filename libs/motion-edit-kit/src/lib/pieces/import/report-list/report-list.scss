@@ -1,0 +1,44 @@
+.scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--lab-fs-meta);
+}
+
+th,
+td {
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border-bottom: 1px solid var(--lab-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--lab-ink-dim);
+  font-weight: var(--lab-fw-control);
+}
+
+.item,
+.why {
+  overflow-wrap: anywhere;
+}
+
+.why {
+  color: var(--lab-ink-dim);
+}
+
+.action-create td:nth-child(3) {
+  color: var(--lab-success);
+}
+
+.action-impossible td:nth-child(3),
+.failed {
+  color: var(--lab-danger);
+}
+
+.action-keep-local td:nth-child(3) {
+  color: var(--lab-warn);
+}

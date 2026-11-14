@@ -1,0 +1,125 @@
+section {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+}
+
+.drop {
+  display: grid;
+  gap: var(--lab-space-1);
+  justify-items: center;
+  box-sizing: border-box;
+  padding: var(--lab-space-2);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+  color: var(--lab-ink-dim);
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  &:hover,
+  &.dragging {
+    border-color: var(--lab-accent);
+    color: var(--lab-ink);
+  }
+
+  &.dragging {
+    background: color-mix(in srgb, var(--lab-accent) 12%, transparent);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+// The empty zone is only the upload icon (its name is for screen readers and the tooltip): a button beside the other
+// frame did not fit in half the panel.
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+// The picture takes the width its frame gives it (half the panel: the end frame sits beside it), its two buttons under it.
+.preview {
+  display: grid;
+  gap: var(--lab-space-2);
+
+  img {
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius-panel);
+    object-fit: cover;
+  }
+}
+
+// Two small icon buttons side by side, as wide together as the picture; their names are for screen readers and the tooltip.
+.preview-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lab-space-2);
+}
+
+.glyph {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: var(--lab-control-h);
+  padding: 0;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+
+  &.retouch {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+}
+
+.error {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  color: var(--lab-danger);
+}

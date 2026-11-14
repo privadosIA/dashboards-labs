@@ -1,0 +1,76 @@
+:host {
+  position: relative;
+  display: inline-block;
+}
+
+.export {
+  position: relative;
+}
+
+.ctl {
+  height: 2rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  font-size: var(--lab-fs-body);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--lab-surface-high);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--lab-space-1));
+  left: 0;
+  z-index: 10;
+  min-width: 18rem;
+  margin: 0;
+  padding: var(--lab-space-1);
+  list-style: none;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-high);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--lab-ink) 20%, transparent);
+
+  button {
+    display: block;
+    width: 100%;
+    padding: var(--lab-space-2) var(--lab-space-3);
+    border: 0;
+    border-radius: var(--lab-radius);
+    background: transparent;
+    color: var(--lab-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background: var(--lab-accent);
+      color: var(--lab-on-accent);
+      outline: none;
+    }
+
+    &:disabled {
+      color: var(--lab-ink-dim);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.why {
+  margin: 0;
+  padding: 0 var(--lab-space-3) var(--lab-space-2);
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}

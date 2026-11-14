@@ -1,0 +1,167 @@
+@if (track(); as t) {
+  <div class="task" data-testid="track-task">
+    <mat-form-field class="kind">
+      <mat-label i18n="@@music.task">What to do</mat-label>
+      <mat-select data-testid="task-select" [value]="t.task ?? ''" (selectionChange)="setTask($event.value)">
+        @for (o of tasks; track o.value) {
+          <mat-option [value]="o.value">{{ o.label }}</mat-option>
+        }
+      </mat-select>
+      @if (hint(); as h) {
+        <mat-hint>{{ h }}</mat-hint>
+      }
+    </mat-form-field>
+
+      <div class="source">
+        <mat-form-field class="file">
+          @if (t.task) {
+            <mat-label i18n="@@music.source">Source song</mat-label>
+          } @else {
+            <mat-label i18n="@@music.reference">Reference (song or video)</mat-label>
+          }
+          <mat-select data-testid="source-select" [value]="current()" (selectionChange)="setSource($event.value)">
+            @if (!t.task) {
+              <mat-option value="" i18n="@@music.referenceNone">— no reference —</mat-option>
+            }
+            @if (sourceMissing()) {
+              <mat-option [value]="current()">
+                <span class="mo-data">{{ current() }}</span>
+                <span class="missing" i18n="@@music.notOnDisk"> ⚠ not on disk</span>
+              </mat-option>
+            }
+            @for (s of store.audioSources(); track s.name) {
+              <mat-option [value]="s.name"><span class="mo-data">{{ s.name }}</span></mat-option>
+            }
+          </mat-select>
+          @if (error('source'); as err) {
+            <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+          } @else if (!t.task) {
+            <mat-hint i18n="@@music.referenceHint">The sound of this recording guides the new song (it is not a remix).</mat-hint>
+          } @else if (store.audioSources().length === 0) {
+            <mat-hint i18n="@@music.sourceNone">Upload audio or use a song you already created.</mat-hint>
+          }
+        </mat-form-field>
+
+        <input #file type="file" accept=".mp3,.wav,.mp4,.mov,.mkv,.webm,.avi,audio/mpeg,audio/wav,video/*" hidden (change)="upload(file)" />
+        <button mat-stroked-button type="button" data-testid="source-upload" [disabled]="store.sourceBusy()" (click)="file.click()">
+          <mat-icon>upload_file</mat-icon>
+          <ng-container i18n="@@music.sourceUpload">Upload audio or video</ng-container>
+        </button>
+
+        <app-source-url [projectId]="store.projectId()" (added)="useUrlSource($event)" />
+
+        @if (exported().length > 0) {
+          <mat-form-field class="file">
+            <mat-label i18n="@@music.sourceExport">Use a created song</mat-label>
+            <mat-select data-testid="source-export" [value]="''" (selectionChange)="pickExport($event.value)">
+              @for (e of exported(); track exportKey(e)) {
+                <mat-option [value]="e.file"><span class="mo-data">{{ exportLabel(e) }}</span></mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+      </div>
+
+      @if (store.sourceError(); as msg) {
+        <p class="server-error" role="alert" data-testid="source-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ msg }}</span>
+        </p>
+      }
+
+      @if (current() && !sourceMissing()) {
+        @if (t.task === 'repaint') {
+          <app-range-picker
+            [file]="sourceFile()"
+            [version]="sourceVersion()"
+            [start]="t.repaint_start"
+            [end]="t.repaint_end"
+            [bpm]="t.bpm"
+            (rangeChange)="setRange($event)"
+          />
+        } @else {
+          <mo-audio-player [src]="sourceUrl(current())" [label]="current()" />
+        }
+      }
+
+      @if (t.task && current() && !sourceMissing() && !store.running()) {
+        <button mat-stroked-button type="button" class="separate" data-testid="source-separate" (click)="separate()">
+          <mat-icon>call_split</mat-icon>
+          <ng-container i18n="@@music.separate">Separate into instruments</ng-container>
+        </button>
+      }
+
+      @if (t.task) {
+      <div class="fields">
+        @if (t.task === 'cover' || t.task === 'cover-nofsq') {
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@music.strength">Source strength</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              max="1"
+              step="0.1"
+              class="mo-data"
+              data-testid="cover-strength"
+              [value]="t.cover_strength ?? ''"
+              (change)="setNumber('cover_strength', $any($event.target).value)"
+              i18n-placeholder="@@music.strengthDefault"
+              placeholder="1"
+            />
+            @if (error('strength'); as err) {
+              <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+            } @else {
+              <mat-hint i18n="@@music.strengthHint">0 = free, 1 = follows the source</mat-hint>
+            }
+          </mat-form-field>
+        }
+        @if (t.task === 'repaint') {
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@music.repaintStart">From (s)</mat-label>
+            <input
+              matInput
+              type="number"
+              class="mo-data"
+              data-testid="repaint-start"
+              [value]="t.repaint_start ?? ''"
+              (change)="setNumber('repaint_start', $any($event.target).value)"
+              placeholder="0"
+            />
+          </mat-form-field>
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@music.repaintEnd">To (s)</mat-label>
+            <input
+              matInput
+              type="number"
+              class="mo-data"
+              data-testid="repaint-end"
+              [value]="t.repaint_end ?? ''"
+              (change)="setNumber('repaint_end', $any($event.target).value)"
+              i18n-placeholder="@@music.repaintEndDefault"
+              placeholder="the end"
+            />
+            @if (error('region'); as err) {
+              <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+            } @else {
+              <mat-hint i18n="@@music.repaintHint">A negative start or an end past the audio extends it</mat-hint>
+            }
+          </mat-form-field>
+        }
+        @if (t.task === 'extract') {
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@music.stem">Extract</mat-label>
+            <mat-select data-testid="extract-stem" [value]="t.stem ?? ''" (selectionChange)="setStem($event.value)">
+              @for (s of stems; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+            @if (error('stem'); as err) {
+              <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+            }
+          </mat-form-field>
+        }
+      </div>
+      }
+  </div>
+}

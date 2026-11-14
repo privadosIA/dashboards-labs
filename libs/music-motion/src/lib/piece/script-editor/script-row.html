@@ -1,0 +1,28 @@
+<article class="row" [attr.data-testid]="'row-' + piece().id">
+  <header>
+    <h3>{{ t.piece }} {{ index() + 1 }}</h3>
+    <span class="span">{{ clock(piece().start) }} – {{ clock(piece().end) }}@if (piece().section) { · {{ piece().section }} }</span>
+    <button type="button" class="show" data-testid="show-on-map" (click)="show.emit()">{{ t.showOnMap }}</button>
+  </header>
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (valueChange)="changed($event)" />
+  @if (part(); as part) {
+    <lab-part-params [part]="part" [values]="piece().params" [level]="level()" [locked]="locked()" (paramsChange)="params.emit($event)" />
+  }
+  <app-extra-parts
+    [piece]="piece()"
+    [catalog]="catalog()"
+    [level]="level()"
+    [locked]="locked()"
+    (add)="addExtra.emit($event)"
+    (remove)="removeExtra.emit($event)"
+    (changePart)="extraPart.emit($event)"
+    (changeParams)="extraParams.emit($event)"
+  />
+  <app-piece-design [piece]="piece()" [catalog]="catalog()" [song]="song()" [locked]="locked()" (designChange)="pieceDesign.emit($event)" />
+  @if (style() === 'illustrated') {
+    <app-stage-editor [stage]="piece().stage" [catalog]="catalog()" [locked]="locked()" (stageChange)="stage.emit($event)" />
+  }
+  @if (problem()) {
+    <p class="problem" role="alert" data-testid="row-problem">{{ problem() }}</p>
+  }
+</article>

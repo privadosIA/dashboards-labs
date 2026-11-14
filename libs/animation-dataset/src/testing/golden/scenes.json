@@ -1,0 +1,115 @@
+{
+  "format": "music-motion-dataset",
+  "version": 2,
+  "exportedAt": "2026-11-13T10:00:00.000Z",
+  "animation": {
+    "title": "Quiet Town",
+    "song": {
+      "project": "demo-musica",
+      "trackId": "track-1",
+      "variant": 0,
+      "title": "Quiet Town",
+      "seconds": 48
+    },
+    "options": {
+      "style": "typographic",
+      "level": "medium",
+      "fps": 30,
+      "resolution": "1280x720"
+    },
+    "design": {
+      "dark": "#101018",
+      "light": "#f4f1ea",
+      "accent": "#ff5a3c",
+      "display": "Space Grotesk",
+      "body": "Inter",
+      "defaultMode": "dark",
+      "modes": {},
+      "concept": "A quiet town that wakes up.",
+      "transitionSeconds": 0.3,
+      "theme": {
+        "css": "#verse{letter-spacing:.08em}",
+        "assets": {
+          "mascot": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\"><circle cx=\"5\" cy=\"5\" r=\"4\"/></svg>"
+        },
+        "hud": {
+          "tl": "QUIET TOWN",
+          "br": "00:48"
+        }
+      }
+    },
+    "script": {
+      "version": 1,
+      "pieces": [
+        {
+          "id": "p1",
+          "start": 0,
+          "end": 24,
+          "part": "scene-old-1",
+          "transition_seconds": 0
+        },
+        {
+          "id": "p2",
+          "start": 24,
+          "end": 48,
+          "part": "scene-old-2"
+        }
+      ],
+      "layers": [
+        {
+          "id": "frame",
+          "items": [
+            {
+              "part": "hud-chrome",
+              "start": 0,
+              "end": 48
+            }
+          ]
+        },
+        {
+          "id": "film",
+          "items": [
+            {
+              "part": "grain",
+              "start": 0,
+              "end": 48,
+              "params": {
+                "amount": 0.1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "parts": [
+      {
+        "name": "scene-old-1",
+        "description": "a street lamp that turns on",
+        "levels": [
+          "simple",
+          "medium",
+          "advanced"
+        ],
+        "text": {
+          "request": "a street lamp that turns on",
+          "manifest": "{\n  \"name\": \"scene-old-1\",\n  \"description\": \"a street lamp that turns on\",\n  \"version\": 1,\n  \"verse\": \"own\",\n  \"scene\": {\n    \"piece\": \"old-piece\",\n    \"script_piece\": \"p1\"\n  },\n  \"params\": []\n}",
+          "fragment": "<div class=\"scene\"><p class=\"idea\">a street lamp that turns on</p></div>"
+        }
+      },
+      {
+        "name": "scene-old-2",
+        "description": "windows lighting up one by one",
+        "levels": [
+          "simple",
+          "medium",
+          "advanced"
+        ],
+        "text": {
+          "request": "windows lighting up one by one",
+          "manifest": "{\n  \"name\": \"scene-old-2\",\n  \"description\": \"windows lighting up one by one\",\n  \"version\": 1,\n  \"verse\": \"own\",\n  \"scene\": {\n    \"piece\": \"old-piece\",\n    \"script_piece\": \"p2\"\n  },\n  \"params\": []\n}",
+          "fragment": "<div class=\"scene\"><p class=\"idea\">windows lighting up one by one</p></div>"
+        }
+      }
+    ]
+  }
+}

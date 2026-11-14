@@ -1,0 +1,12 @@
+<audio
+  #audio
+  controls
+  preload="metadata"
+  [src]="src()"
+  [attr.aria-label]="label() || null"
+  (play)="onPlay()"
+  (pause)="onPause()"
+  (ended)="onEnded()"
+  (seeked)="onSeeked()"
+  (error)="failed.emit()"
+></audio>

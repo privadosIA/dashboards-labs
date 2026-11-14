@@ -1,0 +1,124 @@
+<mat-sidenav-container class="shell" [class.shell--rail]="!phone() && !mobileShell() && !section()" [class.shell--rail-collapsed]="collapsed()" [class.shell--tabs]="mobileShell()" [class.shell--window]="!!section()">
+  @if (!mobileShell() && !section()) {
+    <mat-sidenav
+      class="rail"
+      [class.rail--floating]="!phone()"
+      [class.rail--collapsed]="collapsed()"
+      [mode]="phone() ? 'over' : 'side'"
+      [opened]="!phone() || drawerOpen()"
+      [fixedInViewport]="phone()"
+    >
+      <div class="rail__brand" data-testid="brand">
+        <span class="rail__mark" aria-hidden="true"><mat-icon>play_arrow</mat-icon></span>
+        <span class="rail__name">mediaOrquestator</span>
+      </div>
+      <mat-nav-list class="rail__nav" aria-label="Sections" i18n-aria-label="@@shell.sections">
+        @for (item of visibleNav(); track item.label) {
+          <a
+            mat-list-item
+            [routerLink]="item.path"
+            [activated]="isActive(item)"
+            [matTooltip]="collapsed() ? item.label : ''"
+            matTooltipPosition="right"
+            [class.rail__item--active]="isActive(item)"
+            (click)="onNavClick()"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+      <div class="rail__spacer"></div>
+      <div class="rail__foot">
+      <div class="rail__conn">
+        <button mat-button type="button" (click)="connectionDialog.open()" data-testid="connection" [matTooltip]="collapsed() ? connectionLabel : ''" matTooltipPosition="right">
+          <mat-icon>lan</mat-icon>
+          <span class="rail__label" i18n="@@shell.connection">Connection</span>
+        </button>
+        @if (conn.remote()) {
+          <div class="rail__server mo-data" [title]="conn.server()">{{ conn.server() }}</div>
+        }
+      </div>
+      <mat-button-toggle-group
+        class="rail__lang"
+        [value]="lang"
+        (change)="setLang($event.value)"
+        hideSingleSelectionIndicator
+        aria-label="Language"
+        i18n-aria-label="@@shell.language"
+        data-testid="lang-switch"
+      >
+        <mat-button-toggle value="en" data-testid="lang-en">English</mat-button-toggle>
+        <mat-button-toggle value="es" data-testid="lang-es">Español</mat-button-toggle>
+      </mat-button-toggle-group>
+      <div class="rail__theme">
+        <mat-slide-toggle
+          [checked]="!simpleMode.simple()"
+          (change)="setSimple(!$event.checked)"
+          data-testid="advanced-toggle"
+          i18n="@@shell.advanced"
+          >Advanced version</mat-slide-toggle
+        >
+      </div>
+      <div class="rail__theme">
+        <mat-slide-toggle
+          [checked]="theme.light()"
+          (change)="theme.set($event.checked)"
+          data-testid="theme-toggle"
+          i18n="@@shell.lightTheme"
+          >Light theme</mat-slide-toggle
+        >
+      </div>
+      @if (!phone()) {
+        @if (railOpen()) {
+          <button mat-button type="button" class="rail__collapse" data-testid="rail-collapse" (click)="setRailOpen(false)">
+            <mat-icon>menu_open</mat-icon>
+            <span class="rail__label" i18n="@@shell.closeNav">Hide navigation</span>
+          </button>
+        } @else {
+          <button
+            mat-icon-button
+            type="button"
+            class="rail__collapse"
+            data-testid="rail-expand"
+            (click)="setRailOpen(true)"
+            i18n-aria-label="@@shell.openNav"
+            aria-label="Open navigation"
+            i18n-matTooltip="@@shell.openNav"
+            matTooltip="Open navigation"
+            matTooltipPosition="right"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+      }
+      </div>
+    </mat-sidenav>
+  }
+
+  <mat-sidenav-content>
+    @if (section(); as current) {
+      <app-section-header [title]="current.title" />
+    }
+    @if (phone() && !mobileShell() && !section()) {
+      <mat-toolbar class="topbar">
+        <button
+          mat-icon-button
+          type="button"
+          (click)="drawerOpen.set(!drawerOpen())"
+          i18n-aria-label="@@shell.openNav"
+          aria-label="Open navigation"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+      </mat-toolbar>
+    }
+    <app-status-banner />
+    <main class="content" [class.content--tabs]="mobileShell()" [class.content--section]="!!section()" [class.content--wide]="wide()">
+      <router-outlet />
+    </main>
+    @if (mobileShell() && !section()) {
+      <app-tab-bar [tabs]="tabs()" [moreLabel]="moreLabel" (more)="openMore()" />
+    }
+  </mat-sidenav-content>
+</mat-sidenav-container>

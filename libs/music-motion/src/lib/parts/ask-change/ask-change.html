@@ -1,0 +1,12 @@
+<section class="ask-change" data-testid="ask-change">
+  <h2>{{ t.askChangeTitle }}</h2>
+  <p class="hint">{{ t.askChangeHint }}</p>
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+  <app-assistant-field [(value)]="chosen" [disabled]="working()" />
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="ask-change-refused">{{ refused() }}</p>
+  }
+  <div class="actions">
+    <button type="button" class="ask" data-testid="ask-change-button" [disabled]="!valid() || working()" (click)="ask()">{{ working() ? t.askChangeBusy : t.askChangeAction }}</button>
+  </div>
+</section>

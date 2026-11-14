@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "id": "edit-reference",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Título",
+      "validation": {
+        "required": true,
+        "maxLength": 120,
+        "messages": {
+          "required": "Hace falta un título.",
+          "maxLength": "El título puede tener hasta 120 caracteres."
+        }
+      }
+    },
+    {
+      "key": "notes",
+      "type": "textarea",
+      "label": "Notas",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "maxLength": 2000,
+        "messages": {
+          "maxLength": "Las notas pueden tener hasta 2000 caracteres."
+        }
+      }
+    },
+    {
+      "key": "tags",
+      "type": "text",
+      "label": "Etiquetas, separadas por comas"
+    }
+  ]
+}

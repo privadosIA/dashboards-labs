@@ -1,0 +1,49 @@
+<details class="ask" data-testid="ask-part" [open]="open()">
+  <summary>
+    <h2>{{ t.ask }}</h2>
+  </summary>
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+
+  @switch (source()) {
+    @case ('frame') {
+      @if (references().length === 0) {
+        <p class="hint" data-testid="no-references">{{ t.noReferences }}</p>
+      } @else if (reference()) {
+        <div class="frames" data-testid="frames">
+          <h3>{{ t.frame }}</h3>
+          <ul>
+            @for (f of frames(); track $index) {
+              <li><button type="button" [class.on]="$index === frame()" [attr.aria-pressed]="$index === frame()" (click)="pickFrame($index)"><img [src]="src(f)" alt="" loading="lazy" /></button></li>
+            }
+          </ul>
+        </div>
+      }
+    }
+    @case ('file') {
+      <div class="file">
+        <label class="choose" for="part-file">{{ t.chooseFile }}</label>
+        <input #picker id="part-file" type="file" accept="image/png,image/jpeg,image/webp" data-testid="file" (change)="pickFile($event)" />
+        <span class="name" data-testid="file-name">{{ file()?.name ?? t.noFile }}</span>
+        @if (file()) {
+          <button type="button" data-testid="clear-file" (click)="clear(picker)">{{ t.clearFile }}</button>
+        }
+      </div>
+    }
+  }
+
+  @if (source() === 'none') {
+    <p class="hint" data-testid="no-picture">{{ t.noPictureNote }}</p>
+  } @else {
+    <p class="warning" data-testid="age-warning">{{ t.ageWarning }}</p>
+  }
+
+  <app-assistant-field [(value)]="chosen" [disabled]="working()" />
+
+  @if (pictureMissing()) {
+    <p class="problem" role="alert" data-testid="picture-problem">{{ t.pictureNeeded }}</p>
+  }
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+  <button type="button" class="submit" data-testid="ask" [disabled]="working()" (click)="ask()">{{ working() ? t.asking : t.askAction }}</button>
+</details>

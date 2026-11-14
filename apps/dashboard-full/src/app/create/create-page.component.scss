@@ -1,0 +1,512 @@
+// One column made for a thumb: the request cards above, the input stuck to the bottom.
+:host {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: calc(100dvh - var(--lab-space-7));
+}
+
+.head {
+  margin-bottom: var(--lab-space-3);
+
+  &__title {
+    margin: 0;
+    font-family: var(--lab-font-display);
+    font-size: var(--lab-fs-page);
+    font-weight: var(--lab-fw-title);
+    letter-spacing: var(--lab-tracking-tight);
+  }
+
+  &__desc {
+    margin: var(--lab-space-1) 0 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-body);
+  }
+}
+
+.list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  padding-bottom: var(--lab-space-4);
+}
+
+.empty {
+  color: var(--lab-ink-dim);
+  margin: var(--lab-space-5) 0;
+}
+
+.card {
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  padding: var(--lab-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  min-width: 0;
+
+  &__ask {
+    margin: 0;
+    font-size: var(--lab-fs-body);
+    overflow-wrap: anywhere;
+  }
+}
+
+.label {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+}
+
+// The button groups are as tall as a thumb (the toggle's default is 40 px).
+.animation {
+  --mat-button-toggle-height: 44px;
+}
+
+.field {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+}
+
+.row mat-slide-toggle {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  margin: 0;
+}
+
+.meta {
+  margin: var(--lab-space-1) 0 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  &--warn {
+    color: var(--lab-warn);
+  }
+
+  &--error {
+    color: var(--lab-danger);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+// On a phone the buttons that confirm a request stay at the bottom of the screen while the card is long or the
+// keyboard is open, above the bar of tabs when it is there.
+@media (max-width: 599px) {
+  .review .actions {
+    position: sticky;
+    bottom: var(--app-tabbar-h, 0px);
+    z-index: 1;
+    margin: 0 calc(-1 * var(--lab-space-4));
+    padding: var(--lab-space-2) var(--lab-space-4);
+    background: var(--lab-surface);
+    border-top: 1px solid var(--lab-line);
+  }
+}
+
+.touch {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  max-width: 100%;
+  min-height: 40px;
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-control);
+  font-size: var(--lab-fs-meta);
+
+  // The name is what is cut, never the button: it has to stay whole to be tapped.
+  &__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__x {
+    all: unset;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: calc(var(--lab-space-2) * -1);
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}
+
+.media {
+  width: 100%;
+  max-height: 70dvh;
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-player-bg);
+  object-fit: contain;
+}
+
+// The box of a video is made by CSS alone, whatever the file is: some browsers size a bare <video> from the
+// file's own size (and its controls) and the card jumps. The video fills the box and keeps its own shape inside.
+.player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 70dvh;
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-player-bg);
+  overflow: hidden;
+
+  video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.cover {
+  width: 100%;
+  max-width: 280px;
+  border-radius: var(--lab-radius-control);
+}
+
+.audio {
+  width: 100%;
+}
+
+.end {
+  height: 1px;
+}
+
+// The first step of a request: what to make. Three big buttons, then the way to let the assistant decide.
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+
+  &__label {
+    margin: 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lab-space-2);
+  }
+
+  &__btn {
+    --mdc-filled-button-container-height: 64px;
+    --mat-button-filled-container-height: 64px;
+    height: 64px;
+    flex-direction: column;
+  }
+
+  &__more {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+// The input: stuck to the bottom of the screen with room for the home bar of a phone.
+.composer {
+  position: sticky;
+  // Above the bar of tabs of the phone shell (it sets this height, and takes it to 0 while a field has the keyboard).
+  bottom: var(--app-tabbar-h, 0px);
+  background: var(--lab-bg);
+  border-top: 1px solid var(--lab-line);
+  padding: var(--lab-space-2) 0 max(var(--lab-space-2), env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+
+  // One grid for both shapes: the bar (attach, field, mic, ear, send) and the unfolded sheet (the big field over the buttons).
+  &__row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto auto;
+    grid-template-areas: 'attach text improve mic ear send';
+    align-items: end;
+    gap: var(--lab-space-1);
+  }
+
+  // A phone has no room for the field and six buttons on one line: the field takes the whole width and the buttons go under it.
+  @media (max-width: 599px) {
+    &__row {
+      grid-template-columns: auto auto auto auto 1fr auto;
+      grid-template-areas:
+        'text text text text text text'
+        'attach improve mic ear . send';
+      align-items: center;
+    }
+  }
+
+  &__attach { grid-area: attach; }
+  &__text { grid-area: text; }
+  &__improve { grid-area: improve; }
+  &__mic { grid-area: mic; }
+  &__ear { grid-area: ear; }
+  &__send { grid-area: send; }
+
+  &__text {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius-control);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+    font: inherit;
+    font-size: 16px; // 16px or more: iOS zooms the page in on a smaller field
+    line-height: 1.4;
+    resize: none;
+
+    &:focus {
+      outline: 2px solid var(--lab-accent);
+      outline-offset: 0;
+    }
+  }
+
+  &__kindname {
+    color: var(--lab-ink-dim);
+  }
+
+  // One line over the field: the way back to the choice and the kind, and on the right the buttons of the unfolded field.
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  // Unfolded: the buttons go above the field, out of the way of the phone's keyboard, and the field takes the height that is left (the whole screen on a phone; a taller field on a wide one).
+  &--open &__row {
+    grid-template-columns: auto 1fr auto auto auto auto;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'attach . improve mic ear send'
+      'text text text text text text';
+    flex: 1;
+    min-height: 0;
+  }
+
+  &--open &__text {
+    height: 100%;
+    min-height: 40dvh;
+    font-size: 18px;
+  }
+
+  @media (max-width: 599px) {
+    &--open {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      box-sizing: border-box;
+      height: 100dvh;
+      padding: max(var(--lab-space-2), env(safe-area-inset-top)) var(--lab-space-3) max(var(--lab-space-2), env(safe-area-inset-bottom));
+      border-top: 0;
+      overflow-y: auto;
+    }
+  }
+}
+
+.mic--on {
+  color: var(--lab-danger);
+}
+
+.rec {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--lab-danger);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rec__dot {
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.engines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+}
+
+.engine {
+  min-height: 44px;
+
+  &__meta {
+    display: block;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.picture-use {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+}
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  mat-slider {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.animation {
+  width: 100%;
+
+  .mat-button-toggle {
+    flex: 1;
+  }
+}
+
+.session {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+// The looks (Automatic, Photorealistic, Anime, General, Retouch) go one above the other: in a row the last ones were cut off.
+.styles {
+  --mat-button-toggle-height: 44px;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: var(--lab-space-2) 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-control);
+
+  p {
+    flex: 1 1 100%;
+    margin: 0;
+  }
+}
+
+.note.warn {
+  color: var(--lab-warn);
+}
+
+// Which method recognises a song that plays: a row above the input, wrapping on a narrow phone.
+.method {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-2);
+}
+
+.method__label {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.method__hint {
+  flex-basis: 100%;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .composer--open {
+    animation: rise 0.18s ease-out;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(32px);
+      opacity: 0;
+    }
+  }
+}
+
+.meta__source {
+  opacity: 0.8;
+}

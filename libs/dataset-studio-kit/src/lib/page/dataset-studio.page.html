@@ -1,0 +1,161 @@
+<div class="dataset-studio-kit studio" data-testid="dataset-studio">
+  <header class="intro">
+    <h1>{{ t.title }}</h1>
+    <p class="hint">{{ t.intro }}</p>
+  </header>
+
+  @if (draftFound()) {
+    <div class="draft" role="status" data-testid="draft-found">
+      <span>{{ t.draftFound }}</span>
+      <button type="button" class="primary" data-testid="draft-restore" (click)="restoreDraft()">{{ t.restore }}</button>
+      <button type="button" data-testid="draft-discard" (click)="discardDraft()">{{ t.discard }}</button>
+    </div>
+  }
+
+  <div class="assistant-line" data-testid="assistant-line">
+    @if (noAssistant()) {
+      <p class="warning" role="alert" data-testid="no-assistant">
+        {{ t.noAssistant }}
+        <a class="link" [routerLink]="providersLink" data-testid="go-providers">{{ t.goProviders }}</a>
+      </p>
+    } @else {
+      <p class="hint" data-testid="assistant-summary">
+        {{ t.assistantLine(assistantName(), assistant().model) }}
+        <a class="link" [routerLink]="providersLink" data-testid="change-assistant">{{ t.assistantChange }}</a>
+      </p>
+    }
+    @if (external()) {
+      <p class="external" data-testid="external-mark">{{ t.external(external()) }}</p>
+    }
+  </div>
+
+  <div class="step-bar" role="tablist" [attr.aria-label]="t.stepsLabel" data-testid="step-bar">
+    @for (id of stepIds; track id) {
+      <button
+        type="button"
+        role="tab"
+        class="step-tab"
+        [class.step-tab--on]="step() === id"
+        [attr.aria-selected]="step() === id"
+        [attr.aria-controls]="'panel-' + id"
+        [attr.tabindex]="step() === id ? 0 : -1"
+        [attr.data-testid]="'step-' + id"
+        (click)="step.set(id)"
+        (keydown)="onStepKey($event)"
+      >
+        {{ t.steps[id] }}
+        @if (stepFilled()[id]) {
+          <span class="step-mark" aria-hidden="true">●</span>
+          <span class="visually-hidden">{{ t.stepDone }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <section class="step" id="panel-brief" role="tabpanel" [hidden]="step() !== 'brief'" [attr.aria-label]="t.steps.brief">
+    <div class="kinds" role="radiogroup" [attr.aria-label]="kt.title">
+      @for (k of kinds; track k.id) {
+        <button
+          type="button"
+          role="radio"
+          class="kind"
+          [class.kind--on]="kindId() === k.id"
+          [attr.aria-checked]="kindId() === k.id"
+          [attr.data-testid]="'kind-' + k.id"
+          (click)="chooseKind(k.id)"
+        >
+          <span class="kind-name">{{ kt.kinds[k.id].name }}</span>
+        </button>
+      }
+    </div>
+    @let ktext = kt.kinds[kindId()];
+    <details class="more" data-testid="kind-more">
+      <summary>{{ t.kindMore }}</summary>
+      <div class="kind-detail" data-testid="kind-detail">
+        <p class="hint">{{ kt.hint }}</p>
+        <p>{{ ktext.what }}</p>
+        <p class="hint">{{ ktext.does }}</p>
+        <p class="hint">{{ ktext.emphasis }}</p>
+      </div>
+    </details>
+
+    <div class="brief-main">
+      <lab-brief [kind]="kind()" [mode]="mode()" [models]="imageModels()" [(brief)]="brief" [(negative)]="negative" [(look)]="look" (recommend)="onRecommend($event)" />
+      @if (hasOptions()) {
+        <dynamic-form class="options" [schema]="optionsFormSchema()" [(model)]="options" [showDefaultActions]="false" />
+      }
+      @if (isSong()) {
+        <p class="hint" data-testid="song-hint">{{ t.songHint }}</p>
+      }
+      <p class="hint pinned-note" data-testid="pinned-note">
+        {{ t.pinnedNote(pinned().length) }}
+        <button type="button" class="link" data-testid="open-presets" (click)="step.set('presets')">{{ t.openPresets }}</button>
+      </p>
+    </div>
+
+    <details class="more accordion" data-testid="engines-details">
+      <summary>
+        {{ t.stepEngines }}
+        @if (engine()) {
+          <span class="hint">· {{ t.enginesChosen(engine()) }}</span>
+        }
+      </summary>
+      <lab-engines-panel [kind]="kind()" [(selected)]="engine" />
+    </details>
+  </section>
+
+  <section class="step" id="panel-presets" role="tabpanel" [hidden]="step() !== 'presets'" aria-label="{{ t.steps.presets }}">
+    <lab-preset-browser [kind]="kindId()" [(pinned)]="pinned" [version]="presetVersion()" (insert)="insertPreset($event)" />
+    <div class="buttons">
+      <button type="button" data-testid="back-to-brief" (click)="step.set('brief')">{{ t.backToBrief }}</button>
+    </div>
+  </section>
+
+  <section class="step" id="panel-generate" role="tabpanel" [hidden]="step() !== 'generate'" aria-label="{{ t.steps.generate }}">
+    <div class="generate">
+      <p class="hint" data-testid="examples-note">
+        @if (examples().length) {
+          {{ t.examplesNote(examples().length, pinned().length > 0) }}
+        } @else {
+          {{ matchesTaken() ? t.noExamples : t.noExamplesPinOnly }}
+        }
+      </p>
+      <div class="buttons">
+        <button type="button" class="primary" data-testid="generate" [disabled]="!!whyOff() || generating()" (click)="start()">{{ generateLabel() }}</button>
+        @if (generating()) {
+          <button type="button" data-testid="stop" (click)="stop()">{{ t.stop }}</button>
+        }
+      </div>
+      @if (whyOff() && brief().trim()) {
+        <p class="problem" role="alert" data-testid="why-off">{{ whyOff() }}</p>
+      } @else if (whyOff()) {
+        <p class="hint" data-testid="why-off-empty">
+          {{ whyOff() }}
+          <button type="button" class="link" data-testid="to-brief" (click)="step.set('brief')">{{ t.toBrief }}</button>
+        </p>
+      }
+      @if (generating() && progress(); as p) {
+        <div class="progress" data-testid="progress">
+          <progress [max]="p.total || 1" [value]="p.done"></progress>
+          <span role="status">{{ t.generating(p.done, p.total) }}</span>
+        </div>
+      }
+      @if (stoppedAt() !== null) {
+        <p class="hint" role="status" data-testid="stopped">{{ t.stopped(stoppedAt() ?? 0) }}</p>
+      }
+      @if (failure()) {
+        <p class="problem" role="alert" data-testid="generate-failed">{{ failure() }}</p>
+      }
+      @for (w of warnings(); track $index) {
+        <p class="warning" role="status" [attr.data-testid]="'warning-' + w.code">{{ warningText(w) }}</p>
+      }
+    </div>
+  </section>
+
+  <section class="step" id="panel-result" role="tabpanel" [hidden]="step() !== 'result'" aria-labelledby="step-result">
+    <h2 id="step-result">{{ t.stepResult }}</h2>
+    <lab-dataset-preview [kind]="kind()" [raw]="raw()" [debounceMs]="debounceMs" (rawChange)="setRaw($event)" (status)="status.set($event)" />
+    <lab-dataset-actions [kind]="kind()" [raw]="raw()" [status]="status()" [presetNote]="presetNote()" [presetProblem]="presetProblem()" [canSavePreset]="!!brief().trim()" (savePreset)="savePreset($event)" />
+    <p class="hint">{{ t.presetBrief }}</p>
+  </section>
+</div>

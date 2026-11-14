@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  color: var(--lab-player-fg);
+  --mat-icon-button-icon-color: var(--lab-player-fg);
+  --mat-icon-button-disabled-icon-color: var(--lab-player-fg-dim);
+}
+
+.viewer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &__img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+    transition: transform 0.15s ease-out;
+
+    &--still {
+      transition: none;
+    }
+  }
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-scrim);
+
+  &--top {
+    top: 0;
+    padding-top: calc(var(--lab-space-2) + env(safe-area-inset-top));
+  }
+
+  &--bottom {
+    bottom: 0;
+    justify-content: space-around;
+    padding-bottom: calc(var(--lab-space-2) + env(safe-area-inset-bottom));
+  }
+
+  &__pos {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  max-height: 40%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-scrim-strong);
+  font-size: var(--lab-fs-meta);
+
+  p {
+    margin: 2px 0 0;
+    white-space: pre-wrap;
+  }
+}
+
+.dim {
+  opacity: 0.75;
+}

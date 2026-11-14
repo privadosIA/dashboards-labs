@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  margin-bottom: var(--lab-space-3);
+}
+
+.panel {
+  background: var(--lab-surface);
+}
+
+.group {
+  margin-bottom: var(--lab-space-3);
+
+  h4 {
+    margin: 0 0 var(--lab-space-2);
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+    font-weight: 600;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.chip {
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink);
+  background: transparent;
+  border: 1px solid var(--lab-control-line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &--on {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+}

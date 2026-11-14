@@ -1,0 +1,35 @@
+<section class="render" data-testid="render">
+  <h2>{{ t.title }}</h2>
+
+  @if (piece().state !== 'done') {
+    <p class="forecast" data-testid="forecast">{{ forecast() }}</p>
+    <p class="note">{{ t.forecastNote }}</p>
+    @if (slow()) {
+      <p class="slow" data-testid="slow">{{ slowNote }}</p>
+    }
+  }
+
+  @if (busy()) {
+    <div class="progress" role="progressbar" [attr.aria-label]="t.progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="piece().progress" data-testid="progress">
+      <span [style.width.%]="piece().progress"></span>
+    </div>
+    <p class="note" data-testid="progress-text">{{ piece().progress }}%</p>
+  }
+
+  @if (piece().state === 'failed' && piece().error) {
+    <p class="problem" role="alert" data-testid="failed">{{ t.failed }} {{ piece().error }}</p>
+  }
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  @if (video(); as src) {
+    <video controls preload="metadata" [src]="src" [attr.aria-label]="t.video" data-testid="video"></video>
+    <p class="note">{{ size() }}</p>
+    <a class="download" [href]="src" download data-testid="download">{{ t.download }}</a>
+  }
+
+  <button type="button" class="draw" data-testid="draw" [disabled]="busy() || working()" (click)="draw()">
+    {{ working() ? t.working : piece().state === 'draft' ? t.draw : t.again }}
+  </button>
+</section>

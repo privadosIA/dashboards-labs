@@ -1,0 +1,49 @@
+// A collapsible panel (<details>): its summary shows a chevron that turns down when the panel is open, and what is under it
+// has room to breathe. Included by each component that has one, so a host's own <details> are left alone.
+@mixin collapsible($panel) {
+  #{$panel} > summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--lab-space-2) var(--lab-space-3);
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: '';
+      flex: none;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 2px solid var(--lab-ink-dim);
+      border-bottom: 2px solid var(--lab-ink-dim);
+      transform: rotate(-45deg);
+      transition: transform 0.15s;
+    }
+  }
+
+  #{$panel}[open] > summary {
+    margin-bottom: var(--lab-space-3);
+
+    &::before {
+      transform: rotate(45deg);
+    }
+  }
+
+  #{$panel} > :not(summary) {
+    margin-bottom: var(--lab-space-3);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #{$panel} > summary::before {
+      transition: none;
+    }
+  }
+}

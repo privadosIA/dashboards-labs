@@ -1,0 +1,178 @@
+<mo-page-header
+  title="Environment"
+  i18n-title="@@env.title"
+  description="What the pipeline needs on this machine: programs, models, voices and GPUs."
+  i18n-description="@@env.desc"
+>
+  <button data-keep moActions mat-stroked-button data-testid="refresh" (click)="refresh()">
+    <mat-icon>refresh</mat-icon>
+    <ng-container i18n="@@env.refresh">Refresh</ng-container>
+  </button>
+</mo-page-header>
+
+@if (env.loading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading" i18n-aria-label="@@env.loadingBar" />
+}
+
+@if (env.report(); as r) {
+  @if (r.content_mode === 'censored' || r.content_mode === 'strict') {
+    <p class="content-mode" role="status" data-testid="content-mode">
+      <mat-icon inline>visibility_off</mat-icon>
+      @if (r.content_mode === 'strict') {
+        <span i18n="@@env.contentStrict">Strict mode: only the projects reviewed as fine for everyone are shown.</span>
+      } @else {
+        <span i18n="@@env.contentCensored">Censored mode: the projects marked for people over 18 are not shown.</span>
+      }
+    </p>
+  }
+  <div class="columns columns--4">
+    <mo-panel heading="Binaries" i18n-heading="@@env.binaries">
+      <ul class="list" appAutoAnimate>
+        @for (b of r.binaries; track b.name) {
+          <li class="item">
+            <mat-icon class="item__state" [class.ok]="b.present" [class.missing]="!b.present && b.required">
+              {{ b.present ? 'check_circle' : b.required ? 'cancel' : 'radio_button_unchecked' }}
+            </mat-icon>
+            <span class="mo-data item__name">{{ b.name }}</span>
+            @if (b.present) {
+              <span class="mo-data item__detail">{{ b.version || b.path }}</span>
+            } @else {
+              <span class="item__detail missing" i18n="@@env.missing">missing</span>
+            }
+            @if (!b.present && b.name.startsWith('ace-')) {
+              <span class="item__fix dim" data-testid="music-only" i18n="@@env.musicOnly">Only needed for music projects.</span>
+            }
+            @if (!b.present && b.fix) {
+              <span class="item__fix">
+                → <span class="mo-data">{{ b.fix }}</span>
+                <span class="dim" i18n="@@env.fixManual"> (run it by hand in a terminal)</span>
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    </mo-panel>
+
+    <mo-panel [heading]="voicesHeading(r.voices.length)">
+      <ul class="list" appAutoAnimate>
+        @for (v of r.voices; track v.name) {
+          <li class="item">
+            <span class="mo-data item__name">{{ v.name }}</span>
+            <span class="mo-data dim">{{ v.size | moBytes }}</span>
+          </li>
+        } @empty {
+          <li class="dim" i18n="@@env.noneVoices">none — bash scripts/get-piper.sh</li>
+        }
+      </ul>
+    </mo-panel>
+
+    <mo-panel [heading]="modelsHeading(r.models.length)">
+      <ul class="list" appAutoAnimate>
+        @for (m of r.models; track m.name) {
+          <li class="item">
+            <span class="mo-data item__name">{{ m.name }}</span>
+            <span class="mo-data dim">{{ m.size | moBytes }}</span>
+          </li>
+        } @empty {
+          <li class="dim" i18n="@@env.noneModels">none — bash scripts/get-models.sh</li>
+        }
+      </ul>
+    </mo-panel>
+
+    @if (r.music; as music) {
+      <mo-panel [heading]="musicHeading(music.length)" data-testid="music-panel">
+        <ul class="list" appAutoAnimate>
+          @for (m of music; track m.name) {
+            <li class="item">
+              <span class="mo-data item__name">{{ m.name }}</span>
+              <span class="mo-data dim">{{ m.size | moBytes }}</span>
+            </li>
+          } @empty {
+            <li class="dim" i18n="@@env.noneMusic">none — install a package in Models (Music tab)</li>
+          }
+        </ul>
+      </mo-panel>
+    }
+
+    @if (r.retouch?.length; as n) {
+      <mo-panel [heading]="retouchHeading(n)" data-testid="retouch-panel">
+        <ul class="list" appAutoAnimate>
+          @for (m of r.retouch; track m.name) {
+            <li class="item">
+              <span class="mo-data item__name">{{ m.name }}</span>
+              <span class="mo-data dim">{{ m.size | moBytes }}</span>
+            </li>
+          }
+        </ul>
+      </mo-panel>
+    }
+
+    <mo-panel [heading]="lorasHeading(r.loras.length)">
+      <ul class="list" appAutoAnimate>
+        @for (l of r.loras; track l.name) {
+          <li class="item">
+            <span class="mo-data item__name">{{ l.name }}</span>
+            <span class="mo-data dim">{{ l.size | moBytes }}</span>
+          </li>
+        } @empty {
+          <li class="dim" i18n="@@env.noneLoras">none</li>
+        }
+      </ul>
+    </mo-panel>
+
+    <mo-panel heading="GPUs" i18n-heading="@@env.gpus">
+      @if (r.gpu_error) {
+        <p class="dim">{{ r.gpu_error }}</p>
+      }
+      <ul class="list" appAutoAnimate>
+        @for (g of r.gpus; track g.index) {
+          <li class="item">
+            <span class="mo-data item__name">{{ g.index }}</span>
+            <span class="item__detail">{{ g.name }}</span>
+            <span class="mo-data" i18n="@@env.vramFree">{{ g.free_vram_mb }} MB free</span>
+            <mo-gpu-warnings [gpu]="g" />
+            <button mat-icon-button type="button" class="item__free" [disabled]="freeing() !== null" (click)="free(g)" [attr.data-testid]="'gpu-free-' + g.index" i18n-aria-label="@@env.gpuFree" aria-label="Free memory" i18n-title="@@env.gpuFree" title="Free memory">
+              <mat-icon>cleaning_services</mat-icon>
+            </button>
+            @if (freedOn()[g.index]; as msg) {
+              <p class="dim" [attr.data-testid]="'gpu-freed-' + g.index">{{ msg }}</p>
+            }
+          </li>
+        }
+      </ul>
+    </mo-panel>
+
+    <!-- Disk and RAM are small: with the retouch panel there are nine panels, so they share one cell and the rows stay four and four. -->
+    <div class="stack" [class.stack--on]="!!r.retouch?.length">
+      @if (r.disk; as d) {
+        <mo-panel heading="Disk" i18n-heading="@@env.disk" data-testid="disk-panel">
+          <p class="item">
+            <span class="item__detail" i18n="@@env.diskFree">Free on the projects disk</span>
+            <span class="mo-data" data-testid="disk-free-env">{{ d.free_bytes | moBytes }} / {{ d.total_bytes | moBytes }}</span>
+          </p>
+          @if (d.low) {
+            <p class="warn" data-testid="disk-low">
+              <mat-icon inline>warning</mat-icon>
+              <ng-container i18n="@@env.diskLow">Little space is left (less than {{ d.warn_below_bytes | moBytes }}). Free some from the storage of each project, in Projects, before a long run.</ng-container>
+            </p>
+          }
+        </mo-panel>
+      }
+
+      @if (r.ram; as m) {
+        <mo-panel heading="RAM" data-testid="ram-panel">
+          <p class="item">
+            <span class="item__detail" i18n="@@env.ramAvailable">Available</span>
+            <span class="mo-data" data-testid="ram-available">{{ m.available_bytes | moBytes }}</span>
+          </p>
+          <p class="item">
+            <span class="item__detail" i18n="@@env.ramUsed">In use</span>
+            <span class="mo-data" data-testid="ram-used">{{ m.total_bytes - m.available_bytes | moBytes }} / {{ m.total_bytes | moBytes }}</span>
+          </p>
+          <mat-progress-bar mode="determinate" aria-label="Memory in use" i18n-aria-label="@@env.ramBar" [value]="((m.total_bytes - m.available_bytes) / m.total_bytes) * 100" />
+          <app-music-containers />
+        </mo-panel>
+      }
+    </div>
+  </div>
+}

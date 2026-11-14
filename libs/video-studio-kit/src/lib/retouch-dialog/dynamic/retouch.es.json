@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "id": "retouch",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "model",
+      "type": "select",
+      "label": "Modelo"
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Qué quieres cambiar",
+      "placeholder": "Describe el cambio, p. ej. «como una acuarela, con luz de atardecer».",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Escribe qué quieres cambiar."
+        }
+      }
+    },
+    {
+      "key": "negativePrompt",
+      "type": "textarea",
+      "label": "Prompt negativo (opcional)",
+      "placeholder": "Lo que debe evitar, p. ej. borroso, dedos de más.",
+      "props": {
+        "rows": 2
+      }
+    },
+    {
+      "key": "strength",
+      "type": "number",
+      "label": "Fuerza (de 0,05 a 1)",
+      "defaultValue": 0.6,
+      "props": {
+        "step": 0.05
+      },
+      "layout": {
+        "cssClass": "number-field"
+      },
+      "validation": {
+        "required": true,
+        "min": 0.05,
+        "max": 1,
+        "messages": {
+          "required": "La fuerza debe estar entre 0,05 y 1.",
+          "min": "La fuerza debe estar entre 0,05 y 1.",
+          "max": "La fuerza debe estar entre 0,05 y 1."
+        }
+      }
+    },
+    {
+      "key": "variants",
+      "type": "number",
+      "label": "Variantes (de 1 a {max})",
+      "defaultValue": 2,
+      "layout": {
+        "cssClass": "number-field"
+      },
+      "validation": {
+        "required": true,
+        "min": 1,
+        "max": 4,
+        "pattern": "^[0-9]+$",
+        "messages": {
+          "required": "Las variantes deben ser un número de 1 a {max}.",
+          "min": "Las variantes deben ser un número de 1 a {max}.",
+          "max": "Las variantes deben ser un número de 1 a {max}.",
+          "pattern": "Las variantes deben ser un número entero."
+        }
+      }
+    }
+  ]
+}

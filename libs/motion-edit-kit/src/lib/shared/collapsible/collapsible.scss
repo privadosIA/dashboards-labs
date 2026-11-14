@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.head {
+  margin: var(--lab-space-3) 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--lab-accent);
+  }
+
+  .chevron {
+    width: 1em;
+  }
+}
+
+.panel {
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+
+  .head {
+    margin: 0;
+    padding: var(--lab-space-2) var(--lab-space-3);
+    color: var(--lab-ink);
+    font-size: var(--lab-fs-body);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .body {
+    padding: 0 var(--lab-space-2) var(--lab-space-2);
+  }
+}

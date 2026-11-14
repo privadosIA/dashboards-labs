@@ -1,0 +1,54 @@
+// @core/dynamic-forms takes its look from the --lab-* tokens (both themes):
+// the library ships a light palette, so every --df-* token is pinned here.
+@use '@core/dynamic-forms/src/styles/material' as df-material;
+
+.df-form {
+  --df-color-primary: var(--lab-accent);
+  --df-color-text: var(--lab-ink);
+  --df-color-muted: var(--lab-ink-dim);
+  --df-color-border: var(--lab-line);
+  --df-color-surface: var(--lab-surface);
+  --df-color-danger: var(--lab-danger);
+  --df-color-focus: color-mix(in srgb, var(--lab-accent) 30%, transparent);
+  --df-radius: var(--lab-radius-control);
+  --df-field-gap: var(--lab-field-gap);
+  --df-grid-gap: var(--lab-field-gap);
+  --df-font: var(--lab-font);
+}
+
+// The space between two stacked fields has one source: the margin under each field's outer box, the library's wrapper (--df-field-gap above)
+// or, for Material's form fields, this one. The grid has no row gap of its own, so nothing adds to it. `npm run forms:audit` measures it.
+.df-form .mat-mdc-form-field {
+  margin-bottom: var(--lab-field-gap);
+}
+
+.df-form .df-field .mat-mdc-form-field {
+  margin-bottom: 0;
+}
+
+// A group that only lines fields up in a row: no frame.
+.df-form .df-group--plain,
+.df-form .df-group--plain .df-group {
+  border: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+// A checkbox or a radio group is not a box to type in: Material draws the field's outline around them
+// because the library's theme wraps every field in a form field; here the frame goes and the control stays.
+.df-form .mat-mdc-form-field-type-checkbox,
+.df-form .mat-mdc-form-field-type-radio-group {
+  .mdc-notched-outline {
+    display: none;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding: 0;
+    background: transparent;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 0;
+    padding: 0;
+  }
+}

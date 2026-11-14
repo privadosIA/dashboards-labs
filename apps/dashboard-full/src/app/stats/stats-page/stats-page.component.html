@@ -1,0 +1,204 @@
+<mo-page-header
+  title="Statistics"
+  i18n-title="@@stats.title"
+  description="How runs behave: duration, phases, cache and GPU usage."
+  i18n-description="@@stats.desc"
+>
+  @if (grafana(); as href) {
+    <a data-keep moActions mat-stroked-button [href]="href" target="_blank" rel="noopener" data-testid="stats-grafana">
+      <mat-icon>open_in_new</mat-icon>
+      <ng-container i18n="@@stats.grafana">Open Grafana</ng-container>
+    </a>
+  }
+</mo-page-header>
+
+<div class="filters" data-testid="stats-filters">
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label i18n="@@stats.project">Project</mat-label>
+    <mat-select [value]="project()" (selectionChange)="setProject($event.value)" data-testid="stats-project">
+      <mat-option value="" i18n="@@stats.allProjects">— all —</mat-option>
+      @for (p of projects.projects(); track p.id) {
+        <mat-option [value]="p.id"><span class="mo-data">{{ p.id }}</span></mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (servers().length > 1) {
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label i18n="@@stats.server">Server</mat-label>
+      <mat-select [value]="server()" (selectionChange)="setServer($event.value)" data-testid="stats-server">
+        <mat-option value="" i18n="@@stats.allServers">— all —</mat-option>
+        @for (n of servers(); track n) {
+          <mat-option [value]="n"><span class="mo-data">{{ n }}</span></mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  @if (clients().length > 1) {
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label i18n="@@stats.client">Client</mat-label>
+      <mat-select [value]="client()" (selectionChange)="setClient($event.value)" data-testid="stats-client">
+        <mat-option value="" i18n="@@stats.allClients">— all —</mat-option>
+        @for (n of clients(); track n) {
+          <mat-option [value]="n"><span class="mo-data">{{ n }}</span></mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  <app-mode-select [modes]="false" />
+  <mat-button-toggle-group
+    [value]="mode()"
+    (change)="setMode($event.value)"
+    aria-label="Project type" i18n-aria-label="@@stats.modeAria"
+    data-testid="stats-mode"
+  >
+    @for (m of modes; track m.id) {
+      <mat-button-toggle [value]="m.id" [attr.data-testid]="'stats-mode-' + (m.id || 'all')">{{ m.label }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+  <mat-button-toggle-group
+    [value]="days()"
+    (change)="setDays($event.value)"
+    aria-label="Period" i18n-aria-label="@@stats.periodAria"
+    data-testid="stats-period"
+  >
+    @for (p of periods; track p.days) {
+      <mat-button-toggle [value]="p.days">{{ p.label }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+</div>
+
+<div class="loading">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+</div>
+@if (failed(); as msg) {
+  <p class="warn" role="alert" data-testid="stats-error">
+    <mat-icon inline>error</mat-icon>
+    {{ msg }}
+  </p>
+}
+
+@if (stats(); as s) {
+  @if (empty()) {
+    <mo-empty-state
+      data-testid="stats-empty"
+      icon="insights"
+      message="There are no runs in this period yet."
+      i18n-message="@@stats.emptyTitle"
+      hint="Launch one from the Runs screen and it will appear here."
+      i18n-hint="@@stats.emptyHint"
+    >
+      <a mat-flat-button routerLink="/runs">
+        <mat-icon>play_circle</mat-icon>
+        <ng-container i18n="@@stats.toRuns">Go to Runs</ng-container>
+      </a>
+    </mo-empty-state>
+  } @else {
+    <ul class="cards" appFadeUp data-testid="stats-cards">
+      @for (c of cards(); track c.id) {
+        <li class="card" [attr.data-testid]="'card-' + c.id">
+          <span class="card__label">{{ c.label }}</span>
+          <span class="card__value mo-data">{{ c.value }}</span>
+        </li>
+      }
+    </ul>
+
+    <div class="grid" appFadeUp>
+      <mo-chart-frame
+        i18n-title="@@stats.tDays"
+        title="Runs per day"
+        i18n-description="@@stats.dDays"
+        description="How many runs were launched each day, split into successful, failed and others (canceled, interrupted or still active)."
+        [table]="dayTable()"
+      >
+        <mo-stacked-bar-chart
+          [categories]="dayCategories()"
+          [series]="daySeries()"
+          [shortLabel]="shortDay"
+          ariaLabel="Runs per day"
+          i18n-ariaLabel="@@stats.tDays"
+        />
+      </mo-chart-frame>
+
+      <mo-chart-frame
+        i18n-title="@@stats.tDuration"
+        title="Duration of each run"
+        i18n-description="@@stats.dDuration"
+        description="How long each finished run took, in launch order, with the median as a reference line."
+        [table]="durationTable()"
+      >
+        <mo-line-chart
+          [series]="durationSeries()"
+          [reference]="durationReference()"
+          [yMax]="durationYMax()"
+          [yFormat]="fmtSecondsAxis"
+          [xFormat]="shortDate"
+          ariaLabel="Duration of each run"
+          i18n-ariaLabel="@@stats.tDuration"
+        />
+      </mo-chart-frame>
+
+      <mo-chart-frame
+        i18n-title="@@stats.tPhases"
+        title="Time per phase"
+        i18n-description="@@stats.dPhases"
+        description="Total time spent in each pipeline phase. Phases reused from the cache do not count as time."
+        [table]="phaseTable()"
+      >
+        <mo-bar-chart [data]="phaseData()" [format]="fmtSeconds" ariaLabel="Time per phase" i18n-ariaLabel="@@stats.tPhases" />
+      </mo-chart-frame>
+
+      <mo-chart-frame
+        i18n-title="@@stats.tCache"
+        title="Cache"
+        i18n-description="@@stats.dCache"
+        description="What share of the phases was reused from the cache and what share had to be executed."
+        [table]="cacheTable()"
+      >
+        @if (hasCache()) {
+          <mo-ratio-bar [parts]="cacheParts()" ariaLabel="Reused versus executed phases" i18n-ariaLabel="@@stats.tCacheAria" />
+        } @else {
+          <p class="note" i18n="@@stats.noCache">No phase data in this period.</p>
+        }
+      </mo-chart-frame>
+
+      <mo-chart-frame
+        i18n-title="@@stats.tGpu"
+        title="Usage per GPU"
+        i18n-description="@@stats.dGpu"
+        description="Peak VRAM reached by each GPU during the runs, as a percentage of its memory. It is the memory of the whole GPU, not just the run's: it includes any other process that was using it. Only runs launched with sampling enabled count."
+        [table]="gpuTable()"
+      >
+        @if (gpuPeaks().length > 0) {
+          <mo-bar-chart [data]="gpuPeaks()" [max]="100" [format]="pct" ariaLabel="Peak VRAM per GPU" i18n-ariaLabel="@@stats.tGpuAria" />
+        } @else {
+          <p class="note" data-testid="gpu-nodata" i18n="@@stats.noGpu">
+            There are no resource samples yet: runs from before sampling don't have them. They will appear with upcoming runs.
+          </p>
+        }
+      </mo-chart-frame>
+
+      <mo-chart-frame
+        i18n-title="@@stats.tMode"
+        title="Runs by type"
+        i18n-description="@@stats.dMode"
+        description="How many runs there were in video, image and music projects (those of a project that has been deleted go apart), with the time they took and their success rate."
+        [table]="modeTable()"
+      >
+        <mo-bar-chart [data]="modeData()" [format]="fmtRuns" ariaLabel="Runs by type" i18n-ariaLabel="@@stats.tModeAria" data-testid="stats-by-mode" />
+      </mo-chart-frame>
+    </div>
+
+    <section class="slowest" aria-labelledby="slow-title">
+      <h3 id="slow-title" i18n="@@stats.slowest">Slowest runs</h3>
+      <div data-testid="stats-slowest">
+        <dynamic-form [schema]="tables" [model]="slowModel()" [showDefaultActions]="false" (tableNavigate)="onNavigate($event)">
+          <ng-template dfCell="seconds" let-value="value">
+            <span class="mo-data">{{ fmtSeconds(value) }}</span>
+          </ng-template>
+        </dynamic-form>
+      </div>
+    </section>
+  }
+}

@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+
+  // Fields grow downwards (hint, error): keep every top edge on one line and
+  // centre the controls that are not fields on the input row (40px).
+  > :not(mat-form-field):not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  &__field {
+    width: 175px;
+  }
+
+  &__error,
+  &__note {
+    flex-basis: 100%;
+    margin: 0;
+    min-height: 0;
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__error {
+    color: var(--lab-danger);
+  }
+
+  &__note {
+    color: var(--lab-ink-dim);
+  }
+}
+
+.error {
+  color: var(--lab-danger);
+}
+
+.panel__live {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

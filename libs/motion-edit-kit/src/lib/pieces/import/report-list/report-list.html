@@ -1,0 +1,27 @@
+<div class="scroll">
+  <table data-testid="report">
+    <thead>
+      <tr>
+        <th scope="col">{{ t.columns.kind }}</th>
+        <th scope="col">{{ t.columns.item }}</th>
+        <th scope="col">{{ t.columns.action }}</th>
+        <th scope="col">{{ t.columns.why }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of plan().items; track item.kind + ':' + item.index) {
+        <tr [attr.data-testid]="'row-' + item.kind + '-' + item.index" [class]="'action-' + item.action">
+          <td>{{ t.kinds[item.kind] }}</td>
+          <td class="item">{{ item.label }}</td>
+          @if (outcomes()) {
+            <td data-testid="state" [class.failed]="outcome(item).failed">{{ outcome(item).state }}</td>
+            <td class="why">{{ outcome(item).why }}</td>
+          } @else {
+            <td data-testid="action">{{ t.actions[item.action] }}</td>
+            <td class="why">{{ reason(item) }}</td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

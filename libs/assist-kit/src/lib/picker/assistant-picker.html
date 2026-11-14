@@ -1,0 +1,39 @@
+<section class="picker" data-testid="assistant-picker">
+  <h3>{{ title() ?? t.title }}</h3>
+  <p class="hint">{{ hint() ?? t.hint }}</p>
+
+  @if (providers() === null) {
+    <p class="hint" role="status" data-testid="loading">{{ t.loading }}</p>
+  } @else {
+    @if (noOllama()) {
+      <p class="note" role="status" data-testid="no-ollama">{{ t.noOllama }}</p>
+    }
+    <dynamic-form class="assistant-form" [schema]="schema()" [(model)]="form" [showDefaultActions]="false" />
+    @if (showAddButton()) {
+      <div class="add-toggle">
+        <button type="button" data-testid="add-provider-open" [attr.aria-expanded]="addOpen()" (click)="addOpen.set(!addOpen())">{{ addOpen() ? t.addClose : t.addOpen }}</button>
+      </div>
+    }
+  }
+
+  @if (consent(); as c) {
+    <div class="consent" role="alertdialog" [attr.aria-label]="t.consentTitle(c.name)" data-testid="consent">
+      <h4>{{ t.consentTitle(c.name) }}</h4>
+      <p>{{ consentLine(c.name, c.baseUrl) }}</p>
+      @if (consentProblem()) {
+        <p class="problem" role="alert" data-testid="consent-problem">{{ t.consentFailed(consentProblem()) }}</p>
+      }
+      <div class="actions">
+        <button type="button" class="primary" data-testid="consent-accept" (click)="accept()">{{ t.consentAccept }}</button>
+        <button type="button" data-testid="consent-decline" (click)="decline()">{{ t.consentDecline }}</button>
+      </div>
+    </div>
+  }
+
+  <ng-template #addTemplate>
+    <lab-add-provider (submitted)="add($event)" />
+  </ng-template>
+  @if (showAdd() && !slots) {
+    <ng-container [ngTemplateOutlet]="addTemplate" />
+  }
+</section>

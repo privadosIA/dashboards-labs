@@ -1,0 +1,70 @@
+{
+  "version": "1.0",
+  "id": "reframe",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "aspect_ratio",
+      "type": "select",
+      "label": "Aspect ratio",
+      "defaultValue": "16:9",
+      "options": [
+        {
+          "value": "16:9",
+          "label": "16:9"
+        },
+        {
+          "value": "9:16",
+          "label": "9:16"
+        },
+        {
+          "value": "1:1",
+          "label": "1:1"
+        },
+        {
+          "value": "4:5",
+          "label": "4:5"
+        }
+      ]
+    },
+    {
+      "key": "mode",
+      "type": "select",
+      "label": "How it fits",
+      "defaultValue": "crop",
+      "options": [
+        {
+          "value": "crop",
+          "label": "Crop"
+        },
+        {
+          "value": "pad",
+          "label": "Add bars"
+        }
+      ]
+    },
+    {
+      "key": "color",
+      "type": "text",
+      "label": "Bar colour",
+      "defaultValue": "#000000",
+      "placeholder": "#rrggbb",
+      "validation": {
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "pattern": "Write a colour like #000000."
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "mode",
+          "operator": "eq",
+          "value": "pad"
+        },
+        "resetOnHide": true
+      }
+    }
+  ]
+}

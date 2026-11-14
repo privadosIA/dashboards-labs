@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "id": "preset-search",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "q",
+      "type": "text",
+      "label": "Search",
+      "placeholder": "Search by title, text or tag",
+      "defaultValue": ""
+    }
+  ]
+}

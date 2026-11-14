@@ -1,0 +1,18 @@
+<section class="new-part">
+  <a class="back" [routerLink]="link('parts')">← {{ t.back }}</a>
+  <header>
+    <h1>{{ t.newTitle }}</h1>
+    <p>{{ t.newIntro }}</p>
+  </header>
+
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+  <app-part-preview [manifest]="manifestText()" [fragment]="fragmentText()" />
+
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  <div class="actions">
+    <button type="button" class="create" data-testid="create" [disabled]="!valid() || creating()" (click)="create()">{{ creating() ? t.newCreating : t.newCreate }}</button>
+  </div>
+</section>

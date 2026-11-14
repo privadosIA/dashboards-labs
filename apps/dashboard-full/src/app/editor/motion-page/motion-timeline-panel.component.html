@@ -1,0 +1,123 @@
+<section class="timeline" data-testid="motion-timeline">
+  <div class="head">
+    <h4 i18n="@@timeline.title">Timeline</h4>
+    <button mat-icon-button type="button" data-testid="timeline-undo" [disabled]="!canUndo()" (click)="undo()" i18n-aria-label="@@timeline.undo" aria-label="Undo">
+      <mat-icon>undo</mat-icon>
+    </button>
+    <button mat-icon-button type="button" data-testid="timeline-redo" [disabled]="!canRedo()" (click)="redo()" i18n-aria-label="@@timeline.redo" aria-label="Redo">
+      <mat-icon>redo</mat-icon>
+    </button>
+  </div>
+  <p class="note" i18n="@@timeline.hint">Drag a bar to move it, or its right edge to change the duration; with the keyboard, the arrow keys move it (Shift ×10) and Alt+arrows change the duration. Changes show at once; save the page for them to count in the video.</p>
+
+  <div class="rows">
+    <div class="row scale">
+      <span class="name"></span>
+      <div class="axis ruler" #ruler data-testid="timeline-ruler" (pointerdown)="beginScrub($event, ruler)" (pointermove)="scrubMove($event)" (pointerup)="endScrub()" (pointercancel)="endScrub()">
+        @for (s of ticks(); track s) {
+          <span class="tick mo-data" [style.left.%]="s / duration() * 100">{{ s }}s</span>
+        }
+        <span
+          class="playhead handle"
+          data-testid="timeline-ruler-playhead"
+          role="slider"
+          tabindex="0"
+          i18n-aria-label="@@timeline.playhead"
+          aria-label="Preview position"
+          aria-valuemin="0"
+          [attr.aria-valuemax]="duration()"
+          [attr.aria-valuenow]="time()"
+          [style.left.%]="playhead()"
+          (keydown)="nudgePlayhead($event)"
+        ></span>
+      </div>
+    </div>
+    @for (t of tl().tracks; track t.id) {
+      <div class="row" [class.on]="t.id === selected()" [attr.data-testid]="'timeline-track-' + t.id">
+        <button type="button" class="name" (click)="selected.set(t.id)" [attr.data-testid]="'timeline-select-' + t.id">{{ label(t) }}</button>
+        <div class="axis" #axis (click)="seekFromAxis($event, axis)">
+          <div
+            class="bar"
+            role="slider"
+            tabindex="0"
+            [attr.aria-label]="label(t)"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="duration()"
+            [attr.aria-valuenow]="t.start"
+            [style.left.%]="left(t)"
+            [style.width.%]="width(t)"
+            [attr.data-testid]="'timeline-bar-' + t.id"
+            (pointerdown)="beginDrag($event, t, 'move', axis)"
+            (pointermove)="dragTo($event)"
+            (pointerup)="endDrag()"
+            (pointercancel)="endDrag()"
+            (keydown)="nudgeBar($event, t)"
+          >
+            <span
+              class="grip"
+              [attr.data-testid]="'timeline-grip-' + t.id"
+              (pointerdown)="beginDrag($event, t, 'resize', axis)"
+              (pointermove)="dragTo($event)"
+              (pointerup)="endDrag()"
+              (pointercancel)="endDrag()"
+            ></span>
+          </div>
+          <span
+            class="playhead"
+            aria-hidden="true"
+            data-testid="timeline-playhead"
+            [style.left.%]="playhead()"
+            (pointerdown)="beginScrub($event, axis)"
+            (pointermove)="scrubMove($event)"
+            (pointerup)="endScrub()"
+            (pointercancel)="endScrub()"
+          ></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (current(); as t) {
+    <div class="detail" [attr.data-testid]="'timeline-detail-' + t.id">
+      <p class="target mo-data">{{ t.target }}</p>
+      <label>
+        <span i18n="@@timeline.start">Start (s)</span>
+        <input type="number" class="mo-data" min="0" [step]="step" [value]="t.start" [attr.data-testid]="'timeline-start-' + t.id" (change)="setNumber(t.id, 'start', $any($event.target).value)" />
+      </label>
+      <label>
+        <span i18n="@@timeline.duration">Duration (s)</span>
+        <input type="number" class="mo-data" min="0.05" [step]="step" [value]="t.duration" [attr.data-testid]="'timeline-duration-' + t.id" (change)="setNumber(t.id, 'duration', $any($event.target).value)" />
+      </label>
+      <label>
+        <span i18n="@@timeline.stagger">Stagger (s)</span>
+        <input type="number" class="mo-data" min="0" [step]="step" [value]="t.stagger ?? 0" [attr.data-testid]="'timeline-stagger-' + t.id" (change)="setNumber(t.id, 'stagger', $any($event.target).value)" />
+      </label>
+      <label>
+        <span i18n="@@timeline.ease">Curve</span>
+        <select [value]="easeValue(t)" [attr.data-testid]="'timeline-ease-' + t.id" (change)="setEase(t.id, $any($event.target).value)">
+          <option value="linear" i18n="@@timeline.easeLinear">Linear</option>
+          <option value="in" i18n="@@timeline.easeIn">Starts slowly</option>
+          <option value="out" i18n="@@timeline.easeOut">Ends slowly</option>
+          <option value="in-out" i18n="@@timeline.easeInOut">Slow at the start and the end</option>
+          <option value="out-back" i18n="@@timeline.easeOutBack">Overshoots and returns</option>
+          @if (easeValue(t) === 'custom') {
+            <option value="custom" i18n="@@timeline.easeCustom">Custom</option>
+          }
+        </select>
+      </label>
+      @for (p of props(t); track p) {
+        <div class="values">
+          <span class="prop mo-data">{{ p }}</span>
+          <label>
+            <span i18n="@@timeline.from">From</span>
+            <input type="number" class="mo-data" step="any" [value]="t.from[p] ?? ''" [attr.data-testid]="'timeline-from-' + t.id + '-' + p" (change)="setValue(t.id, 'from', p, $any($event.target).value)" />
+          </label>
+          <label>
+            <span i18n="@@timeline.to">To</span>
+            <input type="number" class="mo-data" step="any" [value]="t.to[p] ?? ''" [attr.data-testid]="'timeline-to-' + t.id + '-' + p" (change)="setValue(t.id, 'to', p, $any($event.target).value)" />
+          </label>
+        </div>
+      }
+    </div>
+  }
+</section>

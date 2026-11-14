@@ -1,0 +1,28 @@
+{
+  "format": "music-motion-dataset",
+  "version": 2,
+  "exportedAt": "2026-11-09T10:00:00.000Z",
+  "animation": {
+    "title": "Quiet Town",
+    "song": { "project": "demo-musica", "trackId": "track-1", "variant": 0, "title": "Quiet Town", "seconds": 48 },
+    "options": { "style": "typographic", "level": "medium", "fps": 30, "resolution": "1280x720" },
+    "design": { "dark": "#101018", "light": "#f4f1ea", "accent": "#ff5a3c", "display": "Space Grotesk", "body": "Inter", "defaultMode": "dark", "modes": {}, "concept": "" },
+    "script": {
+      "version": 1,
+      "pieces": [
+        { "id": "p1", "start": 0, "end": 24, "part": "toggle", "params": { "label": "allow", "on": true } },
+        { "id": "p2", "start": 24, "end": 48, "part": "blank" }
+      ],
+      "layers": [
+        { "id": "strip", "items": [{ "part": "wire-sphere", "params": { "detail": 12 }, "start": 0, "end": 48 }] },
+        {
+          "id": "counting",
+          "items": [
+            { "part": "counter", "params": { "to": 50 }, "start": 10, "end": 30, "animate": { "to": [{ "t": 0, "value": 1, "ease": "out" }, { "t": 20, "value": 500 }] } },
+            { "part": "parallax-cards", "start": 30, "end": 40 }
+          ]
+        }
+      ]
+    }
+  }
+}

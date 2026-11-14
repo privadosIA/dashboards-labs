@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "id": "scale",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "factor",
+      "type": "select",
+      "label": "Cuántas veces más grande",
+      "defaultValue": 2,
+      "options": [
+        { "value": 2, "label": "×2" },
+        { "value": 4, "label": "×4" }
+      ]
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Motor",
+      "defaultValue": "fast",
+      "options": [
+        { "value": "fast", "label": "Rápido" },
+        { "value": "quality", "label": "Calidad" }
+      ]
+    }
+  ]
+}

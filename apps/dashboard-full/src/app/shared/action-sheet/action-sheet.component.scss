@@ -1,0 +1,17 @@
+.sheet {
+  &__title {
+    margin: 0;
+    padding: var(--lab-space-3) var(--lab-space-4) var(--lab-space-1);
+    font-size: var(--lab-fs-section);
+    font-family: var(--lab-font-display);
+    font-weight: var(--lab-fw-title);
+  }
+
+  &__item {
+    min-height: 48px;
+
+    &--danger {
+      color: var(--lab-danger);
+    }
+  }
+}

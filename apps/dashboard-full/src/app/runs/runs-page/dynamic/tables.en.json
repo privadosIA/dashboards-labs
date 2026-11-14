@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "id": "runs",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "type": "table",
+      "id": "runs-history",
+      "dataKey": "history",
+      "filter": true,
+      "filterLabel": "Search",
+      "searchKeys": [
+        "project",
+        "created_at",
+        "server"
+      ],
+      "pageSize": 10,
+      "pageSizeOptions": [
+        4,
+        10,
+        20,
+        50,
+        100
+      ],
+      "persistState": "session",
+      "selectable": "multiple",
+      "selectionKey": "id",
+      "selectableWhen": {
+        "field": "./finished",
+        "operator": "truthy"
+      },
+      "headerSelects": "page",
+      "columns": [
+        {
+          "key": "id",
+          "label": "run",
+          "type": "link",
+          "href": "/runs/{id}",
+          "sortable": true
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "type": "badge",
+          "sortable": true,
+          "map": {
+            "queued": "queued",
+            "running": "running",
+            "succeeded": "succeeded",
+            "failed": "failed",
+            "cancelled": "cancelled",
+            "interrupted": "interrupted"
+          },
+          "variants": {
+            "queued": "warn",
+            "running": "warn",
+            "succeeded": "ok",
+            "failed": "error",
+            "cancelled": "error",
+            "interrupted": "error"
+          }
+        },
+        {
+          "key": "server",
+          "label": "server",
+          "sortable": true
+        },
+        {
+          "key": "options",
+          "label": "options",
+          "sortable": true,
+          "template": "options"
+        },
+        {
+          "key": "durationMs",
+          "label": "duration",
+          "template": "duration",
+          "sortable": true
+        },
+        {
+          "key": "artifact",
+          "label": "artifact",
+          "template": "artifact",
+          "sortable": true
+        }
+      ],
+      "actions": [
+        {
+          "name": "delete",
+          "label": "Delete this run from the history",
+          "icon": "delete",
+          "showWhen": {
+            "field": "./finished",
+            "operator": "truthy"
+          },
+          "disabledWhen": {
+            "field": "ctx.deleting",
+            "operator": "truthy"
+          }
+        }
+      ]
+    }
+  ]
+}

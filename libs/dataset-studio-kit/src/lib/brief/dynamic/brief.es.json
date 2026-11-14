@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "id": "dataset-brief",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "brief",
+      "type": "textarea",
+      "label": "Tu texto",
+      "defaultValue": "",
+      "props": {
+        "rows": 8
+      }
+    },
+    {
+      "key": "negative",
+      "type": "textarea",
+      "label": "Negativo (lo que no debe salir)",
+      "defaultValue": "",
+      "props": {
+        "rows": 2
+      }
+    },
+    {
+      "key": "look",
+      "type": "select",
+      "label": "Aspecto",
+      "defaultValue": "",
+      "description": "Un aspecto son palabras de estilo más un modelo recomendado; nada más.",
+      "options": [
+        {
+          "value": "",
+          "label": "Ninguno"
+        },
+        {
+          "value": "realistic",
+          "label": "Realista"
+        },
+        {
+          "value": "illustration",
+          "label": "Ilustración"
+        }
+      ]
+    }
+  ]
+}

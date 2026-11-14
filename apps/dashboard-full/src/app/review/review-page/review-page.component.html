@@ -1,0 +1,238 @@
+<mo-page-header
+  title="Review"
+  i18n-title="@@review.title"
+  description="Analyze the clips of {{ id() }}, see which problems were found and how they will be fixed, and launch them as tasks."
+  i18n-description="@@review.desc"
+/>
+
+<mo-panel
+  heading="Analyze"
+  i18n-heading="@@review.analyzeTitle"
+  description="Measures the color and sharpness of each clip and, with an Ollama vision model, looks for deformed faces and bodies."
+  i18n-description="@@review.analyzeDesc"
+>
+  <div class="row">
+    <mat-form-field class="model">
+      <mat-label i18n="@@review.model">Vision model</mat-label>
+      <mat-select [value]="model()" (selectionChange)="pickModel($event.value)" data-testid="review-model">
+        <mat-option value="" i18n="@@review.noModel">— measurements only (no model) —</mat-option>
+        @for (m of models(); track m) {
+          <mat-option [value]="m">{{ m }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button type="button" data-testid="analyze" [disabled]="busy() || analyzing()" (click)="analyze()">
+      <mat-icon>search</mat-icon>
+      <ng-container i18n="@@review.analyze">Analyze</ng-container>
+    </button>
+    <app-provider-badge tasks="quality" />
+    <button mat-stroked-button type="button" data-testid="manual-review" [disabled]="busy()" (click)="startManual()">
+      <mat-icon>edit_note</mat-icon>
+      <ng-container i18n="@@review.manual">Manual review</ng-container>
+    </button>
+  </div>
+  @if (models().length === 0) {
+    <p class="note" i18n="@@review.noModels">There are no vision models in Ollama: only color and sharpness will be measured.</p>
+  }
+</mo-panel>
+
+@if (review(); as r) {
+  <mo-panel
+    heading="Findings for {{ r.id }}"
+    i18n-heading="@@review.findingsTitle"
+    class="panel"
+  >
+    @if (analyzing()) {
+      <p class="note" role="status" data-testid="progress" i18n="@@review.progress">Analyzing… {{ r.done }} of {{ r.total }} clips.</p>
+    }
+    @if (r.state === 'failed') {
+      <p class="error" role="alert">{{ r.error }}</p>
+    }
+    @if (r.notes) {
+      <p class="note">{{ r.notes }}</p>
+    }
+
+    <div class="row toolbar">
+      <mat-form-field class="gpu">
+        <mat-label>GPU</mat-label>
+        <mat-select [value]="gpu()" (selectionChange)="gpu.set($event.value)">
+          <mat-option value="" i18n="@@review.gpuNone">— not set —</mat-option>
+          @for (g of env.gpus(); track g.index) {
+            <mat-option [value]="'' + g.index">{{ g.index }} · {{ g.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button type="button" data-testid="run-all" [disabled]="busy() || pendingCount() === 0" (click)="runTasks([])">
+        <mat-icon>play_arrow</mat-icon>
+        <ng-container i18n="@@review.runAll">Fix all pending</ng-container>
+      </button>
+      <button mat-stroked-button type="button" data-testid="run-checked" [disabled]="busy() || checked().size === 0" (click)="runChecked()">
+        <mat-icon>playlist_play</mat-icon>
+        <ng-container i18n="@@review.runChecked">Fix the checked ones</ng-container>
+      </button>
+      @if (running()) {
+        <span class="note" i18n="@@review.running">There are tasks in the queue.</span>
+      }
+    </div>
+
+    @if (findings().length === 0 && !analyzing()) {
+      <mo-empty-state
+        message="Nothing odd was found. If you see something, add it below."
+        i18n-message="@@review.emptyDesc"
+      />
+    }
+
+    <ul class="findings">
+      @for (f of findings(); track f.id) {
+        <li class="finding" [attr.data-testid]="'finding-' + f.id">
+          @if (f.has_frame) {
+            <img class="finding__frame" [src]="frameUrl(f)" alt="" loading="lazy" />
+          }
+          <div class="finding__body">
+            <div class="finding__head">
+              <mat-checkbox
+                [checked]="isChecked(f.id)"
+                [disabled]="!editable(f) || f.status === 'skipped'"
+                (change)="toggle(f.id, $event.checked)"
+                [attr.data-testid]="'check-' + f.id"
+              />
+              <span class="mo-data">{{ f.scene }}</span>
+              <span class="chip">{{ sourceLabel(f) }}</span>
+              <span class="dim mo-data">{{ f.from_seconds }} s · {{ f.severity }}/10</span>
+              <span class="spacer"></span>
+              <span [class]="'chip chip--' + f.status" [attr.data-testid]="'status-' + f.id">{{ statusLabels[f.status] ?? f.status }}</span>
+              @if (f.run_id) {
+                <a class="mo-data" [routerLink]="['/runs', f.run_id]">{{ f.run_id }}</a>
+              }
+            </div>
+            <p class="finding__text">{{ f.description }}</p>
+            @if (f.message) {
+              <p class="error">{{ f.message }}</p>
+            }
+            <div class="row fix">
+              <mat-form-field class="kind">
+                <mat-label i18n="@@review.fix">How to fix it</mat-label>
+                <mat-select
+                  [value]="f.fix.kind"
+                  [disabled]="!editable(f)"
+                  (selectionChange)="setFixKind(f, $event.value)"
+                  [attr.data-testid]="'fix-' + f.id"
+                >
+                  @for (k of fixKinds; track k) {
+                    <mat-option [value]="k">{{ fixLabels[k] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="param" [class.wide]="isText(f.fix.kind)">
+                <mat-label i18n="@@review.param">Value</mat-label>
+                <input
+                  matInput
+                  [value]="paramOf(f)"
+                  [disabled]="!editable(f)"
+                  (change)="setParam(f, $any($event.target).value)"
+                  [attr.data-testid]="'param-' + f.id"
+                />
+              </mat-form-field>
+              @if (f.fix.kind === 'motion_prompt' && editable(f) && availability.available('assistant')) {
+                <button mat-stroked-button type="button" (click)="suggest(f)" [attr.data-testid]="'suggest-' + f.id">
+                  <mat-icon>auto_awesome</mat-icon>
+                  <ng-container i18n="@@review.suggest">Let the assistant propose it</ng-container>
+                </button>
+              }
+              <span class="spacer"></span>
+              @if (editable(f)) {
+                <button mat-stroked-button type="button" [disabled]="busy() || f.status === 'skipped'" (click)="runTasks([f.id])" [attr.data-testid]="'run-' + f.id">
+                  <mat-icon>play_arrow</mat-icon>
+                  <ng-container i18n="@@review.runOne">Fix</ng-container>
+                </button>
+                <button mat-button type="button" (click)="skip(f, f.status !== 'skipped')" [attr.data-testid]="'skip-' + f.id">
+                  @if (f.status === 'skipped') {
+                    <ng-container i18n="@@review.unskip">Restore</ng-container>
+                  } @else {
+                    <ng-container i18n="@@review.skip">Ignore</ng-container>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  </mo-panel>
+
+  <mo-panel
+    heading="Add what you saw"
+    i18n-heading="@@review.obsTitle"
+    description="Tell it what problem you saw and where; it will be fixed just like the others."
+    i18n-description="@@review.obsDesc"
+    class="panel"
+  >
+    <div class="row">
+      <mat-form-field class="kind">
+        <mat-label i18n="@@review.obsScene">Scene</mat-label>
+        <mat-select [value]="obsScene()" (selectionChange)="obsScene.set($event.value)" data-testid="obs-scene">
+          @for (s of scenes(); track s.id) {
+            <mat-option [value]="s.id">{{ s.id }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="param">
+        <mat-label i18n="@@review.obsFrom">From (s)</mat-label>
+        <input matInput type="number" min="0" step="0.1" [value]="obsFrom()" (input)="obsFrom.set(+$any($event.target).value)" />
+      </mat-form-field>
+      <mat-form-field class="param">
+        <mat-label i18n="@@review.obsSeverity">Severity (1-10)</mat-label>
+        <input matInput type="number" min="1" max="10" [value]="obsSeverity()" (input)="obsSeverity.set(+$any($event.target).value)" />
+      </mat-form-field>
+    </div>
+    <mat-form-field class="full">
+      <mat-label i18n="@@review.obsText">What you saw</mat-label>
+      <textarea matInput rows="2" [value]="obsText()" (input)="obsText.set($any($event.target).value)" data-testid="obs-text"></textarea>
+    </mat-form-field>
+    <button mat-flat-button type="button" data-testid="obs-add" [disabled]="!canObserve()" (click)="addObservation()">
+      <mat-icon>add</mat-icon>
+      <ng-container i18n="@@review.obsAdd">Add observation</ng-container>
+    </button>
+  </mo-panel>
+}
+
+<mo-panel
+  heading="Previous reviews"
+  i18n-heading="@@review.historyTitle"
+  class="panel"
+>
+  @if (reviews().length === 0) {
+    <p class="note" i18n="@@review.noHistory">There are no reviews of this project yet.</p>
+  } @else {
+    <div class="row history__bar">
+      <button mat-stroked-button type="button" class="danger" data-testid="delete-all" (click)="deleteAll()">
+        <mat-icon>delete_sweep</mat-icon>
+        <ng-container i18n="@@review.deleteAll">Delete all</ng-container>
+      </button>
+    </div>
+    <ul class="history">
+      @for (r of reviews(); track r.id) {
+        <li class="history__row" [class.current]="review()?.id === r.id">
+          <button mat-button type="button" class="mo-data" (click)="open(r.id)" [attr.data-testid]="'open-' + r.id">{{ r.id }}</button>
+          <span class="chip">{{ stateLabels[r.state] ?? r.state }}</span>
+          <span class="dim">{{ r.model || '—' }}</span>
+          <span class="dim" i18n="@@review.counts">{{ r.findings }} findings · {{ r.pending }} pending</span>
+          <span class="spacer"></span>
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="r.state === 'analyzing'"
+            (click)="deleteReview(r)"
+            [attr.data-testid]="'delete-' + r.id"
+            i18n-matTooltip="@@review.deleteOne"
+            matTooltip="Delete this review"
+            i18n-aria-label="@@review.deleteOne"
+            aria-label="Delete this review"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</mo-panel>

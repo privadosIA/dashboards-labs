@@ -1,0 +1,77 @@
+<div
+  #host
+  class="canvas"
+  [class.drawing]="store().tool() !== 'select'"
+  tabindex="0"
+  role="application"
+  data-testid="vector-canvas"
+  [attr.aria-label]="t.canvas.label"
+  (pointerdown)="down($event)"
+  (pointermove)="move($event)"
+  (pointerup)="up($event)"
+  (pointercancel)="up($event)"
+  (dblclick)="editText($event)"
+  (wheel)="wheel($event)"
+  (keydown)="keydown($event)"
+  (keyup)="keyup($event)"
+>
+  <svg class="stage" preserveAspectRatio="none" aria-hidden="true" [attr.viewBox]="stage()">
+    <rect class="artboard" data-testid="artboard" [attr.x]="vb().x" [attr.y]="vb().y" [attr.width]="vb().width" [attr.height]="vb().height" />
+    <g #content class="content" data-testid="content"></g>
+  </svg>
+  <svg class="overlay" aria-hidden="true" [attr.width]="size().width" [attr.height]="size().height">
+    @for (x of guides().x; track x) {
+      <line class="guide" data-testid="guide" [attr.x1]="x" y1="0" [attr.x2]="x" [attr.y2]="size().height" />
+    }
+    @for (y of guides().y; track y) {
+      <line class="guide" data-testid="guide" x1="0" [attr.y1]="y" [attr.x2]="size().width" [attr.y2]="y" />
+    }
+    @for (b of boxes(); track b.id) {
+      <rect class="box" [attr.x]="b.box.x" [attr.y]="b.box.y" [attr.width]="b.box.width" [attr.height]="b.box.height" />
+    }
+    @if (selected()) {
+      @if (union(); as u) {
+        <line class="stem" [attr.x1]="u.x + u.width / 2" [attr.y1]="u.y" [attr.x2]="rotatePoint().x" [attr.y2]="rotatePoint().y + 5" />
+        <circle class="handle rotate" data-handle="rotate" data-testid="handle-rotate" r="5" [attr.cx]="rotatePoint().x" [attr.cy]="rotatePoint().y">
+          <title>{{ t.canvas.rotate }}</title>
+        </circle>
+        @for (h of handles(); track h.name) {
+          <rect class="handle scale" [attr.data-handle]="h.name" [attr.data-testid]="'handle-' + h.name" width="8" height="8" [attr.x]="h.x - 4" [attr.y]="h.y - 4">
+            <title>{{ t.canvas.scale }}</title>
+          </rect>
+        }
+      }
+      @if (anchor(); as a) {
+        <g class="anchor" data-handle="anchor" data-testid="handle-anchor" [attr.transform]="'translate(' + a.x + ' ' + a.y + ')'">
+          <circle r="9" class="anchor-hit" />
+          <circle r="3.5" class="anchor-dot" />
+          <path d="M-8 0H8M0 -8V8" class="anchor-cross" />
+          <title>{{ t.canvas.anchor }}</title>
+        </g>
+      }
+    }
+    @if (marquee(); as m) {
+      <rect class="marquee" data-testid="marquee" [attr.x]="m.x" [attr.y]="m.y" [attr.width]="m.width" [attr.height]="m.height" />
+    }
+  </svg>
+  <input
+    #picker
+    type="file"
+    hidden
+    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+    data-testid="image-picker"
+    [attr.aria-label]="t.tools.pickImage"
+    (change)="pictureChosen($event)"
+  />
+  @if (editing(); as ed) {
+    <lab-vector-text-edit
+      [text]="ed.node.content"
+      [box]="ed.box"
+      [fontSize]="ed.size"
+      [fontFamily]="ed.family"
+      [fontWeight]="ed.node.fontWeight"
+      (commit)="commitText($event)"
+      (cancel)="cancelText()"
+    />
+  }
+</div>

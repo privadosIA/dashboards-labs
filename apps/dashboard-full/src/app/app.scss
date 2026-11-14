@@ -1,0 +1,284 @@
+// Shell layout. Structure = information: the rail and toolbar are quiet
+// chrome; the content area is where the work happens.
+.shell {
+  height: 100%;
+  background: var(--lab-bg);
+}
+
+// The page's scrollbar appears and goes as the content grows and shrinks (a chart, a table); without a reserved
+// place it narrows the page and the rows of buttons above re-wrap and jump (seen in Firefox).
+mat-sidenav-content {
+  scrollbar-gutter: stable;
+  // A soft glow of the accent at the top of the content area (the element scrolls, its background does not).
+  background-image: var(--lab-glow);
+  background-repeat: no-repeat;
+}
+
+// A section window has its header above the content. The studios fill the window's height less what is above them (`--studio-offset`), so
+// the window says how tall its header is, and the studios leave room for it.
+.shell--window {
+  --section-header-h: 3.75rem;
+  --studio-offset: calc(3rem + var(--section-header-h));
+}
+
+.rail {
+  width: 232px;
+  border-right: 1px solid var(--lab-line);
+  background: var(--lab-bg);
+  display: flex;
+  flex-direction: column;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-3);
+    padding: var(--lab-space-4) var(--lab-space-3) var(--lab-space-3);
+  }
+
+  // The application's mark: a rounded square in the accent colour with a play glyph.
+  &__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: var(--lab-radius-control);
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  // The hamburger that folds the navigation away, at the foot of the column.
+  &__collapse {
+    align-self: flex-start;
+    margin: var(--lab-space-2) var(--lab-space-3) var(--lab-space-3);
+    color: var(--lab-ink-dim);
+  }
+
+  &__name {
+    font-family: var(--lab-font-display);
+    font-size: var(--lab-fs-section);
+    font-weight: 700;
+    letter-spacing: var(--lab-tracking-tight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__nav {
+    padding: var(--lab-space-2) var(--lab-space-2);
+  }
+
+  // Connection and theme live together at the bottom, apart from the sections.
+  &__foot {
+    border-top: 1px solid var(--lab-line);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__conn {
+    padding: var(--lab-space-2) var(--lab-space-3);
+  }
+
+  &__server {
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__theme {
+    padding: var(--lab-space-2) var(--lab-space-4) var(--lab-space-4);
+    font-size: var(--lab-fs-meta);
+  }
+
+  // The active section: a bar on the left and a raised background, so it
+  // reads without relying on colour alone (aria-current is set as well).
+  .mat-mdc-list-item {
+    position: relative;
+    border-radius: var(--lab-radius-control);
+    --mat-list-list-item-label-text-size: var(--lab-fs-body);
+
+    &:hover:not(.rail__item--active) {
+      background: color-mix(in srgb, var(--lab-surface-high) 70%, transparent);
+    }
+  }
+
+  // The rows answer softly (nothing moves: only the colour changes), and not at all when reduced motion is asked for.
+  @media (prefers-reduced-motion: no-preference) {
+    .mat-mdc-list-item {
+      transition: background-color var(--lab-dur) var(--lab-ease);
+    }
+  }
+
+  // The active section is tinted with the accent over the raised surface: it reads without relying on colour alone, and the bar on its left.
+  &__item--active {
+    background: color-mix(in srgb, var(--lab-accent) 16%, var(--lab-surface-high));
+    --mat-list-list-item-leading-icon-color: var(--lab-accent);
+    --mat-list-list-item-label-text-color: var(--lab-ink);
+    --mat-list-list-item-label-text-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--lab-accent);
+    }
+  }
+}
+
+// The content starts where the column ends. Material measures the drawer to set this margin, and mid-fold it would measure a width on its way:
+// the shell says the two widths itself so that the column and the content move together.
+.shell--rail > mat-sidenav-content {
+  margin-left: 232px !important;
+}
+
+.shell--rail-collapsed > mat-sidenav-content {
+  margin-left: 72px !important;
+}
+
+// Folded: a column of icons. The names, the language and the switches are hidden (the icons keep their names as tooltips and for screen readers).
+.rail--collapsed {
+  width: 72px;
+  --mat-list-list-item-leading-icon-start-space: 0;
+  --mat-list-list-item-leading-icon-end-space: 0;
+  // Tighter, so that the whole column fits without scrolling on a short window.
+  --mat-list-list-item-one-line-container-height: 40px;
+
+  .rail__brand {
+    justify-content: center;
+    padding: var(--lab-space-3) 0 var(--lab-space-2);
+  }
+
+  .rail__name,
+  .rail__label,
+  .rail__server,
+  .rail__lang,
+  .rail__theme {
+    display: none;
+  }
+
+  .rail__nav {
+    padding-inline: var(--lab-space-1);
+  }
+
+  .rail__nav .mat-mdc-list-item {
+    justify-content: center;
+    padding-inline: 0;
+
+    display: flex;
+
+    // Material's own rules out-rank a single class, so the icon says it twice.
+    .mat-mdc-list-item-icon.mat-icon.mat-mdc-list-item-icon {
+      margin-inline: auto;
+    }
+
+    [matListItemTitle] {
+      display: none;
+    }
+  }
+
+  .rail__conn {
+    display: flex;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  // The buttons of the foot are just their icon, centred in the column.
+  .rail__conn .mat-mdc-button,
+  .rail__collapse.mat-mdc-button {
+    min-width: 0;
+    padding-inline: 0;
+
+    .mat-icon {
+      margin-inline: 0;
+    }
+  }
+
+  // The foot is a block: the button centres itself with auto margins.
+  .rail__collapse {
+    display: flex;
+    margin: 0 auto var(--lab-space-2);
+  }
+}
+
+// Folding and unfolding is slower than a hover and the two sides move together: the column's width and the content's margin share the curve.
+@media (prefers-reduced-motion: no-preference) {
+  // Material gives the drawer its own `transition: transform`; the width is added to it with a selector that out-ranks it.
+  mat-sidenav.mat-drawer.rail {
+    transition:
+      transform 400ms var(--lab-ease),
+      width var(--lab-dur-slow) var(--lab-ease);
+  }
+
+  mat-sidenav-content {
+    transition: margin-left var(--lab-dur-slow) var(--lab-ease);
+  }
+}
+
+// Shown at phone width, and on a desktop while the side navigation is folded away: it carries just the menu control.
+.topbar {
+  background: var(--lab-bg);
+  border-bottom: 1px solid var(--lab-line);
+  min-height: 48px;
+  height: 48px;
+}
+
+.content {
+  padding: var(--lab-space-5) var(--lab-space-6) var(--lab-space-7);
+  max-width: 1280px;
+}
+
+// A section window has no side navigation, so its page is centred under the header like the same dashboard on its own; the pages with the side navigation stay beside it.
+.content--section {
+  margin-inline: auto;
+}
+
+// The editors (a piece in Motion Edit, the Vector editor, a project's editor) and the pages of Animation use the whole width: a centred column would hide elements.
+.content--wide {
+  max-width: none;
+  margin-inline: 0;
+}
+
+@media (max-width: 599px) {
+  .content {
+    padding: var(--lab-space-4) var(--lab-space-4) var(--lab-space-6);
+  }
+}
+
+.rail__lang {
+  display: flex;
+  margin: 0 var(--lab-space-4) var(--lab-space-3);
+
+  .mat-button-toggle {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+// The phone shell: the page does not scroll behind the content and the bar of tabs is clear of the notch and the
+// home indicator. The viewport fits the visible screen (dvh), not the one under the browser's own bars.
+.shell--tabs {
+  height: 100dvh;
+
+  mat-sidenav-content {
+    overscroll-behavior: contain;
+    // A field that takes the focus is scrolled clear of what sticks to the bottom (the bar of tabs, the composer, the
+    // buttons of a card).
+    scroll-padding-bottom: calc(var(--app-tabbar-h, 0px) + 96px);
+  }
+}
+
+.content--tabs {
+  padding-top: calc(var(--lab-space-4) + env(safe-area-inset-top));
+  padding-left: calc(var(--lab-space-4) + env(safe-area-inset-left));
+  padding-right: calc(var(--lab-space-4) + env(safe-area-inset-right));
+  // Room for the bar of tabs (56 px) and the home indicator.
+  padding-bottom: calc(56px + env(safe-area-inset-bottom) + var(--lab-space-5));
+}

@@ -1,0 +1,57 @@
+<div class="lines" data-testid="lines-editor">
+  <ul>
+    @for (r of rows(); track r.n) {
+      <li class="line" data-testid="line">
+        <label class="field wide">
+          <span>{{ t.lineText }}</span>
+          <input type="text" class="ctl text" [value]="r.text" [disabled]="locked()" (input)="setText(r.n, value($event))" />
+        </label>
+        <label class="field">
+          <span>{{ t.lineStart }}</span>
+          <input #start type="number" step="0.1" class="ctl start" [value]="r.start" [disabled]="locked()" (change)="setTimes(r.n, value($event), end.value)" />
+        </label>
+        <label class="field">
+          <span>{{ t.lineEnd }}</span>
+          <input #end type="number" step="0.1" class="ctl end" [value]="r.end" [disabled]="locked()" (change)="setTimes(r.n, start.value, value($event))" />
+        </label>
+        <label class="field">
+          <span>{{ t.lineKeyword }}</span>
+          <select class="ctl keyword" [disabled]="locked()" (change)="setKeyword(r.n, value($event))">
+            <option value="" [selected]="r.keyword === ''">{{ t.noKeyword }}</option>
+            @for (w of r.words; track w) {
+              <option [value]="w" [selected]="w === r.keyword">{{ w }}</option>
+            }
+          </select>
+        </label>
+        <button type="button" class="ctl danger remove" data-testid="remove-line" [disabled]="locked()" (click)="remove(r.n)">{{ t.removeLine }}</button>
+      </li>
+    }
+  </ul>
+
+  <div class="add">
+    @if (available().length) {
+      <label class="field wide">
+        <span>{{ t.addFromSong }}</span>
+        <select class="ctl from-song" data-testid="add-from-song" [disabled]="locked()" (change)="addFromSong(value($event)); $any($event.target).value = ''">
+          <option value="">{{ t.chooseLine }}</option>
+          @for (a of available(); track a.line) {
+            <option [value]="a.line">{{ a.start }} s · {{ a.text }}</option>
+          }
+        </select>
+      </label>
+    } @else {
+      <p class="hint">{{ t.addFromSongNone }}</p>
+    }
+
+    @if (freeOpen()) {
+      <label class="field wide">
+        <span>{{ t.addFree }}</span>
+        <input #free type="text" class="ctl free" data-testid="free-text" (keydown.enter)="addFree(free.value)" />
+      </label>
+      <p class="hint">{{ t.freeHint }}</p>
+      <button type="button" class="ctl primary go" data-testid="add-free-go" [disabled]="locked()" (click)="addFree(free.value)">{{ t.addExtra }}</button>
+    } @else {
+      <button type="button" class="ctl open" data-testid="add-free" [disabled]="locked()" (click)="freeOpen.set(true)">{{ t.addFree }}</button>
+    }
+  </div>
+</div>

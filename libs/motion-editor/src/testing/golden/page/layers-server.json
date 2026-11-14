@@ -1,0 +1,6 @@
+{
+  "_": "The part of the page that draws the items of the layers, as the server writes it at mediaOrquestator 7b98bd4 (`internal/music/musicmotion/layers.go`: the constant layerSeek; `page.go`: the registration after an item's fragment and its wrapper). The browser's builder must write the same text.",
+  "layerSeek": "\n    var LY = window.__layers || [], abs = ((window.__scene && window.__scene.song_start) || 0) + t;\n    for (var li = 0; li < LY.length; li++) {\n      var on = abs >= LY[li].from - 1e-9 && abs < LY[li].to;\n      LY[li].el.style.display = on ? 'contents' : 'none';\n      if (on && LY[li].seek) LY[li].seek(abs - LY[li].from, beat);\n    }",
+  "wrapperStart": "<div class=\"layer\" id=\"layer-0\" style=\"display:none\">",
+  "registration": "window.__layers=window.__layers||[];window.__layers.push({el:document.getElementById('layer-0'),from:5,to:9,seek:typeof window.__partSeek==='function'?window.__partSeek:null});window.__partSeek=null;})();</script></div>"
+}

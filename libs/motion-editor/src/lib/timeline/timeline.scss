@@ -1,0 +1,457 @@
+:host {
+  display: block;
+  color: var(--lab-ink);
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  overflow: hidden;
+}
+
+.labels {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--lab-line);
+  background: var(--lab-surface-high);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--lab-space-2);
+  overflow: hidden;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.zoom {
+  display: flex;
+  gap: var(--lab-space-1);
+  margin-top: auto;
+  padding: var(--lab-space-2);
+
+  button {
+    flex: 1;
+    height: var(--lab-control-h);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: transparent;
+    color: var(--lab-ink);
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-focus);
+      outline-offset: 2px;
+    }
+  }
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: -2px;
+  }
+}
+
+.lanes {
+  position: relative;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.lane {
+  display: block;
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.tick,
+.bar {
+  stroke: var(--lab-line);
+}
+
+.bar {
+  opacity: 0.6;
+}
+
+.mark,
+.section-tag,
+.word {
+  fill: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.word {
+  fill: var(--lab-ink);
+}
+
+.section {
+  fill: color-mix(in srgb, var(--lab-accent) 10%, transparent);
+  stroke: var(--lab-line);
+
+  &.tone-1 {
+    fill: color-mix(in srgb, var(--lab-accent) 18%, transparent);
+  }
+
+  &.tone-2 {
+    fill: color-mix(in srgb, var(--lab-ink) 8%, transparent);
+  }
+
+  &.tone-3 {
+    fill: color-mix(in srgb, var(--lab-accent) 26%, transparent);
+  }
+}
+
+.loudness {
+  fill: none;
+  stroke: var(--lab-ink-dim);
+  stroke-width: 1.5;
+}
+
+.block {
+  cursor: pointer;
+}
+
+// The block's body is the control that takes the keyboard, so it is the one that shows the focus.
+.block-body:focus-visible {
+  outline: 2px solid var(--lab-focus);
+}
+
+.block-body {
+  fill: var(--lab-surface-high);
+  stroke: var(--lab-control-line);
+}
+
+.block-name {
+  fill: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+}
+
+.block.selected .block-body {
+  fill: color-mix(in srgb, var(--lab-accent) 30%, var(--lab-surface-high));
+  stroke: var(--lab-accent);
+  stroke-width: 2;
+}
+
+.extra-block .block-body {
+  fill: color-mix(in srgb, var(--lab-ink) 6%, var(--lab-surface));
+}
+
+.dot {
+  fill: var(--lab-accent);
+}
+
+.flag {
+  fill: var(--lab-warn);
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px solid var(--lab-accent);
+  pointer-events: none;
+}
+
+// Where a dragged item from the library would land.
+.drop-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--lab-accent);
+  pointer-events: none;
+}
+
+.close {
+  cursor: pointer;
+
+  circle {
+    fill: var(--lab-surface);
+    stroke: var(--lab-danger);
+  }
+
+  path {
+    fill: none;
+    stroke: var(--lab-danger);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  &:hover circle,
+  &:focus-visible circle {
+    fill: var(--lab-danger);
+  }
+
+  &:hover path,
+  &:focus-visible path {
+    stroke: var(--lab-surface);
+  }
+}
+
+.dot-area {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.dot.selected {
+  stroke: var(--lab-ink);
+  stroke-width: 1.5;
+}
+
+// The edge between two blocks: the cut a drag moves.
+.cut-handle {
+  fill: transparent;
+  cursor: ew-resize;
+
+  &:hover,
+  &:focus-visible {
+    fill: color-mix(in srgb, var(--lab-accent) 35%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+  }
+}
+
+.block-body {
+  cursor: grab;
+}
+
+.block.swap-target .block-body {
+  stroke: var(--lab-accent);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+  fill: color-mix(in srgb, var(--lab-accent) 18%, var(--lab-surface-high));
+}
+
+// The target a dragged cut will land on, and its time.
+.guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--lab-accent);
+  pointer-events: none;
+}
+
+.drag-time {
+  position: absolute;
+  top: 0;
+  transform: translateX(6px);
+  padding: 0 var(--lab-space-2);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-size: var(--lab-fs-meta);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.zoom .magnet.on {
+  color: var(--lab-accent);
+  border-color: var(--lab-accent);
+  background: color-mix(in srgb, var(--lab-accent) 14%, transparent);
+}
+
+// A warning on a block: a triangle that says, when the pointer rests on it, what the live checks found.
+.warn-mark {
+  fill: color-mix(in srgb, var(--lab-warn) 25%, transparent);
+  stroke: var(--lab-warn);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: all;
+
+  &.soft {
+    stroke: var(--lab-ink-dim);
+    fill: transparent;
+  }
+}
+
+// The grade a review gave a block: a disc outlined in the colour of its verdict, with a glyph so that the colour is not the only cue.
+.grade-mark {
+  --grade: var(--lab-ink-dim);
+  pointer-events: all;
+
+  circle {
+    fill: var(--lab-surface);
+    stroke: var(--grade);
+    stroke-width: 1.5;
+  }
+
+  text {
+    fill: var(--grade);
+    font-size: 9px;
+    font-weight: 700;
+    pointer-events: none;
+  }
+
+  &[data-verdict='pass'] {
+    --grade: var(--lab-success);
+  }
+
+  &[data-verdict='weak'] {
+    --grade: var(--lab-warn);
+  }
+
+  &[data-verdict='fail'] {
+    --grade: var(--lab-danger);
+  }
+}
+
+// An empty slot of the script: waiting for a part.
+.block.empty .block-body {
+  fill: transparent;
+  stroke: var(--lab-control-line);
+  stroke-dasharray: 4 3;
+}
+
+.block.empty .block-name {
+  fill: var(--lab-ink-dim);
+  font-style: italic;
+}
+
+// The keyframes of a parameter: a thin line over the piece that animates it and a diamond for each keyframe.
+.lane.keyframes {
+  background: color-mix(in srgb, var(--lab-accent) 5%, transparent);
+}
+
+.kf-span {
+  stroke: var(--lab-ink-dim);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+.kf {
+  fill: var(--lab-surface);
+  stroke: var(--lab-accent);
+  stroke-width: 1.5;
+  cursor: ew-resize;
+
+  &.step {
+    fill: var(--lab-accent);
+  }
+
+  &:hover,
+  &:focus-visible {
+    fill: color-mix(in srgb, var(--lab-accent) 45%, var(--lab-surface));
+    outline: none;
+  }
+
+  &.selected {
+    fill: var(--lab-accent);
+    stroke: var(--lab-ink);
+  }
+}
+
+.kf-label {
+  color: var(--lab-accent);
+}
+
+// The lane an extra block would land on when it is dragged to reorder.
+.lane.extra.reorder-target {
+  background: color-mix(in srgb, var(--lab-accent) 16%, transparent);
+  outline: 1px dashed var(--lab-accent);
+  outline-offset: -1px;
+}
+
+.extra-block .block-body {
+  cursor: grab;
+}
+
+.warn-mark.refused {
+  stroke: var(--lab-danger);
+  fill: color-mix(in srgb, var(--lab-danger) 25%, transparent);
+}
+
+// A layer: a lane of items across the cuts, with an end on each side to resize it.
+.lane.layer-lane {
+  background: color-mix(in srgb, var(--lab-accent) 4%, transparent);
+}
+
+.layer-block .block-body {
+  fill: color-mix(in srgb, var(--lab-accent) 10%, var(--lab-surface));
+  cursor: grab;
+}
+
+.layer-block.selected .block-body {
+  fill: color-mix(in srgb, var(--lab-accent) 30%, var(--lab-surface-high));
+}
+
+.item-handle {
+  fill: transparent;
+  cursor: ew-resize;
+
+  &:hover {
+    fill: color-mix(in srgb, var(--lab-accent) 35%, transparent);
+  }
+}
+
+.layer-label {
+  color: var(--lab-accent);
+}
+
+// The space under the layers where a part dropped makes a new one.
+.lane.new-layer {
+  border-top: 1px dashed var(--lab-control-line);
+}
+
+.new-layer-text {
+  fill: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-style: italic;
+}
+
+// A layer's label is the handle to reorder it, and where it would land is marked on its label and its lane.
+.layer-label {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  &.reorder-target {
+    outline: 1px dashed var(--lab-accent);
+    outline-offset: -1px;
+    background: color-mix(in srgb, var(--lab-accent) 16%, transparent);
+  }
+}
+
+.lane.layer-lane.reorder-target {
+  background: color-mix(in srgb, var(--lab-accent) 16%, transparent);
+  outline: 1px dashed var(--lab-accent);
+  outline-offset: -1px;
+}
+
+// How many parts the page of a piece draws, once it is close to what the server takes.
+.page-count {
+  fill: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-variant-numeric: tabular-nums;
+
+  &.full {
+    fill: var(--lab-warn);
+    font-weight: var(--lab-fw-control);
+  }
+}

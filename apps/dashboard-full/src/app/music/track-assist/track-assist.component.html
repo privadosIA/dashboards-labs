@@ -1,0 +1,100 @@
+@if (available()) {
+<div class="assist" data-testid="track-assist">
+  <button
+    mat-stroked-button
+    type="button"
+    data-testid="assist-toggle"
+    [attr.aria-expanded]="open()"
+    (click)="open.set(!open())"
+  >
+    <mat-icon>auto_awesome</mat-icon>
+    <ng-container i18n="@@music.assist.toggle">Write with AI</ng-container>
+  </button>
+  <app-provider-badge tasks="assistant" />
+
+  @if (open()) {
+    <div class="assist__panel">
+      <mat-form-field class="assist__field">
+        <mat-label i18n="@@music.assist.describe">Describe your song (in any language)</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          data-testid="assist-description"
+          [value]="description()"
+          (input)="description.set($any($event.target).value)"
+          i18n-placeholder="@@music.assist.placeholder"
+          placeholder="A sad ballad about coming home on a rainy night, with piano"
+        ></textarea>
+        <mat-hint>
+          @if (instrumental()) {
+            <ng-container i18n="@@music.assist.hintInstrumental">The track is instrumental: only the style is proposed.</ng-container>
+          } @else {
+            <ng-container i18n="@@music.assist.hint">A style is proposed in English and lyrics in the language of your description.</ng-container>
+          }
+        </mat-hint>
+      </mat-form-field>
+
+      <app-assist-model />
+      <div class="assist__bar">
+        @if (busyHere()) {
+          <span class="assist__wait" role="status" data-testid="assist-wait">
+            <mat-progress-spinner mode="indeterminate" diameter="16" />
+            <span>
+              <ng-container i18n="@@music.assist.working">Writing…</ng-container>
+              <span class="mo-data" data-testid="assist-elapsed">{{ assist.elapsed() }} s</span>
+              <span class="assist__note" i18n="@@music.assist.cpuNote">uses the CPU, takes a few seconds</span>
+            </span>
+          </span>
+          <button data-cancel mat-button type="button" data-testid="assist-cancel" (click)="assist.cancel()" i18n="@@music.assist.cancel">
+            Cancel
+          </button>
+        } @else {
+          <button
+            mat-flat-button
+            type="button"
+            data-testid="assist-ask"
+            [disabled]="!!reason() || !!assist.busy()"
+            (click)="ask()"
+          >
+            <ng-container i18n="@@music.assist.ask">Propose</ng-container>
+          </button>
+          @if (reason() === 'tooLong') {
+            <span class="assist__note" data-testid="assist-reason">
+              <ng-container i18n="@@music.assist.tooLong">The description exceeds the assistant's limit</ng-container> ({{ maxChars }})
+            </span>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if (proposal(); as p) {
+    <div class="proposal" data-testid="assist-proposal">
+      <p class="proposal__label" i18n="@@music.assist.proposal">Proposal</p>
+      <p class="proposal__style mo-data" data-testid="assist-proposal-style">{{ p.caption }}</p>
+      @if (p.tags) {
+        <p class="proposal__style mo-data" data-testid="assist-proposal-tags">{{ p.tags }}</p>
+      }
+      @if (p.lyrics && !instrumental()) {
+        <pre class="proposal__lyrics mo-data" data-testid="assist-proposal-lyrics">{{ p.lyrics }}</pre>
+      }
+      <div class="proposal__actions">
+        <button mat-flat-button type="button" data-testid="assist-apply" (click)="apply()" i18n="@@music.assist.apply">Use</button>
+        <button mat-button type="button" data-testid="assist-discard" (click)="assist.discard()" i18n="@@music.assist.discard">
+          Discard
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (failure(); as f) {
+    <p class="assist__error" role="alert" data-testid="assist-error">
+      <mat-icon inline>error</mat-icon>
+      <span>{{ f.message }}</span>
+      <button mat-button type="button" (click)="assist.dismissFailure()" i18n="@@music.assist.dismiss">Close</button>
+    </p>
+  }
+</div>
+} @else {
+  <app-model-notice task="assistant" />
+}

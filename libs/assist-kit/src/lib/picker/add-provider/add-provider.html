@@ -1,0 +1,9 @@
+<section class="add" data-testid="add-provider">
+  <h4>{{ t.addTitle }}</h4>
+  <p class="hint">{{ t.addHint }}</p>
+  <dynamic-form [schema]="schema" [(model)]="value" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+  @if (problem()) {
+    <p class="problem" role="alert" data-testid="add-problem">{{ t.addFailed(problem()) }}</p>
+  }
+  <button type="button" class="primary" data-testid="add-submit" [disabled]="working()" (click)="submit()">{{ working() ? t.adding : t.addSubmit }}</button>
+</section>

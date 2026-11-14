@@ -1,0 +1,116 @@
+<section class="reference">
+  <a class="back" [routerLink]="link('references')">← {{ t.back }}</a>
+
+  @if (reference() === undefined) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (reference(); as r) {
+    <header>
+      <h1>{{ r.title }}</h1>
+      <span class="state" [class]="'state-' + r.state" data-testid="state">{{ t.states[r.state] }}</span>
+    </header>
+    <p class="meta" data-testid="origin">{{ t.source }}: @if (sourceLink(r); as url) {<a [href]="url" target="_blank" rel="noopener noreferrer">{{ url }}</a>} @else {{{ source(r) }}}</p>
+
+    @if (r.state === 'analysing') {
+      <p class="note" role="status" data-testid="analysing">{{ t.analysingNote }}</p>
+    } @else if (r.state === 'failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failedReason }} {{ r.error }}</p>
+    }
+
+    @if (analysis(); as a) {
+      <section class="analysis" data-testid="analysis">
+        @if (big(); as frame) {
+          <img class="big" [src]="src(frame)" alt="" data-testid="big-frame" />
+        }
+        <div class="frames" data-testid="frames">
+          <h2>{{ t.frames }}</h2>
+          <ul>
+            @for (f of a.frames; track $index) {
+              <li><button type="button" [class.on]="$index === chosen()" [attr.aria-pressed]="$index === chosen()" (click)="chosen.set($index)"><img [src]="src(f)" alt="" loading="lazy" /></button></li>
+            }
+          </ul>
+        </div>
+        <div class="colours" data-testid="colours">
+          <h2>{{ t.colours }}</h2>
+          <ul class="row">
+            @for (c of a.colours; track $index) {
+              <li><span class="swatch" [style.background]="c.hex" [attr.title]="c.hex + ' ' + percent(c.share)"></span> {{ percent(c.share) }}</li>
+            }
+          </ul>
+          @for (third of a.thirds; track $index) {
+            <ul class="row" [attr.data-testid]="'third-' + $index">
+              <li class="label">{{ t.third.replace('{n}', '' + ($index + 1)) }}</li>
+              @for (c of third; track $index) {
+                <li><span class="swatch" [style.background]="c.hex" [attr.title]="c.hex + ' ' + percent(c.share)"></span></li>
+              }
+            </ul>
+          }
+        </div>
+        <dl class="facts" data-testid="facts">
+          <div><dt>{{ t.duration }}</dt><dd>{{ clock(a.duration) }}</dd></div>
+          <div><dt>{{ t.size }}</dt><dd>{{ a.width }}×{{ a.height }} · {{ a.fps }} fps</dd></div>
+          <div><dt>{{ t.cuts }}</dt><dd>{{ a.cuts }}</dd></div>
+          <div><dt>{{ t.meanShot }}</dt><dd>{{ a.meanShot }} s</dd></div>
+          @if (a.tempo !== undefined) {
+            <div><dt>{{ t.tempo }}</dt><dd data-testid="tempo">{{ a.tempo }}</dd></div>
+          }
+          @if (a.key) {
+            <div><dt>{{ t.key }}</dt><dd data-testid="key">{{ a.key }}</dd></div>
+          }
+        </dl>
+        <div class="description" data-testid="description">
+          <h2>{{ t.description }}</h2>
+          @if (a.description) {
+            <p>{{ a.description }}</p>
+          } @else {
+            <p class="meta" data-testid="no-description">{{ t.noDescription }} {{ a.descriptionNote }}</p>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="edit" data-testid="edit">
+      <h2>{{ t.edit }}</h2>
+      <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+      @if (refused()) {
+        <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+      }
+      @if (saved() && !refused()) {
+        <p class="ok" role="status" data-testid="saved">{{ t.saved }}</p>
+      }
+      <button type="button" class="save" data-testid="save" [disabled]="!valid() || saving()" (click)="save()">{{ saving() ? t.saving : t.save }}</button>
+    </section>
+
+    <app-learn-section [reference]="r" />
+
+    <section class="preset" data-testid="make">
+      <button type="button" class="make" data-testid="make-preset" [disabled]="!canMake()" (click)="makePreset()">{{ making() ? t.makingPreset : t.makePreset }}</button>
+      @if (r.state !== 'ready') {
+        <p class="meta" data-testid="not-ready">{{ t.notReady }}</p>
+      }
+      @if (makeRefused()) {
+        <p class="problem" role="alert" data-testid="make-refused">{{ makeRefused() }}</p>
+      }
+      @if (preset(); as p) {
+        <div class="made" role="status" data-testid="made">
+          <p>{{ t.presetMade }} <strong>{{ p.name }}</strong></p>
+          @if (p.adjustments.length) {
+            <p>{{ t.adjustments }}</p>
+            <ul data-testid="adjustments">
+              @for (a of p.adjustments; track $index) {
+                <li>{{ a }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="panel" role="alert" data-testid="missing">
+      <p>{{ error() ? t.loadFailed : t.missing }}</p>
+      @if (error()) {
+        <p class="reason" data-testid="reason">{{ error() }}</p>
+      }
+      <a [routerLink]="link('references')">{{ common.back }}</a>
+    </div>
+  }
+</section>

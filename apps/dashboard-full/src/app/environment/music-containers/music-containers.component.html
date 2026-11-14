@@ -1,0 +1,85 @@
+@if (rows().length > 0) {
+  <section class="containers" data-testid="containers-panel">
+    <h3 class="containers__title" i18n="@@env.containers">Music services</h3>
+    @if (engines.starting()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Starting the service" i18n-aria-label="@@env.startingBar" />
+    }
+    <ul class="list">
+      @for (r of rows(); track r.id) {
+        <li class="row" [attr.data-testid]="'container-' + r.id">
+          <div class="row__head">
+            <mat-icon class="row__state" [class.ok]="state(r) === 'running'">
+              {{ state(r) === 'running' ? 'check_circle' : state(r) === 'starting' ? 'hourglass_top' : 'radio_button_unchecked' }}
+            </mat-icon>
+            <span class="mo-data row__name">{{ r.name }}</span>
+            <span class="dim" data-testid="container-state">
+              @switch (state(r)) {
+                @case ('running') {
+                  <ng-container i18n="@@env.containerRunning">running</ng-container>
+                  @if (r.engine.container?.gpu !== undefined) {
+                    <ng-container i18n="@@env.containerOnGpu"> on GPU {{ r.engine.container?.gpu }}</ng-container>
+                  }
+                  @if (r.engine.container?.memory_mb; as mb) {
+                    · {{ memory(mb) }} <ng-container i18n="@@env.containerRam">of RAM</ng-container>
+                  }
+                }
+                @case ('starting') {
+                  <ng-container i18n="@@env.containerStarting">starting…</ng-container>
+                }
+                @default {
+                  <ng-container i18n="@@env.containerStopped">stopped</ng-container>
+                }
+              }
+            </span>
+          </div>
+
+          @if (r.engine.mode === 'external') {
+            <p class="dim" i18n="@@env.containerExternal">It uses the service on another computer (Settings): nothing is started here.</p>
+          } @else if (blocked(r); as reason) {
+            <p class="warn" data-testid="container-blocked">
+              <mat-icon inline>warning</mat-icon>
+              <span>{{ reasonText(reason) }}</span>
+              @if (inModels(reason)) {
+                <a routerLink="/models" i18n="@@env.containerGoModels">Go to Models</a>
+              }
+            </p>
+          } @else {
+            <div class="row__actions">
+              @if (state(r) === 'stopped') {
+                <label>
+                  <select data-testid="container-gpu" aria-label="GPU for the service" i18n-aria-label="@@env.gpuPick" (change)="pickGpu(r.id, $any($event.target).value)">
+                    <option value="" i18n="@@env.containerGpuAuto">auto</option>
+                    @for (g of env.report()?.gpus ?? []; track g.index) {
+                      <option [value]="g.index">GPU {{ g.index }}</option>
+                    }
+                  </select>
+                </label>
+                <button mat-flat-button data-testid="container-start" [disabled]="busy()[r.id]" (click)="start(r)">
+                  <mat-icon>play_arrow</mat-icon>
+                  <ng-container i18n="@@env.containerStart">Start</ng-container>
+                </button>
+              } @else {
+                <button mat-stroked-button data-testid="container-stop" [disabled]="busy()[r.id] || state(r) === 'starting'" (click)="stop(r)">
+                  <mat-icon>stop</mat-icon>
+                  <ng-container i18n="@@env.containerStop">Stop</ng-container>
+                </button>
+              }
+            </div>
+            @if (r.engine.container?.error; as err) {
+              <p class="warn" data-testid="container-error">
+                <mat-icon inline>error</mat-icon>
+                <span i18n="@@env.containerError">It did not start: {{ err }}</span>
+              </p>
+            }
+          }
+        </li>
+      }
+    </ul>
+    @if (engines.callError(); as e) {
+      <p class="warn" role="alert" data-testid="container-call-error">
+        <mat-icon inline>error</mat-icon>
+        <span>{{ e }}</span>
+      </p>
+    }
+  </section>
+}

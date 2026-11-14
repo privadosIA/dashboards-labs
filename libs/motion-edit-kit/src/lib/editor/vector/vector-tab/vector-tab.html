@@ -1,0 +1,26 @@
+@if (store(); as store) {
+  <section class="vector-tab" data-testid="vector-tab">
+    <p class="head" data-testid="vector-title">
+      <span>{{ title() }}</span>
+      @if (dirty()) {
+        <span class="dirty" data-testid="vector-dirty">· {{ t.dirty }}</span>
+      }
+    </p>
+    @if (uses() > 0 && partName()) {
+      <p class="uses" data-testid="vector-uses">{{ t.replacesUses(uses()) }}</p>
+    }
+    <lab-vector-editor-page [store]="store" [beatAt]="beatAt()" [loudnessAt]="loudnessAt()">
+      <div toolbar class="tools" role="toolbar" [attr.aria-label]="t.toolbar">
+        <button type="button" class="ctl primary" data-testid="vector-save" (click)="openSend(false)">{{ t.save }}</button>
+        @if (partName()) {
+          <button type="button" class="ctl" data-testid="vector-save-new" (click)="openSend(true)">{{ t.saveAsNew }}</button>
+        }
+        <button type="button" class="ctl" data-testid="vector-discard" [disabled]="!dirty() && !!partName()" (click)="discard()">{{ t.discard }}</button>
+        <button type="button" class="ctl help" data-testid="vector-help" [attr.aria-label]="t.help" [attr.title]="t.help" (click)="help.emit()">?</button>
+      </div>
+    </lab-vector-editor-page>
+    @if (sendDoc(); as doc) {
+      <lab-vector-send [doc]="doc" [sink]="sink" [open]="sendOpen()" (openChange)="sendOpenChange($event)" (sent)="sent($event)" />
+    }
+  </section>
+}

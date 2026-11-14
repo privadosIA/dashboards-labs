@@ -1,0 +1,22 @@
+<section class="panel" data-testid="song">
+  <h2>{{ t.songDesign }}</h2>
+  <div class="swatches" role="img" aria-hidden="true">
+    @for (s of swatches(); track s.key) {
+      <span class="swatch" [style.background]="s.value" [attr.title]="s.value"></span>
+    }
+  </div>
+  @if (otherProblem()) {
+    <p class="refused" role="alert" data-testid="refused">{{ t.refusedDesign }} {{ otherProblem() }}</p>
+  }
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="status($event)" (valueChange)="changed($event)">
+    <ng-template dfSlot="accentProblem">
+      @if (accentProblem()) {
+        <p class="refused" role="alert" data-testid="accent-problem">{{ accentProblem() }}</p>
+      }
+    </ng-template>
+  </dynamic-form>
+  <app-concept-box [texts]="libraryDesign" [value]="concept()" [disabled]="locked()" (changed)="setConcept($event)" />
+  @if (themed() && script(); as s) {
+    <app-theme-panel [design]="design()" [script]="s" [catalog]="catalog()" [locked]="locked()" [refused]="refused()" (edit)="edit.emit($event)" />
+  }
+</section>

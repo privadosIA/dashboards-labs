@@ -1,0 +1,9 @@
+.message {
+  max-width: 48ch;
+  white-space: pre-line;
+}
+
+button.destructive {
+  --mat-button-filled-container-color: var(--lab-danger);
+  --mat-button-filled-label-text-color: var(--lab-on-accent);
+}

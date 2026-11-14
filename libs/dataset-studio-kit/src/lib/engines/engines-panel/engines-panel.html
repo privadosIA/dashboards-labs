@@ -1,0 +1,76 @@
+<section class="engines" data-testid="engines-panel" aria-live="polite">
+  <h3>{{ t.title }}</h3>
+
+  @if (loading()) {
+    <p class="hint" role="status" data-testid="engines-loading">{{ t.loading }}</p>
+  } @else if (problem()) {
+    <p class="problem" role="alert" data-testid="engines-problem">{{ t.failed(problem()) }}</p>
+    <button type="button" data-testid="engines-retry" (click)="reload()">{{ retry }}</button>
+  } @else {
+    @let v = view();
+    @if (v && 'cards' in v) {
+      @if (!v.cards.length) {
+        <p class="hint" data-testid="engines-empty">{{ t.noModels }}</p>
+      }
+      <div class="cards" role="radiogroup" [attr.aria-label]="t.title">
+        @for (card of v.cards; track card.id) {
+          <div class="card" [class.card--chosen]="selected() === card.id" [class.card--off]="card.state !== 'ready'" [attr.data-testid]="'engine-' + card.id" [attr.data-state]="card.state">
+            <button type="button" role="radio" class="pick" [attr.aria-checked]="selected() === card.id" [disabled]="card.state !== 'ready'" (click)="choose(card)">
+              <span class="name">{{ card.name }}</span>
+              <span class="state" [attr.data-testid]="'state-' + card.id">{{ stateLabel(card) }}</span>
+            </button>
+            @if (card.description) {
+              <p class="detail" [attr.title]="card.description">{{ card.description }}</p>
+            }
+            @if (card.state !== 'ready' && why(card)) {
+              <p class="reason" [attr.data-testid]="'reason-' + card.id">{{ why(card) }}</p>
+            }
+            @if (v.kind === 'video') {
+              <p class="meta">
+                {{ card.audio ? t.sound : t.silent }}
+                @if (card.clipSeconds) {
+                  · {{ t.clip(card.clipSeconds) }}
+                }
+              </p>
+            }
+            @if (v.kind === 'video' || v.kind === 'images') {
+              <p class="meta" [attr.data-testid]="'time-' + card.id">
+                @if (card.seconds !== undefined) {
+                  {{ v.kind === 'video' ? t.perClip(card.seconds) : t.perPicture(card.seconds) }}
+                  <span class="source">({{ card.source === 'history' ? t.sourceHistory : card.source === 'catalog' ? t.sourceCatalog(card.sourceNote ?? '', card.measured === true) : t.sourceServer }})</span>
+                } @else {
+                  {{ t.noMeasurement }}
+                }
+              </p>
+            }
+            @if (card.state === 'stopped') {
+              <button type="button" class="start" [attr.data-testid]="'start-' + card.id" [disabled]="starting() === card.id" (click)="start(card)">
+                {{ starting() === card.id ? t.starting_ : t.start }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      @if (startProblem()) {
+        <p class="problem" role="alert" data-testid="start-problem">{{ startProblem() }}</p>
+      }
+    } @else if (v && v.kind === 'graphics') {
+      <p [class.problem]="!v.chrome" data-testid="graphics-chrome">{{ v.chrome ? t.chromeOk : t.chromeMissing }}</p>
+      <p class="meta" data-testid="graphics-parts">{{ t.parts(v.parts) }}</p>
+    } @else if (v && v.kind === 'piece') {
+      <dl class="piece" data-testid="piece-catalog">
+        <dt>{{ t.pieceStyles }}</dt>
+        <dd>{{ v.styles.join(', ') }}</dd>
+        <dt>{{ t.pieceLevels }}</dt>
+        <dd>{{ v.levels.join(', ') }}</dd>
+        <dt>{{ t.pieceRates }}</dt>
+        <dd>{{ v.frameRates.join(', ') }}</dd>
+        <dt>{{ t.pieceFeatures }}</dt>
+        <dd>{{ v.features.join(', ') || '—' }}</dd>
+      </dl>
+    }
+    @if (note()) {
+      <p class="hint" data-testid="engines-note">{{ note() }}</p>
+    }
+  }
+</section>

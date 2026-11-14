@@ -1,0 +1,42 @@
+<section class="list" data-testid="flow-list">
+  <h2>{{ t.title }}</h2>
+
+  <fieldset class="defaults" data-testid="defaults">
+    <legend>{{ t.defaultsTitle }}</legend>
+    <p class="hint">{{ t.defaultsHint }}</p>
+    @for (step of autoSteps; track step) {
+      <label>
+        <input type="checkbox" [attr.data-testid]="'default-' + step" [checked]="defaults()[step] === true" (change)="setDefault(step, $any($event.target).checked)" />
+        {{ t.defaults[step] }}
+      </label>
+    }
+  </fieldset>
+
+  @if (!hasFlows()) {
+    <p class="hint" data-testid="no-flows">{{ t.empty }}</p>
+  } @else {
+    <ul class="flows">
+      @for (flow of flows(); track flow.id) {
+        <li [attr.data-testid]="'flow-' + flow.id">
+          <div class="what">
+            <strong>{{ title(flow) }}</strong>
+            <span class="hint">{{ where(flow) }} · {{ when(flow) }}</span>
+          </div>
+          <span class="actions">
+            <a class="button primary" data-testid="resume" [routerLink]="link(flow)">{{ t.resume }}</a>
+            <button type="button" data-testid="export" (click)="export(flow)">{{ t.export }}</button>
+            <button type="button" data-testid="delete" (click)="remove(flow)">{{ t.delete }}</button>
+          </span>
+        </li>
+      }
+    </ul>
+  }
+
+  <label class="import">
+    <span class="button">{{ t.import }}</span>
+    <input type="file" accept="application/json,.json" data-testid="import" (change)="import($event)" />
+  </label>
+  @if (importError()) {
+    <p class="problem" role="alert" data-testid="import-error">{{ t.importBad }}</p>
+  }
+</section>

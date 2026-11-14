@@ -1,0 +1,28 @@
+<section class="render" data-testid="render-card">
+  @switch (step()?.status) {
+    @case ('running') {
+      <p role="status" data-testid="progress">{{ queued() ? t.queued : t.drawing(percent()) }}</p>
+      @if (busy()) {
+        <p class="hint" role="status" data-testid="busy">{{ t.busy }}</p>
+      }
+    }
+    @case ('waiting') {
+      <div class="review" data-testid="review">
+        @if (video()) {
+          <video controls [src]="video()" data-testid="video" [attr.aria-label]="t.video"></video>
+        }
+        <button type="button" class="primary" data-testid="continue" (click)="continue()">{{ t.continue }}</button>
+      </div>
+    }
+    @default {
+      @if (step()?.status === 'failed') {
+        <p class="problem" role="alert" data-testid="failed">{{ t.failed(why(step()?.reason)) }}</p>
+      }
+      @if (estimateText()) {
+        <p data-testid="estimate">{{ estimateText() }}</p>
+      }
+      <p class="hint">{{ t.estimateNote }}</p>
+      <button type="button" class="primary" data-testid="draw" (click)="draw()">{{ step()?.status === 'failed' ? t.retry : t.draw }}</button>
+    }
+  }
+</section>

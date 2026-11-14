@@ -1,0 +1,74 @@
+<section class="presets">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p>{{ t.intro }}</p>
+    <a class="new" data-testid="new-style" [routerLink]="link('presets', 'new')">{{ t.newStyle }}</a>
+  </header>
+
+  @if (refused()) {
+    <p class="refused" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  @if (presets() === null) {
+    <p class="notice" role="status">{{ common.loading }}</p>
+  } @else if (presets()!.length === 0 && own().length === 0) {
+    <div class="notice" data-testid="empty">
+      <p>{{ t.empty }}</p>
+      <p class="hint">{{ t.emptyHint }} <a [routerLink]="link('references')">{{ common.nav.references }}</a></p>
+    </div>
+  } @else if (presets()!.length > 0) {
+    <lab-paged-list listId="motion-styles" [data]="presets()!" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (p of page; track p.id) {
+            <li class="card" [attr.data-testid]="'preset-' + p.id">
+              <div class="head">
+                <h2>{{ p.name }}</h2>
+                <span class="swatches" aria-hidden="true">
+                  <span [style.background]="p.design.dark"></span>
+                  <span [style.background]="p.design.light"></span>
+                  <span [style.background]="p.design.accent"></span>
+                </span>
+              </div>
+              <p class="meta" data-testid="summary">{{ summary(p) }}</p>
+              @if (gone(p)) {
+                <p class="meta" data-testid="gone">{{ t.referenceGone }}</p>
+              }
+              <div class="actions">
+                <button type="button" class="open" data-testid="open" (click)="open(p)">{{ t.open }}</button>
+                <button type="button" data-testid="remove" (click)="remove(p)">{{ t.remove }}</button>
+              </div>
+            </li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+
+  @if (own().length > 0) {
+    <section class="own" data-testid="own">
+      <h2>{{ t.ownTitle }}</h2>
+      <p class="meta">{{ t.ownIntro }}</p>
+      <ul class="list">
+        @for (s of own(); track s.id) {
+          <li class="card" [attr.data-testid]="'own-' + s.id">
+            <div class="head">
+              <h2>{{ s.name }}</h2>
+              <span class="badge" data-testid="badge">{{ t.ownBadge }}</span>
+              <span class="swatches" aria-hidden="true">
+                <span [style.background]="s.design.dark"></span>
+                <span [style.background]="s.design.light"></span>
+                <span [style.background]="s.design.accent"></span>
+              </span>
+            </div>
+            <p class="meta" data-testid="summary">{{ summary(s) }}</p>
+            <div class="actions">
+              <button type="button" class="open" data-testid="open-own" (click)="openOwn(s)">{{ t.ownEdit }}</button>
+              <button type="button" data-testid="remove-own" (click)="removeOwn(s)">{{ t.remove }}</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</section>

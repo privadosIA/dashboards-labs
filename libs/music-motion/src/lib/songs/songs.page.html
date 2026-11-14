@@ -1,0 +1,31 @@
+<section class="songs">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p>{{ t.intro }}</p>
+  </header>
+
+  @if (error()) {
+    <div class="notice error" role="alert" data-testid="load-failed">
+      <p>{{ t.loadFailed }}</p>
+      <p class="reason">{{ error() }}</p>
+      <button type="button" data-testid="retry" (click)="load()">{{ common.retry }}</button>
+    </div>
+  } @else if (songs() === null) {
+    <p class="notice" role="status">{{ common.loading }}</p>
+  } @else if (groups().length === 0) {
+    <div class="notice empty" data-testid="empty">
+      <p>{{ t.empty }}</p>
+      <p class="reason">{{ t.emptyHint }}</p>
+    </div>
+  } @else {
+    <lab-paged-list listId="motion-songs" [data]="groups()" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (g of page; track g.id) {
+            <li><app-song-card [group]="g" (animate)="animate($event)" /></li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+</section>

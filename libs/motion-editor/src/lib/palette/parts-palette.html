@@ -1,0 +1,41 @@
+<section class="palette" [attr.aria-label]="t.palette.title">
+  @if (heading()) {
+    <h2>{{ t.palette.title }}</h2>
+  }
+  <input type="search" class="search" [placeholder]="t.palette.search" [attr.aria-label]="t.palette.search" [value]="query()" (input)="typed($event)" />
+  <p class="hint">{{ t.palette.drag }}</p>
+  <ul class="items">
+    @if (textVisible()) {
+      <li class="item text" data-testid="palette-text" draggable="true" [attr.aria-disabled]="locked()" (dragstart)="start($event, { kind: 'text' })">
+        <span class="grip" aria-hidden="true">⋮⋮</span>
+        <span class="body">
+          <span class="name">{{ t.palette.text }}</span>
+          <span class="meta">{{ t.palette.textHint }}</span>
+        </span>
+        <button type="button" class="plus" data-testid="palette-add" [disabled]="locked()" [attr.aria-label]="t.palette.add(t.palette.text)" (click)="add.emit({ kind: 'text' })">+</button>
+      </li>
+    }
+    @for (r of rows(); track r.part.name) {
+      <li class="item" [class.off]="!r.supported || r.why !== ''" data-testid="palette-part" [attr.data-part]="r.part.name" draggable="true" [attr.aria-disabled]="locked()" (dragstart)="start($event, item(r.part.name))">
+        <span class="grip" aria-hidden="true">⋮⋮</span>
+        <span class="body">
+          <span class="name">{{ r.part.name }}@if (r.part.source === 'user') {<span class="badge">{{ t.palette.user }}</span>}</span>
+          <span class="meta">{{ r.part.description }}</span>
+          @if (!r.supported) {
+            <span class="meta warn">{{ t.palette.notAtLevel(level()) }}</span>
+          }
+          @if (r.why) {
+            <span class="meta warn" data-testid="palette-why">{{ r.why }}</span>
+          }
+        </span>
+        <button type="button" class="plus" data-testid="palette-add" [disabled]="locked()" [attr.aria-label]="t.palette.add(r.part.name)" (click)="add.emit(item(r.part.name))">+</button>
+        <button type="button" class="plus replace" data-testid="palette-replace" [disabled]="locked()" [attr.aria-label]="t.palette.replace(r.part.name)" [attr.title]="t.palette.replace(r.part.name)" (click)="replace.emit(item(r.part.name))">⇄</button>
+        <button type="button" class="plus layer" data-testid="palette-layer" [disabled]="locked()" [attr.aria-label]="t.palette.addLayer(r.part.name)" [attr.title]="t.palette.addLayer(r.part.name)" (click)="addLayer.emit(item(r.part.name))">▤</button>
+      </li>
+    } @empty {
+      @if (!textVisible()) {
+        <li class="none">{{ t.palette.none }}</li>
+      }
+    }
+  </ul>
+</section>

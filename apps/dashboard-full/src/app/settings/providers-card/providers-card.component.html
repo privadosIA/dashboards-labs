@@ -1,0 +1,157 @@
+<mo-panel heading="Providers" i18n-heading="@@providers.title">
+  <p class="note" i18n="@@providers.intro">
+    Where the models come from. The Ollama above is the built-in provider. Here you can add another Ollama or any OpenAI-compatible server (OpenAI, OpenRouter, Together, Groq, vLLM, LM Studio…). Keys are saved on the server, are never shown again and are never sent over http to another machine.
+  </p>
+
+  <ul class="list" data-testid="providers-list">
+    @for (p of providers(); track p.id) {
+      <li class="item" [attr.data-testid]="'provider-' + p.id">
+        <div class="item__head">
+          <span class="item__name">{{ p.name }}</span>
+          <span class="chip">{{ p.type === 'ollama' ? 'Ollama' : 'OpenAI' }}</span>
+          @if (p.builtin) {
+            <span class="chip" i18n="@@providers.builtin">built in</span>
+          }
+          @if (p.remote) {
+            <span class="chip chip--warn" data-testid="provider-remote" i18n="@@providers.remote">another machine</span>
+          }
+          @if (p.blocked) {
+            <span class="chip chip--warn" data-testid="provider-blocked" i18n="@@providers.blocked">not allowed in this edition</span>
+          }
+          @if (p.key_set) {
+            <span class="chip" data-testid="provider-key-set" i18n="@@providers.keySet">key saved</span>
+          }
+        </div>
+        <div class="mo-data item__addr">{{ p.base_url }}</div>
+        @if (!p.builtin) {
+          <div class="note">
+            <span i18n="@@providers.models">Text:</span> <span class="mo-data">{{ p.text_model || '—' }}</span> ·
+            <span i18n="@@providers.vision">Vision:</span> <span class="mo-data">{{ p.vision_model || '—' }}</span>
+          </div>
+        }
+        <div class="actions">
+          <button mat-stroked-button type="button" [attr.data-testid]="'provider-test-' + p.id" [disabled]="testing() === p.id" (click)="test(p)">
+            <mat-icon>wifi_find</mat-icon>
+            <ng-container i18n="@@providers.test">Test</ng-container>
+          </button>
+          @if (!p.builtin) {
+            <button mat-button type="button" [attr.data-testid]="'provider-edit-' + p.id" (click)="startEdit(p)" i18n="@@providers.edit">Edit</button>
+            <button mat-button type="button" [attr.data-testid]="'provider-delete-' + p.id" (click)="remove(p)" i18n="@@providers.delete">Delete</button>
+          }
+        </div>
+        @if (testing() === p.id) {
+          <mat-progress-bar mode="indeterminate" />
+        }
+        @if (results()[p.id]; as r) {
+          <div class="result" [attr.data-testid]="'provider-result-' + p.id" [attr.data-ok]="r.ok">
+            @if (r.ok) {
+              <p class="ok">
+                <mat-icon inline>check_circle</mat-icon>
+                <span i18n="@@providers.answers">Answers: {{ r.models?.length ?? 0 }} models.</span>
+              </p>
+              @if (r.models?.length) {
+                <p class="mo-data models">{{ r.models!.slice(0, 12).map(modelName).join(' · ') }}</p>
+              }
+            } @else {
+              <p class="error" role="alert"><mat-icon inline>error</mat-icon><span class="mo-data">{{ r.error }}</span></p>
+            }
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (form(); as f) {
+    <form class="form" data-testid="provider-form" (submit)="$event.preventDefault(); save()">
+      <h4 class="form__title">
+        @if (f.editing) {
+          <ng-container i18n="@@providers.editTitle">Edit provider</ng-container>
+        } @else {
+          <ng-container i18n="@@providers.addTitle">Add provider</ng-container>
+        }
+      </h4>
+      <mat-form-field>
+        <mat-label i18n="@@providers.name">Name</mat-label>
+        <input matInput data-testid="provider-name" maxlength="60" [value]="f.name" (input)="set('name', $any($event.target).value)" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label i18n="@@providers.type">Type</mat-label>
+        <mat-select data-testid="provider-type" [value]="f.type" (selectionChange)="set('type', $event.value)">
+          <mat-option value="openai" i18n="@@providers.typeOpenai">OpenAI-compatible</mat-option>
+          <mat-option value="ollama" i18n="@@providers.typeOllama">Another Ollama</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="wide">
+        <mat-label i18n="@@providers.address">Address</mat-label>
+        <input
+          matInput
+          data-testid="provider-url"
+          autocomplete="off"
+          spellcheck="false"
+          [placeholder]="f.type === 'openai' ? 'https://api.openai.com/v1' : '192.0.2.60:11434'"
+          [value]="f.base_url"
+          (input)="set('base_url', $any($event.target).value)"
+        />
+        <mat-hint>
+          @if (f.type === 'openai') {
+            <ng-container i18n="@@providers.hintOpenai">With https://; the path, if any, ends in /v1.</ng-container>
+          } @else {
+            <ng-container i18n="@@providers.hintOllama">Server and port.</ng-container>
+          }
+        </mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label i18n="@@providers.textModel">Text model</mat-label>
+        <input matInput data-testid="provider-text-model" autocomplete="off" [value]="f.text_model" (input)="set('text_model', $any($event.target).value)" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label i18n="@@providers.visionModel">Vision model</mat-label>
+        <input matInput data-testid="provider-vision-model" autocomplete="off" [value]="f.vision_model" (input)="set('vision_model', $any($event.target).value)" />
+      </mat-form-field>
+      @if (f.type === 'openai') {
+        <mat-form-field class="wide">
+          <mat-label i18n="@@providers.key">API key</mat-label>
+          <input
+            matInput
+            type="password"
+            data-testid="provider-key"
+            autocomplete="new-password"
+            spellcheck="false"
+            [value]="f.key"
+            (input)="set('key', $any($event.target).value)"
+          />
+          <mat-hint i18n="@@providers.keyHint">Write-only: it is never shown again. Empty: the saved one is kept.</mat-hint>
+        </mat-form-field>
+        @if (f.keySaved) {
+          <p class="key-saved" data-testid="provider-key-saved">
+            <mat-icon inline>key</mat-icon>
+            <span i18n="@@providers.keySavedNote">A key is saved.</span>
+            <button mat-button type="button" data-testid="provider-key-remove" (click)="removeSavedKey()" i18n="@@providers.keyRemove">Remove the key</button>
+          </p>
+        }
+        @if (f.removeKey) {
+          <p class="note" data-testid="provider-key-removing" i18n="@@providers.keyRemoving">The key will be removed when you save.</p>
+        }
+      }
+      @if (error(); as e) {
+        <p class="error" role="alert" data-testid="provider-error"><mat-icon inline>error</mat-icon><span class="mo-data">{{ e }}</span></p>
+      }
+      <div class="actions">
+        <button mat-flat-button type="submit" data-testid="provider-save" [disabled]="saving() || !f.name.trim() || !f.base_url.trim()" i18n="@@providers.save">
+          Save
+        </button>
+        <button mat-button type="button" data-testid="provider-cancel" (click)="cancel()" i18n="@@providers.cancel">Cancel</button>
+      </div>
+    </form>
+  } @else {
+    <div class="actions">
+      <button mat-stroked-button type="button" data-testid="provider-add" (click)="startAdd()">
+        <mat-icon>add</mat-icon>
+        <ng-container i18n="@@providers.add">Add provider</ng-container>
+      </button>
+    </div>
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="provider-error"><mat-icon inline>error</mat-icon><span class="mo-data">{{ e }}</span></p>
+    }
+  }
+</mo-panel>

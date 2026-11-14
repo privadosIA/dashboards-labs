@@ -1,0 +1,27 @@
+<div class="hit" data-testid="hit-editor">
+  @if (words().length === 0) {
+    <p class="hint">{{ t.hitNone }}</p>
+  } @else {
+    <div class="row">
+      <label class="field">
+        <span>{{ t.hitWord }}</span>
+        <select class="ctl word" [disabled]="locked()" (change)="setWord(value($event))">
+          <option value="" [selected]="!piece().hit">{{ t.hitNone }}</option>
+          @for (w of words(); track w) {
+            <option [value]="w" [selected]="piece().hit?.word === w">{{ w }}</option>
+          }
+        </select>
+      </label>
+      @if (piece().hit; as h) {
+        <label class="field">
+          <span>{{ t.hitAt }}</span>
+          <input #at type="number" step="0.25" class="ctl at" [value]="h.at" [disabled]="locked()" (change)="setTimes(value($event), length.value)" />
+        </label>
+        <label class="field">
+          <span>{{ t.hitLength }}</span>
+          <input #length type="number" step="0.1" min="0.1" class="ctl length" [value]="h.length" [disabled]="locked()" (change)="setTimes(at.value, value($event))" />
+        </label>
+      }
+    </div>
+  }
+</div>

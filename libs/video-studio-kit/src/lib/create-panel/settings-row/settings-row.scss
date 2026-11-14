@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lab-space-2);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  text-align: start;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-control-line);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+
+  &.bad {
+    border-color: var(--lab-danger);
+  }
+}
+
+.text {
+  display: grid;
+  min-width: 0;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.value {
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--lab-ink-dim);
+}
+
+.error {
+  margin: var(--lab-space-1) 0 0;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-danger);
+}

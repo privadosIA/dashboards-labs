@@ -1,0 +1,19 @@
+<div class="css-box" [attr.data-mode]="mode()" [class.bad]="!!problem()">
+  <textarea
+    class="css-box-plain"
+    rows="8"
+    spellcheck="false"
+    data-testid="theme-css"
+    [attr.aria-label]="t.css"
+    [attr.aria-invalid]="problem() ? 'true' : null"
+    [hidden]="mode() === 'monaco'"
+    [disabled]="readOnly()"
+    [value]="text()"
+    (input)="type($event)"
+  ></textarea>
+  <div #host class="css-box-host" data-testid="theme-css-monaco" [hidden]="mode() !== 'monaco'"></div>
+  <p class="css-box-count" [class.over]="text().length > max" data-testid="theme-css-count">{{ t.cssCount(text().length, max) }}</p>
+  @if (problem()) {
+    <p class="css-box-problem" role="alert" data-testid="theme-css-problem">{{ t.refused(problem()) }}</p>
+  }
+</div>

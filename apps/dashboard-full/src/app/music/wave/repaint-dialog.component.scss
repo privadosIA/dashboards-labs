@@ -1,0 +1,19 @@
+.repaint__song {
+  margin: 0 0 var(--lab-space-2, 8px);
+  color: var(--lab-ink-dim);
+}
+
+.repaint__range {
+  margin: var(--lab-space-2, 8px) 0 0;
+}
+
+.repaint__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2, 8px);
+  color: var(--lab-ink-dim);
+}
+
+.repaint__error {
+  color: var(--lab-danger, var(--lab-ink));
+}

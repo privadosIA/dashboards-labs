@@ -1,0 +1,12 @@
+<dialog #dialog class="modal" [attr.aria-label]="t.regions.preview" data-testid="preview-modal" [style.transform]="'translate(' + offset().x + 'px, ' + offset().y + 'px)'" (close)="open.set(false)" (click)="backdrop($event)">
+  @if (open()) {
+    <div class="box">
+      <header class="bar" data-testid="preview-bar" (pointerdown)="grab($event)" (pointermove)="carry($event)" (pointerup)="drop()" (pointercancel)="drop()">
+        <h2>{{ t.regions.preview }}</h2>
+        <button type="button" class="close" data-testid="preview-close" [attr.aria-label]="t.closePreview" [attr.title]="t.closePreview" (click)="open.set(false)">×</button>
+      </header>
+      <lab-preview-frame-host [pages]="pages()" [time]="clock().shown()" />
+      <lab-preview-transport [clock]="clock()" [songMap]="songMap()" />
+    </div>
+  }
+</dialog>

@@ -1,0 +1,137 @@
+.extract__notes {
+  margin: 0 0 var(--lab-space-3, 12px);
+  padding: var(--lab-space-2, 8px) var(--lab-space-3, 12px) var(--lab-space-2, 8px) 2rem;
+  border: 1px solid var(--lab-line, currentColor);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface-high, transparent);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+}
+
+.extract__alert,
+.extract__error,
+.extract__wait {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2, 8px);
+}
+
+.extract__error {
+  color: var(--lab-danger, var(--lab-ink));
+}
+
+.extract__hint {
+  margin: var(--lab-space-2, 8px) 0 var(--lab-space-3, 12px);
+  padding: var(--lab-space-1, 4px) var(--lab-space-2, 8px);
+  border: 1px solid var(--lab-line, currentColor);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface-high, transparent);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+}
+
+.extract__source {
+  margin-top: var(--lab-space-4, 16px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-3, 12px);
+}
+
+.extract__file {
+  flex: 1 1 14rem;
+}
+
+.extract__tag {
+  color: var(--lab-ink-dim);
+}
+
+.extract__method {
+  margin: var(--lab-space-4, 16px) 0 0;
+  padding: var(--lab-space-3, 12px) var(--lab-space-4, 16px);
+  border: 1px solid var(--lab-line, currentColor);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface-high, transparent);
+
+  legend {
+    padding: 0 var(--lab-space-2, 8px);
+    color: var(--lab-ink);
+    font-size: var(--lab-fs-meta);
+  }
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lab-space-1, 4px);
+  }
+}
+
+.extract__methodname {
+  margin-right: var(--lab-space-2, 8px);
+  font-weight: 600;
+}
+
+.extract__methoddesc {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.extract__methodwhy {
+  margin: 0 0 var(--lab-space-2, 8px) 2.5rem;
+}
+
+.extract__options {
+  margin-top: var(--lab-space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.extract__sub {
+  margin-left: var(--lab-space-4, 16px);
+}
+
+.extract__lang {
+  width: 16rem;
+  margin-top: var(--lab-space-3, 12px);
+}
+
+.extract__hintfield,
+.extract__wide {
+  width: 100%;
+}
+
+.extract__proposal {
+  margin-top: var(--lab-space-4, 16px);
+  padding-top: var(--lab-space-3, 12px);
+  border-top: 1px solid var(--lab-line, currentColor);
+}
+
+.extract__measures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2, 8px);
+}
+
+.extract__narrow {
+  width: 9rem;
+}
+
+// The wait, the failures and the buttons stay in view while the content scrolls: a short window
+// would otherwise hide them below the fold and the dialog would look stuck.
+.extract__actions {
+  flex-wrap: wrap;
+  gap: var(--lab-space-3, 12px);
+  padding: var(--lab-space-3, 12px) var(--lab-space-4, 16px) var(--lab-space-4, 16px);
+}
+
+.extract__status {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.extract__status:empty {
+  display: none;
+}

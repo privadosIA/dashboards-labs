@@ -1,0 +1,40 @@
+<input class="seek" type="range" min="0" step="0.01" [max]="clock().duration()" [value]="clock().time()" [attr.aria-label]="t.transport.seek" [attr.aria-valuetext]="timeLabel()" (input)="scrub($event)" />
+<div class="buttons">
+  <button type="button" class="icon" [attr.aria-label]="t.transport.toStart" [attr.title]="t.transport.toStart" (click)="toStart()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 6l-8 6 8 6z" /></svg>
+  </button>
+  <button type="button" class="icon" [attr.aria-label]="t.transport.stepBack" [attr.title]="t.transport.stepBack" (click)="clock().step(-1)">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+  </button>
+  <button type="button" class="icon primary" [attr.aria-label]="clock().playing() ? t.transport.pause : t.transport.play" [attr.title]="clock().playing() ? t.transport.pause : t.transport.play" (click)="clock().toggle()">
+    @if (clock().playing()) {
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+    } @else {
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z" /></svg>
+    }
+  </button>
+  <button type="button" class="icon" [attr.aria-label]="t.transport.stepForward" [attr.title]="t.transport.stepForward" (click)="clock().step(1)">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+  </button>
+  <button type="button" class="icon" [attr.aria-label]="t.transport.toEnd" [attr.title]="t.transport.toEnd" (click)="toEnd()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 6l8 6-8 6z" /></svg>
+  </button>
+  <button type="button" class="snap" role="switch" [attr.aria-checked]="clock().snapToFrames()" (click)="toggleSnap()">{{ t.transport.quantise }}</button>
+</div>
+<dl class="readout">
+  <div>
+    <dt>{{ t.transport.time }}</dt>
+    <dd class="time">{{ timeLabel() }} / {{ lengthLabel() }}</dd>
+  </div>
+  <div>
+    <dt>{{ t.transport.beat }}</dt>
+    <dd>{{ reading().number < 0 ? '–' : reading().number }}</dd>
+  </div>
+  <div>
+    <dt>{{ t.transport.section }}</dt>
+    <dd>{{ reading().section || '–' }}</dd>
+  </div>
+</dl>
+@if (!clock().hasAudio()) {
+  <p class="hint">{{ t.transport.noAudio }}</p>
+}

@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "id": "dataset-create",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "id",
+      "type": "text",
+      "label": "Nombre del proyecto",
+      "description": "Letras, números y «._-», empezando por una letra o un número (máx. 64).",
+      "defaultValue": "",
+      "validation": {
+        "required": true,
+        "maxLength": 64,
+        "messages": {
+          "required": "Pon un nombre."
+        }
+      }
+    }
+  ]
+}

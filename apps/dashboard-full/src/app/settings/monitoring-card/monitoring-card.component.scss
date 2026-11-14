@@ -1,0 +1,62 @@
+:host {
+  display: block;
+  margin-top: var(--lab-space-4);
+}
+
+.note {
+  margin: 0 0 var(--lab-space-3);
+  max-width: 80ch;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.tool {
+  padding: var(--lab-space-3) 0;
+  border-top: 1px solid var(--lab-line);
+}
+
+.tool__name {
+  margin: 0 0 var(--lab-space-2);
+  font-size: var(--lab-fs-section);
+  font-weight: 600;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start; // a hint under one field must not stretch the others
+  gap: 0 var(--lab-space-4);
+}
+
+.grid mat-form-field {
+  width: 11rem;
+}
+
+.grid .wide {
+  width: 16rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  min-height: 40px;
+}
+
+.ok,
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: var(--lab-space-2) 0 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.error {
+  color: var(--lab-danger);
+}

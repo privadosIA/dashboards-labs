@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.url {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+
+  // The field grows downwards (hint): the controls beside it sit on the input row.
+  > button,
+  > .url__wait {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+    min-height: 40px;
+  }
+
+  &__field {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  &__wait {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__error {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--lab-danger);
+    font-size: var(--lab-fs-meta);
+  }
+}

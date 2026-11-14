@@ -1,0 +1,27 @@
+<div class="ai">
+  <header>
+    <h2>{{ t.ai.title }}</h2>
+    <button type="button" class="close" [attr.aria-label]="t.ai.close" data-testid="ai-close" (click)="ref.close(false)">&times;</button>
+  </header>
+  <p class="lead">{{ t.ai.description }}</p>
+
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" (statusChange)="valid.set($event === 'VALID')">
+    <ng-template dfSlot="promptCount">
+      <app-char-count data-testid="ai-prompt-count" [length]="promptLength()" [max]="promptMax" />
+    </ng-template>
+  </dynamic-form>
+
+  <app-style-capture />
+
+  @if (store.lyrics().trim()) {
+    <p class="notice" data-testid="ai-replaces">{{ t.ai.replaces }}</p>
+  }
+
+  @if (writer.error(); as e) {
+    <p class="error" role="alert" data-testid="ai-error">{{ t.custom.errors[e] }}</p>
+  }
+
+  <button type="button" class="submit" data-testid="ai-submit" [disabled]="!valid() || writer.busy()" (click)="generate()">
+    {{ writer.busy() ? t.custom.writing : '✦ ' + t.ai.generate }}
+  </button>
+</div>

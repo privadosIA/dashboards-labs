@@ -1,0 +1,70 @@
+<section class="piece">
+  <a class="back" [routerLink]="link('pieces')">← {{ common.nav.pieces }}</a>
+
+  @if (piece() === undefined) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (piece(); as p) {
+    <header>
+      <h1>{{ p.title }}</h1>
+      <span class="state" [class]="'state-' + p.state" data-testid="state">{{ states[p.state] }}</span>
+      @if (editor(p.id); as href) {
+        <a class="edit-link" data-testid="edit-in-motion-edit" [routerLink]="href">{{ common.links.editInMotionEdit }}</a>
+      }
+      <app-export-dataset class="export-dataset" [piece]="p" />
+    </header>
+    @if (p.preset && presetName() !== undefined) {
+      <p class="origin" data-testid="preset-origin">{{ presetName() === null ? t.presetGone : t.presetOrigin + ' ' + presetName() }}</p>
+    }
+    @if (ownStyle(); as own) {
+      <p class="origin" data-testid="own-origin">{{ t.ownOrigin }} {{ own }}</p>
+    }
+    @if (busy()) {
+      <p class="note" role="status" data-testid="drawing">{{ t.drawing }}</p>
+    }
+    @if (p.proposal) {
+      <app-proposal-strip [piece]="p" />
+    }
+    @if (promptNote(); as note) {
+      <p class="note warning" role="status" data-testid="prompt-note">{{ t.promptFailed }} {{ note.reason }}</p>
+    }
+    @if (notice()) {
+      <p class="note warning" role="status" data-testid="created-notice">{{ t.createdNotice }} {{ notice() }}</p>
+    }
+    <div class="tabs" role="tablist" [attr.aria-label]="t.tabs">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          [id]="'tab-' + tab.id"
+          [attr.aria-selected]="tab.id === current()"
+          [attr.aria-controls]="'panel-' + tab.id"
+          [attr.tabindex]="tab.id === current() ? 0 : -1"
+          [attr.data-testid]="'tab-' + tab.id"
+          (click)="current.set(tab.id)"
+          (keydown)="moveTab($event)"
+        >
+          {{ tabLabels()[tab.id] }}
+        </button>
+      }
+    </div>
+    <div role="tabpanel" id="panel-render" aria-labelledby="tab-render" [hidden]="current() !== 'render'">
+      <app-render-panel [piece]="p" (started)="follow()" />
+    </div>
+    <div role="tabpanel" id="panel-propose" aria-labelledby="tab-propose" [hidden]="current() !== 'propose'">
+      <app-propose-panel [piece]="p" (proposed)="replace($event)" />
+    </div>
+    <app-design-form [piece]="p" [catalog]="catalog()" (saved)="replace($event)" />
+    <app-song-map [map]="p.songMap" [span]="span()" [piece]="p" (heard)="heard($event)" />
+    @if (catalog(); as c) {
+      <app-script-editor [piece]="p" [catalog]="c" (saved)="replace($event)" (selected)="span.set($event)" />
+    }
+  } @else {
+    <div class="panel" role="alert" data-testid="missing">
+      <p>{{ error() ? t.loadFailed : t.missing }}</p>
+      @if (error()) {
+        <p class="reason" data-testid="reason">{{ error() }}</p>
+      }
+      <a [routerLink]="link('pieces')">{{ common.back }}</a>
+    </div>
+  }
+</section>

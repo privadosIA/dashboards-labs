@@ -1,0 +1,30 @@
+<div class="export">
+  <button
+    type="button"
+    class="ctl"
+    data-testid="export"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="open()"
+    (click)="open.set(!open())"
+  >
+    {{ t.label }}
+  </button>
+  @if (open()) {
+    <ul class="menu" role="menu" data-testid="export-menu" (keydown.escape)="open.set(false)">
+      <li role="none">
+        <button type="button" role="menuitem" data-testid="export-animated" (click)="animated()">{{ t.animated }}</button>
+      </li>
+      <li role="none">
+        <button type="button" role="menuitem" data-testid="export-still" (click)="still()">{{ t.still }}</button>
+      </li>
+      <li role="none">
+        <button type="button" role="menuitem" data-testid="export-part" [disabled]="!canPart()" [attr.aria-describedby]="canPart() ? null : 'export-part-why'" (click)="part()">
+          {{ t.part }}
+        </button>
+        @if (!canPart()) {
+          <p class="why" id="export-part-why" data-testid="export-part-why">{{ t.doesNotMove }}</p>
+        }
+      </li>
+    </ul>
+  }
+</div>

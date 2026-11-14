@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.open {
+  width: 100%;
+  margin-bottom: var(--lab-space-2);
+}
+
+// A file input the button opens: out of sight but in the page (a test and a keyboard reach it).
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

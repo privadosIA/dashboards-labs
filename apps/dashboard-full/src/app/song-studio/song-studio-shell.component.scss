@@ -1,0 +1,11 @@
+// The studio fills the window less what is above it (the page's padding and this bar): its height reads --studio-offset.
+:host {
+  display: block;
+  --studio-offset: calc(3rem + var(--lab-control-h) + var(--lab-space-3) + var(--section-header-h, 0px));
+}
+
+.bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--lab-space-3);
+}

@@ -1,0 +1,148 @@
+@if (store.config(); as c) {
+  <mat-accordion>
+    <mat-expansion-panel class="panel" data-testid="bgm-panel" (opened)="store.loadSources()">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@bgm.title">Background music</mat-panel-title>
+        <mat-panel-description class="mo-data">{{ summary() }}</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <mat-button-toggle-group
+        class="kind"
+        data-testid="bgm-kind"
+        [value]="kind()"
+        (change)="setKind($event.value)"
+        i18n-aria-label="@@bgm.kindLabel"
+        aria-label="Background music source"
+      >
+        <mat-button-toggle value="none" i18n="@@bgm.none">None</mat-button-toggle>
+        <mat-button-toggle value="prompt" i18n="@@bgm.prompt">Generate it</mat-button-toggle>
+        <mat-button-toggle value="file" i18n="@@bgm.file">A file</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      @if (c.output.mode === 'images') {
+        <p class="note" i18n="@@bgm.imagesNote">Background music only exists in video: it will be removed on save.</p>
+      }
+
+      @if (serverMessage(); as msg) {
+        <p class="server-error" role="alert" data-testid="bgm-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ msg }}</span>
+        </p>
+      }
+
+      @if (kind() === 'prompt') {
+        <mat-form-field class="wide">
+          <mat-label i18n="@@bgm.promptLabel">Music style</mat-label>
+          <textarea
+            matInput
+            rows="2"
+            data-testid="bgm-prompt"
+            [value]="bgm()?.prompt ?? ''"
+            (change)="patch({ prompt: $any($event.target).value })"
+            i18n-placeholder="@@bgm.promptPlaceholder"
+            placeholder="Soft, atmospheric piano, slow tempo, no vocals"
+          ></textarea>
+          @if (store.bgmIncomplete()) {
+            <mat-hint class="error" role="alert" i18n="@@bgm.promptEmpty">Describe the music to be able to save</mat-hint>
+          } @else {
+            <mat-hint i18n="@@bgm.promptHint">Always instrumental. Generated with the music engine and cached.</mat-hint>
+          }
+        </mat-form-field>
+      }
+
+      @if (kind() === 'file') {
+        <div class="file-row">
+          <mat-form-field class="file">
+            <mat-label i18n="@@bgm.fileLabel">Audio file</mat-label>
+            <mat-select data-testid="bgm-file" [value]="bgm()?.file ?? ''" (selectionChange)="patch({ file: $event.value })">
+              @if (fileMissing()) {
+                <mat-option [value]="bgm()?.file ?? ''">
+                  <span class="mo-data">{{ bgm()?.file }}</span>
+                  <span class="missing" i18n="@@bgm.notOnDisk"> ⚠ not on disk</span>
+                </mat-option>
+              }
+              @for (s of store.audioSources(); track s.name) {
+                <mat-option [value]="s.name"><span class="mo-data">{{ s.name }}</span></mat-option>
+              }
+            </mat-select>
+            @if (store.bgmIncomplete()) {
+              <mat-hint class="error" role="alert" i18n="@@bgm.fileEmpty">Choose or upload an audio file to be able to save</mat-hint>
+            }
+          </mat-form-field>
+          <input #pick type="file" accept=".mp3,.wav,.mp4,.mov,.mkv,.webm,.avi,audio/mpeg,audio/wav,video/*" hidden (change)="upload(pick)" />
+          <button mat-stroked-button type="button" data-testid="bgm-upload" [disabled]="store.sourceBusy()" (click)="pick.click()">
+            <mat-icon>upload_file</mat-icon>
+            <ng-container i18n="@@bgm.upload">Upload audio or video</ng-container>
+          </button>
+        </div>
+        <app-source-url [projectId]="store.projectId()" (added)="useUrlSource($event)" />
+        @if (store.sourceError(); as msg) {
+          <p class="server-error" role="alert" data-testid="bgm-source-error">
+            <mat-icon inline>error</mat-icon>
+            <span class="mo-data">{{ msg }}</span>
+          </p>
+        }
+        @if (bgm()?.file && !fileMissing()) {
+          <mo-audio-player [src]="fileUrl(bgm()!.file!)" [label]="bgm()!.file!" />
+        }
+      }
+
+      @if (kind() !== 'none') {
+        <div class="mix">
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@bgm.volume">Volume</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              class="mo-data"
+              data-testid="bgm-volume"
+              [value]="bgm()?.volume ?? ''"
+              (change)="setNumber('volume', $any($event.target).value)"
+              placeholder="0.25"
+            />
+            <mat-hint i18n="@@bgm.volumeHint">0 to 1, under the voice</mat-hint>
+          </mat-form-field>
+          <mat-form-field class="narrow">
+            <mat-label i18n="@@bgm.fade">Fade (s)</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              class="mo-data"
+              data-testid="bgm-fade"
+              [value]="bgm()?.fade_seconds ?? ''"
+              (change)="setNumber('fade_seconds', $any($event.target).value)"
+              placeholder="2"
+            />
+          </mat-form-field>
+          @if (kind() === 'prompt') {
+            <mat-form-field class="narrow">
+              <mat-label>seed</mat-label>
+              <input
+                matInput
+                type="number"
+                class="mo-data"
+                data-testid="bgm-seed"
+                [value]="bgm()?.seed ?? ''"
+                (change)="setNumber('seed', $any($event.target).value)"
+                i18n-placeholder="@@bgm.seedAuto"
+                placeholder="based on the style"
+              />
+              <mat-hint i18n="@@bgm.seedHint">Same style, same music</mat-hint>
+            </mat-form-field>
+          }
+          <mat-checkbox
+            data-testid="bgm-ducking"
+            [checked]="bgm()?.ducking !== false"
+            (change)="patch({ ducking: $event.checked ? undefined : false })"
+            i18n="@@bgm.ducking"
+            >Lower the music while the voice speaks</mat-checkbox
+          >
+        </div>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+}

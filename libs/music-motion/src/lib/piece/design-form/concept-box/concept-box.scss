@@ -1,0 +1,47 @@
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+}
+
+.concept {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  font-weight: var(--lab-fw-control);
+
+  textarea {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    flex: 1 1 auto;
+    // The idea is the most important thing of the design: it takes the whole bottom of the block, and what is left of its height.
+    min-height: 6.5rem;
+    padding: var(--lab-space-2);
+    background: var(--lab-surface);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    color: var(--lab-ink);
+    font: inherit;
+    font-weight: 400;
+    resize: vertical;
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-focus);
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+.count {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  text-align: right;
+}

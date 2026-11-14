@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.actions {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.hint {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.project-id {
+  max-width: 28rem;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+
+  button {
+    height: var(--lab-control-h);
+    padding: 0 var(--lab-space-4);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: transparent;
+    color: var(--lab-ink);
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+  }
+
+  .primary {
+    border-color: var(--lab-accent);
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+}

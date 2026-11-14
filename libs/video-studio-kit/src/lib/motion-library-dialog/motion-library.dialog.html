@@ -1,0 +1,50 @@
+<div class="library-dialog">
+  <h2>{{ t.motionLibrary.title }}</h2>
+
+  <section class="list">
+    @if (status() === 'error') {
+      <p class="error" role="alert" data-testid="motions-error">
+        {{ t.motionLibrary.unreadable }}
+        <button type="button" class="retry" data-testid="motions-retry" (click)="load()">{{ t.motionLibrary.retry }}</button>
+      </p>
+    } @else if (status() === 'ready' && motions().length === 0) {
+      <p class="empty" data-testid="motions-empty">{{ t.videoTools.dialog.motionEmpty }}</p>
+    }
+    <app-motion-cards [motions]="motions()" mode="manage" (remove)="remove($event)" />
+  </section>
+
+  <section class="add">
+    <h3>{{ t.motionLibrary.addTitle }}</h3>
+    <div class="limits" data-testid="motion-limits">
+      <p class="hint">{{ t.motionLibrary.limitsTitle }}</p>
+      <ul>
+        @for (limit of t.motionLibrary.limits; track limit) {
+          <li>{{ limit }}</li>
+        }
+      </ul>
+    </div>
+    <div class="pick">
+      <button type="button" data-testid="choose-motion-file" (click)="chooseFile()">{{ t.motionLibrary.chooseFile }}</button>
+      @if (file(); as picked) {
+        <span class="picked" data-testid="motion-file-name">{{ picked.name }}</span>
+        <button type="button" data-testid="clear-motion-file" (click)="clearFile()">{{ t.motionLibrary.clearFile }}</button>
+      } @else {
+        <span class="picked">{{ t.motionLibrary.noFile }}</span>
+      }
+    </div>
+    <input #motionFile type="file" accept="video/*,.mkv" hidden data-testid="motion-file" (change)="picked()" />
+    @if (schema) {
+      <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+    }
+    @if (error()) {
+      <p class="error" role="alert" data-testid="motion-error">{{ error() }}</p>
+    }
+    <div class="actions">
+      <button type="button" class="primary" data-testid="add-motion" [disabled]="adding()" (click)="add()">{{ adding() ? t.motionLibrary.adding : t.motionLibrary.add }}</button>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button type="button" data-testid="close-library" (click)="close()">{{ t.motionLibrary.close }}</button>
+  </div>
+</div>

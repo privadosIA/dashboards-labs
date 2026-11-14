@@ -1,0 +1,81 @@
+<section class="look" data-testid="look-step">
+  <p class="hint">{{ t.intro }}</p>
+
+  <button type="button" class="card none" data-testid="look-none" [class.on]="isNone()" [attr.aria-pressed]="isNone()" (click)="chooseNone()">
+    <strong>{{ t.none }}</strong>
+    <span class="meta">{{ t.noneHint }}</span>
+  </button>
+
+  <h3>{{ t.referencesTitle }}</h3>
+  @if (references().length === 0) {
+    <p class="hint" data-testid="no-references">{{ t.noReferences }}</p>
+  } @else {
+    <ul class="grid" data-testid="references">
+      @for (r of references(); track r.id) {
+        <li>
+          <button
+            type="button"
+            class="card ref"
+            [class.on]="isReference(r)"
+            [class.waiting]="r.state !== 'ready'"
+            [attr.aria-pressed]="isReference(r)"
+            [attr.data-testid]="'reference-' + r.id"
+            [disabled]="r.state !== 'ready'"
+            (click)="chooseReference(r)"
+          >
+            @if (frame(r)) {
+              <img [src]="frame(r)" alt="" loading="lazy" />
+            } @else {
+              <span class="blank" aria-hidden="true"></span>
+            }
+            <strong>{{ r.title }}</strong>
+            @if (analysing(r)) {
+              <span class="state" data-testid="state">{{ t.analysing }}</span>
+            } @else if (r.state === 'failed') {
+              <span class="state failed" data-testid="state">{{ t.failed }}{{ r.error ? ': ' + r.error : '' }}</span>
+            } @else if (r.tags.length) {
+              <span class="meta">{{ r.tags.join(', ') }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="address">
+    <h3>{{ t.addressTitle }}</h3>
+    <p class="meta">{{ t.addressHint }}</p>
+    <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" (formSubmit)="add()" />
+    @if (refused()) {
+      <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+    }
+    @if (added()) {
+      <p class="ok" role="status" data-testid="added">{{ t.added }}</p>
+    }
+    <button type="button" class="add" data-testid="add-reference" [disabled]="!valid() || adding()" (click)="add()">{{ adding() ? t.adding : t.add }}</button>
+  </div>
+
+  <h3>{{ t.stylesTitle }}</h3>
+  @if (presets().length === 0 && own().length === 0) {
+    <p class="hint" data-testid="no-styles">{{ t.noStyles }}</p>
+  } @else {
+    <ul class="styles" data-testid="styles">
+      @for (p of presets(); track p.id) {
+        <li>
+          <button type="button" class="card style" [class.on]="isStyle(p)" [attr.aria-pressed]="isStyle(p)" [attr.data-testid]="'style-' + p.id" (click)="chooseStyle(p)">{{ p.name }}</button>
+        </li>
+      }
+      @for (s of own(); track s.id) {
+        <li>
+          <button type="button" class="card style" [class.on]="isOwn(s)" [attr.aria-pressed]="isOwn(s)" [attr.data-testid]="'own-' + s.id" (click)="chooseOwn(s)">
+            {{ s.name }} <span class="badge">{{ t.ownBadge }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (chosen().kind === 'reference') {
+    <p class="hint" data-testid="will-make">{{ t.willMake }}</p>
+  }
+</section>

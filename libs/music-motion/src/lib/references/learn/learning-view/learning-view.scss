@@ -1,0 +1,86 @@
+.view {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.items {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: var(--lab-space-2);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+
+    &.gone strong {
+      color: var(--lab-ink-dim);
+      text-decoration: line-through;
+    }
+  }
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--lab-space-2);
+}
+
+.state,
+.novel {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-ink-dim);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.state[data-state='ready'],
+.novel {
+  border-color: var(--lab-success);
+  color: var(--lab-success);
+}
+
+.state[data-state='writing'] {
+  border-color: var(--lab-accent);
+  color: var(--lab-accent);
+}
+
+.state[data-state='failed'] {
+  border-color: var(--lab-danger);
+  color: var(--lab-danger);
+}
+
+.open {
+  margin-left: auto;
+  color: var(--lab-accent);
+}
+
+.meta {
+  margin: var(--lab-space-1) 0 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  margin: var(--lab-space-1) 0 0;
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-body);
+}

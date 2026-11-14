@@ -1,0 +1,151 @@
+.capture {
+  padding: var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+
+  // open: what is inside is a column with room between its parts
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lab-space-2);
+  }
+}
+
+// The title is what opens and closes it: the whole line answers, and a chevron says which way it goes.
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lab-space-2);
+  list-style: none;
+  cursor: pointer;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::after {
+    content: '';
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid var(--lab-ink-dim);
+    border-bottom: 2px solid var(--lab-ink-dim);
+    transform: rotate(45deg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 4px;
+    border-radius: var(--lab-radius);
+  }
+}
+
+.capture[open] summary::after {
+  transform: rotate(-135deg);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+}
+
+p {
+  margin: 0;
+}
+
+.hint,
+.note,
+.measures {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+
+  .import {
+    flex: 1;
+  }
+}
+
+.import {
+  min-height: var(--lab-control-h-lg);
+  margin-block: var(--lab-space-1);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--lab-accent);
+  }
+
+  &:disabled {
+    color: var(--lab-accent);
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.link {
+  align-self: flex-start;
+  min-height: var(--lab-control-h);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lab-accent);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.heard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  font-size: var(--lab-fs-meta);
+}
+
+.measures {
+  display: flex;
+  gap: var(--lab-space-3);
+  font-family: var(--lab-font-mono);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0 var(--lab-space-2);
+    background: var(--lab-accent);
+    border-radius: var(--lab-radius-pill);
+    color: var(--lab-on-accent);
+  }
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

@@ -1,0 +1,278 @@
+<mo-page-header
+  title="Runs"
+  i18n-title="@@runs.title"
+  description="Launch a project's pipeline and browse the run history."
+  i18n-description="@@runs.desc"
+/>
+
+<mo-panel
+  heading="Launch run"
+  i18n-heading="@@runs.launchTitle"
+  description="Choose what to run, where and with which options."
+  i18n-description="@@runs.launchDesc"
+  class="launch"
+>
+  <div class="launch__groups">
+    <div class="launch__filters">
+      <app-mode-select data-testid="launch-modes" />
+    </div>
+    <fieldset class="group">
+      <legend i18n="@@runs.groupWhat">What to run</legend>
+      <div class="group__fields">
+    <mat-form-field>
+      <mat-label i18n="@@runs.project">Project</mat-label>
+      <mat-select
+        [value]="selectedProject()"
+        (selectionChange)="selectProject($event.value)"
+      >
+        @for (p of launchProjects(); track p.id) {
+          <mat-option [value]="p.id"><span class="mo-data">{{ p.id }}</span></mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label i18n="@@runs.only">Only the scene</mat-label>
+      <mat-select [value]="only()" (selectionChange)="only.set($event.value)">
+        <mat-option value="" i18n="@@runs.onlyAll">— all —</mat-option>
+        @for (s of scenes(); track s.id) {
+          <mat-option [value]="s.id"><span class="mo-data">{{ s.id }}</span></mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label i18n="@@runs.mode">Mode</mat-label>
+      <mat-select [value]="modeOverride()" (selectionChange)="modeOverride.set($event.value)">
+        <mat-option value="" i18n="@@runs.modeDefault">— the project's —</mat-option>
+        <mat-option value="video">video</mat-option>
+        <mat-option value="images">images</mat-option>
+      </mat-select>
+    </mat-form-field>
+      </div>
+    </fieldset>
+    <fieldset class="group">
+      <legend i18n="@@runs.groupWhere">Where</legend>
+      <div class="group__fields">
+    <mat-form-field>
+      <mat-label>GPU</mat-label>
+      <mat-select
+        multiple
+        [value]="gpu()"
+        (selectionChange)="gpu.set($event.value)"
+        i18n-placeholder="@@runs.gpuNone"
+        placeholder="— automatic: the card with the most memory —"
+      >
+        @for (g of env.gpus(); track g.index) {
+          <mat-option [value]="'' + g.index">
+            <span class="mo-data">{{ g.index }} · {{ g.name }} · {{ g.free_vram_mb }} MB</span>
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label i18n="@@runs.vram">VRAM warning (MB)</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0"
+        class="mo-data"
+        [value]="vramWarnMb()"
+        (change)="vramWarnMb.set(+$any($event.target).value)"
+      />
+    </mat-form-field>
+      </div>
+    </fieldset>
+    <fieldset class="group">
+      <legend i18n="@@runs.groupOptions">Options</legend>
+      <div class="launch__flags">
+        <mat-checkbox [checked]="keepTmp()" (change)="keepTmp.set($event.checked)">keep-tmp</mat-checkbox>
+        <mat-checkbox [checked]="force()" (change)="force.set($event.checked)">force</mat-checkbox>
+      </div>
+    </fieldset>
+  </div>
+
+  @if (gpu().length > 1) {
+    <p class="note" data-testid="multi-gpu-note" i18n="@@runs.multiGpuNote">
+      With several GPUs, one scene is processed at a time on each. Large models (Krea 2) take turns through RAM and animations do overlap.
+    </p>
+  }
+  @for (g of selectedGpus(); track g.index) {
+    <mo-gpu-warnings [gpu]="g" [named]="true" />
+  }
+  @if (env.disk()?.low) {
+    <p class="warn" data-testid="disk-low-warning">
+      <mat-icon inline>warning</mat-icon>
+      <ng-container i18n="@@runs.diskLow">Little space is left on the projects disk ({{ env.disk()?.free_bytes | moBytes }} free). The run can start, but free some before a long one.</ng-container>
+    </p>
+  }
+  @if (!keepTmp()) {
+    <p class="warn" i18n="@@runs.coldWarning">
+      Without keep-tmp the cache does not survive: the next run of this project will start cold.
+    </p>
+  }
+
+  <div class="launch__action">
+    <button
+      mat-flat-button
+      [disabled]="!selectedProject() || launching()"
+      (click)="launch()"
+    >
+      <mat-icon>play_arrow</mat-icon>
+      <ng-container i18n="@@runs.launchAction">Launch run</ng-container>
+    </button>
+  </div>
+</mo-panel>
+
+@if (cache(); as report) {
+  <section class="cache">
+    <h3 i18n="@@runs.cacheTitle">Cache: what the next run would re-execute</h3>
+    @if (report.cold) {
+      <p class="warn" i18n="@@runs.cacheCold">
+        There is no cache manifest (the last run did not keep tmp/): the next run re-executes everything.
+      </p>
+    }
+    <table class="cache__table">
+      <thead>
+        <tr>
+          <th i18n="@@runs.cacheScene">scene</th>
+          @for (ph of cachePhases(report); track ph) {
+            <th class="mo-data">{{ ph }}</th>
+          }
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sc of report.scenes; track sc.scene_id) {
+          <tr>
+            <td class="mo-data">{{ sc.scene_id }}</td>
+            @for (ph of cachePhases(report); track ph) {
+              <td>
+                <span class="chip" [class]="'chip chip--' + (sc.phases[ph] ?? 'na')">{{
+                  sc.phases[ph] ?? 'n/a'
+                }}</span>
+              </td>
+            }
+            <td>
+              <button
+                mat-icon-button
+                (click)="relaunchScene(sc.scene_id)"
+                [disabled]="launching() || !selectedProject()"
+                i18n-matTooltip="@@runs.rerenderScene"
+                matTooltip="Re-render only this scene"
+                i18n-aria-label="@@runs.rerenderScene"
+                aria-label="Re-render only this scene"
+              >
+                <mat-icon>replay</mat-icon>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}
+
+<section class="history">
+  <h3 i18n="@@runs.historyTitle">History</h3>
+  @if (history().length === 0) {
+    <mo-empty-state
+      icon="history"
+      message="You haven't launched any run yet."
+      i18n-message="@@runs.emptyTitle"
+      hint="Choose a project in “Launch run” and press the button: its history will appear here."
+      i18n-hint="@@runs.emptyHint"
+    />
+  } @else {
+    <div class="modes" data-testid="runs-modes">
+      <app-mode-select />
+    </div>
+    <div class="history__tools" data-testid="history-tools">
+      <span class="dim" data-testid="selected-count">
+        <ng-container i18n="@@runs.selected">Selected:</ng-container> {{ selected().size }}
+      </span>
+      <button
+        mat-stroked-button
+        type="button"
+        data-testid="select-all-finished"
+        [disabled]="finished().length === 0 || selected().size === finished().length"
+        (click)="table()?.selectAll()"
+      >
+        <ng-container i18n="@@runs.selectAll">Select all finished runs in the list</ng-container>
+        ({{ finished().length }})
+      </button>
+      @if (selected().size > 0) {
+        <button mat-button type="button" data-testid="clear-selection" (click)="table()?.clearSelection()" i18n="@@runs.clearSelection">
+          Clear selection
+        </button>
+      }
+      <span class="spacer"></span>
+      <button
+        mat-stroked-button
+        type="button"
+        class="danger"
+        data-testid="delete-selected"
+        [disabled]="selected().size === 0 || deleting()"
+        (click)="deleteSelected()"
+      >
+        <mat-icon>delete</mat-icon>
+        <ng-container i18n="@@runs.deleteSelected">Delete selected</ng-container>
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        class="danger"
+        data-testid="delete-all-finished"
+        [disabled]="finished().length === 0 || deleting()"
+        (click)="deleteAllFinished()"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        <ng-container i18n="@@runs.deleteAllFinished">Delete all finished</ng-container>
+      </button>
+    </div>
+    @if (deleteResult(); as msg) {
+      <p class="note" role="status" data-testid="delete-result">{{ msg }}</p>
+    }
+    @if (visibleHistory().length === 0) {
+      <p class="hidden-modes" role="status" data-testid="runs-hidden">
+        <mat-icon inline>visibility_off</mat-icon>
+        <span i18n="@@runs.hiddenIntro">The chosen modes have no runs. Hidden:</span>
+        @for (h of hiddenModes(); track h.mode; let last = $last) {
+          <span class="mo-data">{{ modeLabel(h.mode) }} ({{ h.count }})</span>@if (!last) {<span>,</span>}
+        }
+        <button mat-button type="button" data-testid="runs-show-all" (click)="modes.showAll()" i18n="@@runs.showAllModes">Show all modes</button>
+      </p>
+    } @else {
+    <!-- the rows are what changes: the animation goes on the library's tbody -->
+    <div appAutoAnimate appAutoAnimateTarget=".df-table__table tbody">
+    <dynamic-form
+      [schema]="tables"
+      [model]="tableModel()"
+      [context]="tableContext()"
+      [showDefaultActions]="false"
+      (tableSelect)="onTableSelect($event)"
+      (tableAction)="onTableAction($event)"
+      (tableNavigate)="onTableNavigate($event)"
+    >
+      <ng-template dfCell="options" let-value="value">
+        <span class="mo-data clip" [matTooltip]="value">{{ value }}</span>
+      </ng-template>
+      <ng-template dfCell="duration" let-value="value">
+        <span class="mo-data duration">{{ readableDuration(value) }}</span>
+      </ng-template>
+      <ng-template dfCell="artifact" let-row>
+        <span class="mo-data">
+          @if (resultOf(row); as link) {
+            @if (link.kind === 'video') {
+              <a [href]="videoUrl(row, link)" target="_blank" rel="noopener">{{ link.artifact }}</a>
+            } @else if (link.kind === 'music') {
+              <a [routerLink]="['/projects', link.project, 'music']" i18n="@@runs.openMusic">View the songs</a>
+            } @else {
+              <a routerLink="/gallery" [queryParams]="{ project: link.project }" i18n="@@runs.openGallery">View in the gallery</a>
+            }
+          }
+        </span>
+      </ng-template>
+    </dynamic-form>
+    </div>
+    }
+  }
+</section>

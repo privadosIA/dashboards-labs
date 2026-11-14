@@ -1,0 +1,8 @@
+<div class="confirm">
+  <h2>{{ data.title }}</h2>
+  <p>{{ data.message }}</p>
+  <div class="actions">
+    <button type="button" data-testid="cancel" (click)="ref.close(false)">{{ cancel }}</button>
+    <button type="button" class="go" [class.danger]="data.danger" data-testid="confirm" (click)="ref.close(true)">{{ data.action }}</button>
+  </div>
+</div>

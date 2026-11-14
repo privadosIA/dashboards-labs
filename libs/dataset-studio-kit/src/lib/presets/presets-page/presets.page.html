@@ -1,0 +1,39 @@
+<div class="dataset-studio-kit presets" data-testid="presets-page">
+  <header>
+    <h1>{{ t.title }}</h1>
+    <p class="hint">{{ t.intro }}</p>
+  </header>
+
+  <section class="tools">
+    <div class="tool">
+      <h2>{{ t.importTitle }}</h2>
+      <p class="hint">{{ t.importHint }}</p>
+      <label class="file" [class.file--busy]="working()">
+        <span>{{ working() ? t.importing : t.chooseFile }}</span>
+        <input type="file" accept="application/json,.json" data-testid="import-file" [disabled]="working()" (change)="onFile($event)" />
+      </label>
+      @if (report(); as r) {
+        <p class="ok" role="status" data-testid="import-report">{{ t.imported(r.added, r.already, r.refused.length) }}</p>
+        @if (r.refused.length) {
+          <ul class="refused" data-testid="import-refused">
+            @for (x of r.refused; track $index) {
+              <li>{{ t.refusedAt(x.index, x.reason) }}</li>
+            }
+          </ul>
+        }
+      }
+      @if (problem()) {
+        <p class="problem" role="alert" data-testid="import-problem">{{ problem() }}</p>
+      }
+    </div>
+    <div class="tool">
+      <h2>{{ t.exportTitle }}</h2>
+      <button type="button" data-testid="export-own" (click)="exportOwn()">{{ t.exportOwn }}</button>
+      @if (note()) {
+        <p class="hint" role="status" data-testid="export-note">{{ note() }}</p>
+      }
+    </div>
+  </section>
+
+  <lab-preset-browser [kind]="null" [insertable]="false" [version]="version()" />
+</div>

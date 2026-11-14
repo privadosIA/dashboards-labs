@@ -1,0 +1,5 @@
+<div class="card" data-testid="header-card" [attr.title]="description() || null">
+  <button type="button" class="change" data-testid="change-model" (click)="change.emit()">{{ t.panel.change }}</button>
+  <p class="kind">{{ t.panel.headerKind }}</p>
+  <p class="model" data-testid="header-model">{{ model() || '–' }}</p>
+</div>

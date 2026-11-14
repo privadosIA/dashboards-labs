@@ -1,0 +1,88 @@
+<section class="theme" data-testid="theme">
+  <h3>{{ t.title }}</h3>
+  <p class="meta">{{ t.hint }}</p>
+
+  <div class="block">
+    <h4>{{ t.css }}</h4>
+    <p class="meta">{{ t.cssHint(cssMax) }}</p>
+    <app-css-box [text]="css()" [readOnly]="locked()" [problem]="cssProblem()" (textChange)="setCss($event)" />
+  </div>
+
+  <div class="block" data-testid="theme-assets">
+    <h4>{{ t.assets }}</h4>
+    <p class="meta">{{ t.assetsHint }}</p>
+    @if (assets().length) {
+      <ul class="drawings">
+        @for (a of assets(); track a.name) {
+          <li data-testid="theme-asset">
+            <img [src]="a.src" alt="" width="48" height="48" />
+            <code>{{ a.name }}</code>
+            <button type="button" class="ctl" data-testid="theme-asset-remove" [disabled]="locked()" [attr.aria-label]="t.removeAsset(a.name)" [attr.title]="t.removeAsset(a.name)" (click)="removeAsset(a.name)">×</button>
+          </li>
+        }
+      </ul>
+    }
+    @if (pending(); as p) {
+      <div class="pending" data-testid="theme-asset-pending">
+        <img [src]="pendingSrc()" alt="" width="48" height="48" />
+        <label class="field">
+          <span>{{ t.assetName }}</span>
+          <input type="text" maxlength="32" spellcheck="false" data-testid="theme-asset-name" [value]="p.name" (input)="rename($event)" />
+        </label>
+        <button type="button" class="ctl primary" data-testid="theme-asset-add" (click)="addAsset()">{{ t.addAsset }}</button>
+        <button type="button" class="ctl" data-testid="theme-asset-cancel" (click)="pending.set(null)">×</button>
+      </div>
+    } @else {
+      <label class="ctl choose" [class.off]="locked() || assets().length >= assetMax">
+        {{ t.addAsset }}
+        <input type="file" accept="image/svg+xml,.svg" hidden data-testid="theme-asset-file" [disabled]="locked() || assets().length >= assetMax" (change)="pick($event)" />
+      </label>
+    }
+    @if (assetError()) {
+      <p class="problem" role="alert" data-testid="theme-asset-error">{{ assetError() }}</p>
+    }
+    @if (assetsProblem()) {
+      <p class="problem" role="alert" data-testid="theme-assets-problem">{{ t.refused(assetsProblem()) }}</p>
+    }
+  </div>
+
+  <div class="block" data-testid="theme-hud">
+    <h4>{{ t.hud }}</h4>
+    <p class="meta">{{ t.hudHint }}</p>
+    <dynamic-form [schema]="hudSchema" [(model)]="hud" [showDefaultActions]="false" showErrors="always" (valueChange)="hudChanged($event)" />
+    @if (hudProblem()) {
+      <p class="problem" role="alert" data-testid="theme-hud-problem">{{ t.refused(hudProblem()) }}</p>
+    }
+  </div>
+
+  @if (fonts().length) {
+    <div class="block" data-testid="theme-fonts">
+      <h4>{{ t.fonts }}</h4>
+      <ul class="licences">
+        @for (line of fonts(); track $index) {
+          <li>{{ line }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div class="block" data-testid="theme-transition">
+    <h4>{{ t.transition }}</h4>
+    <p class="meta">{{ t.transitionHint }}</p>
+    <div class="slider">
+      <input type="range" min="0" [max]="max" step="0.05" data-testid="theme-transition-range" [attr.aria-label]="t.transition" [disabled]="locked()" [value]="seconds()" (input)="setTransition($event)" />
+      <output data-testid="theme-transition-value">{{ t.seconds(seconds()) }}</output>
+    </div>
+    @if (transitionProblem()) {
+      <p class="problem" role="alert" data-testid="theme-transition-problem">{{ t.refused(transitionProblem()) }}</p>
+    }
+  </div>
+
+  <div class="block" data-testid="theme-frame">
+    <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="theme-frame-preset" [disabled]="locked()" [attr.title]="t.framePresetHint" (click)="frame()">{{ t.framePreset }}</button>
+    <p class="meta">{{ t.framePresetHint }}</p>
+    @if (frameNote()) {
+      <p class="meta" role="status" data-testid="theme-frame-note">{{ frameNote() }}</p>
+    }
+  </div>
+</section>

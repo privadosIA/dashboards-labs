@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "id": "interpolate",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "fps",
+      "type": "select",
+      "label": "Frames per second",
+      "defaultValue": 30,
+      "options": [
+        { "value": 24, "label": "24" },
+        { "value": 30, "label": "30" },
+        { "value": 60, "label": "60" }
+      ]
+    }
+  ]
+}

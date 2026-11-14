@@ -1,0 +1,85 @@
+// A narrow side panel and the history beside it, each as tall as the window and scrolling inside; stacked and free on a narrow screen.
+.studio {
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr);
+  gap: var(--lab-space-4);
+  align-items: start;
+}
+
+.frame {
+  box-sizing: border-box;
+  // What the host's header and padding take: the host sets --studio-offset (7.5rem is what video-studio's leave).
+  height: calc(100vh - var(--studio-offset, 7.5rem));
+  min-height: 30rem;
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+}
+
+// Both tabs stay mounted, so what was typed in one is there when the person comes back.
+.tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lab-control-line) transparent;
+}
+
+.error {
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.demo {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  input {
+    accent-color: var(--lab-accent);
+  }
+}
+
+@media (max-width: 900px) {
+  .studio {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .frame {
+    height: auto;
+    min-height: 0;
+  }
+
+  .history {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  .frame {
+    padding: var(--lab-space-3);
+  }
+}

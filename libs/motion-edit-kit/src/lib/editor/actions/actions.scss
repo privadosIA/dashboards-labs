@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--lab-space-1);
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+}
+
+
+p {
+  margin: 0;
+}
+
+.meta {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.ok {
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.video {
+  color: var(--lab-accent);
+  font-size: var(--lab-fs-body);
+}

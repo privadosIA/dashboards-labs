@@ -1,0 +1,15 @@
+<dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false">
+  <ng-template dfSlot="titleCount">
+    <app-char-count data-testid="title-count" [length]="titleLength()" [max]="titleMax" />
+  </ng-template>
+
+  <ng-template dfSlot="lyricsTools">
+    <app-lyrics-tools (insert)="insert($event)" (write)="openAi()" />
+  </ng-template>
+
+  <ng-template dfSlot="styleTags">
+    @if (showChips()) {
+      <button type="button" class="pick-tags" data-testid="tags-open" (click)="openTags()"># {{ t.style.pick }}</button>
+    }
+  </ng-template>
+</dynamic-form>

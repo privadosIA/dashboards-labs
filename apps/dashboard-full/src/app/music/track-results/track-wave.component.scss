@@ -1,0 +1,8 @@
+:host {
+  display: block;
+  margin-bottom: var(--lab-space-2, 8px);
+}
+
+:host(.track-wave--unreadable) {
+  display: none;
+}

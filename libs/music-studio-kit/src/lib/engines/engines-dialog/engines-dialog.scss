@@ -1,0 +1,122 @@
+.engines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+.lead {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.close {
+  min-width: var(--lab-control-h);
+  min-height: var(--lab-control-h);
+  border: 0;
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-title);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2) var(--lab-space-3);
+  padding: var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.what {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  min-width: 12rem;
+}
+
+.role,
+.reason {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.error {
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.state {
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+
+  &.running,
+  &.ready {
+    color: var(--lab-success);
+  }
+
+  &.starting {
+    color: var(--lab-accent);
+  }
+}
+
+.action {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--lab-accent);
+  }
+
+  &:disabled {
+    cursor: progress;
+    color: var(--lab-ink-dim);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,26 @@
+<h2 class="title">{{ t.studio.songsTitle }}</h2>
+
+@if (failed()) {
+  <p class="error" role="alert" data-testid="songs-error">{{ t.songs.actionFailed }}</p>
+}
+
+@if (songs(); as list) {
+  @if (list.length) {
+    <lab-paged-list listId="studio-songs" [data]="list" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list" data-testid="songs">
+          @for (song of page; track song.id) {
+            <li><app-song-card [song]="song" (retry)="retry($event)" (cancel)="cancel($event)" (remove)="remove($event)" /></li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  } @else {
+    <div class="empty" data-testid="songs-empty">
+      <p class="lead">{{ t.songs.empty }}</p>
+      <p>{{ t.songs.emptyHint }}</p>
+    </div>
+  }
+} @else {
+  <p class="loading" role="status" data-testid="songs-loading">{{ t.songs.loading }}</p>
+}

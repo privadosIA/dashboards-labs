@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "id": "propose-prompt",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What should the animation be like? (optional)",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "maxLength": 2000,
+        "messages": {
+          "maxLength": "The text can have up to 2000 characters."
+        }
+      }
+    }
+  ]
+}

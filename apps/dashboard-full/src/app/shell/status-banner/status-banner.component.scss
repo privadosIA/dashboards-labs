@@ -1,0 +1,18 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-4);
+  border-bottom: 1px solid var(--lab-line);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+
+  &--error {
+    border-bottom-color: var(--lab-danger);
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+}

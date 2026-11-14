@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "id": "ask-change",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "request",
+      "type": "textarea",
+      "label": "What to change",
+      "props": {
+        "rows": 2
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 500,
+        "messages": {
+          "required": "Write what to change.",
+          "maxLength": "The instruction can have up to 500 characters."
+        }
+      }
+    }
+  ]
+}

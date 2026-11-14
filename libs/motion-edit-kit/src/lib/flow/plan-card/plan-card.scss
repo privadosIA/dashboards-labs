@@ -1,0 +1,96 @@
+:host {
+  display: block;
+}
+
+.plan {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.sentence {
+  display: grid;
+  gap: var(--lab-space-1);
+  font-weight: var(--lab-fw-control);
+
+  textarea {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    // Tall enough that the assistant below starts level with the form to add a provider, in the column on the left.
+    min-height: 6.1rem;
+    padding: var(--lab-space-2);
+    background: var(--lab-surface);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.count {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  text-align: right;
+
+  &.over {
+    color: var(--lab-danger);
+  }
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.note {
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-warn);
+  border-radius: var(--lab-radius);
+}
+
+.problem {
+  margin: 0;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.editable {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+button {
+  justify-self: start;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &.primary {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// The button that makes the plan goes at the right end of its block, under the sentence.
+.make {
+  justify-self: end;
+}

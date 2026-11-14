@@ -1,0 +1,71 @@
+@use '../../shared/collapsible' as collapsible;
+
+@include collapsible.collapsible('.design');
+
+.design {
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.origin {
+  margin-left: auto;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.swatches {
+  display: flex;
+  gap: var(--lab-space-2);
+}
+
+.swatch {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+}
+
+// The fields take the whole width of the block, as the idea under them does (a host may cap the width of a form for reading).
+dynamic-form {
+  max-width: none;
+}
+
+.problem,
+.ok {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  color: var(--lab-danger);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.save {
+  justify-self: start;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    cursor: not-allowed;
+  }
+}

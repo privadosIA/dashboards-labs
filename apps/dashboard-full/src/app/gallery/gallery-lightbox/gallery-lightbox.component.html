@@ -1,0 +1,30 @@
+<mat-dialog-content class="box">
+  <img class="box__img" [src]="url()" [alt]="img().scene_id" />
+  <div class="box__caption">
+    <span class="mo-data"
+      >{{ img().scene_id }} · v{{ img().variant + 1 }} · seed {{ img().effective_seed }}</span
+    >
+    <span class="mo-data dim">{{ img().model }} · {{ img().sampler }} · {{ img().steps }} steps</span>
+    <p class="prompt mo-data">{{ img().prompt }}</p>
+    @if (img().negative_prompt) {
+      <p class="prompt mo-data dim">− {{ img().negative_prompt }}</p>
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-icon-button (click)="prev()" i18n-aria-label="@@lightbox.prev" aria-label="Previous">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <span class="mo-data">{{ index() + 1 }} / {{ data.images.length }}</span>
+  <button
+    mat-icon-button
+    (click)="next()"
+    i18n-aria-label="@@lightbox.next"
+    aria-label="Next"
+  >
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+  <a mat-icon-button [href]="url()" [attr.download]="img().scene_id" i18n-aria-label="@@lightbox.download" aria-label="Download" data-testid="lightbox-download"><mat-icon>download</mat-icon></a>
+  <button mat-icon-button type="button" [disabled]="sharer.busy() === url()" (click)="sharer.share(url())" i18n-aria-label="@@lightbox.share" aria-label="Share" data-testid="lightbox-share"><mat-icon>share</mat-icon></button>
+  <button mat-button mat-dialog-close i18n="@@lightbox.close">Close</button>
+</mat-dialog-actions>

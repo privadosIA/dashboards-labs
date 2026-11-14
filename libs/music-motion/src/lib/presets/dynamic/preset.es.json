@@ -1,0 +1,137 @@
+{
+  "version": "1.0",
+  "id": "preset",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nombre",
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "El estilo necesita un nombre."
+        }
+      }
+    },
+    {
+      "key": "rhythm",
+      "type": "number",
+      "label": "Ritmo: segundos de cada pieza del guion",
+      "defaultValue": 6,
+      "validation": {
+        "required": true,
+        "min": 2,
+        "max": 15,
+        "messages": {
+          "required": "El ritmo está entre 2 y 15 segundos.",
+          "min": "El ritmo está entre 2 y 15 segundos.",
+          "max": "El ritmo está entre 2 y 15 segundos."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "rhythmProblem"
+    },
+    {
+      "key": "dark",
+      "type": "text",
+      "label": "Color oscuro",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      }
+    },
+    {
+      "key": "light",
+      "type": "text",
+      "label": "Color claro",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      }
+    },
+    {
+      "key": "accent",
+      "type": "text",
+      "label": "Color de acento",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "accentProblem"
+    },
+    {
+      "key": "display",
+      "type": "select",
+      "label": "Tipografía de las palabras grandes"
+    },
+    {
+      "key": "body",
+      "type": "select",
+      "label": "Tipografía del verso"
+    },
+    {
+      "key": "defaultMode",
+      "type": "radio",
+      "label": "Modo por defecto",
+      "defaultValue": "dark",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "concept",
+      "type": "textarea",
+      "label": "Concepto",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "maxLength": 200,
+        "messages": {
+          "maxLength": "El concepto puede tener hasta 200 caracteres."
+        }
+      }
+    },
+    {
+      "key": "verseStyle",
+      "type": "select",
+      "label": "Estilo del verso",
+      "defaultValue": "plain"
+    },
+    {
+      "key": "hitStyle",
+      "type": "select",
+      "label": "Estilo del golpe de palabra",
+      "defaultValue": "plain"
+    },
+    {
+      "key": "parts",
+      "type": "multiselect",
+      "label": "Partes del catálogo (ninguna: todas las habituales)"
+    },
+    {
+      "type": "slot",
+      "name": "partsProblem"
+    }
+  ]
+}

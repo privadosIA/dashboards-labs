@@ -1,0 +1,27 @@
+.res {
+  margin-top: 24px;
+}
+
+.res__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 {
+    margin: 0;
+    font-size: var(--lab-fs-section);
+    font-weight: 600;
+  }
+}
+
+.res__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  max-width: 80ch;
+}

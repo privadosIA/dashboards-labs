@@ -1,0 +1,552 @@
+<mo-page-header
+  title="Models"
+  i18n-title="@@models.title"
+  description="Install and manage image, video, LoRA, music and voice models, and download keys."
+  i18n-description="@@models.desc"
+>
+  <button data-keep moActions mat-stroked-button data-testid="refresh" (click)="refresh()">
+    <mat-icon>refresh</mat-icon>
+    <ng-container i18n="@@models.refresh">Refresh</ng-container>
+  </button>
+</mo-page-header>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (env.modelsDir(); as md) {
+  <section class="mdir" data-testid="models-dir" aria-label="Models folder" i18n-aria-label="@@models.dirLabel">
+    <p class="mdir__line" [class.mdir__line--low]="md.disk?.low">
+      <ng-container i18n="@@models.dir">Models folder:</ng-container>
+      <span class="mo-data" data-testid="models-dir-path">{{ md.dir }}</span>
+      @if (md.available && md.disk?.free_bytes !== undefined) {
+        <span data-testid="models-dir-free">
+          <ng-container i18n="@@models.dirFree">· free space:</ng-container>
+          <span class="mo-data">{{ md.disk?.free_bytes | moBytes }}</span>
+        </span>
+        @if (md.disk?.low) {
+          <span data-testid="models-dir-low" i18n="@@models.dirLow">(low: models take a lot of room)</span>
+        }
+      }
+    </p>
+    @if (!md.available) {
+      <p class="warn" role="alert" data-testid="models-dir-unavailable">
+        <mat-icon inline>error</mat-icon>
+        <span>
+          <ng-container i18n="@@models.dirUnavailable">The models folder is not available (is its disk mounted?): nothing can be installed until it is.</ng-container>
+          @if (md.reason) {
+            <span class="mo-data">{{ md.reason }}</span>
+          }
+        </span>
+      </p>
+    } @else if (!md.linked) {
+      <p class="warn" role="status" data-testid="models-dir-unlinked">
+        <mat-icon inline>warning</mat-icon>
+        <ng-container i18n="@@models.dirUnlinked">Run "orchestrator models migrate" so the server uses this folder.</ng-container>
+      </p>
+    }
+  </section>
+}
+
+@if (store.downloads().length > 0) {
+  <section class="block" aria-labelledby="dl-title">
+    <h3 id="dl-title" i18n="@@models.downloads">Downloads</h3>
+    <ul class="list" appAutoAnimate data-testid="downloads">
+      @for (d of store.downloads(); track d.id) {
+        <li class="dl" [attr.data-state]="d.state">
+          <div class="dl__head">
+            <span class="mo-data dl__name">{{ d.name }}</span>
+            <span class="dl__state" [class.failed]="d.state === 'failed'" [class.ok]="d.state === 'succeeded'">
+              {{ stateLabels[d.state] }}
+            </span>
+            @if (isActive(d)) {
+              <button
+                mat-icon-button
+                data-cancel (click)="cancel(d)"
+                i18n-aria-label="@@models.cancel"
+                aria-label="Cancel download"
+                i18n-matTooltip="@@models.cancel"
+                matTooltip="Cancel download"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+          @if (d.state === 'running') {
+            @if (percent(d); as p) {
+              <mat-progress-bar mode="determinate" [value]="p" />
+            } @else {
+              <mat-progress-bar mode="indeterminate" />
+            }
+            <span class="mo-data dim">
+              {{ d.bytes | moBytes }}@if (d.total) { / {{ d.total | moBytes }}}
+            </span>
+          } @else if (d.state === 'queued') {
+            <span class="dim" i18n="@@models.queuedHint">Waiting for the previous download to finish</span>
+          }
+          @if (d.error) {
+            <p class="warn" role="alert">
+              <mat-icon inline>error</mat-icon>
+              {{ d.error }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<details class="guide" [open]="guideOpen()" (toggle)="onGuideToggle($event)" data-testid="guide">
+  <summary i18n="@@models.guide.title">What is what? Quick guide</summary>
+  <ul class="guide__list">
+    <li>
+      <strong i18n="@@models.guide.imageT">Image</strong>
+      <span i18n="@@models.guide.image">the model that draws each scene. You need at least one; it works the same in narrated video and in image mode.</span>
+    </li>
+    <li>
+      <strong i18n="@@models.guide.editT">Retouch</strong>
+      <span i18n="@@models.guide.edit">the models that change a picture of yours from an instruction. Optional: without them pictures are still generated.</span>
+    </li>
+    <li>
+      <strong i18n="@@models.guide.loraT">LoRA</strong>
+      <span i18n="@@models.guide.lora">an optional style tweak added on top of an image model. The pipeline does not apply it yet.</span>
+    </li>
+    <li>
+      <strong i18n="@@models.guide.videoT">Video</strong>
+      <span i18n="@@models.guide.video">models that animate an image with real motion (Wan or AnimateDiff). A project uses them from its animation block.</span>
+    </li>
+    <li>
+      <strong i18n="@@models.guide.musicT">Music</strong>
+      <span i18n="@@models.guide.music">the models that compose and play the songs in music mode. It is a separate feature from video and images.</span>
+    </li>
+    <li>
+      <strong i18n="@@models.guide.voiceT">Voice</strong>
+      <span i18n="@@models.guide.voice">the voice that narrates the video. Only needed in video mode.</span>
+    </li>
+  </ul>
+  <p class="guide__start" i18n="@@models.guide.start">
+    To get started, one Image model and one voice (the ones marked “Starter”) are enough: with those you can already generate images and narrated videos.
+  </p>
+</details>
+
+@if (env.tokens(); as t) {
+  <section class="keys" data-testid="tokens" aria-labelledby="keys-title">
+    <h3 id="keys-title" i18n="@@models.keys.title">Download keys</h3>
+    <ul class="keys__list">
+      @for (svc of services; track svc) {
+        @if (t[svc] && !openKeys().has(svc)) {
+          <li class="keys__compact" [attr.data-service]="svc" data-configured="true">
+            <span class="keys__state ok">
+              <mat-icon inline>check_circle</mat-icon>
+              <strong>{{ serviceLabel[svc] }}</strong>
+              <span i18n="@@models.keys.configured">configured</span>
+            </span>
+            <span class="dim" [attr.data-testid]="'key-source-' + svc">{{ keySourceText(svc) }}</span>
+            <button
+              mat-button
+              type="button"
+              class="mo-compact"
+              [attr.data-testid]="'key-expand-' + svc"
+              (click)="toggleKey(svc)"
+              i18n="@@models.keys.change"
+            >
+              Change
+            </button>
+          </li>
+        } @else {
+          <li [attr.data-service]="svc" [attr.data-configured]="t[svc]">
+            <span class="keys__state" [class.ok]="t[svc]" [class.warn-text]="!t[svc]">
+              <mat-icon inline>{{ t[svc] ? 'check_circle' : 'warning' }}</mat-icon>
+              <strong>{{ serviceLabel[svc] }}</strong>
+              @if (t[svc]) {
+                <span i18n="@@models.keys.configured">configured</span>
+              } @else {
+                <span i18n="@@models.keys.notConfigured">not configured</span>
+              }
+            </span>
+            @if (env.tokenSources()[svc] === 'env') {
+              <span class="dim" [attr.data-testid]="'key-env-' + svc">
+                <ng-container i18n="@@models.keys.fromEnv">The key in use comes from the environment variable</ng-container>{{ ' ' }}<span class="mo-data">{{ envVar[svc] }}</span>,
+                <ng-container i18n="@@models.keys.envWins">which overrides the one you save here; to change it you have to change the variable when starting the server.</ng-container>
+              </span>
+            } @else if (!t[svc]) {
+              <span class="dim keys__how" [attr.data-testid]="'how-' + svc">{{ howTo[svc] }}</span>
+            }
+            <div class="keys__entry">
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label i18n="@@models.keys.fieldLabel">{{ serviceLabel[svc] }} key</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  autocomplete="off"
+                  spellcheck="false"
+                  [formControl]="keyControls[svc]"
+                  [attr.data-testid]="'key-input-' + svc"
+                  (keydown.enter)="$event.preventDefault(); saveKey(svc)"
+                />
+              </mat-form-field>
+              <button
+                mat-flat-button
+                type="button"
+                [attr.data-testid]="'key-save-' + svc"
+                [disabled]="!keyControls[svc].value.trim() || keyBusy()[svc]"
+                (click)="saveKey(svc)"
+                i18n="@@models.keys.save"
+              >
+                Save
+              </button>
+              @if (env.tokenSources()[svc] === 'file') {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [attr.data-testid]="'key-remove-' + svc"
+                  [disabled]="keyBusy()[svc]"
+                  (click)="removeKey(svc)"
+                  i18n="@@models.keys.remove"
+                >
+                  Remove
+                </button>
+              }
+            </div>
+            @if (keyError()[svc]; as msg) {
+              <p class="warn" role="alert" [attr.data-testid]="'key-error-' + svc">
+                <mat-icon inline>error</mat-icon>
+                {{ msg }}
+              </p>
+            }
+                    @if (t[svc]) {
+              <button
+                mat-button
+                type="button"
+                class="mo-compact"
+                [attr.data-testid]="'key-collapse-' + svc"
+                (click)="toggleKey(svc)"
+                i18n="@@models.keys.hide"
+              >
+                Hide
+              </button>
+            }
+          </li>
+        }
+      }
+    </ul>
+  </section>
+}
+
+<mat-tab-group
+  [selectedIndex]="tab()"
+  (selectedIndexChange)="selectTab($event)"
+  animationDuration="0ms"
+  mat-stretch-tabs="false"
+>
+  @for (g of groups; track g.id) {
+    <mat-tab [label]="g.label">
+      <ng-container *ngTemplateOutlet="body; context: { $implicit: g }" />
+    </mat-tab>
+  }
+</mat-tab-group>
+
+<ng-template #body let-g>
+  <p class="note tabnote" [attr.data-testid]="'note-' + g.id">
+    <mat-icon inline>info</mat-icon>
+    {{ g.note }}
+  </p>
+  <div class="columns">
+    <details class="block fold" aria-labelledby="inst-title" data-testid="installed-section" [open]="installedOpen()" (toggle)="onSectionToggle('installed', $event)">
+      <summary class="fold__head">
+        <h3 id="inst-title"><ng-container i18n="@@models.installed">Installed</ng-container> <span class="dim">({{ installedCount(g) }})</span></h3>
+      </summary>
+      @for (k of kindsOf(g); track k.kind) {
+        <h4 class="kind" [attr.data-kind]="k.kind">{{ kindLabels[k.kind] }} ({{ k.assets.length }})</h4>
+        @if (k.note) {
+          <p class="note">
+            <mat-icon inline>info</mat-icon>
+            {{ k.note }}
+          </p>
+        }
+        <ul class="list" appAutoAnimate>
+          @for (a of k.assets; track a.name) {
+            <li class="item">
+              <span class="mo-data item__name" [title]="a.name">
+                <span aria-hidden="true">{{ a.name | middleEllipsis: 34 }}</span>
+                <span class="sr-only">{{ a.name }}</span>
+              </span>
+              @if (isSupportFile(a.name)) {
+                <span class="badge" data-testid="support" i18n="@@models.supportFile">support file</span>
+              }
+              <span class="mo-data dim">{{ a.size | moBytes }}</span>
+              <button
+                mat-icon-button
+                (click)="remove(k.kind, a.name)"
+                [attr.aria-label]="deleteLabel(a.name)"
+                i18n-matTooltip="@@models.delete"
+                matTooltip="Delete"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </li>
+          } @empty {
+            <li class="dim" data-testid="empty">
+              @if (k.kind === 'lora') {
+                <span i18n="@@models.noneLora">none</span>
+              } @else {
+                <span i18n="@@models.noneInstalled">none installed — pick one from the catalog or download it by URL</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </details>
+
+    <details class="block fold" aria-labelledby="cat-title" data-testid="catalog-section" [open]="catalogOpen()" (toggle)="onSectionToggle('catalog', $event)">
+      <summary class="fold__head">
+        <h3 id="cat-title"><ng-container i18n="@@models.catalog">Recommended catalog</ng-container> <span class="dim">({{ catalogOf(g).length }})</span></h3>
+      </summary>
+      <ul class="list">
+        @for (e of catalogOf(g); track e.id) {
+          <li class="entry" [attr.data-entry]="e.id">
+            <div class="entry__main">
+              <span class="entry__name">{{ text.name(e) }}</span>
+              @if (e.starter) {
+                <span class="badge" data-testid="starter" i18n="@@models.starter">Starter</span>
+              }
+              <span class="dim">
+                {{ kindSingular[e.kind] }} · {{ e.size_bytes | moBytes }}
+                @if (vramLabel(e); as v) {
+                  · <span data-testid="vram">{{ v }}</span>
+                }
+                @if (ramLabel(e); as r) {
+                  · <strong class="entry__ram" data-testid="min-ram">⚠ {{ r }}</strong>
+                }
+              </span>
+              @if (bundleLabel(e); as bundle) {
+                <p class="dim entry__bundle mo-data" data-testid="bundle">{{ bundle }}</p>
+              }
+              @if (presetLabel(e); as preset) {
+                <p class="dim entry__bundle" data-testid="preset">
+                  <ng-container i18n="@@models.preset">Recommended settings:</ng-container>{{ ' ' }}<span class="mo-data">{{ preset }}</span>
+                </p>
+              }
+              @if (requiresKey(e); as r) {
+                <p
+                  class="entry__key"
+                  [class.warn-text]="r.configured !== true"
+                  [attr.data-testid]="'requires-' + r.service"
+                  [attr.data-configured]="r.configured"
+                >
+                  <mat-icon inline>{{ r.configured ? 'key' : 'warning' }}</mat-icon>
+                  <span>{{ r.text }}</span>
+                </p>
+              }
+              <p class="dim entry__desc">{{ text.description(e) }}</p>
+              @if (commercialLabel(e); as c) {
+                <p class="entry__license" data-testid="commercial" [attr.data-commercial]="e.commercial">
+                  <strong class="license license--{{ e.commercial }}">{{ c }}</strong>
+                  @if (e.license) {
+                    <span class="dim"> · {{ e.license }}</span>
+                  }
+                  @if (text.commercialNote(e); as note) {
+                    <span class="dim" data-testid="commercial-note"> — {{ note }}</span>
+                  }
+                </p>
+              }
+            </div>
+            @if (e.installed) {
+              <span class="ok entry__state"><mat-icon inline>check_circle</mat-icon> <span i18n="@@models.installedBadge">installed</span></span>
+            } @else if (store.activeByCatalog().get(e.id); as d) {
+              <span class="dim entry__state mo-data">
+                @if (percent(d); as p) { {{ p }} % } @else { … }
+              </span>
+            } @else if (e.kind === 'diffrhythm2') {
+              <span class="dim entry__state" data-testid="diffrhythm2-use-build" i18n="@@models.installWithBuild">Installed with the button above</span>
+            } @else {
+              <button mat-stroked-button (click)="install(e)" i18n="@@models.install">Install</button>
+            }
+          </li>
+        }
+      </ul>
+    </details>
+
+    @if (g.id !== 'edit') {
+    <section class="block" aria-labelledby="url-title">
+      <h3 id="url-title" i18n="@@models.custom">Download by URL, Hugging Face or Civitai</h3>
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field>
+          <mat-label i18n="@@models.form.kind">Type</mat-label>
+          <mat-select formControlName="kind">
+            @for (k of g.kinds; track k) {
+              @if (k !== 'heartmula' && k !== 'diffrhythm2' && k !== 'transcription') {
+                <mat-option [value]="k">{{ kindName(k) }}</mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-button-toggle-group formControlName="source" aria-label="Source" i18n-aria-label="@@models.form.sourceAria" class="source">
+          <mat-button-toggle value="url" i18n="@@models.form.url">Direct URL</mat-button-toggle>
+          <mat-button-toggle value="hf" i18n="@@models.form.hf">Hugging Face</mat-button-toggle>
+          @if (!env.isPublic()) {
+            <mat-button-toggle value="civitai" i18n="@@models.form.civitai">Civitai</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+
+        @if (form.controls.source.value === 'url') {
+          <mat-form-field>
+            <mat-label i18n="@@models.form.urlLabel">File URL</mat-label>
+            <input matInput formControlName="url" autocomplete="off" placeholder="https://…/model.safetensors" />
+            @if (form.controls.url.hasError('required')) {
+              <mat-error i18n="@@models.form.urlRequired">Paste the download URL</mat-error>
+            } @else if (form.controls.url.hasError('pattern')) {
+              <mat-error i18n="@@models.form.urlPattern">It must start with http:// or https://</mat-error>
+            }
+          </mat-form-field>
+          @if (civitaiUrl()) {
+            <p class="note" data-testid="civitai-hint">
+              <mat-icon inline>info</mat-icon>
+              <span>{{ civitaiHint() }}</span>
+            </p>
+          }
+        } @else if (form.controls.source.value === 'civitai') {
+          <p class="note" data-testid="civitai-mode-note">
+            <mat-icon inline>info</mat-icon>
+            <span>{{ civitaiKeyNote() }}</span>
+          </p>
+          <div class="civitai-search">
+            <mat-form-field>
+              <mat-label i18n="@@models.form.civitaiRef">Model URL on Civitai</mat-label>
+              <input
+                matInput
+                formControlName="ref"
+                autocomplete="off"
+                placeholder="https://civitai.com/models/…"
+                (keydown.enter)="$event.preventDefault(); searchCivitai()"
+              />
+              @if (form.controls.ref.hasError('required')) {
+                <mat-error i18n="@@models.form.civitaiRefRequired">Paste the model page URL</mat-error>
+              } @else if (form.controls.ref.hasError('pattern')) {
+                <mat-error i18n="@@models.form.urlPattern">It must start with http:// or https://</mat-error>
+              }
+            </mat-form-field>
+            <button
+              mat-stroked-button
+              type="button"
+              data-testid="civitai-search"
+              [disabled]="civitaiSearching()"
+              (click)="searchCivitai()"
+              i18n="@@models.form.civitaiSearch"
+            >
+              Search
+            </button>
+          </div>
+          @if (civitaiError(); as msg) {
+            <p class="warn" role="alert" data-testid="civitai-error">
+              <mat-icon inline>error</mat-icon>
+              {{ msg }}
+            </p>
+          }
+          @if (civitaiResult(); as r) {
+            <div class="civitai-result" data-testid="civitai-result">
+              <p class="civitai-result__head">
+                <strong>{{ r.model.name }}</strong>
+                <span class="dim">
+                  @if (r.model.type) { {{ r.model.type }} · }
+                  @if (r.model.base_model) { {{ r.model.base_model }} · }
+                  <ng-container i18n="@@models.civitai.version">version</ng-container> {{ r.version.name || r.version.id }}
+                </span>
+              </p>
+              @if (r.files.length === 0) {
+                <p class="dim" data-testid="civitai-nofiles" i18n="@@models.civitai.noFiles">This version has no downloadable files.</p>
+              }
+              <mat-radio-group
+                class="civitai-files"
+                aria-label="Files" i18n-aria-label="@@models.form.filesAria"
+                [value]="civitaiFileId()"
+                (change)="chooseCivitaiFile(fileById(r, $event.value))"
+              >
+                @for (f of r.files; track f.id) {
+                  <mat-radio-button [value]="f.id" [attr.data-testid]="'civitai-file-' + f.id">
+                    <span class="mo-data">{{ f.name }}</span>
+                    <span class="dim">
+                      {{ civitaiFileDetail(f) }}
+                      @if (f.size_bytes) { · {{ f.size_bytes | moBytes }} }
+                    </span>
+                    @if (f.fp === 'int8') {
+                      <span class="warn-text" data-testid="civitai-int8">
+                        <mat-icon inline>warning</mat-icon>
+                        <ng-container i18n="@@models.civitai.int8"
+                          >Civitai int8 files did not work with this sd (measured with Krea 2: about 195 s per step).</ng-container
+                        >
+                      </span>
+                    }
+                  </mat-radio-button>
+                }
+              </mat-radio-group>
+            </div>
+          }
+        } @else {
+          <p class="note" data-testid="hf-hint">
+            <mat-icon inline>info</mat-icon>
+            <span i18n="@@models.form.hfHint"
+              >Public repositories do not need an account. Gated ones require accepting their license on huggingface.co and starting the server with a read token in HF_TOKEN.</span
+            >
+            @if (env.tokens(); as t) {
+              <strong data-testid="hf-status">
+                @if (t.huggingface) {
+                  <ng-container i18n="@@models.form.hfConfigured">HF_TOKEN is configured on this server.</ng-container>
+                } @else {
+                  <ng-container i18n="@@models.form.hfMissing">HF_TOKEN is not configured on this server.</ng-container>
+                }
+              </strong>
+            }
+          </p>
+          <mat-form-field>
+            <mat-label i18n="@@models.form.repo">Repository</mat-label>
+            <input matInput formControlName="repo" autocomplete="off" placeholder="owner/name" i18n-placeholder="@@models.form.repoPlaceholder" />
+            @if (form.controls.repo.hasError('required')) {
+              <mat-error i18n="@@models.form.repoRequired">Enter the repository</mat-error>
+            } @else if (form.controls.repo.hasError('pattern')) {
+              <mat-error i18n="@@models.form.repoPattern">Format organization/name</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label i18n="@@models.form.file">File inside the repository</mat-label>
+            <input matInput formControlName="file" autocomplete="off" placeholder="folder/model.safetensors" />
+            @if (form.controls.file.hasError('required')) {
+              <mat-error i18n="@@models.form.fileRequired">Enter the file path</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label i18n="@@models.form.revision">Revision (optional, defaults to main)</mat-label>
+            <input matInput formControlName="revision" autocomplete="off" />
+          </mat-form-field>
+        }
+
+        <mat-form-field>
+          <mat-label>
+            @if (civitaiUrl()) {
+              <ng-container i18n="@@models.form.nameRequired">File name (required with Civitai)</ng-container>
+            } @else {
+              <ng-container i18n="@@models.form.name">File name (optional)</ng-container>
+            }
+          </mat-label>
+          <input matInput formControlName="name" autocomplete="off" />
+          @if (form.controls.name.hasError('required')) {
+            <mat-error i18n="@@models.form.nameMissing">Enter the file name: Civitai URLs do not include one</mat-error>
+          }
+        </mat-form-field>
+
+        @if (formError(); as msg) {
+          <p class="warn" role="alert" data-testid="form-error">
+            <mat-icon inline>error</mat-icon>
+            {{ msg }}
+          </p>
+        }
+
+        <div class="form__actions">
+          <button mat-flat-button type="submit" [disabled]="submitting()" i18n="@@models.form.submit">Download</button>
+        </div>
+      </form>
+    </section>
+    }
+  </div>
+</ng-template>

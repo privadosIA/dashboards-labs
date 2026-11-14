@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "id": "describe",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "description",
+      "type": "textarea",
+      "label": "¿Qué debe dibujar?",
+      "placeholder": "Un anillo verde con un punto en el centro",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Cuenta en pocas palabras qué dibujar.",
+          "maxLength": "La descripción puede tener hasta 2000 caracteres."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,683 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": false
+  },
+  "newProjectRoot": "apps",
+  "projects": {
+    "api-client": {
+      "projectType": "library",
+      "root": "libs/api-client",
+      "sourceRoot": "libs/api-client/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "runnerConfig": "libs/api-client/vitest.config.mts",
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "forms-kit": {
+      "projectType": "library",
+      "root": "libs/forms-kit",
+      "sourceRoot": "libs/forms-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "server-connection": {
+      "projectType": "library",
+      "root": "libs/server-connection",
+      "sourceRoot": "libs/server-connection/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "motion-parts": {
+      "projectType": "library",
+      "root": "libs/motion-parts",
+      "sourceRoot": "libs/motion-parts/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "dashboard-full": {
+      "projectType": "application",
+      "root": "apps/dashboard-full",
+      "sourceRoot": "apps/dashboard-full/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "loader": {
+              ".ttf": "file"
+            },
+            "browser": "apps/dashboard-full/src/main.ts",
+            "tsConfig": "apps/dashboard-full/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "apps/dashboard-full/public"
+              },
+              {
+                "glob": "swagger-ui.css",
+                "input": "node_modules/swagger-ui-dist",
+                "output": "swagger-ui"
+              }
+            ],
+            "styles": [
+              "@fontsource/material-symbols-outlined/400.css",
+              "@fontsource-variable/plus-jakarta-sans/index.css",
+              "@fontsource-variable/geist/index.css",
+              "apps/dashboard-full/src/styles.scss",
+              "apps/dashboard-full/src/tailwind.css"
+            ],
+            "outputPath": "dist/dashboard-full",
+            "polyfills": [
+              "@angular/localize/init"
+            ],
+            "allowedCommonJsDependencies": [
+              "swagger-ui-dist"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
+                }
+              ],
+              "outputHashing": "all",
+              "serviceWorker": "apps/dashboard-full/ngsw-config.json"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "tutorial": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "apps/dashboard-full/src/environments/environment.ts",
+                  "with": "apps/dashboard-full/src/environments/environment.tutorial.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "apps/dashboard-full/proxy.conf.json"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "dashboard-full:build:production"
+            },
+            "development": {
+              "buildTarget": "dashboard-full:build:development"
+            },
+            "tutorial": {
+              "buildTarget": "dashboard-full:build:tutorial"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "apps/dashboard-full/tsconfig.spec.json",
+            "runner": "vitest",
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ],
+            "setupFiles": [
+              "apps/dashboard-full/src/test-setup.ts"
+            ]
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "dashboard-full:build"
+          }
+        }
+      },
+      "i18n": {
+        "sourceLocale": "en"
+      }
+    },
+    "music-motion": {
+      "projectType": "library",
+      "root": "libs/music-motion",
+      "sourceRoot": "libs/music-motion/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "video-studio-kit": {
+      "projectType": "library",
+      "root": "libs/video-studio-kit",
+      "sourceRoot": "libs/video-studio-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "music-studio-kit": {
+      "projectType": "library",
+      "root": "libs/music-studio-kit",
+      "sourceRoot": "libs/music-studio-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "paged-list": {
+      "projectType": "library",
+      "root": "libs/paged-list",
+      "sourceRoot": "libs/paged-list/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "dataset-import": {
+      "projectType": "library",
+      "root": "libs/dataset-import",
+      "sourceRoot": "libs/dataset-import/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "theme-switch": {
+      "projectType": "library",
+      "root": "libs/theme-switch",
+      "sourceRoot": "libs/theme-switch/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "vector-editor": {
+      "projectType": "library",
+      "root": "libs/vector-editor",
+      "sourceRoot": "libs/vector-editor/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "vector-studio-kit": {
+      "projectType": "library",
+      "root": "libs/vector-studio-kit",
+      "sourceRoot": "libs/vector-studio-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "motion-edit-kit": {
+      "projectType": "library",
+      "root": "libs/motion-edit-kit",
+      "sourceRoot": "libs/motion-edit-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "animation-core": {
+      "projectType": "library",
+      "root": "libs/animation-core",
+      "sourceRoot": "libs/animation-core/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "animation-dataset": {
+      "projectType": "library",
+      "root": "libs/animation-dataset",
+      "sourceRoot": "libs/animation-dataset/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "motion-editor": {
+      "projectType": "library",
+      "root": "libs/motion-editor",
+      "sourceRoot": "libs/motion-editor/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "motion-ui": {
+      "projectType": "library",
+      "root": "libs/motion-ui",
+      "sourceRoot": "libs/motion-ui/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "assist-kit": {
+      "projectType": "library",
+      "root": "libs/assist-kit",
+      "sourceRoot": "libs/assist-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "dataset-studio-kit": {
+      "projectType": "library",
+      "root": "libs/dataset-studio-kit",
+      "sourceRoot": "libs/dataset-studio-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

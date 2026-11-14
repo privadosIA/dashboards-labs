@@ -1,0 +1,20 @@
+<textarea
+  #field
+  class="edit"
+  rows="1"
+  spellcheck="false"
+  data-testid="text-edit"
+  [attr.aria-label]="t.tools.textEdit"
+  [value]="text()"
+  [style.left.px]="box().x"
+  [style.top.px]="box().y"
+  [style.min-width.px]="box().width + 24"
+  [style.font-size.px]="fontSize()"
+  [style.font-weight]="fontWeight()"
+  [style.font-family]="fontFamily()"
+  (keydown)="key($event)"
+  (keyup)="$event.stopPropagation()"
+  (pointerdown)="$event.stopPropagation()"
+  (dblclick)="$event.stopPropagation()"
+  (blur)="blur()"
+></textarea>

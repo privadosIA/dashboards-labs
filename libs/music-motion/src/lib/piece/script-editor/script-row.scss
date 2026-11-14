@@ -1,0 +1,44 @@
+.row {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  background: var(--lab-bg);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+}
+
+.span {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  margin: 0;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.show {
+  margin-left: auto;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}

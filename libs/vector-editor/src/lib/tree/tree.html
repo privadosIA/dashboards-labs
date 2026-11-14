@@ -1,0 +1,92 @@
+<div class="tree" data-testid="vector-tree" [attr.aria-label]="t.tree.label">
+  @if (rows().length === 0) {
+    <p class="empty" data-testid="tree-empty">{{ t.tree.empty }}</p>
+  } @else {
+    <ul class="rows" role="tree" [attr.aria-label]="t.tree.label" (keydown)="keydown($event)">
+      @for (row of rows(); track row.id) {
+        <li
+          class="row"
+          role="treeitem"
+          draggable="true"
+          [attr.data-testid]="'row-' + row.id"
+          [attr.aria-level]="row.depth + 1"
+          [attr.aria-selected]="selection().includes(row.id)"
+          [attr.aria-expanded]="row.hasChildren ? !collapsed().has(row.id) : null"
+          [class.selected]="selection().includes(row.id)"
+          [class.hidden]="!row.visible"
+          [class.locked]="row.locked"
+          [class.drop-before]="drop()?.id === row.id && drop()?.zone === 'before'"
+          [class.drop-after]="drop()?.id === row.id && drop()?.zone === 'after'"
+          [class.drop-into]="drop()?.id === row.id && drop()?.zone === 'into'"
+          [style.--depth]="row.depth"
+          [attr.tabindex]="focusId() === row.id ? 0 : -1"
+          (click)="select(row, $event)"
+          (dragstart)="dragStart($event, row)"
+          (dragover)="dragOver($event, row)"
+          (dragleave)="drop.set(undefined)"
+          (drop)="dropOn($event, row)"
+          (dragend)="dragEnd()"
+        >
+          @if (row.hasChildren) {
+            <button type="button" class="twist" data-testid="twist" [attr.aria-label]="collapsed().has(row.id) ? '+' : '−'" (click)="toggleCollapse(row.id, $event)">
+              <svg viewBox="0 0 10 10" aria-hidden="true" [class.open]="!collapsed().has(row.id)"><path d="M3 1.5 7 5 3 8.5" /></svg>
+            </button>
+          } @else {
+            <span class="twist-gap"></span>
+          }
+          @if (editing() === row.id) {
+            <input
+              class="name-input"
+              data-testid="name-input"
+              type="text"
+              [attr.aria-label]="t.tree.rename"
+              [value]="row.name"
+              (click)="$event.stopPropagation()"
+              (keydown)="nameKey($event, row)"
+              (blur)="commitName($event, row)"
+            />
+          } @else {
+            <span class="name" data-testid="name" (dblclick)="startRename(row.id, $event)">{{ row.name }}</span>
+          }
+          <button
+            type="button"
+            class="toggle"
+            data-testid="toggle-visible"
+            [attr.aria-label]="row.visible ? t.tree.visible : t.tree.hidden"
+            [attr.aria-pressed]="!row.visible"
+            (click)="toggleVisible(row, $event)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              @if (row.visible) {
+                <path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" /><circle cx="8" cy="8" r="2" />
+              } @else {
+                <path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" /><path d="M2.5 13.5 13.5 2.5" />
+              }
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="toggle"
+            data-testid="toggle-lock"
+            [attr.aria-label]="row.locked ? t.tree.locked : t.tree.unlocked"
+            [attr.aria-pressed]="row.locked"
+            (click)="toggleLocked(row, $event)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3.5" y="7" width="9" height="6.5" rx="1" />
+              @if (row.locked) {
+                <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+              } @else {
+                <path d="M5.5 7V5a2.5 2.5 0 0 1 4.6-1.3" />
+              }
+            </svg>
+          </button>
+        </li>
+      }
+    </ul>
+    <p class="hint">{{ t.tree.dragHint }}</p>
+    @if (deep()) {
+      <p class="hint" data-testid="tree-deeper">{{ t.tree.deeper }}</p>
+    }
+  }
+</div>

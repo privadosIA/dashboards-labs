@@ -1,0 +1,269 @@
+<div class="pull" [style.height.px]="pull.distance()" [class.pull--ready]="pull.ready()" aria-hidden="true" data-testid="gallery-pull">
+  @if (pull.distance() > 0) {
+    <mat-icon>{{ pull.ready() ? 'refresh' : 'arrow_downward' }}</mat-icon>
+  }
+</div>
+<mo-page-header
+  title="Gallery"
+  i18n-title="@@gallery.title"
+  description="The images, videos and songs each project has generated."
+  i18n-description="@@gallery.desc"
+>
+  <button data-keep moActions mat-stroked-button type="button" [disabled]="!selected() || busy()" (click)="reloadManifest()" data-testid="gallery-refresh">
+    <mat-icon>refresh</mat-icon>
+    <ng-container i18n="@@gallery.refresh">Refresh</ng-container>
+  </button>
+</mo-page-header>
+
+<div class="toolbar">
+  @if (!simpleMode.simple()) {
+    <app-mode-select />
+  }
+  <mat-form-field>
+    <mat-label i18n="@@gallery.project">Project</mat-label>
+    <mat-select [value]="selected()" (selectionChange)="selectProject($event.value)">
+      @for (p of listed(); track p.id) {
+        <mat-option [value]="p.id">
+          <span class="mo-data">{{ p.id }}</span>
+          @if (p.mode === 'images') {
+            <span class="mode-tag"> · images</span>
+          } @else if (p.mode === 'video') {
+            <span class="mode-tag"> · <ng-container i18n="@@gallery.videoTag">video</ng-container></span>
+          } @else if (p.mode === 'music') {
+            <span class="mode-tag"> · <ng-container i18n="@@gallery.musicTag">music</ng-container></span>
+          }
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (contactSheetUrl(); as url) {
+    <a mat-stroked-button [href]="url" target="_blank">
+      <mat-icon>grid_view</mat-icon>
+      <ng-container i18n="@@gallery.contactSheet">Contact sheet</ng-container>
+    </a>
+  }
+</div>
+
+@if (projects.loaded() && projects.projects().length > 0 && listed().length === 0) {
+  <p class="hidden-modes" role="status" data-testid="gallery-hidden">
+    <mat-icon inline>visibility_off</mat-icon>
+    <span i18n="@@gallery.hiddenIntro">The chosen modes have no projects. Hidden:</span>
+    @for (h of hidden(); track h.mode; let last = $last) {
+      <span class="mo-data">{{ modeLabel(h.mode) }} ({{ h.count }})</span>@if (!last) {<span>,</span>}
+    }
+    <button mat-button type="button" data-testid="gallery-show-all" (click)="modes.showAll()" i18n="@@gallery.showAllModes">Show all modes</button>
+  </p>
+}
+
+@if (busy()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (pinned(); as msg) {
+  <p class="pinned mo-data">{{ msg }} ✓</p>
+}
+
+@if (loaded() && selected() && isMusic() && !musicManifest()) {
+  <mo-empty-state
+    icon="library_music"
+    message="This project has no exported songs yet."
+    i18n-message="@@gallery.emptyMusicTitle"
+    hint="Launch a run: the manifest.json left by the export phase feeds this gallery."
+    i18n-hint="@@gallery.emptyMusicHint"
+  >
+    <a mat-flat-button routerLink="/runs" [queryParams]="{ project: selected() }">
+      <mat-icon>play_circle</mat-icon>
+      <ng-container i18n="@@gallery.toRuns">Go to Runs</ng-container>
+    </a>
+  </mo-empty-state>
+}
+
+@for (group of tracks(); track group.trackId) {
+  <section class="scene-group" [attr.data-testid]="'gallery-track-' + group.trackId">
+    <h3 class="mo-data">
+      {{ group.trackId }}
+      <a class="studio-link" [routerLink]="['/projects', selected(), 'music']" [attr.data-testid]="'gallery-studio-' + group.trackId">
+        <mat-icon inline>open_in_new</mat-icon>
+        <ng-container i18n="@@gallery.openStudio">Open in the music studio</ng-container>
+      </a>
+    </h3>
+    <div class="songs">
+      @for (e of group.songs; track e.file) {
+        <article class="song" [attr.data-testid]="'gallery-song-' + e.track_id + '-' + e.variant">
+          <header class="song__head">
+            <span class="song__title mo-data">{{ fileName(e) }}</span>
+            <span class="song__meta mo-data">
+              v{{ e.variant + 1 }} · seed {{ e.effective_seed }}
+              @if (e.bpm) { · {{ e.bpm }} bpm }
+              @if (length(e); as len) { · {{ len }} }
+              @if (e.keyscale) { · {{ e.keyscale }} }
+            </span>
+            @if (e.reference) {
+              <span class="song__task" data-testid="gallery-song-reference" i18n="@@gallery.songReference">reference <span class="mo-data">← {{ e.reference }}</span></span>
+            }
+            @if (e.source) {
+              <span class="song__task" data-testid="gallery-song-source"><span class="mo-data">← {{ e.source }}</span></span>
+            }
+          </header>
+          @if (isMissing(e)) {
+            <p class="song__missing" role="status" data-testid="gallery-song-missing">
+              <mat-icon inline>warning</mat-icon>
+              <ng-container i18n="@@gallery.songMissing">The file is no longer in the project.</ng-container>
+            </p>
+          } @else {
+            <mo-audio-player [src]="songUrl(e)" [label]="fileName(e)" (failed)="markMissing(e)" />
+          }
+          @if (e.caption) {
+            <p class="song__caption">{{ e.caption }}</p>
+          }
+          @if (e.lyrics_sung && !e.instrumental) {
+            <details class="song__lyrics">
+              <summary i18n="@@gallery.lyricsSung">Sung lyrics</summary>
+              <pre class="mo-data" data-testid="gallery-lyrics-sung">{{ e.lyrics_sung }}</pre>
+            </details>
+          }
+          @if (differs(e)) {
+            <p class="song__note" i18n="@@gallery.lyricsDiffer">The model changed the lyrics you asked for.</p>
+          }
+          @if (phone()) {
+            <button mat-icon-button type="button" (click)="openFileSheet(fileName(e), songUrl(e), fileName(e), true)" i18n-aria-label="@@gallery.actions" aria-label="Actions" data-testid="gallery-song-actions"><mat-icon>more_vert</mat-icon></button>
+          } @else {
+          <a class="song__download" [href]="songUrl(e)" [attr.download]="fileName(e)" data-testid="gallery-song-download">
+            <mat-icon inline>download</mat-icon>
+            <ng-container i18n="@@gallery.download">Download</ng-container>
+          </a>
+          <button mat-stroked-button type="button" [disabled]="sharer.busy() === songUrl(e)" (click)="sharer.share(songUrl(e), fileName(e))" data-testid="gallery-song-share">
+            <mat-icon>share</mat-icon>
+            <ng-container i18n="@@gallery.share">Share</ng-container>
+          </button>
+          }
+        </article>
+      }
+    </div>
+  </section>
+}
+
+@if (loaded() && selected() && !isMusic() && !isVideo() && !manifest()) {
+  <mo-empty-state
+    icon="photo_library"
+    message="This project has no exported images yet."
+    i18n-message="@@gallery.emptyTitle"
+    hint="Launch a run in image mode: the manifest.json left by the export phase feeds this gallery."
+    i18n-hint="@@gallery.emptyHint"
+  >
+    <a mat-flat-button routerLink="/runs" [queryParams]="{ project: selected() }">
+      <mat-icon>play_circle</mat-icon>
+      <ng-container i18n="@@gallery.toRuns">Go to Runs</ng-container>
+    </a>
+  </mo-empty-state>
+}
+
+@if (isVideo()) {
+  @if (finalVideo(); as url) {
+    @if (!finalVideoMissing()) {
+      <section class="scene-group" data-testid="gallery-final-video">
+        <h3 i18n="@@gallery.finalVideo">Final video</h3>
+        <video class="final" controls preload="metadata" [src]="url" (error)="finalVideoMissing.set(true)"></video>
+        <div class="share-row">
+          <a mat-stroked-button [href]="url" download data-testid="gallery-final-download"><mat-icon>download</mat-icon><ng-container i18n="@@gallery.download">Download</ng-container></a>
+          <button mat-stroked-button type="button" [disabled]="sharer.busy() === url" (click)="sharer.share(url)" data-testid="gallery-final-share"><mat-icon>share</mat-icon><ng-container i18n="@@gallery.share">Share</ng-container></button>
+        </div>
+      </section>
+    }
+  }
+  @if (sceneClips().length > 0) {
+    <section class="scene-group" data-testid="gallery-scene-clips">
+      <h3 i18n="@@gallery.sceneClips">Clip of each scene</h3>
+      <div class="grid clips" appAutoAnimate>
+        @for (c of sceneClips(); track c.scene) {
+          <figure class="clip" [attr.data-testid]="'gallery-clip-' + c.scene">
+            @if (clipGone(c)) {
+              <p class="song__missing" role="status">
+                <mat-icon inline>warning</mat-icon>
+                <ng-container i18n="@@gallery.clipGone">The file is no longer in the project.</ng-container>
+              </p>
+            } @else {
+              <video controls preload="metadata" [src]="clipUrl(c)" (error)="markClipGone(c)"></video>
+            }
+            <figcaption>
+              <span class="mo-data">{{ c.scene }}</span>
+              <span class="mo-data dim">{{ c.size | moBytes }}</span>
+              @if (!clipGone(c)) {
+                @if (phone()) {
+                  <button mat-icon-button type="button" (click)="openFileSheet(c.scene, clipUrl(c), c.scene + '.mp4')" aria-label="Actions" i18n-aria-label="@@gallery.actions" [attr.data-testid]="'gallery-actions-clip-' + c.scene"><mat-icon>more_vert</mat-icon></button>
+                } @else {
+                <button mat-icon-button type="button" [disabled]="sharer.busy() === clipUrl(c)" (click)="sharer.share(clipUrl(c))" aria-label="Share" i18n-aria-label="@@gallery.share" [attr.data-testid]="'gallery-share-clip-' + c.scene"><mat-icon>share</mat-icon></button>
+                }
+              }
+            </figcaption>
+          </figure>
+        }
+      </div>
+    </section>
+  }
+  @if (videoEmpty()) {
+    <mo-empty-state
+      icon="movie"
+      message="This project has no video or clips yet."
+      i18n-message="@@gallery.emptyVideo"
+      hint="Launch a run: the final video and the clip of each scene will appear here."
+      i18n-hint="@@gallery.emptyVideoHint"
+    >
+      <a mat-flat-button routerLink="/runs" [queryParams]="{ project: selected() }">
+        <mat-icon>play_circle</mat-icon>
+        <ng-container i18n="@@gallery.toRuns">Go to Runs</ng-container>
+      </a>
+    </mo-empty-state>
+  }
+}
+
+@for (group of scenes(); track group.sceneId) {
+  <section class="scene-group">
+    <h3 class="mo-data">{{ group.sceneId }}</h3>
+    <div class="grid">
+      @for (img of group.images; track img.file; let i = $index) {
+        <figure class="print">
+          <button type="button" class="print__frame" [moGestures]="pressOf(img)" (click)="openImage(group.sceneId, i)" data-testid="gallery-image">
+            <img [src]="imageUrl(img)" [alt]="img.scene_id" loading="lazy" />
+          </button>
+          <figcaption>
+            <span class="mo-data">v{{ img.variant + 1 }} · s{{ img.effective_seed }}</span>
+            @if (phone()) {
+              <button mat-icon-button type="button" (click)="openImageSheet(img)" i18n-aria-label="@@gallery.actions" aria-label="Actions" data-testid="gallery-image-actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            } @else {
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              i18n-aria-label="@@gallery.actions"
+              aria-label="Actions"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            }
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="sharer.share(imageUrl(img))" [disabled]="sharer.busy() === imageUrl(img)" data-testid="gallery-image-share">
+                <mat-icon>share</mat-icon>
+                <ng-container i18n="@@gallery.share">Share</ng-container>
+              </button>
+              <a mat-menu-item [href]="imageUrl(img)" [attr.download]="img.scene_id" data-testid="gallery-image-download">
+                <mat-icon>download</mat-icon>
+                <ng-container i18n="@@gallery.download">Download</ng-container>
+              </a>
+              <button mat-menu-item (click)="pinSeed(img)" [disabled]="busy()">
+                <mat-icon>push_pin</mat-icon>
+                <ng-container i18n="@@gallery.pinSeed"
+                  >Pin seed {{ img.effective_seed }} on the scene</ng-container
+                >
+              </button>
+              <button mat-menu-item (click)="rerender(img)" [disabled]="busy()">
+                <mat-icon>replay</mat-icon>
+                <ng-container i18n="@@gallery.rerender">Re-render this scene</ng-container>
+              </button>
+            </mat-menu>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  </section>
+}

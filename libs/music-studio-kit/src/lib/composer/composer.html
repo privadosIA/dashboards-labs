@@ -1,0 +1,35 @@
+<div class="modes" role="group" [attr.aria-label]="t.composer.modeLabel">
+  <button type="button" class="mode" [class.on]="store.mode() === 'easy'" [attr.aria-pressed]="store.mode() === 'easy'" data-testid="mode-easy" (click)="setMode('easy')">{{ t.composer.easy }}</button>
+  <button type="button" class="mode" [class.on]="store.mode() === 'custom'" [attr.aria-pressed]="store.mode() === 'custom'" data-testid="mode-custom" (click)="setMode('custom')">{{ t.composer.custom }}</button>
+</div>
+
+<div class="scroll">
+@if (store.mode() === 'custom') {
+  <app-custom-form />
+} @else {
+  <app-easy-form />
+}
+
+
+</div>
+
+<div class="go">
+  @if (reason(); as why) {
+    <p class="reason" data-testid="engine-reason" role="status">{{ why }}</p>
+    @if (canStart()) {
+      <button type="button" class="start" data-testid="engine-start" [disabled]="starting()" (click)="start()">{{ starting() ? t.composer.starting : t.composer.start }}</button>
+    }
+  }
+  @if (blockers().length) {
+    <p class="todo" id="todo" data-testid="todo">{{ t.composer.toGenerate }} {{ todo() }}.</p>
+  }
+  @if (error(); as e) {
+    <p class="error" data-testid="generate-error" role="alert">{{ t.composer[e] }}</p>
+  }
+  <div class="row">
+    <dynamic-form class="generator" [schema]="schema()" [(model)]="generatorModel" [showDefaultActions]="false" />
+    <button type="button" class="generate" data-testid="generate" [disabled]="!ready() || blockers().length > 0 || submitting()" [attr.aria-describedby]="blockers().length ? 'todo' : null" (click)="generate()">
+      {{ submitting() ? t.composer.generating : t.composer.generate }}
+    </button>
+  </div>
+</div>

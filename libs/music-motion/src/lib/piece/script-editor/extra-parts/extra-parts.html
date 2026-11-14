@@ -1,0 +1,20 @@
+<section class="extras" data-testid="extras">
+  <h4>{{ t.extras }}</h4>
+  <p class="hint">{{ t.extrasHint }}</p>
+  @for (e of entries(); track e.k) {
+    <div class="extra" [attr.data-testid]="'extra-' + e.k">
+      <div class="head">
+        <dynamic-form [schema]="e.schema" [model]="e.model" [showDefaultActions]="false" (valueChange)="partChanged(e.k, $event)" />
+        <button type="button" class="remove" [attr.data-testid]="'remove-extra-' + e.k" [disabled]="locked()" (click)="remove.emit(e.k)">{{ t.removeExtra }}</button>
+      </div>
+      @if (e.part; as part) {
+        <lab-part-params [part]="part" [values]="extras()[e.k].params" [level]="level()" [locked]="locked()" (paramsChange)="changeParams.emit({ k: e.k, params: $event })" />
+      }
+    </div>
+  }
+  @if (canAdd()) {
+    <div class="add" data-testid="add-extra">
+      <dynamic-form [schema]="addSchema()" [model]="addModel()" [showDefaultActions]="false" (valueChange)="addChanged($event)" />
+    </div>
+  }
+</section>

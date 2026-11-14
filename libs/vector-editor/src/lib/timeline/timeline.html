@@ -1,0 +1,84 @@
+<div class="timeline" data-testid="vector-timeline" role="region" [attr.aria-label]="t.timeline.label" (keydown)="keydown($event)">
+  <div class="bar">
+    <label class="all">
+      <input type="checkbox" data-testid="all-nodes" [checked]="all()" (change)="all.set($any($event.target).checked)" />
+      {{ t.timeline.allNodes }}
+    </label>
+    <label class="ease">
+      {{ t.timeline.ease }}
+      <select data-testid="ease" [disabled]="!selectedFrame()" (change)="chooseEase($event)">
+        @for (e of eases; track e) {
+          <option [value]="e" [selected]="selectedFrame()?.ease === e">{{ t.timeline.eases[e] }}</option>
+        }
+      </select>
+    </label>
+    <button type="button" data-testid="remove-keyframe" [disabled]="!selectedFrame()" (click)="removeSelected()">{{ t.timeline.remove }}</button>
+    <span class="clock" data-testid="clock">{{ clock() }}</span>
+  </div>
+
+  <div class="grid">
+    <div class="labels">
+      <div class="ruler-label">{{ t.timeline.ruler }}</div>
+      @for (row of rows(); track row.id + row.property) {
+        <div class="label" data-testid="row-label">
+          <span class="node">{{ row.nodeName }}</span>
+          <span class="prop">{{ t.properties[row.property] }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="tracks" #tracks>
+      <div class="ruler" data-testid="ruler" role="slider" tabindex="0" [attr.aria-label]="t.timeline.playhead" [attr.aria-valuemin]="0" [attr.aria-valuemax]="duration()" [attr.aria-valuenow]="playhead()" (pointerdown)="scrubStart($event)" (pointermove)="scrub($event)" (pointerup)="scrubEnd()" (pointercancel)="scrubEnd()">
+        @for (tick of ticks(); track tick.t) {
+          <span class="tick" [class.major]="tick.major" [style.left.%]="(tick.t / duration()) * 100">
+            @if (tick.major) {
+              <span class="tick-label">{{ tick.t }}{{ t.timeline.seconds }}</span>
+            }
+          </span>
+        }
+      </div>
+
+      @for (row of rows(); track row.id + row.property) {
+        <div class="row" data-testid="row" [attr.data-node]="row.id" [attr.data-property]="row.property" (dblclick)="addAt($event, row)">
+          @for (frame of row.frames; track $index) {
+            <button
+              type="button"
+              class="diamond"
+              data-testid="diamond"
+              [class.selected]="isSelected(row, $index)"
+              [style.left.%]="(frame.t / duration()) * 100"
+              [attr.aria-label]="t.timeline.keyframe + ': ' + row.nodeName + ', ' + t.properties[row.property] + ', ' + frame.t + t.timeline.seconds"
+              [attr.aria-pressed]="isSelected(row, $index)"
+              [title]="frame.t + t.timeline.seconds + ' · ' + t.timeline.eases[frame.ease]"
+              (pointerdown)="dragStart($event, row, $index)"
+              (pointermove)="dragMove($event)"
+              (pointerup)="dragEnd()"
+              (pointercancel)="dragEnd()"
+              (click)="$event.stopPropagation()"
+              (dblclick)="$event.stopPropagation()"
+              (keydown)="diamondKey($event, row, $index)"
+            >
+              <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11 6 6 11 1 6Z" /></svg>
+            </button>
+          }
+        </div>
+      }
+
+      @if (rows().length === 0) {
+        <p class="empty" data-testid="timeline-empty">{{ t.timeline.empty }}</p>
+      }
+
+      <div
+        class="playhead"
+        data-testid="playhead"
+        [style.left.%]="(playhead() / duration()) * 100"
+        (pointerdown)="scrubStart($event)"
+        (pointermove)="scrub($event)"
+        (pointerup)="scrubEnd()"
+        (pointercancel)="scrubEnd()"
+      >
+        <span class="grip"></span>
+      </div>
+    </div>
+  </div>
+</div>

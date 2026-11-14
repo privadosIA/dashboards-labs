@@ -1,0 +1,65 @@
+<dialog #dialog class="modal" [attr.aria-label]="t.title" data-testid="new-part" (close)="open.set(false)" (click)="backdrop($event)">
+  @if (open()) {
+    <div class="box">
+      <header class="bar">
+        <h2>{{ t.title }}</h2>
+        <button type="button" class="close" data-testid="new-part-close" [attr.aria-label]="t.close" [attr.title]="t.close" (click)="open.set(false)">×</button>
+      </header>
+
+      @if (current(); as id) {
+        <button type="button" class="ctl back" data-testid="new-part-back" (click)="current.set(null)">← {{ t.back }}</button>
+        <app-draft-view [id]="id" (approved)="onApproved($event)" (closed)="current.set(null)" (changed)="refresh()" />
+      } @else {
+        <section class="describe">
+          <h3>{{ t.describe }}</h3>
+          <label class="field">
+            <span>{{ t.request }}</span>
+            <textarea rows="3" maxlength="500" data-testid="new-part-request" [value]="request()" (input)="type($event)"></textarea>
+            <small>{{ t.requestHint }}</small>
+          </label>
+          <div class="picture">
+            <label class="ctl choose">
+              {{ t.picture }}
+              <input type="file" accept="image/png,image/jpeg,image/webp" hidden data-testid="new-part-file" (change)="pick($event)" />
+            </label>
+            @if (file(); as f) {
+              <span class="meta" data-testid="new-part-file-name">{{ f.name }}</span>
+              <button type="button" class="ctl" data-testid="new-part-clear" (click)="file.set(null)">{{ t.clearPicture }}</button>
+            } @else {
+              <span class="meta">{{ t.pictureHint }}</span>
+            }
+          </div>
+          @if (refused()) {
+            <p class="problem" role="alert" data-testid="new-part-refused">{{ refused() }}</p>
+          }
+          <button type="button" class="ctl primary" data-testid="new-part-ask" [disabled]="!canAsk()" (click)="ask()">{{ asking() ? t.asking : t.ask }}</button>
+        </section>
+
+        <section class="drafts" data-testid="new-part-drafts">
+          <h3>{{ t.drafts }}</h3>
+          @if (drafts().length === 0) {
+            <p class="meta" data-testid="new-part-no-drafts">{{ t.draftsNone }}</p>
+          }
+          <ul>
+            @for (d of drafts(); track d.id) {
+              <li data-testid="new-part-draft">
+                <span class="name">{{ d.name ?? d.request }}</span>
+                <span class="state" [attr.data-state]="d.state">{{ state(d) }}</span>
+                <button type="button" class="ctl" data-testid="new-part-reopen" (click)="current.set(d.id)">{{ t.reopen }}</button>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <details class="guide" data-testid="new-part-guide">
+          <summary>{{ t.guideTitle }}</summary>
+          <ul>
+            @for (line of t.guide; track $index) {
+              <li>{{ line }}</li>
+            }
+          </ul>
+        </details>
+      }
+    </div>
+  }
+</dialog>

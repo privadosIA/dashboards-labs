@@ -1,0 +1,386 @@
+{
+  "format": "prompt-presets",
+  "version": 1,
+  "meta": {
+    "note": "Written for this repository, CC0-1.0."
+  },
+  "items": [
+    {
+      "kind": "image",
+      "title": "Neon street in the rain",
+      "prompt": "a narrow city street at night in heavy rain, neon signs reflected in the wet asphalt, a lone figure with an umbrella, cinematic wide shot, shallow depth of field",
+      "tags": [
+        "neon",
+        "night",
+        "rain",
+        "city",
+        "cinematic"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "image-01",
+      "licence": "CC0-1.0",
+      "negative": "blurry, text, watermark"
+    },
+    {
+      "kind": "image",
+      "title": "Portrait in window light",
+      "prompt": "close portrait of an elderly fisherman, deep wrinkles, soft window light from the left, muted colours, 85mm photo, sharp focus on the eyes",
+      "tags": [
+        "portrait",
+        "natural light",
+        "photo"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "image-02",
+      "licence": "CC0-1.0",
+      "negative": "cartoon, oversaturated"
+    },
+    {
+      "kind": "image",
+      "title": "Misty mountain lake",
+      "prompt": "a still mountain lake at dawn, mist over the water, pine forest, first sun on the peaks, ultra detailed landscape photography",
+      "tags": [
+        "landscape",
+        "dawn",
+        "mountain",
+        "mist"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "image-03",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "image",
+      "title": "Cosy reading nook",
+      "prompt": "a cosy reading nook under a staircase, warm lamp light, stacked books, a sleeping cat on a knitted blanket, soft illustration style",
+      "tags": [
+        "interior",
+        "warm",
+        "illustration",
+        "cat"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "image-04",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "image",
+      "title": "Retro robot poster",
+      "prompt": "a friendly retro robot waving, 1950s travel poster style, flat colours, bold shapes, a teal and orange palette",
+      "tags": [
+        "poster",
+        "retro",
+        "robot",
+        "illustration"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "image-05",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "video",
+      "title": "Hive at dawn",
+      "prompt": "wide shot of a wooden beehive in a meadow at sunrise, soft golden light, bees leaving the entrance, slow push-in",
+      "tags": [
+        "nature",
+        "dawn",
+        "documentary",
+        "slow push-in"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "video-01",
+      "licence": "CC0-1.0",
+      "negative": "text, watermark"
+    },
+    {
+      "kind": "video",
+      "title": "Chef hands at work",
+      "prompt": "close-up of a chef's hands slicing fresh herbs on a wooden board, steam rising from a pan behind, shallow depth of field, handheld feel",
+      "tags": [
+        "food",
+        "close-up",
+        "handheld"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "video-02",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "video",
+      "title": "Drone over the coast",
+      "prompt": "aerial view following a rocky coastline at golden hour, waves breaking on the cliffs, smooth forward drone motion",
+      "tags": [
+        "aerial",
+        "coast",
+        "golden hour",
+        "drone"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "video-03",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "video",
+      "title": "Night train window",
+      "prompt": "inside a night train, the window shows city lights streaking past, a passenger reflected in the glass, quiet and melancholic",
+      "tags": [
+        "night",
+        "train",
+        "melancholic"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "video-04",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "video",
+      "title": "Paper boat in a stream",
+      "prompt": "a paper boat drifting down a small stream after rain, leaves floating by, camera low at water level, gentle tracking shot",
+      "tags": [
+        "water",
+        "low angle",
+        "tracking",
+        "gentle"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "video-05",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "motion",
+      "title": "Counter with three steps",
+      "prompt": "an animated counter that counts from 0 to 100 in 4 seconds with an ease-out, the number large and centred, a thin progress line below",
+      "tags": [
+        "counter",
+        "numbers",
+        "ease-out"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "motion-01",
+      "licence": "CC0-1.0",
+      "engine": "chrome"
+    },
+    {
+      "kind": "motion",
+      "title": "Lower third name bar",
+      "prompt": "a lower-third title bar that slides in from the left, shows a name and a role, holds for 3 seconds and slides out",
+      "tags": [
+        "lower third",
+        "overlay",
+        "title"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "motion-02",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "motion",
+      "title": "Toggle switch demo",
+      "prompt": "part: toggle count=3 label=allow, switching on one after another every 0.8 seconds",
+      "tags": [
+        "part",
+        "toggle",
+        "ui"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "motion-03",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "motion",
+      "title": "Bar chart growing",
+      "prompt": "a bar chart with five bars that grow one by one, each with its value above, a clean white background",
+      "tags": [
+        "chart",
+        "bars",
+        "data"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "motion-04",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "motion",
+      "title": "Kinetic quote",
+      "prompt": "a short quote typed on screen word by word, the key word enlarged and tinted with the accent colour, 5 seconds",
+      "tags": [
+        "text",
+        "quote",
+        "kinetic"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "motion-05",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "music",
+      "title": "Summer acoustic pop",
+      "prompt": "upbeat acoustic pop, fingerpicked guitar and handclaps, warm female vocal, about summer evenings by the sea, 100 bpm",
+      "tags": [
+        "pop",
+        "acoustic",
+        "summer",
+        "upbeat"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "music-01",
+      "licence": "CC0-1.0",
+      "engine": "ace-step"
+    },
+    {
+      "kind": "music",
+      "title": "Late-night lo-fi",
+      "prompt": "mellow lo-fi hip hop beat, dusty vinyl crackle, soft electric piano, slow swing drums, instrumental, 78 bpm",
+      "tags": [
+        "lo-fi",
+        "instrumental",
+        "calm",
+        "night"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "music-02",
+      "licence": "CC0-1.0",
+      "engine": "ace-step"
+    },
+    {
+      "kind": "music",
+      "title": "Epic cinematic rise",
+      "prompt": "epic cinematic orchestral build, low strings ostinato, soaring brass, big taiko hits at the climax, instrumental",
+      "tags": [
+        "cinematic",
+        "epic",
+        "orchestra",
+        "instrumental"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "music-03",
+      "licence": "CC0-1.0",
+      "engine": "heartmula"
+    },
+    {
+      "kind": "music",
+      "title": "Spanish flamenco pop",
+      "prompt": "flamenco pop with nylon guitar and palmas, passionate male vocal in Spanish, lyrics about leaving home, 96 bpm",
+      "tags": [
+        "flamenco",
+        "pop",
+        "spanish",
+        "passionate"
+      ],
+      "language": "es",
+      "source": "dashboards-lab-sample",
+      "source_id": "music-04",
+      "licence": "CC0-1.0",
+      "engine": "diffrhythm2"
+    },
+    {
+      "kind": "music",
+      "title": "Dark synthwave drive",
+      "prompt": "dark synthwave, pulsing bass, gated snare, arpeggiated analog synths, a night drive through an empty city, 110 bpm",
+      "tags": [
+        "synthwave",
+        "dark",
+        "electronic",
+        "night"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "music-05",
+      "licence": "CC0-1.0",
+      "engine": "ace-step"
+    },
+    {
+      "kind": "animation",
+      "title": "Minimal city waking",
+      "prompt": "a minimalist music video about a city waking up: flat shapes, a calm blue to warm orange gradient, lights switching on window by window",
+      "tags": [
+        "minimal",
+        "city",
+        "gradient",
+        "calm"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "animation-01",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "animation",
+      "title": "Kinetic lyric video",
+      "prompt": "a kinetic typography lyric video, bold sans-serif words landing on the beat, black background, one accent colour per chorus",
+      "tags": [
+        "kinetic",
+        "typography",
+        "lyrics",
+        "beat"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "animation-02",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "animation",
+      "title": "Neon pulse visualiser",
+      "prompt": "a neon pulse audio visualiser: concentric rings that expand on every kick and glow on the chorus, dark background",
+      "tags": [
+        "visualiser",
+        "neon",
+        "pulse",
+        "beat"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "animation-03",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "animation",
+      "title": "Hand-drawn travel diary",
+      "prompt": "a hand-drawn travel diary look: paper texture, doodled icons popping in with each verse, a small dotted route line growing across a map",
+      "tags": [
+        "hand-drawn",
+        "paper",
+        "travel",
+        "doodle"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "animation-04",
+      "licence": "CC0-1.0"
+    },
+    {
+      "kind": "animation",
+      "title": "Retro terminal glitch",
+      "prompt": "a retro terminal aesthetic: green monospace text, scanlines, glitch cuts on the drops, the song title typed in at the start",
+      "tags": [
+        "retro",
+        "terminal",
+        "glitch",
+        "monospace"
+      ],
+      "language": "en",
+      "source": "dashboards-lab-sample",
+      "source_id": "animation-05",
+      "licence": "CC0-1.0"
+    }
+  ]
+}

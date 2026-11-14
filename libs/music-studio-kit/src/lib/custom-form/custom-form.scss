@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+// The button that opens the tags of the style: one line, like the buttons above the style box.
+.pick-tags {
+  width: 100%;
+  min-height: var(--lab-control-h);
+  margin-bottom: var(--lab-space-3);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}

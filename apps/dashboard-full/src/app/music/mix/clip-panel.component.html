@@ -1,0 +1,50 @@
+@if (clip(); as c) {
+  <div class="panel" data-testid="clip-panel">
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.start">Start (s)</mat-label>
+      <input matInput type="number" step="0.1" min="0" class="mo-data" data-testid="clip-start" [value]="c.start ?? 0" (change)="set('start', $any($event.target).value)" />
+      @if (errors().start; as err) {<mat-hint class="error">{{ err }}</mat-hint>}
+    </mat-form-field>
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.gain">Volume</mat-label>
+      <input matInput type="number" step="0.05" min="0" [max]="maxGain" class="mo-data" data-testid="clip-gain" [value]="c.gain ?? 1" (change)="set('gain', $any($event.target).value)" />
+      @if (errors().gain; as err) {<mat-hint class="error">{{ err }}</mat-hint>}
+    </mat-form-field>
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.fadeIn">Fade in (s)</mat-label>
+      <input matInput type="number" step="0.1" min="0" class="mo-data" data-testid="clip-fade-in" [value]="c.fade_in ?? ''" placeholder="0" (change)="set('fade_in', $any($event.target).value)" />
+      @if (errors().fades; as err) {<mat-hint class="error">{{ err }}</mat-hint>}
+    </mat-form-field>
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.fadeOut">Fade out (s)</mat-label>
+      <input matInput type="number" step="0.1" min="0" class="mo-data" data-testid="clip-fade-out" [value]="c.fade_out ?? ''" placeholder="0" (change)="set('fade_out', $any($event.target).value)" />
+    </mat-form-field>
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.trimFrom">Trim: from (s)</mat-label>
+      <input matInput type="number" step="0.1" min="0" class="mo-data" data-testid="clip-trim-from" [value]="c.trim_start ?? ''" placeholder="0" (change)="set('trim_start', $any($event.target).value)" />
+      @if (errors().trim; as err) {<mat-hint class="error">{{ err }}</mat-hint>}
+    </mat-form-field>
+    <mat-form-field class="panel__field">
+      <mat-label i18n="@@mix.trimTo">Trim: to (s)</mat-label>
+      <input matInput type="number" step="0.1" min="0" class="mo-data" data-testid="clip-trim-to" [value]="c.trim_end ?? ''" placeholder="all" i18n-placeholder="@@clip.trimAll" (change)="set('trim_end', $any($event.target).value)" />
+    </mat-form-field>
+    <mat-checkbox class="panel__mute" data-testid="clip-mute" [checked]="!!c.mute" (change)="setMute($event.checked)" i18n="@@mix.mute">Mute</mat-checkbox>
+    <button mat-stroked-button type="button" data-testid="trim-silences" [disabled]="busy()" (click)="trimSilences()">
+      <mat-icon>content_cut</mat-icon>
+      <ng-container i18n="@@mix.trimSilences">Trim silences</ng-container>
+    </button>
+    <button mat-button type="button" class="danger" data-testid="remove-clip" (click)="remove()">
+      <mat-icon>delete</mat-icon>
+      <ng-container i18n="@@mix.removeClip">Remove track</ng-container>
+    </button>
+    <p class="panel__live" data-testid="live-hint" i18n="@@mix.liveHint">
+      With this track playing alone (▶ on its left), or with “Listen without mixing” above, the volume, fades, trim and start are heard instantly as you change them.
+    </p>
+    @if (errors().source; as err) {
+      <p class="panel__error" role="alert">{{ err }}</p>
+    }
+    @if (note(); as n) {
+      <p class="panel__note" role="status" data-testid="trim-note">{{ n }}</p>
+    }
+  </div>
+}

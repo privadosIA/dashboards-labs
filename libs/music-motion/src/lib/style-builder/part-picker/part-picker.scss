@@ -1,0 +1,151 @@
+.picker {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--lab-fw-title);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+}
+
+h4 {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.count,
+.note,
+.meta,
+.desc,
+.why {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.why {
+  color: var(--lab-warn);
+}
+
+.chosen,
+.catalog {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chosen li,
+.catalog li {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.catalog li.on {
+  border-color: var(--lab-accent);
+}
+
+.chosen .none {
+  color: var(--lab-ink-dim);
+  border-style: dashed;
+}
+
+.order {
+  min-width: 1.5rem;
+  color: var(--lab-ink-dim);
+}
+
+.name {
+  flex: 1 1 auto;
+  font-weight: var(--lab-fw-control);
+  overflow-wrap: anywhere;
+}
+
+.buttons {
+  display: flex;
+  gap: var(--lab-space-1);
+}
+
+.info {
+  display: grid;
+  flex: 1 1 auto;
+  gap: var(--lab-space-1);
+  min-width: 0;
+}
+
+.levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+}
+
+.chip {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  input,
+  select {
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-3);
+    background: var(--lab-surface);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    color: var(--lab-ink);
+  }
+
+  input {
+    flex: 1 1 12rem;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+    color: var(--lab-ink-dim);
+  }
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+}

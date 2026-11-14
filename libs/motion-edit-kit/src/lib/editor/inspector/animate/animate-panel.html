@@ -1,0 +1,75 @@
+@if (rows().length > 0 || unsupported()) {
+  <section class="animate" data-testid="animate">
+    <h3>{{ t.title }}</h3>
+    @if (unsupported()) {
+      <p class="warn" role="alert" data-testid="animate-unsupported">{{ t.unsupported }}</p>
+    }
+    @for (row of rows(); track row.def.name) {
+      <div class="row" [attr.data-param]="row.def.name">
+        <div class="head">
+          <span class="name">{{ row.def.name }}</span>
+          @if (row.frames) {
+            <span class="now" data-testid="animate-now">{{ t.atPlayhead(row.shown) }}</span>
+            <button type="button" class="ctl stop" data-testid="animate-stop" [disabled]="locked()" (click)="stopParam(row.def)">{{ t.stop }}</button>
+          } @else {
+            <button type="button" class="ctl go" data-testid="animate-go" [disabled]="locked()" (click)="animateParam(row.def)">{{ t.animate }}</button>
+          }
+        </div>
+        @if (row.frames) {
+          <ul class="frames">
+            @for (f of row.frames; track $index; let n = $index) {
+              <li>
+                <button type="button" class="frame" data-testid="animate-frame" [class.on]="isPicked(row.def.name, n)" [attr.aria-pressed]="isPicked(row.def.name, n)" (click)="choose(row.def.name, n)">◆ {{ frameText(row, n) }}</button>
+              </li>
+            }
+          </ul>
+          @if (picked(row); as p) {
+            <div class="edit" data-testid="animate-edit">
+              <label class="field">
+                <span>{{ layer() ? t.timeItem : t.time }}</span>
+                <input class="ctl" type="number" step="0.01" min="0" [max]="length()" data-testid="animate-time" [value]="p.frame.t" [disabled]="locked()" (change)="setTime(row.def, text($event))" />
+              </label>
+              <label class="field">
+                <span>{{ t.value }}</span>
+                @switch (row.def.type) {
+                  @case ('bool') {
+                    <input type="checkbox" data-testid="animate-value" [checked]="p.frame.value === true" [disabled]="locked()" (change)="setValue(row.def, checked($event))" />
+                  }
+                  @case ('enum') {
+                    <select class="ctl" data-testid="animate-value" [disabled]="locked()" (change)="setValue(row.def, text($event))">
+                      @for (o of row.def.options ?? []; track o) {
+                        <option [value]="o" [selected]="p.frame.value === o">{{ o }}</option>
+                      }
+                    </select>
+                  }
+                  @case ('string') {
+                    <input class="ctl" type="text" data-testid="animate-value" [attr.maxlength]="row.def.maxLength ?? null" [value]="p.frame.value" [disabled]="locked()" (change)="setValue(row.def, text($event))" />
+                  }
+                  @default {
+                    <input class="ctl" type="number" data-testid="animate-value" [step]="row.def.type === 'int' ? 1 : 'any'" [attr.min]="row.def.min ?? null" [attr.max]="row.def.max ?? null" [value]="p.frame.value" [disabled]="locked()" (change)="setValue(row.def, text($event))" />
+                  }
+                }
+              </label>
+              <label class="field">
+                <span>{{ t.ease }}</span>
+                <select class="ctl" data-testid="animate-ease" [disabled]="locked()" (change)="setEase(row.def, text($event))">
+                  @for (e of eases; track e) {
+                    <option [value]="e" [selected]="(p.frame.ease ?? 'linear') === e">{{ t.eases[e] }}</option>
+                  }
+                </select>
+              </label>
+              <button type="button" class="ctl danger" data-testid="animate-remove" [disabled]="locked()" (click)="removeFrame(row.def)">{{ t.removeKeyframe }}</button>
+            </div>
+          }
+          <button type="button" class="ctl add" data-testid="animate-add" [disabled]="locked()" (click)="add(row.def, row)">◆ + {{ row.shown }}</button>
+        }
+      </div>
+    }
+    @if (someFixed()) {
+      <p class="meta" data-testid="animate-why">{{ t.why }}</p>
+    }
+    @if (hasAny()) {
+      <button type="button" class="ctl danger" data-testid="animate-remove-all" [disabled]="locked()" (click)="removeAll()">{{ t.removeAll }}</button>
+    }
+  </section>
+}

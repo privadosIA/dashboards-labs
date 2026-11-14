@@ -1,0 +1,52 @@
+.strip {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-left: 6px solid var(--lab-success);
+  border-radius: var(--lab-radius-panel);
+
+  &.running {
+    border-left-color: var(--lab-accent);
+  }
+
+  &.failed {
+    border-left-color: var(--lab-danger);
+  }
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+ul {
+  display: grid;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding-left: var(--lab-space-4);
+}
+
+.rule {
+  color: var(--lab-warn);
+  overflow-wrap: anywhere;
+}

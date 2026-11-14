@@ -1,0 +1,58 @@
+.style-tags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  max-height: 18rem;
+  overflow-y: auto;
+  padding-top: var(--lab-space-3);
+  border-top: 1px solid var(--lab-line);
+  scrollbar-width: thin;
+  scrollbar-color: var(--lab-control-line) transparent;
+}
+
+.chip {
+  flex: none;
+  min-height: 2rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &.open {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+
+  &.on {
+    background: var(--lab-accent);
+    border-color: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+

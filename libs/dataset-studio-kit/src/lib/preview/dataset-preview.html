@@ -1,0 +1,112 @@
+<section class="preview" data-testid="dataset-preview">
+  <h3>{{ t.title }}</h3>
+  <p class="hint">{{ t.nothingCreated }}</p>
+
+  @if (!raw().trim()) {
+    <p class="hint" data-testid="preview-empty">{{ t.empty }}</p>
+  }
+
+  <div class="panes">
+    @if (tupleKind() && raw().trim()) {
+      <div class="pane">
+        <h4>{{ t.table }}</h4>
+        @if (list().ok) {
+          <div class="scroll">
+            <table data-testid="entries-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ t.columns.id }}</th>
+                  <th scope="col">{{ t.columns.title }}</th>
+                  <th scope="col">{{ t.columns.text }}</th>
+                  @for (c of columns(); track c) {
+                    <th scope="col">{{ c }}</th>
+                  }
+                  @if (hasParams()) {
+                    <th scope="col">{{ t.columns.params }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of rows(); track $index; let r = $index) {
+                  <tr [class.row--rejected]="row.tuple && rejectedById().has(row.tuple[0])" [class.row--unread]="!row.tuple" [attr.data-testid]="'row-' + r">
+                    @if (row.tuple) {
+                      <td><input type="text" class="cell" [value]="row.tuple[0]" [attr.aria-label]="t.columns.id" [attr.data-testid]="'cell-id-' + r" (change)="editId(r, row, value($event))" /></td>
+                      <td><input type="text" class="cell" [value]="row.tuple[1]" [attr.aria-label]="t.columns.title" [attr.data-testid]="'cell-title-' + r" (change)="editTitle(r, row, value($event))" /></td>
+                      <td><textarea class="cell" rows="2" [value]="row.prompt" [attr.aria-label]="t.columns.text" [attr.data-testid]="'cell-text-' + r" (change)="editText(r, row, value($event))"></textarea></td>
+                      @for (c of columns(); track c) {
+                        <td><textarea class="cell" rows="1" [value]="cell(row, c)" [attr.aria-label]="c" [attr.data-testid]="'cell-' + c + '-' + r" (change)="editMarker(r, row, c, value($event))"></textarea></td>
+                      }
+                      @if (hasParams()) {
+                        <td class="params" [attr.data-testid]="'cell-params-' + r">{{ params(row) }}</td>
+                      }
+                    } @else {
+                      <td [attr.colspan]="3 + columns().length + (hasParams() ? 1 : 0)" class="unread" [attr.data-testid]="'unread-' + r">
+                        <strong>{{ t.rowUnread }}</strong> <code>{{ row.text }}</code>
+                      </td>
+                    }
+                  </tr>
+                  @if (row.tuple && rejectedById().get(row.tuple[0]); as why) {
+                    <tr class="why" [attr.data-testid]="'why-' + r">
+                      <td [attr.colspan]="3 + columns().length + (hasParams() ? 1 : 0)" role="alert">{{ t.rejectedBecause(why) }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="problem" role="alert" data-testid="unreadable">{{ $any(list()).error }}</p>
+        }
+      </div>
+    }
+
+    @if (raw().trim() || tupleKind() === false) {
+      <div class="pane">
+        <h4>{{ t.raw }}</h4>
+        <textarea class="rawtext" rows="14" spellcheck="false" [value]="raw()" [attr.aria-label]="t.raw" data-testid="raw-text" (input)="onRaw($event)"></textarea>
+        <p class="hint">{{ t.rawHint }}</p>
+      </div>
+    }
+  </div>
+
+  @let s = server();
+  @if (s.state === 'busy') {
+    <p class="hint" role="status" data-testid="server-busy">{{ t.checking }}</p>
+  } @else if (s.state === 'tuples') {
+    <div class="report" data-testid="server-report">
+      <h4>{{ t.server }}</h4>
+      <ul class="counts" data-testid="server-counts">
+        <li><strong>{{ s.preview.entries }}</strong> {{ t.counts.entries }}</li>
+        <li><strong>{{ s.preview.imported }}</strong> {{ t.counts.imported }}</li>
+        <li><strong>{{ s.preview.quiet }}</strong> {{ kind().mode === 'music' ? t.counts.instrumental : t.counts.quiet }}</li>
+        <li><strong>{{ s.preview.rejected }}</strong> {{ t.counts.rejected }}</li>
+      </ul>
+      <pre class="report-text">{{ s.preview.report }}</pre>
+    </div>
+  } @else if (s.state === 'piece') {
+    <div class="report" data-testid="piece-report">
+      <h4>{{ t.plan }}</h4>
+      <ul class="plan">
+        @for (item of s.plan.items; track $index) {
+          <li [attr.data-testid]="'plan-' + $index" [attr.data-action]="item.action">
+            <strong>{{ item.label }}</strong> — {{ t.action[item.action] }}@if (item.reason) {
+              : {{ t.reasons[item.reason] ?? item.reason }}
+            }
+          </li>
+        }
+      </ul>
+      <p class="hint">{{ t.pieceParts }}</p>
+    </div>
+  } @else if (s.state === 'failed') {
+    <div class="report" data-testid="server-failed">
+      <p class="problem" role="alert">{{ s.reason }}</p>
+      @if (problems().length) {
+        <ul class="problems" data-testid="piece-problems">
+          @for (p of problems(); track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

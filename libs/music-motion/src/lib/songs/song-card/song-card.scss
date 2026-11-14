@@ -1,0 +1,95 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.cover {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--lab-radius);
+  object-fit: cover;
+}
+
+// Title, version and player share one row and wrap only when the card is narrow.
+.body {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  min-width: 0;
+}
+
+.title {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.version {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  select {
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+}
+
+audio {
+  flex: 0 1 18rem;
+  min-width: 0;
+  height: 2.5rem;
+}
+
+.animate {
+  flex: none;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}
+
+@media (max-width: 40rem) {
+  .card {
+    flex-wrap: wrap;
+  }
+
+  .body {
+    flex-basis: calc(100% - 4rem);
+  }
+
+  .animate {
+    flex: 1 1 100%;
+  }
+}

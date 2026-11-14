@@ -1,0 +1,56 @@
+:host {
+  display: block;
+  margin-top: var(--lab-space-3);
+}
+
+.panel {
+  background: var(--lab-surface);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+  font-weight: 600;
+  margin: var(--lab-space-4) 0 var(--lab-space-2);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+}
+
+.narrow {
+  width: 160px;
+  max-width: 100%;
+}
+
+.song {
+  width: 320px;
+  max-width: 100%;
+}
+
+.wide {
+  width: 100%;
+  max-width: 80ch;
+}
+
+.mode {
+  margin-bottom: var(--lab-space-3);
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}
+
+.server-error {
+  color: var(--lab-danger);
+  margin: var(--lab-space-2) 0;
+}
+
+.missing {
+  color: var(--lab-warn);
+}

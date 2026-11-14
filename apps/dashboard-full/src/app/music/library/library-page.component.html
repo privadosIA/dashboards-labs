@@ -1,0 +1,297 @@
+<mo-page-header
+  title="Library"
+  i18n-title="@@library.title"
+  description="All your songs, from every music project: search them, rate them with stars and group them into playlists."
+  i18n-description="@@library.desc"
+>
+  <button data-keep moActions mat-stroked-button type="button" [disabled]="store.loading()" (click)="store.load()" data-testid="library-refresh">
+    <mat-icon>refresh</mat-icon>
+    <ng-container i18n="@@library.refresh">Refresh</ng-container>
+  </button>
+</mo-page-header>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.loaded() && store.songs().length === 0) {
+  <mo-empty-state
+    icon="library_music"
+    message="There are no songs yet."
+    i18n-message="@@library.emptyTitle"
+    hint="Make songs in a project's music studio: they appear here once they are exported."
+    i18n-hint="@@library.emptyHint"
+  >
+    <a mat-flat-button routerLink="/projects">
+      <mat-icon>library_music</mat-icon>
+      <ng-container i18n="@@library.toProjects">Go to Projects</ng-container>
+    </a>
+  </mo-empty-state>
+} @else if (store.loaded()) {
+  <div class="library">
+    <nav class="views" appAutoAnimate aria-label="Lists" i18n-aria-label="@@library.views" data-testid="views">
+      <button type="button" class="view" [class.view--on]="store.view() === VIEW_ALL" (click)="store.view.set(VIEW_ALL)" data-testid="view-all">
+        <mat-icon>library_music</mat-icon>
+        <span class="view__name" i18n="@@library.viewAll">All</span>
+        <span class="view__n mo-data">{{ viewCount(VIEW_ALL) }}</span>
+      </button>
+      <button type="button" class="view" [class.view--on]="store.view() === VIEW_FAVORITES" (click)="store.view.set(VIEW_FAVORITES)" data-testid="view-favorites">
+        <mat-icon>favorite</mat-icon>
+        <span class="view__name" i18n="@@library.viewFavorites">Favorites</span>
+        <span class="view__n mo-data">{{ viewCount(VIEW_FAVORITES) }}</span>
+      </button>
+      <button type="button" class="view" [class.view--on]="store.view() === VIEW_RATED" (click)="store.view.set(VIEW_RATED)" data-testid="view-rated">
+        <mat-icon>grade</mat-icon>
+        <span class="view__name" i18n="@@library.viewRated">Rated</span>
+        <span class="view__n mo-data">{{ viewCount(VIEW_RATED) }}</span>
+      </button>
+      <h3 class="views__title" i18n="@@library.playlists">Playlists</h3>
+      @for (p of store.playlists(); track p.id) {
+        <button type="button" class="view" [class.view--on]="store.view() === p.id" (click)="store.view.set(p.id)" [attr.data-testid]="'view-' + p.id">
+          <mat-icon>queue_music</mat-icon>
+          <span class="view__name">{{ p.name }}</span>
+          <span class="view__n mo-data">{{ viewCount(p.id) }}</span>
+        </button>
+      }
+      @if (creating()) {
+        <form class="new" (ngSubmit)="createList()" data-testid="new-list-form">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label i18n="@@library.newListName">Name of the playlist</mat-label>
+            <input matInput #newInput name="newName" [ngModel]="newName()" (ngModelChange)="newName.set($event)" data-testid="new-list-name" autocomplete="off" />
+          </mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="!newName().trim()" data-testid="new-list-create" i18n="@@library.createList">Create</button>
+          <button mat-button type="button" (click)="cancelNewList()" data-testid="new-list-cancel" i18n="@@library.cancel">Cancel</button>
+        </form>
+      } @else {
+        <button mat-button type="button" (click)="startNewList()" data-testid="new-list">
+          <mat-icon>add</mat-icon>
+          <ng-container i18n="@@library.newList">New playlist</ng-container>
+        </button>
+      }
+    </nav>
+
+    <section class="main">
+      <div class="toolbar">
+        <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
+          <mat-label i18n="@@library.search">Search</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            type="search"
+            [ngModel]="store.search()"
+            (ngModelChange)="store.search.set($event)"
+            placeholder="title, project, style or lyrics"
+            i18n-placeholder="@@library.searchHint"
+            data-testid="search"
+            autocomplete="off"
+          />
+        </mat-form-field>
+        <app-mode-select [modes]="false" />
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label i18n="@@library.project">Project</mat-label>
+          <mat-select [value]="store.project()" (selectionChange)="store.project.set($event.value)" data-testid="project">
+            <mat-option value="" i18n="@@library.allProjects">All</mat-option>
+            @for (p of store.projectNames(); track p) {
+              <mat-option [value]="p"><span class="mo-data">{{ p }}</span></mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label i18n="@@library.generator">Generator</mat-label>
+          <mat-select [value]="store.generator()" (selectionChange)="store.generator.set($event.value)" data-testid="generator">
+            <mat-option value="" i18n="@@library.allGenerators">All</mat-option>
+            @for (g of generators; track g.value) {
+              <mat-option [value]="g.value">{{ g.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label i18n="@@library.minStars">Stars</mat-label>
+          <mat-select [value]="store.minStars()" (selectionChange)="store.minStars.set($event.value)" data-testid="min-stars">
+            <mat-option [value]="0" i18n="@@library.anyStars">Any</mat-option>
+            @for (n of starValues; track n) {
+              <mat-option [value]="n">{{ n }}+ ★</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (!store.activePlaylist()) {
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label i18n="@@library.sort">Order</mat-label>
+            <mat-select [value]="store.sort()" (selectionChange)="store.sort.set($event.value)" data-testid="sort">
+              @for (s of sorts; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+      </div>
+
+      <div class="listbar">
+        <h2 class="listbar__title">
+          @if (store.activePlaylist(); as p) {
+            @if (renaming()) {
+              <form class="rename" (ngSubmit)="applyRename()">
+                <mat-form-field subscriptSizing="dynamic">
+                  <mat-label i18n="@@library.listName">Name</mat-label>
+                  <input matInput name="rename" [ngModel]="renameValue()" (ngModelChange)="renameValue.set($event)" data-testid="rename-input" />
+                </mat-form-field>
+                <button mat-flat-button type="submit" data-testid="rename-apply" i18n="@@library.save">Save</button>
+              </form>
+            } @else {
+              {{ p.name }}
+            }
+          } @else if (store.view() === VIEW_FAVORITES) {
+            <ng-container i18n="@@library.viewFavorites2">Favorites</ng-container>
+          } @else if (store.view() === VIEW_RATED) {
+            <ng-container i18n="@@library.viewRated2">Rated</ng-container>
+          } @else {
+            <ng-container i18n="@@library.viewAll2">All songs</ng-container>
+          }
+          <span class="listbar__n mo-data">{{ store.visible().length }}</span>
+        </h2>
+        <span class="listbar__actions">
+          <button mat-flat-button type="button" [disabled]="store.visible().length === 0" (click)="playAll()" data-testid="play-all">
+            <mat-icon>play_arrow</mat-icon>
+            <ng-container i18n="@@library.playAll">Play all</ng-container>
+          </button>
+          @if (store.activePlaylist()) {
+            <button mat-icon-button type="button" (click)="startRename()" aria-label="Rename" i18n-aria-label="@@library.rename" data-testid="rename">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="deleteList()" aria-label="Delete the playlist" i18n-aria-label="@@library.deleteList" data-testid="delete-list">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </span>
+      </div>
+
+      @if (nowPlaying(); as now) {
+        <section class="now" data-testid="now-playing" aria-live="polite">
+          <div class="now__head">
+            @if (now.cover) {
+              <img class="now__cover" [src]="coverUrl(now)" alt="" />
+            }
+            <div class="now__text">
+              <span class="now__title">{{ now.title }}</span>
+              <span class="now__sub mo-data">{{ now.project }} · {{ queuePos() + 1 }}/{{ queue().length }}</span>
+            </div>
+            <button mat-icon-button type="button" (click)="previous()" [disabled]="queuePos() === 0" aria-label="Previous" i18n-aria-label="@@library.previous" data-testid="previous">
+              <mat-icon>skip_previous</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="next()" aria-label="Next" i18n-aria-label="@@library.next" data-testid="next">
+              <mat-icon>skip_next</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="stopQueue()" aria-label="Stop" i18n-aria-label="@@library.stop" data-testid="stop">
+              <mat-icon>stop</mat-icon>
+            </button>
+          </div>
+          <mo-audio-player #nowPlayer [src]="url(now)" [label]="now.title" (ended)="next()" (failed)="markMissing(now.key); next()" />
+        </section>
+      }
+
+      @if (store.visible().length === 0) {
+        <p class="none" data-testid="no-results" i18n="@@library.noResults">No song matches what you asked for.</p>
+      }
+      <lab-paged-list listId="library" [data]="store.visible()" [pageSizeOptions]="pageSizes" [lang]="lang">
+        <ng-template let-songs>
+          @for (s of songs; track s.key) {
+            @let i = store.visible().indexOf(s);
+            <article class="song" [class.song--now]="nowPlaying()?.key === s.key" [attr.data-testid]="'song-' + s.key">
+              <div class="song__head">
+                @if (s.cover) {
+                  <img class="song__cover" [src]="coverUrl(s)" alt="" loading="lazy" />
+                } @else {
+                  <span class="song__cover song__cover--none"><mat-icon>music_note</mat-icon></span>
+                }
+                <div class="song__text">
+                  <span class="song__title">{{ s.title }}</span>
+                  <span class="song__sub mo-data">
+                    {{ s.project }} · {{ s.track_id }} · v{{ s.variant + 1 }} · {{ generatorName(s) }}
+                    @if (s.bpm) { · {{ s.bpm }} bpm }
+                    @if (length(s); as len) { · {{ len }} }
+                    @if (s.keyscale) { · {{ s.keyscale }} }
+                  </span>
+                </div>
+                @if (s.favorite) {
+                  <mat-icon class="song__fav" matTooltip="Favorite in its project" i18n-matTooltip="@@library.favoriteTip" aria-label="Favorite" i18n-aria-label="@@library.favorite">favorite</mat-icon>
+                }
+                <span class="stars" role="group" aria-label="Stars" i18n-aria-label="@@library.stars">
+                  @for (n of starValues; track n) {
+                    <button
+                      type="button"
+                      class="stars__star"
+                      [class.stars__star--on]="n <= store.stars(s.key)"
+                      [attr.aria-pressed]="n <= store.stars(s.key)"
+                      [attr.aria-label]="n + ' ★'"
+                      [attr.data-testid]="'star-' + n"
+                      (click)="store.rate(s.key, n)"
+                    >
+                      <mat-icon>{{ n <= store.stars(s.key) ? 'star' : 'star_border' }}</mat-icon>
+                    </button>
+                  }
+                </span>
+                <button mat-icon-button type="button" (click)="playAll(s.key)" aria-label="Play from here" i18n-aria-label="@@library.playFrom" data-testid="play-from">
+                  <mat-icon>play_circle</mat-icon>
+                </button>
+                @if (!missing().has(s.key)) {
+                  <a
+                    mat-icon-button
+                    routerLink="/animation/new"
+                    [queryParams]="{ project: s.project, track: s.track_id, variant: s.variant }"
+                    aria-label="Animate"
+                    i18n-aria-label="@@library.animate"
+                    matTooltip="Animate this song"
+                    i18n-matTooltip="@@library.animateTip"
+                    data-testid="animate"
+                  >
+                    <mat-icon>animation</mat-icon>
+                  </a>
+                }
+                <button mat-icon-button type="button" [matMenuTriggerFor]="listMenu" [matMenuTriggerData]="{ key: s.key }" aria-label="Add to a playlist" i18n-aria-label="@@library.addToList" data-testid="add-to-list">
+                  <mat-icon>playlist_add</mat-icon>
+                </button>
+                <button mat-icon-button type="button" (click)="deleteSong(s)" aria-label="Delete the song" i18n-aria-label="@@library.deleteSong" data-testid="delete-song">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                @if (store.activePlaylist(); as p) {
+                  <button mat-icon-button type="button" (click)="store.moveInPlaylist(p.id, s.key, -1)" [disabled]="i === 0" aria-label="Move up" i18n-aria-label="@@library.up" data-testid="move-up">
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" (click)="store.moveInPlaylist(p.id, s.key, 1)" [disabled]="i === store.visible().length - 1" aria-label="Move down" i18n-aria-label="@@library.down" data-testid="move-down">
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                }
+              </div>
+              @if (missing().has(s.key)) {
+                <p class="song__missing" role="status" data-testid="song-missing">
+                  <mat-icon inline>warning</mat-icon>
+                  <ng-container i18n="@@library.missing">The file is no longer in the project.</ng-container>
+                </p>
+              } @else {
+                <mo-audio-player [src]="url(s)" [label]="s.title" (failed)="markMissing(s.key)" />
+              }
+              @if (s.caption) {
+                <p class="song__caption">{{ s.caption }}</p>
+              }
+            </article>
+          }
+        </ng-template>
+      </lab-paged-list>
+    </section>
+  </div>
+}
+
+<mat-menu #listMenu="matMenu">
+  <ng-template matMenuContent let-key="key">
+    @for (p of store.playlists(); track p.id) {
+      <button mat-menu-item type="button" (click)="store.togglePlaylistSong(p.id, key)" [attr.data-testid]="'menu-list-' + p.id">
+        <mat-icon>{{ p.songs.includes(key) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+        <span>{{ p.name }}</span>
+      </button>
+    }
+    <button mat-menu-item type="button" (click)="startNewList(key)" data-testid="menu-new-list">
+      <mat-icon>add</mat-icon>
+      <span i18n="@@library.newListWithSong">New playlist with this song…</span>
+    </button>
+  </ng-template>
+</mat-menu>

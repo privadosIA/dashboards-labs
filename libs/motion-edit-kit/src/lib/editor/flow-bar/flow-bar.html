@@ -1,0 +1,8 @@
+<aside class="flow-bar" data-testid="flow-bar" role="region" [attr.aria-label]="t.label(step())">
+  <strong data-testid="flow-bar-step">{{ t.label(step()) }}</strong>
+  @if (dirty()) {
+    <span class="hint" data-testid="flow-bar-unsaved">{{ t.unsaved }}</span>
+  }
+  <a class="back" data-testid="flow-bar-back" [routerLink]="address()">{{ t.back }}</a>
+  <button type="button" class="primary" data-testid="flow-bar-continue" [disabled]="saving()" (click)="continued.emit()">{{ saving() ? t.saving : t.continue }}</button>
+</aside>

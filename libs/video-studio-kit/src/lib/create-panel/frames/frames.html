@@ -1,0 +1,9 @@
+<div class="frames">
+  <app-start-image testId="start-frame" [label]="showEnd() ? t.inputs.frameStart : ''" [image]="start()" (imageChange)="start.set($event)" />
+  @if (showEnd()) {
+    <app-start-image testId="end-frame" [label]="t.inputs.frameEnd" [image]="end()" (imageChange)="end.set($event)" />
+  }
+  @if (showEnd()) {
+    <app-info-tip class="note" [text]="t.inputs.framesNote" />
+  }
+</div>

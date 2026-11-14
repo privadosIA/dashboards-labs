@@ -1,0 +1,138 @@
+.song {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  background: var(--lab-surface-high);
+  border: 1px solid var(--lab-line);
+  border-inline-start: 4px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+
+  &[data-state='running'],
+  &[data-state='queued'] {
+    border-inline-start-color: var(--lab-accent);
+  }
+
+  &[data-state='done'] {
+    border-inline-start-color: var(--lab-success);
+  }
+
+  &[data-state='failed'] {
+    border-inline-start-color: var(--lab-danger);
+  }
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--lab-space-1) var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.clock {
+  font-family: var(--lab-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0 var(--lab-space-2);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius-pill);
+    background: var(--lab-surface);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.style,
+.status {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.style {
+  color: var(--lab-ink-dim);
+}
+
+.status {
+  color: var(--lab-ink-dim);
+
+  &.working {
+    color: var(--lab-accent);
+  }
+
+  &.failed {
+    color: var(--lab-danger);
+  }
+}
+
+audio {
+  width: 100%;
+  accent-color: var(--lab-accent);
+}
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+button,
+.button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.danger {
+  border-color: transparent;
+  background: transparent;
+  color: var(--lab-ink-dim);
+
+  &:hover {
+    border-color: var(--lab-danger);
+    color: var(--lab-danger);
+  }
+}

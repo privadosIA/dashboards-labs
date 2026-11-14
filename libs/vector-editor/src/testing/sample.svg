@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <title>Sample logo</title>
+  <style>.tag { fill: #ff8800; }</style>
+  <g id="logo">
+    <circle id="dot" cx="50" cy="50" r="30" fill="#e63946"/>
+    <path id="wing-a" d="M90 20 L150 50 L90 80 Z" fill="#457b9d" transform="translate(2 0)"/>
+    <path id="wing-b" d="M100 30 L140 50 L100 70 Z" fill="#a8dadc" stroke="#1d3557" stroke-width="2"/>
+    <text id="label" x="100" y="95" font-size="12" fill="#1d3557">LOGO</text>
+  </g>
+  <rect id="tag" class="tag" x="160" y="10" width="30" height="12"/>
+</svg>

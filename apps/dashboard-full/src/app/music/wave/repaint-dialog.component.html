@@ -1,0 +1,35 @@
+<h2 mat-dialog-title i18n="@@repaint.title">Repaint this part</h2>
+<mat-dialog-content>
+  <p class="repaint__song mo-data" data-testid="repaint-song">{{ name() }}</p>
+  <p i18n="@@repaint.hint">
+    Pick the part you want to redo: the rest of the song is kept. A new track is added with that part and the style and lyrics that were sung, and it is created right away; then you can adjust it and create it again.
+  </p>
+  <app-range-picker
+    [file]="data.entry.file"
+    [version]="data.entry.sha256"
+    [start]="range()?.start"
+    [end]="range()?.end"
+    [bpm]="data.entry.bpm"
+    [timesignature]="data.entry.timesignature"
+    (rangeChange)="range.set($event)"
+  />
+  @if (range(); as r) {
+    <p class="repaint__range mo-data" data-testid="repaint-range">{{ r.start }} – {{ r.end }} s</p>
+  }
+  @if (otherEngine()) {
+    <p class="repaint__note" role="note" data-testid="repaint-other-engine">
+      <mat-icon inline>info</mat-icon>
+      <span i18n="@@repaint.otherEngine">ACE-Step did not make this song, and it is the one that repaints: the new part will sound like ACE-Step.</span>
+    </p>
+  }
+  @if (store.sourceError(); as err) {
+    <p class="repaint__error" role="alert" data-testid="repaint-error">{{ err }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close data-testid="repaint-cancel" i18n="@@repaint.cancel">Cancel</button>
+  <button mat-flat-button type="button" data-testid="repaint-create" [disabled]="!range() || store.sourceBusy()" (click)="confirm()">
+    <mat-icon>playlist_add</mat-icon>
+    <ng-container i18n="@@repaint.create">Repaint and create</ng-container>
+  </button>
+</mat-dialog-actions>

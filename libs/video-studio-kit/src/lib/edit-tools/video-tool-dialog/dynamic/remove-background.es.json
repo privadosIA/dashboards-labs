@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "id": "remove-background",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "background",
+      "type": "text",
+      "label": "Color del fondo",
+      "defaultValue": "#00ff00",
+      "placeholder": "#rrggbb",
+      "validation": {
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "pattern": "Escribe un color como #00ff00."
+        }
+      },
+      "logic": {
+        "hideWhen": {
+          "field": "alpha",
+          "operator": "truthy"
+        },
+        "resetOnHide": true
+      }
+    },
+    {
+      "key": "alpha",
+      "type": "checkbox",
+      "label": "Fondo transparente (un WebM con transparencia)",
+      "defaultValue": false
+    }
+  ]
+}

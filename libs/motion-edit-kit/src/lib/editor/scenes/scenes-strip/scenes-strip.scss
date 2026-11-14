@@ -1,0 +1,73 @@
+.strip {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+}
+
+.grow {
+  flex: 1;
+}
+
+.meter {
+  width: 8rem;
+  accent-color: var(--lab-accent);
+}
+
+.state,
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.config,
+.ask {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.ask p {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.ok,
+.problem {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.problem {
+  color: var(--lab-danger);
+}
+
+.cards {
+  display: flex;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0 0 var(--lab-space-1);
+  overflow-x: auto;
+  list-style: none;
+}

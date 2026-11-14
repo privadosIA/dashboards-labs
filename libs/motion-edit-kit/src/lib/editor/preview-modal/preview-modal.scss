@@ -1,0 +1,61 @@
+.modal {
+  // The dialog is the resizable box: its width is dragged from the bottom-right grip and the picture follows it.
+  width: min(60rem, 92vw);
+  min-width: 20rem;
+  max-width: 96vw;
+  padding: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  resize: horizontal;
+  overflow: auto;
+
+  &::backdrop {
+    background: color-mix(in srgb, black 60%, transparent);
+  }
+}
+
+.box {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  // The window is taken by its bar.
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: var(--lab-fs-body);
+    font-weight: var(--lab-fw-title);
+  }
+}
+
+.close {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-title);
+  line-height: 1.4;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--lab-accent);
+    border-color: var(--lab-accent);
+  }
+}

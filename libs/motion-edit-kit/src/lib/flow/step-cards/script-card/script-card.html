@@ -1,0 +1,42 @@
+<section class="script" data-testid="script-card">
+  @switch (step()?.status) {
+    @case ('running') {
+      <p class="hint" role="status" data-testid="proposing">{{ t.proposingScript }}</p>
+      @if (busy()) {
+        <p class="hint" role="status" data-testid="busy">{{ t.busy }}</p>
+      }
+    }
+    @case ('failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failed(why(step()?.reason)) }}</p>
+      <button type="button" data-testid="retry" (click)="run()">{{ t.retry }}</button>
+    }
+    @case ('stale') {
+      <p class="note" role="status" data-testid="stale">{{ t.stale }}</p>
+      <div class="actions">
+        <button type="button" data-testid="keep" (click)="keep()">{{ t.keep }}</button>
+        <button type="button" data-testid="again-open" (click)="openAgain()">{{ t.again }}</button>
+      </div>
+    }
+    @case ('waiting') {
+      @if (summary(); as s) {
+        <div class="review" data-testid="review">
+          <p class="hint" data-testid="sent">{{ t.sent(s.prompt, s.askedModel, s.askedProvider) }}</p>
+          <p data-testid="source">{{ s.source === 'assistant' ? t.byAssistant(s.model ?? '') : t.byRule(s.fallbackReason ?? '') }}</p>
+          @if (s.script; as sc) {
+            <p data-testid="script-summary">{{ t.scriptSummary(sc.pieces, sc.lines) }}</p>
+          }
+          <div class="actions">
+            <a class="button primary" data-testid="open-script" [routerLink]="editorLink()" [queryParams]="editorQuery()">{{ t.openScript }}</a>
+            <button type="button" data-testid="again-open" (click)="openAgain()">{{ t.again }}</button>
+            <button type="button" data-testid="continue" (click)="continue()">{{ t.continue }}</button>
+          </div>
+
+        </div>
+      }
+    }
+  }
+
+  @if (again()) {
+    <app-propose-again [prompt]="summary()?.prompt ?? flow()?.prompt ?? ''" [model]="summary()?.askedModel ?? ''" [provider]="summary()?.askedProvider ?? ''" [models]="models()" (submitted)="proposeAgain($event)" (cancelled)="again.set(false)" />
+  }
+</section>

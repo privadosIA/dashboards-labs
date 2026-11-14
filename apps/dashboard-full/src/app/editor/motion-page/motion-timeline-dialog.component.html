@@ -1,0 +1,58 @@
+<div class="tl-dialog__bar" data-testid="timeline-window-handle" (pointerdown)="startMove($event)" (dblclick)="toggleMaximize()">
+  <h2 mat-dialog-title class="tl-dialog__title" i18n="@@timeline.windowTitle">Timeline</h2>
+  <span class="tl-dialog__hint" i18n="@@timeline.windowHint">Drag this bar to move it and any edge or corner to resize; the full-screen button maximizes it.</span>
+  <button
+    mat-icon-button
+    type="button"
+    class="tl-dialog__close"
+    data-testid="timeline-window-maximize"
+    [attr.aria-pressed]="maximized()"
+    [attr.aria-label]="maximized() ? restoreLabel : maximizeLabel"
+    (click)="toggleMaximize()"
+  >
+    <mat-icon>{{ maximized() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+  </button>
+  <button mat-icon-button type="button" class="tl-dialog__close" data-testid="timeline-window-close" mat-dialog-close i18n-aria-label="@@mix.dialogClose" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content class="tl-dialog__body">
+  @if (session.page(); as p) {
+    @if (srcdoc(); as doc) {
+      <iframe
+        #frame
+        class="tl-dialog__frame"
+        data-testid="timeline-window-frame"
+        sandbox="allow-scripts"
+        referrerpolicy="no-referrer"
+        i18n-title="@@motion.frameTitle"
+        title="Preview of the page"
+        [srcdoc]="doc"
+        (load)="loaded()"
+      ></iframe>
+      <div class="tl-dialog__player">
+        <button mat-icon-button type="button" data-testid="timeline-window-play" (click)="session.toggle()" [attr.aria-label]="session.playing() ? 'pause' : 'play'">
+          <mat-icon>{{ session.playing() ? 'pause' : 'play_arrow' }}</mat-icon>
+        </button>
+        <mat-slider min="0" [max]="p.duration" step="0.05">
+          <input matSliderThumb [value]="session.time()" (valueChange)="setTime($event)" />
+        </mat-slider>
+        <span class="mo-data">{{ session.time().toFixed(2) }} / {{ p.duration.toFixed(1) }} s</span>
+      </div>
+    }
+    @if (session.timeline(); as tl) {
+      <app-motion-timeline [timeline]="tl" [duration]="p.duration" [time]="session.time()" (changed)="session.changed($event)" (seekTo)="setTime($event)" />
+    }
+    <div class="tl-dialog__actions">
+      @if (session.dirty()) {
+        <button mat-flat-button type="button" data-testid="timeline-window-save" [disabled]="session.busy() !== ''" (click)="session.save()" i18n="@@timeline.save">Save the changes</button>
+        <span class="tl-dialog__note" i18n="@@timeline.unsaved">There are unsaved changes: you see them here, but the video uses the saved page.</span>
+      }
+    </div>
+  }
+</mat-dialog-content>
+@if (!maximized()) {
+  @for (e of edges; track e) {
+    <div class="tl-dialog__edge" [class]="'tl-dialog__edge tl-dialog__edge--' + e" [attr.data-edge]="e" (pointerdown)="startResize($event, e)"></div>
+  }
+}

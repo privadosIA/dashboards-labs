@@ -1,0 +1,6 @@
+<nav aria-label="main" data-testid="motion-edit-nav">
+  <a [routerLink]="pieces()" routerLinkActive="active" ariaCurrentWhenActive="page" data-testid="nav-pieces">{{ t.pieces }}</a>
+  @if (flow()) {
+    <a [routerLink]="flowLink()" routerLinkActive="active" ariaCurrentWhenActive="page" data-testid="nav-flow">{{ t.flow }}</a>
+  }
+</nav>

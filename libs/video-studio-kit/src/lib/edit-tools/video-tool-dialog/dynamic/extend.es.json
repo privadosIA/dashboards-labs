@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "id": "extend",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "seconds",
+      "type": "number",
+      "label": "Segundos que se alarga (de 2 a 10)",
+      "defaultValue": 4,
+      "props": {
+        "step": 1
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Qué pasa a continuación",
+      "placeholder": "Describe cómo sigue el vídeo.",
+      "props": {
+        "rows": 3
+      }
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Motor",
+      "defaultValue": "minimax-h3",
+      "options": [
+        {
+          "value": "minimax-h3",
+          "label": "MiniMax H3"
+        },
+        {
+          "value": "ltx",
+          "label": "LTX"
+        }
+      ]
+    }
+  ]
+}

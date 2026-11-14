@@ -1,0 +1,24 @@
+<div class="picked" data-testid="tag-picked">
+  @if (selected().length === 0) {
+    <span class="none" i18n="@@tags.none">No tags: add at least one genre.</span>
+  }
+  <mat-chip-set aria-label="Style tags" i18n-aria-label="@@tags.ariaPicked">
+    @for (t of selected(); track t) {
+      <mat-chip [removable]="true" (removed)="toggle(t)" [attr.data-testid]="'tag-' + t">
+        {{ t }}
+        <button matChipRemove type="button" [attr.aria-label]="'Quitar ' + t"><mat-icon>cancel</mat-icon></button>
+      </mat-chip>
+    }
+  </mat-chip-set>
+</div>
+<mat-expansion-panel class="more" data-testid="tag-more" [disabled]="categories().length === 0">
+  <mat-expansion-panel-header><mat-panel-title i18n="@@tags.add">Add tags</mat-panel-title></mat-expansion-panel-header>
+  @for (c of categories(); track c.id) {
+    <p class="category">{{ label(c.id) }}</p>
+    <mat-chip-listbox multiple [attr.aria-label]="label(c.id)">
+      @for (t of c.tags; track t) {
+        <mat-chip-option [selected]="has(t)" (selectionChange)="$event.isUserInput && toggle(t)" [attr.data-testid]="'option-' + t">{{ t }}</mat-chip-option>
+      }
+    </mat-chip-listbox>
+  }
+</mat-expansion-panel>

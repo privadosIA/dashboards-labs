@@ -1,0 +1,30 @@
+<section class="animations" data-testid="export">
+  <h2>{{ t.title }}</h2>
+  <p class="hint">{{ t.intro }}</p>
+  <p class="hint" data-testid="parts-note">{{ t.partsNote }}</p>
+
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+
+  @if (pieces() === null) {
+    <p class="hint" role="status" data-testid="loading">{{ t.loading }}</p>
+  } @else if (pieces()!.length === 0) {
+    <p class="hint" data-testid="empty">{{ t.empty }}</p>
+  } @else {
+    <lab-paged-list listId="motion-dataset-animations" [data]="pieces()!" [lang]="lang">
+      <ng-template let-page>
+        <ul class="list">
+          @for (p of page; track p.id) {
+            <li class="row" [attr.data-testid]="'animation-' + p.id">
+              <span class="title">{{ p.title }}</span>
+              <span class="song" data-testid="song">{{ songTitle()(p) }}</span>
+              <span class="state">{{ stateText(p) }}</span>
+              <app-export-dataset [piece]="p" />
+            </li>
+          }
+        </ul>
+      </ng-template>
+    </lab-paged-list>
+  }
+</section>

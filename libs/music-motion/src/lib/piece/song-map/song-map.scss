@@ -1,0 +1,140 @@
+.map {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.tempo,
+.summary {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+svg {
+  width: 100%;
+  height: 7.5rem;
+  background: var(--lab-bg);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.section {
+  fill: var(--lab-surface-high);
+
+  &.odd {
+    fill: var(--lab-line);
+  }
+}
+
+.span {
+  fill: var(--lab-accent);
+  opacity: 0.2;
+}
+
+.beat {
+  stroke: var(--lab-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.loudness {
+  fill: none;
+  stroke: var(--lab-accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.word {
+  fill: var(--lab-ink);
+}
+
+.tags {
+  position: relative;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  li {
+    position: absolute;
+    top: 0;
+    max-width: 25%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  &.estimated {
+    color: var(--lab-warn);
+  }
+}
+
+.sync {
+  display: grid;
+  justify-items: start;
+  gap: var(--lab-space-2);
+  margin-top: var(--lab-space-2);
+
+  button {
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-4);
+    border: 1px solid var(--lab-accent);
+    border-radius: var(--lab-radius-pill);
+    background: transparent;
+    color: var(--lab-accent);
+    font-weight: var(--lab-fw-control);
+    cursor: pointer;
+
+    &:disabled {
+      border-color: var(--lab-line);
+      color: var(--lab-ink-dim);
+      cursor: default;
+    }
+  }
+
+  .wait {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  .problem {
+    color: var(--lab-danger);
+    overflow-wrap: anywhere;
+  }
+
+  .warning {
+    color: var(--lab-warn);
+    overflow-wrap: anywhere;
+  }
+
+  .ok {
+    color: var(--lab-success);
+  }
+}

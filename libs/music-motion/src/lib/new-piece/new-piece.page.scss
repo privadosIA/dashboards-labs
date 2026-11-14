@@ -1,0 +1,254 @@
+.new {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.intro {
+  max-width: 60rem;
+}
+
+// The idea (the text and the assistant) and the look (the references) side by side, so that the width of the window is used; one under the other on a narrow one.
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: start;
+  gap: var(--lab-space-4);
+
+  @media (max-width: 64rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// The options on the left and what the animation is made of and what happens next on the right.
+.options-grid {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+
+  @media (max-width: 64rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.summary .sub {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+}
+
+.next {
+  display: grid;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding-left: var(--lab-space-5);
+  color: var(--lab-ink-dim);
+}
+
+.back {
+  color: var(--lab-ink-dim);
+  text-decoration: none;
+  width: fit-content;
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+.song {
+  margin: 0;
+  color: var(--lab-ink-dim);
+
+  span {
+    margin-right: var(--lab-space-1);
+  }
+
+  strong {
+    color: var(--lab-ink);
+  }
+}
+
+.panel {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+
+  p {
+    margin: 0;
+  }
+}
+
+.note {
+  color: var(--lab-warn);
+}
+
+.refused {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.create {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    cursor: not-allowed;
+  }
+}
+
+.intro,
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.meta {
+  font-size: var(--lab-fs-meta);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius-pill);
+    background: transparent;
+    color: var(--lab-ink-dim);
+    font-weight: var(--lab-fw-control);
+    cursor: pointer;
+
+    &.on {
+      border-color: var(--lab-accent);
+      color: var(--lab-ink);
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+  }
+
+  .num {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--lab-radius-pill);
+    background: var(--lab-line);
+  }
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+
+  button {
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-4);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius-pill);
+    background: transparent;
+    color: var(--lab-ink);
+    font-weight: var(--lab-fw-control);
+    cursor: pointer;
+
+    &.primary,
+    &.create {
+      background: var(--lab-accent);
+      border-color: var(--lab-accent);
+      color: var(--lab-on-accent);
+    }
+
+    &:disabled {
+      background: transparent;
+      border-color: var(--lab-line);
+      color: var(--lab-ink-dim);
+      cursor: default;
+    }
+  }
+}
+
+.link {
+  margin-left: var(--lab-space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lab-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sub {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.progress {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 2px solid var(--lab-accent);
+  border-radius: var(--lab-radius-panel);
+
+  .what {
+    display: grid;
+    gap: var(--lab-space-1);
+  }
+
+  .time {
+    color: var(--lab-ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.spinner {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid var(--lab-line);
+  border-top-color: var(--lab-accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}

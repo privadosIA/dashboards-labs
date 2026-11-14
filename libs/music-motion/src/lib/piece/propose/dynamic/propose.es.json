@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "id": "propose-prompt",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "¿Cómo debe ser la animación? (opcional)",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "maxLength": 2000,
+        "messages": {
+          "maxLength": "El texto puede tener hasta 2000 caracteres."
+        }
+      }
+    }
+  ]
+}

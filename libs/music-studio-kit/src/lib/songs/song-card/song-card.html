@@ -1,0 +1,54 @@
+<article class="song" [attr.data-state]="state().phase" [attr.data-testid]="'song-' + song().id">
+  <header>
+    <h3 data-testid="song-title">{{ song().title }}</h3>
+    <p class="meta">
+      <span data-testid="song-generator">{{ generator() }}</span>
+      @if (clock()) {
+        <span class="clock" data-testid="song-clock">{{ clock() }}</span>
+      }
+    </p>
+  </header>
+
+  @if (tags().length) {
+    <ul class="tags" data-testid="song-tags">
+      @for (tag of tags(); track tag) {
+        <li>{{ tag }}</li>
+      }
+    </ul>
+  } @else if (song().style) {
+    <p class="style" data-testid="song-style">{{ song().style }}</p>
+  }
+
+  @switch (state().phase) {
+    @case ('queued') {
+      <p class="status" role="status" data-testid="song-status">{{ queue() }}</p>
+    }
+    @case ('running') {
+      <p class="status working" role="status" data-testid="song-status">{{ t.songs.running }}</p>
+    }
+    @case ('cancelled') {
+      <p class="status" data-testid="song-status">{{ t.songs.cancelled }}</p>
+    }
+    @case ('failed') {
+      <p class="status failed" role="alert" data-testid="song-status">{{ $any(state()).reason }}</p>
+    }
+    @case ('done') {
+      <audio controls preload="none" [src]="audio()" [attr.aria-label]="t.songs.player + ': ' + song().title" data-testid="song-audio"></audio>
+    }
+  }
+
+  <footer>
+    @if (!finished()) {
+      <button type="button" data-testid="song-cancel" (click)="cancel.emit(song())">{{ t.songs.cancel }}</button>
+    }
+    @if (state().phase === 'failed' || state().phase === 'cancelled') {
+      <button type="button" data-testid="song-retry" (click)="retry.emit(song())">{{ t.songs.retry }}</button>
+    }
+    @if (state().phase === 'done') {
+      <a class="button" [href]="audio()" download data-testid="song-download">{{ t.songs.download }}</a>
+    }
+    @if (finished()) {
+      <button type="button" class="danger" data-testid="song-remove" (click)="remove.emit(song())">{{ t.songs.remove }}</button>
+    }
+  </footer>
+</article>

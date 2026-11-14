@@ -1,0 +1,121 @@
+<h2 mat-dialog-title i18n="@@videoclip.title">Create music video</h2>
+<mat-dialog-content>
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <p i18n="@@videoclip.hint">
+    Cuts the song into shots by its lyrics, writes the picture of each one and chooses the models for the time you want to wait. The result is a video project with the song as its soundtrack, ready to generate.
+  </p>
+  <p class="song mo-data" data-testid="videoclip-song">{{ data.entry.title || data.entry.track_id }} · {{ length }} s</p>
+
+  <div class="options">
+    <mat-form-field>
+      <mat-label i18n="@@videoclip.name">Video project</mat-label>
+      <input matInput [formControl]="projectId" autocomplete="off" data-testid="videoclip-id" />
+      @if (projectId.hasError('pattern')) {
+        <mat-error i18n="@@projectName.pattern">Use letters, numbers and “._-”, starting with a letter or number (max. 64)</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label i18n="@@videoclip.shot">Each shot lasts</mat-label>
+      <mat-select data-testid="videoclip-shot" [value]="shotSeconds()" (selectionChange)="shotSeconds.set($event.value)">
+        @for (s of shotChoices; track s) {
+          <mat-option [value]="s"><ng-container i18n="@@videoclip.seconds">{{ s }} seconds</ng-container></mat-option>
+        }
+      </mat-select>
+      <mat-hint i18n="@@videoclip.shotHint">Shorter means more shots and more time</mat-hint>
+    </mat-form-field>
+  </div>
+  @if (aiAvailable()) {
+    <mat-checkbox [checked]="useAi()" (change)="useAi.set($event.checked)" data-testid="videoclip-ai" i18n="@@videoclip.ai">
+      Write the scenes with the AI (a few minutes; if it is not available they are made from the style and the lyrics)
+    </mat-checkbox>
+    @if (useAi()) {
+      <app-provider-badge tasks="assistant" />
+    }
+  } @else {
+    <app-model-notice task="assistant" />
+  }
+
+  <div class="actions-row">
+    <button mat-flat-button type="button" data-testid="videoclip-prepare" [disabled]="busy()" (click)="prepare()">
+      <mat-icon>movie_filter</mat-icon>
+      <ng-container i18n="@@videoclip.prepare">Prepare the shots</ng-container>
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="warn" role="alert" data-testid="videoclip-error">{{ error() }}</p>
+  }
+
+  @if (plan(); as p) {
+    <h3 data-testid="videoclip-summary" i18n="@@videoclip.summary">{{ p.shots.length }} shots for {{ seconds(p.audio_seconds) }} s of song</h3>
+    @if (p.aligned_cuts) {
+      <p class="ok" data-testid="videoclip-aligned" i18n="@@videoclip.aligned">The cuts were adjusted to the changes of the song ({{ p.aligned_cuts }} of {{ (p.sections ?? 1) - 1 }}).</p>
+    }
+    @if (p.used_ai) {
+      <p class="ok" i18n="@@videoclip.usedAi">The AI wrote the pictures.</p>
+    }
+    @for (w of p.warnings ?? []; track w) {
+      <p class="warn">{{ w }}</p>
+    }
+    <ol class="shots" data-testid="videoclip-shots">
+      @for (s of p.shots.slice(0, 4); track s.id) {
+        <li>
+          <span class="mo-data">{{ s.id }}</span> · {{ s.seconds.toFixed(1) }} s
+          <span class="dim">{{ s.prompt }}</span>
+        </li>
+      }
+      @if (p.shots.length > 4) {
+        <li class="dim" i18n="@@videoclip.more">…and {{ p.shots.length - 4 }} more shots</li>
+      }
+    </ol>
+
+    <mat-form-field class="budget">
+      <mat-label i18n="@@auto.budgetLabel">How long do you want to wait, roughly?</mat-label>
+      <mat-select data-testid="videoclip-budget" [value]="budgetIndex()" (selectionChange)="budgetIndex.set($event.value)">
+        @for (b of budgets; track $index) {
+          <mat-option [value]="$index">{{ budgetLabel(b) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="animate">
+      <mat-label i18n="@@videoclip.animateLabel">Animate the shots</mat-label>
+      <mat-select data-testid="videoclip-animate" [value]="animateMode()" (selectionChange)="animateMode.set($event.value)">
+        <mat-option value="none" i18n="@@videoclip.animateNone">No: still pictures with camera movement</mat-option>
+        <mat-option value="chorus" [disabled]="!hasChorus()" i18n="@@videoclip.animateChorus">Only the shots of the chorus</mat-option>
+        <mat-option value="all" i18n="@@videoclip.animateAll">All the shots (takes much longer)</mat-option>
+      </mat-select>
+      <mat-hint i18n="@@videoclip.animateHint">Each animation lasts a few seconds and loops</mat-hint>
+    </mat-form-field>
+
+    @if (autoPlan(); as a) {
+      <ul class="auto-lines" data-testid="videoclip-lines">
+        @for (l of lines(); track l) {
+          <li class="mo-data">{{ l }}</li>
+        }
+      </ul>
+      <p data-testid="videoclip-time">
+        <strong i18n="@@auto.time">It will take {{ timeText(a.seconds) }} or so</strong>
+      </p>
+      @if (!a.fits) {
+        <p class="warn" i18n="@@auto.over">
+          It cannot make it in that time: the fastest I can do takes {{ timeText(a.fastest ?? a.seconds) }}. I propose that.
+        </p>
+      }
+      @for (n of a.notes; track n) {
+        <p class="warn">{{ n }}</p>
+      }
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-stroked-button type="button" data-testid="videoclip-create" [disabled]="!plan() || busy() || projectId.invalid" (click)="create(false)">
+    <ng-container i18n="@@videoclip.create">Create project</ng-container>
+  </button>
+  <button mat-flat-button type="button" data-testid="videoclip-generate" [disabled]="!plan() || busy() || projectId.invalid" (click)="create(true)">
+    <mat-icon>play_arrow</mat-icon>
+    <ng-container i18n="@@videoclip.generate">Create and generate</ng-container>
+  </button>
+</mat-dialog-actions>

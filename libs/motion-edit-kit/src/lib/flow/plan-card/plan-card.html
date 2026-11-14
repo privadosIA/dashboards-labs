@@ -1,0 +1,48 @@
+<section class="plan" data-testid="plan-card">
+  <label class="sentence">
+    <span>{{ t.sentence }}</span>
+    <textarea data-testid="sentence" rows="3" [value]="sentence()" [disabled]="making()" (input)="type($any($event.target).value)"></textarea>
+  </label>
+  <p class="count" [class.over]="sentence().length > max" data-testid="sentence-count">{{ t.sentenceCount(sentence().length, max) }}</p>
+  <p class="hint">{{ t.sentenceHint }}</p>
+  @if (sentence().length > max) {
+    <p class="problem" role="alert">{{ t.tooLong(max) }}</p>
+  }
+  <button type="button" class="make" data-testid="make-plan" [disabled]="!sentenceOk() || making()" (click)="make()">{{ making() ? t.making : t.make }}</button>
+  @if (making() && oneCall()) {
+    <p class="hint" role="status" data-testid="takes-time">{{ t.takesTime }}</p>
+  }
+
+  <lab-assistant-picker [(value)]="assistant" [routingModels]="routingModels()" />
+
+  @if (planned()) {
+    <div class="editable" data-testid="plan-form">
+      <h3>{{ t.planTitle }}</h3>
+      <p class="hint">{{ t.planHint }}</p>
+      @if (noModels()) {
+        <p class="note" role="status" data-testid="no-models">{{ t.noModels }}</p>
+      }
+      @if (notUsed()) {
+        <p class="note" role="status" data-testid="not-used">{{ t.notUsed(notUsed()) }}</p>
+      }
+      @if (warnings().length) {
+        <div class="note" role="status" data-testid="warnings">
+          <strong>{{ t.warningsTitle }}</strong>
+          <ul>
+            @for (w of warnings(); track w) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (writeFailed()) {
+        <p class="problem" role="alert" data-testid="write-failed">{{ t.writeFailed(writeFailed()) }}</p>
+      }
+      <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+      @if (invalidParts()) {
+        <p class="problem" role="alert" data-testid="invalid-parts">{{ t.invalidParts(invalidParts()) }}</p>
+      }
+      <button type="button" class="start primary" data-testid="start" [disabled]="!valid()" (click)="start()">{{ t.start }}</button>
+    </div>
+  }
+</section>

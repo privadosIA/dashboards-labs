@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+h3 {
+  margin: var(--lab-space-3) 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--lab-space-2);
+}
+
+.field {
+  display: grid;
+  gap: var(--lab-space-1);
+  min-width: 0;
+
+  &.wide {
+    grid-column: 1 / -1;
+  }
+
+  span {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

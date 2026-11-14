@@ -1,0 +1,134 @@
+@if (db(); as d) {
+  <mo-panel heading="Database" i18n-heading="@@db.title">
+    <p class="note" i18n="@@db.intro">
+      Where the run history, the statistics and the reviews are kept. SQLite is a file on this computer and needs nothing; with MySQL or Postgres several servers can share the history (each keeps its own projects and files).
+    </p>
+
+    <p class="current" data-testid="db-active">
+      <mat-icon inline>storage</mat-icon>
+      <span i18n="@@db.inUse">In use:</span>
+      @if (d.active.driver === 'sqlite') {
+        <span class="mo-data" i18n="@@db.activeSqlite">SQLite (a file on this computer)</span>
+      } @else {
+        <span class="mo-data">{{ d.active.driver }} · {{ d.active.user }}&#64;{{ d.active.host }}:{{ d.active.port }}/{{ d.active.name }}</span>
+      }
+    </p>
+
+    @if (d.restart_required) {
+      <p class="warning" role="status" data-testid="db-restart">
+        <mat-icon inline>restart_alt</mat-icon>
+        <span i18n="@@db.restart">What is saved will apply when the server restarts.</span>
+      </p>
+    }
+
+    <div class="grid">
+      <mat-form-field class="engine">
+        <mat-label i18n="@@db.engine">Engine</mat-label>
+        <mat-select data-testid="db-driver" [value]="driver()" (selectionChange)="pick($event.value)">
+          <mat-option value="sqlite">SQLite</mat-option>
+          <mat-option value="mysql">MySQL</mat-option>
+          <mat-option value="postgres">Postgres</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (remote()) {
+        <mat-form-field class="wide">
+          <mat-label i18n="@@db.host">Server</mat-label>
+          <input matInput data-testid="db-host" autocomplete="off" spellcheck="false" placeholder="192.0.2.20" [value]="host()" (input)="host.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@db.port">Port</mat-label>
+          <input matInput data-testid="db-port" inputmode="numeric" autocomplete="off" [placeholder]="'' + defaultPort()" [value]="port()" (input)="port.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label i18n="@@db.name">Database</mat-label>
+          <input matInput data-testid="db-name" autocomplete="off" spellcheck="false" placeholder="mo_history" [value]="name()" (input)="name.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label i18n="@@db.user">User</mat-label>
+          <input matInput data-testid="db-user" autocomplete="off" spellcheck="false" [value]="user()" (input)="user.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label i18n="@@db.password">Password</mat-label>
+          <input
+            matInput
+            type="password"
+            data-testid="db-password"
+            autocomplete="new-password"
+            [placeholder]="d.saved.password_set && d.saved.driver === driver() ? '••••••••' : ''"
+            [value]="password()"
+            (input)="password.set($any($event.target).value)"
+          />
+          <mat-hint i18n="@@db.passwordHint">Empty: the saved one is kept. It is never shown again.</mat-hint>
+        </mat-form-field>
+      }
+
+      <mat-form-field class="wide">
+        <mat-label i18n="@@db.serverName">Name of this server</mat-label>
+        <input matInput data-testid="db-server-name" autocomplete="off" spellcheck="false" [value]="serverName()" (input)="serverName.set($any($event.target).value)" />
+        <mat-hint i18n="@@db.serverNameHint">How it appears in a shared history (by default, the computer's name).</mat-hint>
+      </mat-form-field>
+    </div>
+
+    @if (d.servers.length > 0) {
+      <p class="note" data-testid="db-servers">
+        <ng-container i18n="@@db.servers">Servers with runs in the history:</ng-container>
+        <span class="mo-data">{{ d.servers.join(', ') }}</span>
+      </p>
+    }
+
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="db-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+
+    <div class="actions">
+      @if (remote()) {
+        <button mat-stroked-button type="button" data-testid="db-test" [disabled]="testing() || saving()" (click)="runTest()">
+          <mat-icon>wifi_find</mat-icon>
+          <ng-container i18n="@@db.test">Test connection</ng-container>
+        </button>
+      }
+      <button mat-flat-button type="button" data-testid="db-save" [disabled]="saving() || testing()" (click)="save()" i18n="@@db.save">Save</button>
+      @if (canCopy()) {
+        <button mat-stroked-button type="button" data-testid="db-copy" [disabled]="copying() || saving()" (click)="copy()">
+          <mat-icon>content_copy</mat-icon>
+          <ng-container i18n="@@db.copy">Copy the current history to that database</ng-container>
+        </button>
+      }
+    </div>
+
+    @if (testing() || copying()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (test(); as t) {
+      <div class="result" data-testid="db-test-result" [attr.data-ok]="t.ok">
+        @if (t.ok) {
+          <p class="ok">
+            <mat-icon inline>check_circle</mat-icon>
+            <span class="mo-data" i18n="@@db.answers">It answers: {{ t.version }}.</span>
+          </p>
+          @if (t.empty) {
+            <p class="note" i18n="@@db.empty">It does not have the tables of the history yet: they are created when the server starts with it.</p>
+          }
+        } @else {
+          <p class="error" role="alert" data-testid="db-test-error">
+            <mat-icon inline>error</mat-icon>
+            <span class="mo-data">{{ t.error }}</span>
+          </p>
+        }
+      </div>
+    }
+
+    @if (copied(); as c) {
+      <p class="ok" data-testid="db-copied">
+        <mat-icon inline>check_circle</mat-icon>
+        <span class="mo-data">{{ copiedText(c) || '—' }}</span>
+        <span i18n="@@db.copiedRestart">Restart the server to use that database.</span>
+      </p>
+    }
+  </mo-panel>
+}

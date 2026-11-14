@@ -1,0 +1,35 @@
+<div class="engines">
+  <header>
+    <h2>{{ t.engines.title }}</h2>
+    <button type="button" class="close" [attr.aria-label]="t.engines.close" data-testid="engines-close" (click)="ref.close()">&times;</button>
+  </header>
+  <p class="lead">{{ t.engines.lead }}</p>
+
+  @if (unreadable()) {
+    <p class="error" role="alert" data-testid="engines-unreadable">{{ t.engines.unreadable }}</p>
+  }
+
+  <ul class="list">
+    @for (row of rows(); track row.id) {
+      <li class="row" [attr.data-testid]="'engine-row-' + row.id">
+        <div class="what">
+          <strong>{{ row.name }}</strong>
+          <span class="role">{{ t.engines.roles[row.id] }}</span>
+          @if (row.reason) {
+            <span class="reason" [attr.data-testid]="'engine-reason-' + row.id">{{ row.reason }}</span>
+          }
+          @if (errors()[row.id]; as e) {
+            <span class="error" role="alert" [attr.data-testid]="'engine-error-' + row.id">{{ e }}</span>
+          }
+        </div>
+        <span class="state" [class]="'state ' + row.state" role="status" [attr.data-testid]="'engine-state-' + row.id">{{ t.engines.states[row.state] }}</span>
+        @if (row.canStart) {
+          <button type="button" class="action" [attr.data-testid]="'engine-start-' + row.id" [disabled]="busy(row.id)" (click)="start(row.id)">{{ t.engines.start }}</button>
+        }
+        @if (row.canStop) {
+          <button type="button" class="action" [attr.data-testid]="'engine-stop-' + row.id" [disabled]="busy(row.id)" (click)="stop(row.id)">{{ t.engines.stop }}</button>
+        }
+      </li>
+    }
+  </ul>
+</div>

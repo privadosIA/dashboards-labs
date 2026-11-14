@@ -1,0 +1,59 @@
+<div class="import">
+  <header>
+    <h2>{{ t.title }}</h2>
+    <button type="button" class="close" [attr.aria-label]="t.close" data-testid="dataset-close" (click)="ref.close(undefined)">&times;</button>
+  </header>
+
+  @switch (step()) {
+    @case ('file') {
+      <p class="lead">{{ t.intro[mode] }}</p>
+      <input #file type="file" accept=".json,.html,.htm,application/json,text/html" hidden data-testid="dataset-file" (change)="pick($event)" />
+      <button type="button" class="primary" data-testid="dataset-choose" [disabled]="busy()" (click)="file.click()">
+        {{ busy() ? t.reading : '↑ ' + t.choose }}
+      </button>
+    }
+    @case ('report') {
+      @if (preview(); as p) {
+        <p class="file" data-testid="dataset-file-name">{{ fileName() }}</p>
+        <ul class="counts" data-testid="dataset-counts">
+          <li><strong>{{ p.entries }}</strong> {{ t.counts.entries }}</li>
+          <li><strong>{{ p.imported }}</strong> {{ t.counts.imported }}</li>
+          <li><strong>{{ p.quiet }}</strong> {{ t.counts.quiet[mode] }}</li>
+          <li [class.warn]="p.rejected > 0"><strong>{{ p.rejected }}</strong> {{ t.counts.rejected }}</li>
+        </ul>
+        @if (p.report) {
+          <section class="report" [attr.aria-label]="t.report">
+            <h3>{{ t.report }}</h3>
+            <pre data-testid="dataset-report">{{ p.report }}</pre>
+          </section>
+        }
+        <label class="name">
+          <span>{{ t.projectName }}</span>
+          <input type="text" [value]="name()" [attr.aria-invalid]="!validName()" data-testid="dataset-name" (input)="rename($event)" (keydown.enter)="confirm()" />
+          <small [class.bad]="!validName()">{{ t.projectHint }}</small>
+        </label>
+        <div class="actions">
+          <button type="button" class="secondary" data-testid="dataset-again" [disabled]="busy()" (click)="again()">{{ t.chooseAnother }}</button>
+          <button type="button" class="primary" data-testid="dataset-confirm" [disabled]="!validName() || busy() || p.imported === 0" (click)="confirm()">
+            {{ busy() ? t.creating : t.confirm }}
+          </button>
+        </div>
+      }
+    }
+    @case ('done') {
+      <p class="lead" role="status" data-testid="dataset-created">{{ createdText() }}</p>
+      <p class="hint">{{ t.where }}</p>
+      @if (filled(); as entry) {
+        <p class="filled" role="status" data-testid="dataset-filled">{{ t.filled.replace('{title}', entry) }}</p>
+      }
+      <button type="button" class="primary" data-testid="dataset-done" (click)="ref.close(createdId())">{{ t.done }}</button>
+    }
+  }
+
+  @if (message(); as m) {
+    <p class="error" role="alert" data-testid="dataset-error">{{ m }}</p>
+    @if (reason(); as why) {
+      <p class="reason" data-testid="dataset-reason">{{ why }}</p>
+    }
+  }
+</div>

@@ -1,0 +1,56 @@
+.options {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+
+  mat-form-field {
+    flex: 1 1 240px;
+  }
+}
+
+.song {
+  margin: 0 0 8px;
+}
+
+.actions-row {
+  margin: 12px 0;
+}
+
+.warn {
+  color: var(--lab-accent);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+  font-weight: 600;
+  margin: 16px 0 4px;
+}
+
+.shots {
+  margin: 0 0 12px;
+  padding-left: 22px;
+  font-size: var(--lab-fs-meta);
+
+  li {
+    margin-bottom: 4px;
+  }
+}
+
+.budget {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auto-lines {
+  margin: 8px 0;
+  padding-left: 20px;
+}

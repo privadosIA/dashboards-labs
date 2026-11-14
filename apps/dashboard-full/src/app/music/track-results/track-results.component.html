@@ -1,0 +1,209 @@
+@if (comparable().length > 1 && comparedEntry(); as cur) {
+  <section class="compare" data-testid="compare" aria-labelledby="compare-title">
+    <h4 id="compare-title" class="compare__title" i18n="@@music.compare">Compare variants</h4>
+    <div class="compare__bar" role="group" aria-label="Variant playing" i18n-aria-label="@@music.compareGroup">
+      @for (c of comparable(); track c.file) {
+        <button
+          mat-stroked-button
+          type="button"
+          [attr.data-testid]="'compare-' + c.variant"
+          [attr.aria-pressed]="c.variant === cur.variant"
+          [class.compare__on]="c.variant === cur.variant"
+          (click)="compare(c.variant)"
+        >
+          v{{ c.variant + 1 }}
+        </button>
+      }
+    </div>
+    <mo-audio-player #comparePlayer [src]="url(cur)" [label]="fileName(cur)" (position)="onComparePosition($event)" (failed)="store.markMissing(cur.file)" />
+    <p class="compare__hint" i18n="@@music.compareHint">When you switch variants it continues from the same second.</p>
+  </section>
+}
+@if (added(); as a) {
+  <p class="added" data-testid="added" role="status">
+    <span i18n="@@music.addedLine">Tracks added by the last action: {{ a.tracks }}, with their songs.</span>
+    <button mat-stroked-button type="button" class="danger" data-testid="remove-added" [disabled]="store.saving()" (click)="removeAdded()">
+      <mat-icon>delete_sweep</mat-icon>
+      <ng-container i18n="@@music.removeAdded">Remove these tracks</ng-container>
+    </button>
+  </p>
+}
+@for (e of entries(); track e.file) {
+  <article class="song" [attr.data-testid]="'song-' + e.track_id + '-' + e.variant">
+    <header class="song__head">
+      <button
+        mat-icon-button
+        type="button"
+        class="song__star"
+        data-testid="favorite"
+        [attr.aria-pressed]="store.isFavorite(e)"
+        [class.song__star--on]="store.isFavorite(e)"
+        (click)="store.toggleFavorite(e)"
+        i18n-aria-label="@@music.favorite"
+        aria-label="Mark as favorite"
+        [matTooltip]="store.isFavorite(e) ? unfavoriteTip : favoriteTip"
+      >
+        <mat-icon>{{ store.isFavorite(e) ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+      @if (e.cover) {
+        <img class="song__cover" data-testid="song-cover" [src]="coverUrl(e)" alt="" loading="lazy" />
+      }
+      <span class="song__title mo-data">{{ fileName(e) }}</span>
+      @if (e.title && e.title !== e.track_id) {
+        <span class="song__label" data-testid="song-title">{{ e.title }}</span>
+      }
+      <span class="song__meta mo-data">
+        v{{ e.variant + 1 }} · seed {{ e.effective_seed }}
+        @if (e.bpm) { · {{ e.bpm }} bpm }
+        @if (length(e); as len) { · {{ len }} }
+        @if (e.keyscale) { · {{ e.keyscale }} }
+        @if (e.check?.lufs; as lufs) { · {{ lufs }} LUFS }
+      </span>
+      @if (e.reference) {
+        <span class="song__task" data-testid="song-reference"><ng-container i18n="@@track.reference">reference</ng-container> <span class="mo-data">← {{ e.reference }}</span></span>
+      }
+      @if (e.task) {
+        <span class="song__task" data-testid="song-task">{{ taskName(e) }}@if (stemName(e); as stem) {: {{ stem }}} <span class="mo-data">← {{ e.source }}</span></span>
+      }
+    </header>
+
+    @if (isMissing(e)) {
+      <p class="song__missing" role="status" data-testid="song-missing">
+        <mat-icon inline>warning</mat-icon>
+        <ng-container i18n="@@music.fileMissing">The file is no longer in the project. Create the track again to regenerate it.</ng-container>
+      </p>
+    } @else {
+      <app-track-wave [entry]="e" [position]="positions()[e.file] ?? 0" (seek)="player.seek($event); setPosition(e, $event)" />
+      <mo-audio-player #player [src]="url(e)" [label]="fileName(e)" (position)="setPosition(e, $event)" (failed)="store.markMissing(e.file)" />
+    }
+
+    @for (issue of e.check?.issues ?? []; track $index) {
+      <p class="song__missing" role="status" data-testid="song-issue">
+        <mat-icon inline>warning</mat-icon>
+        <span>{{ issueText(issue) }}</span>
+      </p>
+    }
+
+    @if (e.caption) {
+      <p class="song__caption">{{ e.caption }}</p>
+    }
+
+    @if (e.lyrics_sung && !e.instrumental) {
+      <details class="song__lyrics">
+        <summary i18n="@@music.lyricsSung">Sung lyrics</summary>
+        <pre class="mo-data" data-testid="lyrics-sung">{{ e.lyrics_sung }}</pre>
+      </details>
+    }
+    @if (differs(e)) {
+      <details class="song__lyrics song__lyrics--differs" open data-testid="lyrics-differ">
+        <summary>
+          <mat-icon inline>compare_arrows</mat-icon>
+          <ng-container i18n="@@music.lyricsDiffer">The model changed your lyrics. This is what you asked for:</ng-container>
+        </summary>
+        <pre class="mo-data">{{ e.lyrics_requested }}</pre>
+      </details>
+    }
+
+    <p class="song__models mo-data">{{ models(e) }}</p>
+
+    <div class="song__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        data-testid="pin-seed"
+        [disabled]="store.saving()"
+        (click)="store.pinSeed(e)"
+      >
+        <mat-icon>push_pin</mat-icon>
+        <ng-container i18n="@@music.pinSeed">Pin seed {{ e.effective_seed }}</ng-container>
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        data-testid="regenerate"
+        [disabled]="store.running()"
+        (click)="store.launch(e.track_id)"
+      >
+        <mat-icon>replay</mat-icon>
+        <ng-container i18n="@@music.regenerate">Regenerate this track</ng-container>
+      </button>
+      @if (!newSongsOnly() && !isMissing(e) && (e.audio_seconds ?? e.duration_seconds)) {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="extend"
+          [attr.aria-expanded]="extending() === e.file"
+          [disabled]="store.running()"
+          (click)="toggleExtend(e)"
+        >
+          <mat-icon>add_circle</mat-icon>
+          <ng-container i18n="@@music.extend">Extend</ng-container>
+        </button>
+      }
+      @if (!newSongsOnly() && !isMissing(e) && (e.audio_seconds ?? e.duration_seconds)) {
+        <button mat-stroked-button type="button" data-testid="repaint" [disabled]="store.running()" (click)="repaint(e)">
+          <mat-icon>brush</mat-icon>
+          <ng-container i18n="@@music.repaintPart">Repaint this part</ng-container>
+        </button>
+      }
+      @if (!newSongsOnly() && !isMissing(e)) {
+        <button mat-stroked-button type="button" data-testid="separate" [disabled]="store.running()" (click)="separate(e)">
+          <mat-icon>call_split</mat-icon>
+          <ng-container i18n="@@music.separate">Separate into instruments</ng-container>
+        </button>
+      }
+      @if (canKeep() && !isMissing(e)) {
+        <button mat-stroked-button type="button" data-testid="keep-variant" [disabled]="store.running() || store.saving()" (click)="keep(e)">
+          <mat-icon>check_circle</mat-icon>
+          <ng-container i18n="@@music.keep">Keep this one</ng-container>
+        </button>
+      }
+      @if (!isMissing(e) && (e.audio_seconds ?? e.duration_seconds)) {
+        <button mat-stroked-button type="button" data-testid="videoclip" (click)="videoclip(e)">
+          <mat-icon>movie</mat-icon>
+          <ng-container i18n="@@music.videoclip">Create music video</ng-container>
+        </button>
+      }
+      @if (!isMissing(e)) {
+        <a mat-stroked-button [href]="url(e)" [attr.download]="fileName(e)" data-testid="download">
+          <mat-icon>download</mat-icon>
+          <ng-container i18n="@@music.download">Download</ng-container>
+        </a>
+      }
+      <button mat-stroked-button type="button" class="danger" data-testid="delete-song" [disabled]="store.running() || store.saving()" (click)="remove(e)">
+        <mat-icon>delete</mat-icon>
+        <ng-container i18n="@@music.deleteSong">Delete</ng-container>
+      </button>
+    </div>
+    @if (extending() === e.file) {
+      <div class="song__extend" data-testid="extend-panel">
+        <label class="song__extendfield">
+          <span i18n="@@music.extendSeconds">Seconds to add</span>
+          <input
+            type="number"
+            class="mo-data"
+            data-testid="extend-seconds"
+            [min]="extendMin"
+            [max]="extendMax"
+            step="5"
+            [value]="extra()"
+            (input)="setExtra($any($event.target).value)"
+          />
+        </label>
+        <button mat-flat-button type="button" data-testid="extend-create" [disabled]="!extendValid() || store.sourceBusy()" (click)="extend(e)">
+          <mat-icon>playlist_add</mat-icon>
+          <ng-container i18n="@@music.extendCreate">Create the track that extends it</ng-container>
+        </button>
+        @if (!extendValid()) {
+          <span class="song__extendhint" role="alert" data-testid="extend-range">{{ extendMin }}–{{ extendMax }} s</span>
+        }
+        @if (store.sourceError(); as err) {
+          <span class="song__extendhint song__extendhint--error" role="alert">{{ err }}</span>
+        }
+        <p class="song__extendhint" i18n="@@music.extendHint">
+          A new track is added that repaints the last {{ overlap }} s and continues for {{ extra() }} s more. It starts from the same style and the lyrics that were sung: add the verses that follow before creating it.
+        </p>
+      </div>
+    }
+  </article>
+}

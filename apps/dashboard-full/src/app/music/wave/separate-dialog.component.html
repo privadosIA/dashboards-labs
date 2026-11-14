@@ -1,0 +1,63 @@
+<h2 mat-dialog-title i18n="@@separate.title">Separate into instruments</h2>
+<mat-dialog-content>
+  <p class="separate__song mo-data" data-testid="separate-song">{{ name() }}</p>
+  <p i18n="@@separate.hint">
+    Tick the voice or the instruments you want to isolate: one extract track is added and created for each, all from this same song, one after another. The original song does not change.
+  </p>
+  @if (ready()) {
+    <p class="separate__note" role="note" data-testid="separate-model">
+      <mat-icon inline>info</mat-icon>
+      <span i18n="@@separate.model">Extracting needs the SFT synthesis model, not the turbo one.</span>
+    </p>
+    @if (canSwitch()) {
+      <mat-checkbox class="separate__switch" data-testid="separate-switch" [checked]="switchLevel()" (change)="switchLevel.set($event.checked)" i18n="@@separate.switch">
+        Switch this project to the quality level "Maximum" (SFT model)
+      </mat-checkbox>
+      @if (switchLevel()) {
+        <p class="separate__hint" data-testid="separate-switch-note" i18n="@@separate.switchNote">
+          The project's other songs will also use that level (slower) the next time you create them.
+        </p>
+      } @else {
+        <p class="separate__note" role="note" data-testid="separate-turbo">
+          <mat-icon inline>warning</mat-icon>
+          <span i18n="@@separate.turbo">
+            This project's model is a turbo one: pick the quality level "Maximum" (or the SFT model) before creating these tracks, or the engine will refuse them.
+          </span>
+        </p>
+      }
+    }
+    <div class="separate__stems" role="group" aria-label="Instruments" i18n-aria-label="@@separate.group">
+      @for (s of stems; track s.value) {
+        <mat-checkbox [attr.data-testid]="'stem-' + s.value" [checked]="picked().has(s.value)" (change)="toggle(s.value, $event.checked)">{{ s.label }}</mat-checkbox>
+      }
+    </div>
+  } @else {
+    <p class="separate__missing" role="alert" data-testid="separate-missing">
+      <mat-icon inline>warning</mat-icon>
+      <span i18n="@@separate.missing">No synthesis model other than the turbo is installed, and extracting needs one (the SFT).</span>
+      <a mat-dialog-close routerLink="/models" data-testid="separate-models" i18n="@@music.seeModels">Install them in Models (Music tab)</a>
+    </p>
+  }
+  @if (ready() && count() > manyTracks) {
+    <p class="separate__note" role="note" data-testid="separate-many">
+      <mat-icon inline>schedule</mat-icon>
+      <span i18n="@@separate.many">That is {{ count() }} generations, one after another, of about 10 s each: {{ time() }} in total.</span>
+    </p>
+  }
+  @if (store.sourceError(); as err) {
+    <p class="separate__error" role="alert" data-testid="separate-error">{{ err }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close data-testid="separate-cancel" i18n="@@separate.cancel">Cancel</button>
+  @if (ready()) {
+    <button mat-flat-button type="button" data-testid="separate-create" [disabled]="picked().size === 0 || store.sourceBusy()" (click)="confirm()">
+      <mat-icon>playlist_add</mat-icon>
+      @if (count() === 1) {
+        <ng-container i18n="@@separate.create1">Create 1 track</ng-container>
+      } @else {
+        <ng-container i18n="@@separate.createN">Create {{ count() }} tracks</ng-container>
+      }
+    </button>
+  }
+</mat-dialog-actions>

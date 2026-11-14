@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "id": "new-piece",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "style",
+      "type": "radio",
+      "label": "Estilo",
+      "defaultValue": "typographic",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "level",
+      "type": "radio",
+      "label": "Nivel",
+      "defaultValue": "simple",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "fps",
+      "type": "radio",
+      "label": "Fotogramas por segundo",
+      "defaultValue": "30",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "resolution",
+      "type": "text",
+      "label": "Resolución",
+      "defaultValue": "1280x720",
+      "validation": {
+        "required": true,
+        "pattern": "^[0-9]{3,4}x[0-9]{3,4}$",
+        "messages": {
+          "required": "Falta la resolución, como 1280x720.",
+          "pattern": "Escribe la resolución como ancho x alto, como 1280x720."
+        }
+      }
+    },
+    {
+      "key": "hearWords",
+      "type": "checkbox",
+      "label": "Oír las palabras (el servidor escucha la canción: cerca de un tercio de lo que dura)",
+      "defaultValue": false
+    }
+  ]
+}

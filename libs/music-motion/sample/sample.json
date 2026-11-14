@@ -1,0 +1,482 @@
+{
+  "songs": [
+    {
+      "project": "sample-beat",
+      "trackId": "track-1",
+      "variant": 0,
+      "title": "Sample Beat",
+      "seconds": 12,
+      "bpm": 96,
+      "instrumental": false,
+      "lyrics": "[Verse]\nA beat is all it takes\nTo make the picture move\n\n[Chorus]\nLight on the one\nColour on the two"
+    },
+    {
+      "project": "sample-beat",
+      "trackId": "track-1",
+      "variant": 1,
+      "title": "Sample Beat (instrumental)",
+      "seconds": 12,
+      "bpm": 96,
+      "instrumental": true,
+      "lyrics": ""
+    },
+    {
+      "project": "neon-drive",
+      "trackId": "track-1",
+      "variant": 0,
+      "title": "Neon Drive",
+      "seconds": 12,
+      "bpm": 120,
+      "instrumental": false,
+      "lyrics": "[Verse]\nStreetlights bleeding red\nEngines hum ahead\n\n[Chorus]\nTake the long way home\nNever feel alone"
+    },
+    {
+      "project": "paper-boats",
+      "trackId": "track-1",
+      "variant": 0,
+      "title": "Paper Boats",
+      "seconds": 12,
+      "bpm": 84,
+      "instrumental": false,
+      "lyrics": "[Verse]\nFold the evening small\nLet the river call\n\n[Chorus]\nFloat away with me\nDown to the quiet sea"
+    }
+  ],
+  "pieces": [
+    {
+      "id": "sample-piece",
+      "song": {
+        "project": "sample-beat",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "medium",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-2",
+      "song": {
+        "project": "neon-drive",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "advanced",
+      "style": "typographic",
+      "fps": 60,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-3",
+      "song": {
+        "project": "paper-boats",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "simple",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-4",
+      "song": {
+        "project": "sample-beat",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "advanced",
+      "style": "illustrated",
+      "fps": 24,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-5",
+      "song": {
+        "project": "neon-drive",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "medium",
+      "style": "illustrated",
+      "fps": 24,
+      "resolution": "1920x1080",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-6",
+      "song": {
+        "project": "paper-boats",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "medium",
+      "style": "typographic",
+      "fps": 24,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-7",
+      "song": {
+        "project": "sample-beat",
+        "trackId": "track-1",
+        "variant": 1
+      },
+      "level": "simple",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-8",
+      "song": {
+        "project": "neon-drive",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "simple",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1920x1080",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-9",
+      "song": {
+        "project": "paper-boats",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "advanced",
+      "style": "illustrated",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "done"
+    },
+    {
+      "id": "sample-piece-10",
+      "song": {
+        "project": "sample-beat",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "simple",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "draft"
+    },
+    {
+      "id": "sample-piece-11",
+      "song": {
+        "project": "neon-drive",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "medium",
+      "style": "typographic",
+      "fps": 30,
+      "resolution": "1280x720",
+      "state": "draft"
+    },
+    {
+      "id": "sample-piece-12",
+      "song": {
+        "project": "sample-beat",
+        "trackId": "track-1",
+        "variant": 1
+      },
+      "level": "medium",
+      "style": "illustrated",
+      "fps": 24,
+      "resolution": "1280x720",
+      "state": "draft"
+    },
+    {
+      "id": "sample-piece-13",
+      "song": {
+        "project": "paper-boats",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "advanced",
+      "style": "typographic",
+      "fps": 60,
+      "resolution": "1920x1080",
+      "state": "failed",
+      "error": "the render ran out of memory: try a lower resolution or a simpler level"
+    },
+    {
+      "id": "sample-piece-14",
+      "song": {
+        "project": "neon-drive",
+        "trackId": "track-1",
+        "variant": 0
+      },
+      "level": "advanced",
+      "style": "illustrated",
+      "fps": 60,
+      "resolution": "1920x1080",
+      "state": "failed",
+      "error": "the render was interrupted: the machine was restarted"
+    }
+  ],
+  "references": [
+    {
+      "id": "sample-reference",
+      "title": "Neon city at night",
+      "notes": "Wet streets, pink and cyan signs, slow camera.",
+      "tags": [
+        "city",
+        "neon"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-neon-city-at-night"
+    },
+    {
+      "id": "sample-reference-2",
+      "title": "Typography on a beat",
+      "notes": "Big words that land on the kick.",
+      "tags": [
+        "type",
+        "fast"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-typography-on-a-beat"
+    },
+    {
+      "id": "sample-reference-3",
+      "title": "Paper cut-out forest",
+      "notes": "Layered paper, warm light, gentle parallax.",
+      "tags": [
+        "paper",
+        "calm"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-paper-cut-out-forest"
+    },
+    {
+      "id": "sample-reference-4",
+      "title": "Old terminal boot",
+      "notes": "Green text on black, glitches at the cuts.",
+      "tags": [
+        "retro",
+        "terminal"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-old-terminal-boot"
+    },
+    {
+      "id": "sample-reference-5",
+      "title": "Sunrise timelapse",
+      "notes": "Orange to blue, long shots, no cuts.",
+      "tags": [
+        "nature",
+        "calm"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-sunrise-timelapse"
+    },
+    {
+      "id": "sample-reference-6",
+      "title": "Pop art collage",
+      "notes": "Halftone dots, flat colours, jump cuts.",
+      "tags": [
+        "pop",
+        "collage"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-pop-art-collage"
+    },
+    {
+      "id": "sample-reference-7",
+      "title": "Ink in water",
+      "notes": "Slow dark clouds of colour.",
+      "tags": [
+        "abstract",
+        "slow"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-ink-in-water"
+    },
+    {
+      "id": "sample-reference-8",
+      "title": "Road trip dashboard",
+      "notes": "Night driving, instruments glowing.",
+      "tags": [
+        "car",
+        "night"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-road-trip-dashboard"
+    },
+    {
+      "id": "sample-reference-9",
+      "title": "Hand-drawn doodles",
+      "notes": "Quick sketches that redraw themselves.",
+      "tags": [
+        "doodle",
+        "light"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-hand-drawn-doodles"
+    },
+    {
+      "id": "sample-reference-10",
+      "title": "Glass and light",
+      "notes": "Prisms, bokeh and soft flares.",
+      "tags": [
+        "glass",
+        "light"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-glass-and-light"
+    },
+    {
+      "id": "sample-reference-11",
+      "title": "Retro grid sunset",
+      "notes": "Striped sun over a moving grid.",
+      "tags": [
+        "synthwave",
+        "retro"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-retro-grid-sunset"
+    },
+    {
+      "id": "sample-reference-12",
+      "title": "Rain on a window",
+      "notes": "Drops running down, city lights out of focus.",
+      "tags": [
+        "rain",
+        "calm"
+      ],
+      "source": "https://www.youtube.com/watch?v=sample-ref-rain-on-a-window"
+    }
+  ],
+  "presets": [
+    {
+      "id": "sample-style",
+      "name": "Neon night",
+      "referenceId": "sample-reference"
+    },
+    {
+      "id": "sample-style-2",
+      "name": "Paper calm",
+      "referenceId": "sample-reference-3"
+    },
+    {
+      "id": "sample-style-3",
+      "name": "Retro terminal",
+      "referenceId": "sample-reference-4"
+    },
+    {
+      "id": "sample-style-4",
+      "name": "Pop collage",
+      "referenceId": "sample-reference-6"
+    }
+  ],
+  "parts": [
+    {
+      "name": "confetti-burst",
+      "description": "Confetti that bursts from the bottom on the loud beats",
+      "manifest": {
+        "name": "confetti-burst",
+        "description": "Confetti that bursts from the bottom on the loud beats",
+        "version": 1,
+        "cost_ms": 60,
+        "levels": [
+          "simple",
+          "medium",
+          "advanced"
+        ],
+        "params": [
+          {
+            "name": "count",
+            "type": "int",
+            "default": "24",
+            "min": 4,
+            "max": 60
+          },
+          {
+            "name": "spread",
+            "type": "number",
+            "default": "1",
+            "min": 0.2,
+            "max": 2,
+            "animatable": true
+          }
+        ]
+      },
+      "fragment": "<style>#cb{position:absolute;inset:0;overflow:hidden}#cb i{position:absolute;bottom:0;width:1.2%;height:2.4%;background:var(--accent);opacity:0}#cb i:nth-child(3n){background:var(--fg)}</style>\n<div id=\"cb\"></div>\n<script>\n(function () {\n  var p = window.__params || {};\n  var count = Math.max(4, Math.min(60, parseInt(p.count, 10) || 24));\n  var root = document.getElementById('cb');\n  var bits = [];\n  for (var i = 0; i < count; i++) {\n    var el = document.createElement('i');\n    root.appendChild(el);\n    bits.push({ el: el, x: ((i * 37) % 100) / 100, v: 0.5 + ((i * 53) % 50) / 100, d: ((i * 29) % 100) / 100 - 0.5 });\n  }\n  window.__partSeek = function (t, beat) {\n    var spread = Number(p.spread) || 1;\n    var n = beat && beat.number >= 0 ? beat.number : 0;\n    var pos = beat && beat.position ? beat.position : 0;\n    var age = pos + (n % 4 === 0 ? 0 : 1);\n    bits.forEach(function (b) {\n      var life = age / 2;\n      var up = Math.sin(Math.min(1, life) * Math.PI) * 70 * b.v;\n      b.el.style.left = (b.x * 100 + b.d * 30 * spread * life) + '%';\n      b.el.style.bottom = up + '%';\n      b.el.style.opacity = life < 1 ? 1 - life * 0.6 : 0;\n      b.el.style.transform = 'rotate(' + Math.round(life * 360 * b.d) + 'deg)';\n    });\n  };\n})();\n</script>"
+    },
+    {
+      "name": "ticker-tape",
+      "description": "A strip of words that scrolls along the bottom of the frame",
+      "manifest": {
+        "name": "ticker-tape",
+        "description": "A strip of words that scrolls along the bottom of the frame",
+        "version": 1,
+        "cost_ms": 50,
+        "levels": [
+          "simple",
+          "medium",
+          "advanced"
+        ],
+        "params": [
+          {
+            "name": "text",
+            "type": "string",
+            "default": "LIVE • ON AIR • LIVE •",
+            "max_length": 60
+          },
+          {
+            "name": "speed",
+            "type": "number",
+            "default": "1",
+            "min": 0.25,
+            "max": 4,
+            "animatable": true
+          }
+        ]
+      },
+      "fragment": "<style>#tt{position:absolute;left:0;right:0;bottom:6%;height:9%;overflow:hidden;background:var(--accent);color:var(--bg);font-family:var(--display);white-space:nowrap}#tt span{position:absolute;top:0;line-height:2.4;font-size:3.4vh;letter-spacing:.1em}</style>\n<div id=\"tt\"><span id=\"tt-run\"></span></div>\n<script>\n(function () {\n  var p = window.__params || {};\n  var text = String(p.text || 'LIVE • ON AIR • LIVE •');\n  var run = document.getElementById('tt-run');\n  run.textContent = text + '  ' + text + '  ' + text;\n  window.__partSeek = function (t) {\n    var speed = Number(p.speed) || 1;\n    var width = run.scrollWidth / 3 || 1;\n    run.style.left = (-((t * 120 * speed) % width)) + 'px';\n  };\n})();\n</script>"
+    },
+    {
+      "name": "pulse-ring",
+      "description": "Rings that expand from the centre on every beat",
+      "manifest": {
+        "name": "pulse-ring",
+        "description": "Rings that expand from the centre on every beat",
+        "version": 1,
+        "cost_ms": 55,
+        "levels": [
+          "simple",
+          "medium",
+          "advanced"
+        ],
+        "params": [
+          {
+            "name": "rings",
+            "type": "int",
+            "default": "3",
+            "min": 1,
+            "max": 6
+          },
+          {
+            "name": "weight",
+            "type": "number",
+            "default": "1",
+            "min": 0.5,
+            "max": 3,
+            "animatable": true
+          }
+        ]
+      },
+      "fragment": "<style>#pr{position:absolute;inset:0}#pr b{position:absolute;left:50%;top:50%;border:solid var(--accent);border-radius:50%;transform:translate(-50%,-50%);box-sizing:border-box}</style>\n<div id=\"pr\"></div>\n<script>\n(function () {\n  var p = window.__params || {};\n  var rings = Math.max(1, Math.min(6, parseInt(p.rings, 10) || 3));\n  var root = document.getElementById('pr');\n  var els = [];\n  for (var i = 0; i < rings; i++) { var b = document.createElement('b'); root.appendChild(b); els.push(b); }\n  window.__partSeek = function (t, beat) {\n    var weight = Number(p.weight) || 1;\n    var pos = beat && beat.position ? beat.position : 0;\n    els.forEach(function (el, i) {\n      var life = (pos + i / rings) % 1;\n      var size = 8 + life * 70;\n      el.style.width = size + 'vmin';\n      el.style.height = size + 'vmin';\n      el.style.borderWidth = (0.6 * weight * (1 - life)) + 'vmin';\n      el.style.opacity = 1 - life;\n    });\n  };\n})();\n</script>"
+    }
+  ],
+  "video": {
+    "file": "sample.mp4",
+    "address": "samples/music-motion/sample.mp4",
+    "seconds": 12,
+    "bytes": 392476,
+    "width": 1280,
+    "height": 720
+  }
+}

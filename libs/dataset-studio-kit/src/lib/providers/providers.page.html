@@ -1,0 +1,9 @@
+<div class="dataset-studio-kit providers" data-testid="providers-page">
+  <header class="intro">
+    <h1>{{ t.title }}</h1>
+    <p class="hint">{{ t.intro }}</p>
+  </header>
+  <section class="panel">
+    <lab-assistant-picker [(value)]="choice" [routingModels]="routingModels()" [alwaysAdd]="true" [title]="pt.assistantTitle" [hint]="pt.assistantHint" [consentSentence]="pt.consent" />
+  </section>
+</div>

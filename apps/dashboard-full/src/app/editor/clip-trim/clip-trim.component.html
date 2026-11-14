@@ -1,0 +1,68 @@
+@if (src(); as url) {
+  @if (!failed()) {
+    <video
+      #vid
+      class="preview"
+      [attr.data-testid]="testId() + '-preview'"
+      controls
+      loop
+      preload="metadata"
+      [src]="url"
+      (loadedmetadata)="onMetadata(vid)"
+      (error)="failed.set(true)"
+    ></video>
+  }
+}
+<div class="row">
+  <mat-form-field class="field">
+    <mat-label i18n="@@clip.from">From (s)</mat-label>
+    <input matInput type="number" min="0" step="0.1" [attr.data-testid]="testId() + '-start'" [value]="start() ?? ''" (change)="set('clip_start', $any($event.target).value)" />
+    @if (src() && !failed()) {
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        [attr.data-testid]="testId() + '-mark-start'"
+        (click)="mark('clip_start')"
+        i18n-matTooltip="@@clip.markNow"
+        matTooltip="Use the current instant"
+        i18n-aria-label="@@clip.markNow"
+        aria-label="Use the current instant"
+      >
+        <mat-icon>my_location</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+  <mat-form-field class="field">
+    <mat-label i18n="@@clip.to">To (s)</mat-label>
+    <input matInput type="number" min="0" step="0.1" [attr.data-testid]="testId() + '-end'" [value]="end() ?? ''" (change)="set('clip_end', $any($event.target).value)" />
+    @if (src() && !failed()) {
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        [attr.data-testid]="testId() + '-mark-end'"
+        (click)="mark('clip_end')"
+        i18n-matTooltip="@@clip.markNow"
+        matTooltip="Use the current instant"
+        i18n-aria-label="@@clip.markNow"
+        aria-label="Use the current instant"
+      >
+        <mat-icon>my_location</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+  <mat-form-field class="field">
+    <mat-label i18n="@@clip.speed">Speed (×)</mat-label>
+    <input matInput type="number" min="0.25" max="4" step="0.05" [attr.data-testid]="testId() + '-speed'" [value]="speed() ?? ''" (change)="set('clip_speed', $any($event.target).value)" />
+  </mat-form-field>
+</div>
+<p class="note" i18n="@@clip.speedHint">Empty = automatic. 1 is the video’s own speed, 0.5 half speed (slower) and 2 double.</p>
+@if (speedError(); as err) {
+  <p class="server-error" role="alert"><mat-icon inline>error</mat-icon><span>{{ err }}</span></p>
+}
+@if (error(); as err) {
+  <p class="server-error" role="alert"><mat-icon inline>error</mat-icon><span>{{ err }}</span></p>
+} @else if (partSeconds(); as part) {
+  <p class="note" [attr.data-testid]="testId() + '-part'" i18n="@@clip.part">Part used: {{ part }} s (empty = the whole clip).</p>
+}

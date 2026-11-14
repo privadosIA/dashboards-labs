@@ -1,0 +1,52 @@
+<section class="init" data-testid="scene-init">
+    <h3 i18n="@@scene.init">Starting image (optional)</h3>
+    @if (scene()?.init_image === undefined) {
+      <button mat-stroked-button type="button" data-testid="init-enable" (click)="setInit(true)">
+        <mat-icon>add_photo_alternate</mat-icon>
+        <ng-container i18n="@@scene.initEnable">Start from my own image</ng-container>
+      </button>
+    } @else {
+      @if (store.editEntry() || store.editing()) {
+        <mat-button-toggle-group class="init__mode" [value]="store.editing() ? 'edit' : 'start'" (change)="store.setEditing($event.value === 'edit')" hideSingleSelectionIndicator aria-label="What to do with the picture" i18n-aria-label="@@scene.initModeLabel" data-testid="init-mode">
+          <mat-button-toggle value="start" data-testid="init-mode-start" i18n="@@scene.initModeStart">Start from this picture</mat-button-toggle>
+          <mat-button-toggle value="edit" data-testid="init-mode-edit" i18n="@@scene.initModeEdit">Edit it with an instruction</mat-button-toggle>
+        </mat-button-toggle-group>
+        @if (store.editing()) {
+          <app-edit-engine-select testId="init-edit-engine" [engines]="store.editEngines()" [value]="store.editEngine()" (picked)="store.setEditEngine($event)" />
+          <p class="note" data-testid="init-edit-note" i18n="@@scene.initEditNote">The prompt is the instruction ("put a red cap on him"): it only changes what you say. It changes the model of the whole project: all its scenes need their starting picture.</p>
+        }
+      }
+      <app-picture-picker
+        testId="init"
+        i18n-label="@@scene.initLabel"
+        label="Starting image"
+        [value]="scene()?.init_image ?? ''"
+        [error]="error()"
+        [importMetadata]="true"
+        (picked)="patch({ init_image: $event })"
+        (metadataFound)="onMetadata($event)"
+      />
+      @if (metaApplied(); as m) {
+        @if (m.id === scene()?.id) {
+          <p class="note" data-testid="meta-applied">
+            <ng-container i18n="@@meta.applied">Image data applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ m.note }}</span>
+            <button mat-button type="button" data-testid="meta-undo" (click)="undoMetadata()">
+              <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+            </button>
+          </p>
+        }
+      }
+      @if (!store.editing()) {
+      <mo-slider-field
+        class="init__strength"
+        label="strength"
+        i18n-label="@@scene.strength"
+        testId="init-strength"
+        [value]="scene()?.strength ?? 0.6"
+        (valueChange)="patch({ strength: $event })"
+      />
+      <p class="note" i18n="@@scene.strengthHint">Low: stays close to the original. High: the prompt reinterprets it. The prompt says what to do with it.</p>
+      }
+      <button mat-button type="button" data-testid="init-remove" (click)="setInit(false)" i18n="@@scene.initRemove">Remove the starting image</button>
+    }
+  </section>

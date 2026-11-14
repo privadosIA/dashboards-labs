@@ -1,0 +1,67 @@
+<section class="picker" data-testid="picker">
+  <div class="head">
+    <h3>{{ t.title }}</h3>
+    <span class="count" data-testid="count">{{ t.count(chosen().length, max) }}</span>
+  </div>
+
+  <ol class="chosen" [attr.aria-label]="t.chosen" data-testid="chosen">
+    @for (c of picked(); track c.name; let i = $index; let first = $first; let last = $last) {
+      <li [attr.data-testid]="'chosen-' + c.name">
+        <span class="order">{{ i + 1 }}</span>
+        <span class="name">{{ c.name }}</span>
+        @if (!c.part) {
+          <span class="note">{{ t.unknown }}</span>
+        }
+        <span class="buttons">
+          <button type="button" data-testid="up" [disabled]="first" [attr.aria-label]="t.up + ' ' + c.name" (click)="move(i, -1)">↑</button>
+          <button type="button" data-testid="down" [disabled]="last" [attr.aria-label]="t.down + ' ' + c.name" (click)="move(i, 1)">↓</button>
+          <button type="button" data-testid="remove" [attr.aria-label]="t.remove + ' ' + c.name" (click)="remove(i)">×</button>
+        </span>
+      </li>
+    } @empty {
+      <li class="none" data-testid="none">{{ t.none }}</li>
+    }
+  </ol>
+  @if (full()) {
+    <p class="note" data-testid="full">{{ t.full(max) }}</p>
+  }
+
+  <div class="filters">
+    <input type="search" data-testid="search" [attr.aria-label]="t.search" [placeholder]="t.search" [value]="query()" (input)="setQuery($event)" />
+    <label>
+      {{ t.level }}
+      <select data-testid="level" [value]="level()" (change)="setLevel($event)">
+        <option value="">{{ t.anyLevel }}</option>
+        @for (l of levels; track l) {
+          <option [value]="l">{{ t.levels[l] }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <h4>{{ t.available }}</h4>
+  @if (matching().length === 0) {
+    <p class="note" data-testid="no-match">{{ t.noMatch }}</p>
+  } @else {
+    <ul class="catalog" data-testid="catalog">
+      @for (p of matching(); track p.name) {
+        <li [attr.data-testid]="'part-' + p.name" [class.on]="isChosen(p)">
+          <div class="info">
+            <strong>{{ p.name }}</strong>
+            <span class="levels">
+              @for (l of p.levels; track l) {
+                <span class="chip">{{ t.levels[l] }}</span>
+              }
+            </span>
+            <p class="desc">{{ p.description }}</p>
+            <p class="meta">{{ t.cost(p.costMs) }}@if (p.manual) { · {{ t.manual }} }</p>
+            @if (!isChosen(p) && whyNot(p)) {
+              <p class="why" data-testid="why">{{ whyNot(p) }}</p>
+            }
+          </div>
+          <button type="button" data-testid="add" [disabled]="isChosen(p) || !!whyNot(p)" (click)="add(p)">{{ t.add }}</button>
+        </li>
+      }
+    </ul>
+  }
+</section>

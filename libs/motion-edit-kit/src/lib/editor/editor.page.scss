@@ -1,0 +1,282 @@
+:host {
+  display: block;
+}
+
+.notice {
+  margin: var(--lab-space-5) auto;
+  padding: var(--lab-space-4);
+  border: 1px dashed var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  color: var(--lab-ink-dim);
+  text-align: center;
+
+  p {
+    margin: 0 0 var(--lab-space-2);
+  }
+
+  a {
+    color: var(--lab-accent);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3);
+  margin-bottom: var(--lab-space-3);
+
+  h1 {
+    flex: 1;
+    margin: 0;
+    font-size: var(--lab-fs-title);
+    font-weight: var(--lab-fw-title);
+  }
+
+  .back {
+    color: var(--lab-ink-dim);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--lab-accent);
+    }
+  }
+}
+
+.banner {
+  margin: 0 0 var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius);
+  background: color-mix(in srgb, var(--lab-accent) 12%, transparent);
+}
+
+.grid {
+  // Two stacks, the pieces with the library on the left and the preview with the inspector on the right, and the timeline across both.
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--lab-space-3);
+  align-items: start;
+}
+
+.side {
+  display: grid;
+  gap: var(--lab-space-2);
+  align-content: start;
+  width: 20rem;
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--lab-space-1);
+  padding: var(--lab-space-1);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-surface);
+}
+
+.tab {
+  flex: 1;
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font: inherit;
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--lab-accent);
+  }
+
+  &.on {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink);
+  }
+}
+
+.main {
+  // The preview and, to its right, the inspector, which uses the rest of the width in as many columns as fit.
+  display: grid;
+  grid-template-columns: minmax(18rem, 28rem) minmax(0, 1fr);
+  grid-template-areas: 'stage inspector';
+  gap: var(--lab-space-3);
+  align-items: start;
+  min-width: 0;
+}
+
+.stage {
+  min-width: 0;
+}
+
+.stage-body {
+  display: grid;
+  gap: var(--lab-space-3);
+  // A small preview: the big one is a click away (the enlarge button opens it in a window).
+  max-width: 40rem;
+}
+
+.enlarge {
+  justify-self: start;
+}
+
+.inspector {
+  grid-area: inspector;
+  min-width: 0;
+}
+
+.timeline {
+  // Under everything, across the whole width.
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (max-width: 60rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  // The preview and its inspector first, then the timeline and the lists.
+  .main {
+    order: -1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'stage'
+      'inspector';
+  }
+}
+
+.edit-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+
+  .dirty {
+    color: var(--lab-warn);
+    font-size: var(--lab-fs-meta);
+  }
+
+  .ok {
+    color: var(--lab-success);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.banner.problem {
+  border-color: var(--lab-danger);
+  background: color-mix(in srgb, var(--lab-danger) 12%, transparent);
+}
+
+.views {
+  width: fit-content;
+  margin-bottom: var(--lab-space-3);
+}
+
+// The vector part takes the same place as the code does; the preview and the timeline stay where they are.
+.vector {
+  display: none;
+  grid-area: inspector;
+  min-width: 0;
+}
+
+.vector-view {
+  .side,
+  .inspector,
+  .code {
+    display: none;
+  }
+
+  // The vector editor has panels of its own (layers, canvas, properties, timeline) and needs the whole width: the preview stays on top and the
+  // editor goes under it, instead of squeezing the canvas into the column the code uses.
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'stage'
+      'inspector';
+  }
+
+  .vector {
+    display: block;
+  }
+
+  &.grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tab .dot {
+  margin-left: var(--lab-space-1);
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}
+
+.tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.views .why {
+  align-self: center;
+  padding: 0 var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+// The code takes the place of the inspector (and the left column goes away); the preview and the timeline stay where they are.
+.code {
+  display: none;
+  grid-area: inspector;
+  min-width: 0;
+}
+
+.code-view {
+  .side,
+  .inspector {
+    display: none;
+  }
+
+  .code {
+    display: grid;
+    gap: var(--lab-space-2);
+    align-content: start;
+  }
+
+  &.grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.code-status {
+  margin: 0;
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+
+  &.bad {
+    color: var(--lab-danger);
+  }
+}
+
+.code-hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+// The button that opens the window of a new part, above the library.
+.new-part {
+  width: 100%;
+  margin-bottom: var(--lab-space-2);
+}
+
+.scenes {
+  grid-column: 1 / -1;
+}
+
+.reviews {
+  grid-column: 1 / -1;
+}

@@ -1,0 +1,44 @@
+// The look of the panel of a select, the same in every dashboard (a dashboard includes it once, in its Material stylesheet). Only tokens of the dashboards' common set.
+//
+// - The panel is as wide as the field it opens from: for a filled field the horizontal padding is moved from its wrapper to its infix, so that the place the panel is measured
+//   from (the wrapper's flex box) is the whole field, and not 16 px narrower on each side. (`provideLabForms` asks the selects for that width.)
+// - When it has more options than fit and scrolls, its scrollbar is thin and in the tokens' colours, clear of the rounded corners (not the browser's thick grey bar over them).
+// - It is rounded like the field (Material gives it square top corners), keeps a little room between its options and its corners, and floats a little clear of the field.
+.mat-form-field-appearance-fill.mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
+  padding-inline: 0;
+}
+
+.mat-form-field-appearance-fill.mat-mdc-form-field-type-mat-select .mat-mdc-form-field-infix {
+  padding-inline: var(--mat-form-field-container-horizontal-padding, 16px);
+}
+
+// (the doubled class: Material gives a panel that opens upwards its own, more specific, corners)
+.cdk-overlay-pane .mat-mdc-select-panel.mat-mdc-select-panel,
+.cdk-overlay-pane .mat-mdc-autocomplete-panel.mat-mdc-autocomplete-panel {
+  border-radius: var(--lab-radius);
+  padding-block: var(--lab-space-1);
+  margin-block: var(--lab-space-1);
+}
+
+// The scrollbar of a panel that scrolls (a select with many options, an autocomplete, a menu): thin, quiet, and only as dark as a control's outline.
+.cdk-overlay-pane .mat-mdc-select-panel,
+.cdk-overlay-pane .mat-mdc-autocomplete-panel,
+.cdk-overlay-pane .mat-mdc-menu-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--lab-control-line) transparent;
+
+  // The browsers that style it with pseudo-elements (Safari): the same, a rounded thumb on a transparent track.
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: var(--lab-space-2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: var(--lab-radius-pill);
+    background: var(--lab-control-line);
+  }
+}

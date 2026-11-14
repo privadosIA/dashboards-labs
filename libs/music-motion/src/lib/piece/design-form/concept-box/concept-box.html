@@ -1,0 +1,5 @@
+<label class="concept">
+  <span>{{ texts().concept }}</span>
+  <textarea data-testid="concept" rows="4" [attr.maxlength]="max" [placeholder]="texts().conceptPlaceholder" [value]="value()" [disabled]="disabled()" (input)="type($event)"></textarea>
+</label>
+<p class="count" data-testid="concept-count">{{ texts().conceptCount(value().length, max) }}</p>

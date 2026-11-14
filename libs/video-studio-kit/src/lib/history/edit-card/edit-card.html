@@ -1,0 +1,50 @@
+@let e = edit();
+<div class="head">
+  <h3 class="name">{{ name() }}</h3>
+  <span class="state">{{ t.videoTools.edit.states[e.state] }}</span>
+</div>
+@if (pills().length || e.motion || size() || e.result) {
+  <p class="pills">
+    @for (pill of pills(); track pill) {
+      <span class="pill">{{ pill }}</span>
+    }
+    @if (e.motion) {
+      <span class="pill">motion: {{ e.motion }}</span>
+    }
+    @if (e.result; as r) {
+      @if (size()) {
+        <span class="pill">{{ size() }}</span>
+      }
+      @if (r.format === 'webm') {
+        <span class="pill">WebM</span>
+      }
+      @if (r.extendedTimes) {
+        <span class="pill" data-testid="extended">{{ t.videoTools.edit.extended.replace('{n}', '' + r.extendedTimes) }}</span>
+      }
+      <span class="pill" data-testid="sound">{{ r.hasAudio ? t.videoTools.edit.sound : t.videoTools.edit.silent }}</span>
+    }
+  </p>
+}
+@if (prompt()) {
+  <p class="prompt">{{ prompt() }}</p>
+}
+@if (e.state === 'queued' || e.state === 'running') {
+  <progress max="100" [value]="e.progress" [attr.aria-label]="t.videoTools.edit.states[e.state]"></progress>
+}
+@if (e.state === 'failed') {
+  <p class="error" role="alert">{{ e.error }}</p>
+}
+@if (e.result?.notes?.length) {
+  <ul class="notes" [attr.aria-label]="t.videoTools.edit.notes">
+    @for (note of e.result!.notes; track note) {
+      <li>{{ note }}</li>
+    }
+  </ul>
+}
+<div class="actions">
+  @if (e.state === 'done' && e.result) {
+    <button type="button" (click)="open.emit(e)">{{ t.history.open }}</button>
+    <a [href]="tickets.withTicket(e.result.video)" download>{{ t.history.download }}</a>
+  }
+  <button type="button" (click)="remove.emit(e)">{{ t.history.remove }}</button>
+</div>

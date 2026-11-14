@@ -1,0 +1,54 @@
+.songs {
+  display: grid;
+  gap: var(--lab-space-4);
+}
+
+h1 {
+  margin: 0 0 var(--lab-space-1);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+header p {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notice {
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+
+  p {
+    margin: 0;
+  }
+
+  &.error {
+    border: 1px solid var(--lab-danger);
+  }
+
+  button {
+    margin-top: var(--lab-space-3);
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-4);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius-pill);
+    background: transparent;
+    color: var(--lab-ink);
+    font-weight: var(--lab-fw-control);
+    cursor: pointer;
+  }
+}
+
+.reason {
+  color: var(--lab-ink-dim);
+}

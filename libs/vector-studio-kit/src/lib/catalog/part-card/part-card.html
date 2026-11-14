@@ -1,0 +1,19 @@
+<article class="card" [attr.data-testid]="'part-' + item().name">
+  <img class="thumb" data-testid="thumb" [src]="item().thumbnail" [alt]="t.thumbnail(item().name)" width="240" height="135" />
+  <div class="body">
+    <h3 class="name">{{ item().name }}</h3>
+    <p class="description">{{ item().description || t.noDescription }}</p>
+    @if (confirming()) {
+      <p class="ask" role="alert" data-testid="ask">{{ busy() ? t.busy(item().name, busy()!) : t.removing(item().name) }}</p>
+      <div class="actions">
+        <button type="button" class="danger" data-testid="confirm-remove" (click)="confirm()">{{ busy() ? t.force : t.remove }}</button>
+        <button type="button" data-testid="cancel-remove" (click)="cancel()">{{ t.cancel }}</button>
+      </div>
+    } @else {
+      <div class="actions">
+        <button type="button" class="primary" data-testid="open-part" (click)="open.emit()">{{ t.open }}</button>
+        <button type="button" data-testid="remove-part" (click)="confirming.set(true)">{{ t.remove }}</button>
+      </div>
+    }
+  </div>
+</article>

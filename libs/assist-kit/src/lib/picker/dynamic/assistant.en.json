@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "id": "assist-picker",
+  "layout": {
+    "columns": 12
+  },
+  "fields": [
+    {
+      "key": "provider",
+      "type": "select",
+      "label": "Provider",
+      "defaultValue": "",
+      "layout": {
+        "col": 6
+      }
+    },
+    {
+      "key": "model",
+      "type": "select",
+      "label": "Model",
+      "defaultValue": "",
+      "layout": {
+        "col": 6
+      }
+    }
+  ]
+}

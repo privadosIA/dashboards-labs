@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "id": "flow-propose-again",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Cómo debe ser la propuesta",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Escribe cómo debe ser."
+        }
+      }
+    }
+  ]
+}

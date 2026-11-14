@@ -1,0 +1,36 @@
+.intro {
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-ink-dim);
+}
+
+.field {
+  margin-bottom: var(--lab-space-3);
+}
+
+.value {
+  margin: 0 0 0 var(--lab-space-5);
+  max-height: 7em;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.hint,
+.warn {
+  margin: 2px 0 0 var(--lab-space-5);
+  font-size: var(--lab-fs-meta);
+}
+
+.hint {
+  color: var(--lab-ink-dim);
+}
+
+.warn {
+  color: var(--lab-warn);
+}
+
+.info strong {
+  display: block;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}

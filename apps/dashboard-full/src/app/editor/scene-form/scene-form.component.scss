@@ -1,0 +1,96 @@
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.wide {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+
+  // Fields grow downwards (hint, error): keep every top edge on one line and
+  // centre the controls that are not fields on the input row (40px).
+  > :not(mat-form-field):not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}
+
+.narrow {
+  width: 180px;
+}
+
+.voice {
+  width: 400px;
+  max-width: 100%;
+}
+
+.missing {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  margin-left: var(--lab-space-2);
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+  border-top: 1px solid var(--lab-line);
+  padding-top: 8px;
+  margin-top: 8px;
+
+  h3 {
+    font-size: var(--lab-fs-body);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--lab-danger);
+  border: 1px solid var(--lab-danger);
+  padding: 8px 12px;
+  font-size: var(--lab-fs-meta);
+}
+
+textarea {
+  max-width: 72ch;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}
+
+.picture {
+  margin-bottom: var(--lab-space-3);
+}
+
+.trim-title {
+  margin: var(--lab-space-4) 0 var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: 500;
+}
+

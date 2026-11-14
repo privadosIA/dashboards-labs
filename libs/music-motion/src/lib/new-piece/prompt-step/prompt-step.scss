@@ -1,0 +1,41 @@
+.prompt {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.hint,
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.meta {
+  font-size: var(--lab-fs-meta);
+}
+
+.over {
+  color: var(--lab-danger);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}
+
+.model {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2) var(--lab-space-3);
+
+  select {
+    min-height: var(--lab-control-h);
+    max-width: 100%;
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+  }
+}

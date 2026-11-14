@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+/* level with the kit's pages, which keep var(--lab-space-4) inside their own box */
+.bar {
+  display: flex;
+  margin-bottom: var(--lab-space-3);
+  padding-inline: var(--lab-space-4);
+}
+
+// The kit's links are drawn by the kit and Angular's encapsulation does not cross into it: they look like the section's other links, quiet, with the current one tinted and marked with aria-current.
+:host ::ng-deep dataset-studio-nav nav a {
+  padding: var(--lab-space-1) var(--lab-space-3);
+  border-radius: var(--lab-radius);
+  color: var(--lab-ink-dim);
+  text-decoration: none;
+
+  &.active {
+    background: color-mix(in srgb, var(--lab-accent) 14%, var(--lab-surface-high));
+    color: var(--lab-ink);
+  }
+}

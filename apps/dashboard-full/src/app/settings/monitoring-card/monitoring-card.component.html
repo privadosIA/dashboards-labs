@@ -1,0 +1,84 @@
+<mo-panel heading="Monitoring" i18n-heading="@@mon.title">
+  <p class="note" i18n="@@mon.intro">
+    Grafana, Prometheus, Loki and Redis that you run beside this server. It does not depend on them or need them: they can be switched off. Here their addresses and keys are kept, and tested whenever you want. With a user, the calls use Basic authentication; with no user, the key is a token (for Redis, the password).
+  </p>
+  @if (loadError()) {
+    <p class="error" role="alert" data-testid="mon-load-error">
+      <mat-icon inline>error</mat-icon>
+      <span i18n="@@mon.loadFailed">The saved tools could not be read.</span>
+    </p>
+  }
+  @for (r of rows(); track r.id) {
+    <section class="tool" [attr.data-testid]="'mon-' + r.id">
+      <h4 class="tool__name">{{ r.name }}</h4>
+      <div class="grid">
+        <mat-form-field class="wide">
+          <mat-label i18n="@@mon.address">Address</mat-label>
+          <input matInput [attr.data-testid]="'mon-address-' + r.id" autocomplete="off" spellcheck="false" [placeholder]="r.placeholder" [value]="r.address" (input)="patch(r.id, { address: $any($event.target).value })" />
+        </mat-form-field>
+        <mat-form-field class="mid">
+          <mat-label i18n="@@mon.user">User</mat-label>
+          <input matInput [attr.data-testid]="'mon-user-' + r.id" autocomplete="off" spellcheck="false" [value]="r.user" (input)="patch(r.id, { user: $any($event.target).value })" />
+        </mat-form-field>
+        <mat-form-field class="mid">
+          <mat-label>
+            @if (r.id === 'redis') {
+              <ng-container i18n="@@mon.password">Password</ng-container>
+            } @else {
+              <ng-container i18n="@@mon.token">Key or token</ng-container>
+            }
+          </mat-label>
+          <input
+            matInput
+            type="password"
+            [attr.data-testid]="'mon-secret-' + r.id"
+            autocomplete="new-password"
+            [placeholder]="r.secretSet ? '••••••••' : ''"
+            [value]="r.secret"
+            (input)="patch(r.id, { secret: $any($event.target).value })"
+          />
+        </mat-form-field>
+        <div class="actions">
+          <button mat-stroked-button type="button" [attr.data-testid]="'mon-test-' + r.id" [disabled]="r.busy || !r.address.trim()" (click)="runTest(r)">
+            <mat-icon>wifi_find</mat-icon>
+            <ng-container i18n="@@mon.test">Test</ng-container>
+          </button>
+          <button mat-flat-button type="button" [attr.data-testid]="'mon-save-' + r.id" [disabled]="r.busy" (click)="save(r)" i18n="@@mon.save">Save</button>
+          @if (link(r); as href) {
+            <a mat-button [href]="href" target="_blank" rel="noopener" [attr.data-testid]="'mon-open-' + r.id">
+              <mat-icon>open_in_new</mat-icon>
+              <ng-container i18n="@@mon.open">Open</ng-container>
+            </a>
+          }
+        </div>
+      </div>
+      @if (r.busy) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+      @if (r.error) {
+        <p class="error" role="alert" [attr.data-testid]="'mon-error-' + r.id">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ r.error }}</span>
+        </p>
+      }
+      @if (r.test; as t) {
+        <p [class]="t.ok ? 'ok' : 'error'" [attr.data-testid]="'mon-result-' + r.id" [attr.data-ok]="t.ok">
+          <mat-icon inline>{{ t.ok ? 'check_circle' : 'error' }}</mat-icon>
+          @if (t.ok) {
+            <span class="mo-data">
+              <ng-container i18n="@@mon.answers">It answers</ng-container>
+              @if (t.version) {
+                <span> · {{ t.version }}</span>
+              }
+              @if (t.authenticated) {
+                <span> · <ng-container i18n="@@mon.authOk">accepts the user and key</ng-container></span>
+              }
+            </span>
+          } @else {
+            <span class="mo-data">{{ t.error }}</span>
+          }
+        </p>
+      }
+    </section>
+  }
+</mo-panel>

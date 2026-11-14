@@ -1,0 +1,70 @@
+.tags-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  // the dialog scrolls inside only when the window is too short for it
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+.close {
+  width: var(--lab-control-h);
+  height: var(--lab-control-h);
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--lab-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+// What the style says now, in the words of the style box.
+.current {
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.done {
+  flex: none;
+  height: 3rem;
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-title);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 3px;
+  }
+}

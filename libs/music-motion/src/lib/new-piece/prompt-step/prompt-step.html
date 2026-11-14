@@ -1,0 +1,10 @@
+<section class="prompt" data-testid="prompt-step">
+  <p class="hint">{{ t.intro }}</p>
+  <dynamic-form [schema]="schema" [model]="model()" (modelChange)="changed($event)" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+  <p class="meta" data-testid="counter" [class.over]="length() > max">{{ t.counter(length(), max) }}</p>
+  <p class="meta" data-testid="prompt-hint">{{ t.hint }}</p>
+  <app-assistant-field [(value)]="assistant" />
+  @if (own()) {
+    <p class="note" data-testid="own-note">{{ t.ownNote }}</p>
+  }
+</section>

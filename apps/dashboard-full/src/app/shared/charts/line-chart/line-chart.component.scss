@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-size: var(--lab-fs-meta);
+  font-family: var(--lab-font-mono);
+  touch-action: pan-y;
+}
+
+.grid {
+  stroke: var(--lab-line);
+  stroke-width: 1;
+}
+
+.tick {
+  fill: var(--lab-ink-dim);
+}
+
+.ref {
+  stroke: var(--lab-ink-dim);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.ref-label {
+  fill: var(--lab-ink-dim);
+  // a halo in the surface colour keeps the label readable over the data line
+  paint-order: stroke;
+  stroke: var(--lab-surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+
+  &--amber {
+    stroke: var(--lab-accent);
+  }
+
+  &--green {
+    stroke: var(--lab-success);
+  }
+
+  &--red {
+    stroke: var(--lab-danger);
+  }
+
+  &--dim {
+    stroke: var(--lab-ink-dim);
+  }
+}
+
+.pt {
+  fill: var(--lab-surface);
+  stroke-width: 1.5;
+  outline: none;
+
+  &--amber {
+    stroke: var(--lab-accent);
+  }
+
+  &--green {
+    stroke: var(--lab-success);
+  }
+
+  &--red {
+    stroke: var(--lab-danger);
+  }
+
+  &--dim {
+    stroke: var(--lab-ink-dim);
+  }
+
+  &--on,
+  &:focus-visible {
+    fill: var(--lab-ink);
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-4);
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.swatch {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  margin-right: 6px;
+  vertical-align: 3px;
+  border-top: 2px solid var(--lab-ink-dim);
+
+  &--amber {
+    border-top: 2px solid var(--lab-accent);
+  }
+
+  &--green {
+    border-top: 2px dashed var(--lab-success);
+  }
+
+  &--red {
+    border-top: 2px dotted var(--lab-danger);
+  }
+
+  &--dim {
+    border-top: 2px dashed var(--lab-ink-dim);
+  }
+}
+
+.readout {
+  margin: 4px 0 0;
+  min-height: 1.4em;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}

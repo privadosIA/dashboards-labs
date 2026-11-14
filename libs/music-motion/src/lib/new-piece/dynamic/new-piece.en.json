@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "id": "new-piece",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "style",
+      "type": "radio",
+      "label": "Style",
+      "defaultValue": "typographic",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "level",
+      "type": "radio",
+      "label": "Level",
+      "defaultValue": "simple",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "fps",
+      "type": "radio",
+      "label": "Frame rate (fps)",
+      "defaultValue": "30",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "resolution",
+      "type": "text",
+      "label": "Resolution",
+      "defaultValue": "1280x720",
+      "validation": {
+        "required": true,
+        "pattern": "^[0-9]{3,4}x[0-9]{3,4}$",
+        "messages": {
+          "required": "The resolution is needed, like 1280x720.",
+          "pattern": "Write the resolution as width x height, like 1280x720."
+        }
+      }
+    },
+    {
+      "key": "hearWords",
+      "type": "checkbox",
+      "label": "Hear the words (the server listens to the song: about a third of its length)",
+      "defaultValue": false
+    }
+  ]
+}

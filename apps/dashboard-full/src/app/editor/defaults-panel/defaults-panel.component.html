@@ -1,0 +1,1138 @@
+@if (cfg(); as c) {
+  <mat-accordion multi>
+    <mat-expansion-panel class="panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@defaults.output">Output</mat-panel-title>
+        <mat-panel-description class="mo-data">{{ c.output.mode || 'video' }}</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="grid">
+        <div class="mode-row">
+          <mat-button-toggle-group
+            [value]="c.output.mode || 'video'"
+            (change)="store.setMode($event.value)"
+            i18n-aria-label="@@defaults.modeLabel"
+            aria-label="Output mode"
+            data-testid="output-mode"
+          >
+            <mat-button-toggle value="video" i18n="@@defaults.modeVideo">Video</mat-button-toggle>
+            <mat-button-toggle value="images" i18n="@@defaults.modeImages"
+              >Images</mat-button-toggle
+            >
+            <mat-button-toggle value="music" i18n="@@defaults.modeMusic">Music</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <mat-form-field class="span-6">
+          <mat-label i18n="@@defaults.adult">Content</mat-label>
+          <mat-select
+            data-testid="adult-select"
+            [value]="adultValue()"
+            (selectionChange)="setAdult($event.value)"
+          >
+            <mat-option value="" i18n="@@defaults.adultUnset">Not reviewed</mat-option>
+            <mat-option value="false" i18n="@@defaults.adultFine">Reviewed: fine for everyone</mat-option>
+            @if (!env.hidesAdult() || adultValue() === 'true') {
+              <mat-option value="true" i18n="@@defaults.adultAdult">For people over 18</mat-option>
+            }
+          </mat-select>
+          @if (env.hidesAdult()) {
+            <mat-hint data-testid="adult-hint" i18n="@@defaults.adultHint">This server does not keep content for people over 18.</mat-hint>
+          }
+        </mat-form-field>
+
+        @if (toMusic()) {
+          <!-- the notice in the page explains the switch; nothing else applies -->
+        } @else if (videoMode()) {
+          <mat-form-field class="span-6">
+            <mat-label i18n="@@defaults.outputFile">Output file</mat-label>
+            <input
+              matInput
+              class="mo-data"
+              [value]="c.output.file"
+              (change)="store.updateOutput({ file: $any($event.target).value })"
+            />
+            @if (store.validation()?.output?.file; as err) {
+              <mat-hint class="error">{{ err }}</mat-hint>
+            }
+          </mat-form-field>
+        } @else {
+          <mat-checkbox
+            [checked]="c.output.contact_sheet"
+            (change)="store.updateOutput({ contact_sheet: $event.checked })"
+            i18n="@@defaults.contactSheet"
+            >Generate contact sheet</mat-checkbox
+          >
+        }
+      </div>
+    </mat-expansion-panel>
+
+    @if (!toMusic()) {
+    <mat-expansion-panel class="panel" data-testid="quality-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@quality.title">Style and quality</mat-panel-title>
+        <mat-panel-description i18n="@@quality.subtitle">Fills in model, resolution and steps in one go</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="grid">
+        @if (autoPlan(); as plan) {
+          <mat-expansion-panel class="wide auto-group" data-testid="auto-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title i18n="@@auto.title">I'm lazy: choose everything for me</mat-panel-title>
+            </mat-expansion-panel-header>
+            <p class="note" i18n="@@auto.hint">
+              Looks at what you have installed and what your machine can take, and chooses the highest-quality model, resolution and animation that fit in the time you want to wait. You only say how long.
+            </p>
+            <mat-form-field class="auto-budget">
+              <mat-label i18n="@@auto.budgetLabel">How long do you want to wait, roughly?</mat-label>
+              <mat-select data-testid="auto-budget" [value]="budgetIndex()" (selectionChange)="budgetIndex.set($event.value)">
+                @for (b of budgets; track $index) {
+                  <mat-option [value]="$index">{{ budgetLabel(b) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (plan.animationAvailable) {
+              <mat-checkbox data-testid="auto-animate" [checked]="autoAnimate()" (change)="autoAnimate.set($event.checked)" i18n="@@auto.animateAll">
+                Animate the scenes (make them move)
+              </mat-checkbox>
+            }
+            <p class="note" data-testid="auto-machine">
+              @if (machine().vramMb > 0) {
+                <ng-container i18n="@@auto.machine">Your machine: {{ machine().gpuName }} ({{ (machine().vramMb / 1024).toFixed(0) }} GB of VRAM)</ng-container>
+                @if (machine().ramGb !== null) {
+                  · <ng-container i18n="@@auto.machineRam">{{ machine().ramGb }} GB of RAM</ng-container>
+                }
+              } @else {
+                <ng-container i18n="@@auto.noGpu">No GPU detected</ng-container>
+              }
+            </p>
+            @if (autoLines().length) {
+              <ul class="auto-lines" data-testid="auto-lines">
+                @for (l of autoLines(); track l) {
+                  <li class="mo-data">{{ l }}</li>
+                }
+              </ul>
+              <p data-testid="auto-time">
+                <strong i18n="@@auto.time">It will take {{ autoTime(plan.seconds) }} or so</strong>
+                @if (machine().speedGuessed) {
+                  <span class="dim" i18n="@@auto.guessed">(your card is not in my table: this is a rough guess)</span>
+                } @else if (machine().speedMeasured > 0) {
+                  <span class="dim" data-testid="auto-measured" i18n="@@auto.measured">(adjusted to your machine from {{ machine().speedMeasured }} of your own renders)</span>
+                }
+              </p>
+            }
+            @if (!plan.fits) {
+              <p class="warn" data-testid="auto-over" i18n="@@auto.over">
+                It cannot make it in that time: the fastest I can do takes {{ autoTime(plan.fastest ?? plan.seconds) }}. I propose that.
+              </p>
+            }
+            @for (n of plan.notes; track n) {
+              <p class="note warn">{{ n }}</p>
+            }
+            @if (plan.better.length) {
+              <p class="note" data-testid="auto-better" i18n="@@auto.better">
+                For more quality you could install in Models: {{ betterNames(plan) }}.
+              </p>
+            }
+            <div class="quality-buttons">
+              <button mat-flat-button type="button" data-testid="auto-apply" [disabled]="!autoLines().length || generating()" (click)="applyAuto()">
+                <mat-icon>auto_fix_high</mat-icon>
+                <ng-container i18n="@@auto.apply">Apply this</ng-container>
+              </button>
+              <button mat-stroked-button type="button" data-testid="auto-generate" [disabled]="!autoLines().length || generating()" (click)="applyAndGenerate()">
+                <mat-icon>play_arrow</mat-icon>
+                <ng-container i18n="@@auto.applyGenerate">Apply and generate</ng-container>
+              </button>
+            </div>
+            @if (store.autoApplied(); as a) {
+              <p class="note" data-testid="auto-applied">
+                <ng-container i18n="@@auto.applied">Applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ a.note.join(' · ') }}</span>
+                <button mat-button type="button" data-testid="auto-undo" (click)="store.undoAuto()">
+                  <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+                </button>
+              </p>
+            }
+          </mat-expansion-panel>
+        }
+        <div class="wide quality-group">
+          <h4 i18n="@@quality.styleTitle">Style</h4>
+          <div class="quality-buttons">
+            @for (s of styles(); track s.style) {
+              <button
+                mat-stroked-button
+                type="button"
+                [attr.data-testid]="'style-' + s.style"
+                [class.active]="activeStyle() === s.style"
+                [attr.aria-pressed]="activeStyle() === s.style"
+                [disabled]="!s.entry"
+                [matTooltip]="s.entry ? catalogLabel(s.entry) : ''"
+                (click)="pickStyle(s.style)"
+              >
+                {{ s.label }}
+              </button>
+            }
+            <button
+              mat-stroked-button
+              type="button"
+              data-testid="style-edit"
+              [class.active]="activeStyle() === 'edit'"
+              [attr.aria-pressed]="activeStyle() === 'edit'"
+              [disabled]="!editAvailable()"
+              (click)="pickEdit()"
+            >
+              {{ editLabel }}
+            </button>
+          </div>
+          <p class="note" data-testid="style-help">{{ styleHelpText() }}</p>
+          @if (usedModel(); as m) {
+            <p class="note" data-testid="style-model"><ng-container i18n="@@quality.usedModel">Model in use:</ng-container> <strong>{{ m.name }}</strong> · {{ m.resolution }} · <ng-container i18n="@@quality.usedSteps">{{ m.steps }} steps</ng-container></p>
+          }
+          @if (activeStyle() === 'edit') {
+            <app-edit-engine-select class="wide" testId="style-edit-engine" [engines]="store.editEngines()" [value]="store.editEngine()" (picked)="store.setEditEngine($event)" />
+            <p class="note" data-testid="style-edit-note" i18n="@@quality.editNote">Each scene needs its starting picture (the one to retouch); the scene's prompt is the instruction.</p>
+          } @else if (catalog().length && !editAvailable()) {
+            <p class="note" data-testid="style-edit-missing" i18n="@@quality.editMissing">To retouch pictures with instructions, install FLUX.1 Kontext or Qwen-Image-Edit in Models.</p>
+          }
+          @if (catalog().length && !styleAny()) {
+            <p class="note" i18n="@@quality.noModels">No image model is installed: install them under Models.</p>
+          }
+        </div>
+
+        <div class="wide quality-group">
+          <h4 i18n="@@quality.tierTitle">Quality</h4>
+          <div class="quality-buttons">
+            @for (t of tiers(); track t.tier) {
+              <button mat-stroked-button type="button" [attr.data-testid]="'tier-' + t.tier" [class.active]="activeTier() === t.tier" [attr.aria-pressed]="activeTier() === t.tier" [matTooltip]="t.text" [attr.aria-label]="t.label + ': ' + t.text" (click)="pickTier(t.tier)">
+                <span class="tier-name">{{ t.label }}</span>
+              </button>
+            }
+          </div>
+          <p class="note" i18n="@@quality.guide">
+            The factors are a guide, not a measurement: High may not fit in your VRAM and Low may degrade few-step models. Everything can be changed by hand afterwards.
+          </p>
+          @if (videoMode() && isAnimateDiff()) {
+            <p class="note" data-testid="tier-video-note" i18n="@@quality.videoNoteAnimateDiff">
+              With AnimateDiff, quality only adjusts the resolution, frames and steps of the animation (Low 384x384 · 8 f, Medium 512x512 · 16 f, High 640x640 · 24 f); the engine and its files are left untouched.
+            </p>
+          } @else if (videoMode()) {
+            <p class="note" data-testid="tier-video-note" i18n="@@quality.videoNote">
+              In video, quality also picks the installed Wan: Low the 5B Q4, Medium the 5B Q8 and High the A14B, which takes about eight times longer (about 11 minutes per clip versus 85 s with the 5B, measured on an RTX 5060 Ti) and reaches about 21 GB of RAM.
+            </p>
+          }
+          @if (tierNote(); as n) {
+            <p class="note" data-testid="tier-applied">
+              <ng-container i18n="@@quality.applied">Tier applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ n.note.join(' · ') }}</span>
+              <button mat-button type="button" data-testid="undo-tier" (click)="store.undoTier()">
+                <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+              </button>
+            </p>
+          }
+        </div>
+
+        <mat-expansion-panel class="wide tune" data-testid="tune-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title i18n="@@quality.tune">Adjust tiers</mat-panel-title>
+          </mat-expansion-panel-header>
+          <p class="note" i18n="@@quality.tuneNote">
+            What you type replaces the computed value for that tier and is saved in this browser. Empty = the computed one.
+          </p>
+          @for (t of tiers(); track t.tier) {
+            <div class="tune-row" [attr.data-testid]="'tune-' + t.tier">
+              <strong class="tier-name">{{ t.label }}</strong>
+              <mat-form-field>
+                <mat-label i18n="@@defaults.resolution">Resolution</mat-label>
+                <input matInput class="mo-data" [placeholder]="t.values.resolution" [value]="ov(t.tier, 'resolution')" (change)="setOverride(t.tier, 'resolution', $any($event.target).value)" />
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Steps</mat-label>
+                <input matInput type="number" min="1" class="mo-data" [placeholder]="'' + t.values.steps" [value]="ov(t.tier, 'steps')" (change)="setOverride(t.tier, 'steps', $any($event.target).value)" />
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>variants</mat-label>
+                <input matInput type="number" min="1" class="mo-data" [placeholder]="'' + t.values.variants" [value]="ov(t.tier, 'variants')" (change)="setOverride(t.tier, 'variants', $any($event.target).value)" />
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>lora</mat-label>
+                <mat-select [value]="ov(t.tier, 'lora')" (selectionChange)="setOverride(t.tier, 'lora', $event.value)">
+                  <mat-option value="" i18n="@@scene.loraNone">— no LoRA —</mat-option>
+                  @for (l of loraChoices(); track l) {
+                    <mat-option [value]="l"><span class="mo-data">{{ l }}</span></mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              @if (videoMode() && isAnimateDiff()) {
+                <mat-form-field>
+                  <mat-label i18n="@@quality.adRes">AnimateDiff resolution</mat-label>
+                  <input matInput class="mo-data" data-testid="tune-ad-resolution" [placeholder]="t.values.wanResolution" [value]="ov(t.tier, 'adResolution')" (change)="setOverride(t.tier, 'adResolution', $any($event.target).value)" />
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label i18n="@@quality.adFrames">AnimateDiff frames</mat-label>
+                  <input matInput type="number" min="8" max="32" class="mo-data" [placeholder]="'' + t.values.wanFrames" [value]="ov(t.tier, 'adFrames')" (change)="setOverride(t.tier, 'adFrames', $any($event.target).value)" />
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label i18n="@@quality.adSteps">AnimateDiff steps</mat-label>
+                  <input matInput type="number" min="1" class="mo-data" [placeholder]="'' + t.values.wanSteps" [value]="ov(t.tier, 'adSteps')" (change)="setOverride(t.tier, 'adSteps', $any($event.target).value)" />
+                </mat-form-field>
+              } @else if (videoMode()) {
+                <mat-form-field>
+                  <mat-label i18n="@@quality.wanRes">Wan resolution</mat-label>
+                  <input matInput class="mo-data" [placeholder]="t.values.wanResolution" [value]="ov(t.tier, 'wanResolution')" (change)="setOverride(t.tier, 'wanResolution', $any($event.target).value)" />
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label i18n="@@quality.wanFrames">Wan frames</mat-label>
+                  <input matInput type="number" min="5" class="mo-data" [placeholder]="'' + t.values.wanFrames" [value]="ov(t.tier, 'wanFrames')" (change)="setOverride(t.tier, 'wanFrames', $any($event.target).value)" />
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label i18n="@@quality.wanSteps">Wan steps</mat-label>
+                  <input matInput type="number" min="1" class="mo-data" [placeholder]="'' + t.values.wanSteps" [value]="ov(t.tier, 'wanSteps')" (change)="setOverride(t.tier, 'wanSteps', $any($event.target).value)" />
+                </mat-form-field>
+              }
+            </div>
+          }
+          <button mat-button type="button" data-testid="restore-tiers" [disabled]="!hasOverrides()" (click)="restoreTiers()" i18n="@@quality.restore">
+            Restore
+          </button>
+        </mat-expansion-panel>
+      </div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel class="panel" data-testid="defaults-section">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@defaults.title">Defaults</mat-panel-title>
+        <mat-panel-description class="mo-data"
+          >{{ c.defaults.resolution }} · {{ c.defaults.sampler }} ·
+          {{ c.defaults.steps }}</mat-panel-description
+        >
+      </mat-expansion-panel-header>
+
+      <div class="grid">
+        <div class="mode-row">
+          <mat-button-toggle-group
+            data-testid="model-mode"
+            [value]="modelMode()"
+            (change)="store.setModelMode($event.value)"
+            i18n-aria-label="@@defaults.modelModeLabel"
+            aria-label="Image model"
+          >
+            <mat-button-toggle value="checkpoint" i18n="@@defaults.modelCheckpoint"
+              >Single checkpoint</mat-button-toggle
+            >
+            <mat-button-toggle value="set" i18n="@@defaults.modelSet"
+              >Model set</mat-button-toggle
+            >
+          </mat-button-toggle-group>
+        </div>
+
+        @if (modelMode() === 'checkpoint') {
+          <mat-form-field class="span-6">
+            <mat-label i18n="@@defaults.model">Model (sd)</mat-label>
+            <mat-select
+              [value]="c.defaults.model"
+              [matTooltip]="c.defaults.model"
+              matTooltipShowDelay="400"
+              (selectionChange)="pickModel($event.value, 'checkpoint')"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (c.defaults.model) | middleEllipsis: 24 }}</span>@if (missing(modelOptions(), c.defaults.model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of modelOptions(); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+            @if (store.validation()?.defaults?.model; as err) {
+              <mat-hint class="error">{{ err }}</mat-hint>
+            }
+          </mat-form-field>
+        } @else if (c.defaults.model_set; as ms) {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.msDiffusion">Diffusion model</mat-label>
+            <mat-select
+              [value]="ms.diffusion_model"
+              [matTooltip]="ms.diffusion_model"
+              matTooltipShowDelay="400"
+              (selectionChange)="pickModel($event.value, 'set')"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (ms.diffusion_model) | middleEllipsis: 24 }}</span>@if (missing(setOptions('diffusion_model'), ms.diffusion_model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of setOptions('diffusion_model'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (ms.edit) {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.msClipL">CLIP-L (editing model)</mat-label>
+            <mat-select
+              [value]="ms.clip_l"
+              [matTooltip]="ms.clip_l ?? ''"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateModelSet({ clip_l: $event.value })"
+              [attr.data-testid]="'ms-clip_l'"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (ms.clip_l ?? '') | middleEllipsis: 24 }}</span>@if (missing(setOptions('clip_l'), ms.clip_l)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of setOptions('clip_l'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.msT5">T5-XXL (editing model)</mat-label>
+            <mat-select
+              [value]="ms.t5xxl"
+              [matTooltip]="ms.t5xxl ?? ''"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateModelSet({ t5xxl: $event.value })"
+              [attr.data-testid]="'ms-t5xxl'"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (ms.t5xxl ?? '') | middleEllipsis: 24 }}</span>@if (missing(setOptions('t5xxl'), ms.t5xxl)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of setOptions('t5xxl'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          } @else {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.msLlm">Text encoder</mat-label>
+            <mat-select
+              [value]="ms.llm"
+              [matTooltip]="ms.llm"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateModelSet({ llm: $event.value })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (ms.llm) | middleEllipsis: 24 }}</span>@if (missing(setOptions('llm'), ms.llm)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of setOptions('llm'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          }
+          <mat-form-field class="span-4">
+            <mat-label>VAE</mat-label>
+            <mat-select
+              [value]="ms.vae"
+              [matTooltip]="ms.vae"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateModelSet({ vae: $event.value })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (ms.vae) | middleEllipsis: 24 }}</span>@if (missing(setOptions('vae'), ms.vae)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of setOptions('vae'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label>cfg_scale</mat-label>
+            <input
+              matInput
+              type="number"
+              step="0.5"
+              min="0"
+              class="mo-data"
+              i18n-placeholder="@@defaults.msCfgPlaceholder"
+              placeholder="sd's"
+              [value]="ms.cfg_scale ?? ''"
+              (change)="store.updateModelSet({ cfg_scale: num($any($event.target).value) })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefaultSd">sd's by default</ng-container> (7)</mat-hint
+            >
+          </mat-form-field>
+          <div class="aux span-8">
+            <p class="note" data-testid="model-set-note" i18n="@@defaults.msNote">
+              Krea 2 and IntoRealism are used with 8 steps (Steps) and cfg_scale 1, at 1024x576. Without cfg_scale the model uses sd's (7) and the image comes out wrong.
+            </p>
+            @if (preset()) {
+              <div class="preset">
+                <button mat-stroked-button type="button" data-testid="apply-preset" (click)="applyPreset()">
+                  <mat-icon>tune</mat-icon>
+                  <ng-container i18n="@@defaults.presetApply">Use recommended settings</ng-container>
+                </button>
+                <span class="mo-data" data-testid="preset-values">{{ presetText() }}</span>
+              </div>
+            }
+          </div>
+          @if (store.validation()?.defaults?.modelSet; as err) {
+            <p class="error wide" role="alert">{{ err }}</p>
+          }
+          @if (store.validation()?.defaults?.model; as err) {
+            <p class="error wide" role="alert">{{ err }}</p>
+          }
+        }
+
+        @if (appliedNote() || promptHint() || (modelMode() === 'checkpoint' && preset())) {
+          <div class="aux wide">
+            @if (appliedNote()) {
+              <p class="note" data-testid="preset-applied">
+                <ng-container i18n="@@defaults.presetApplied">Recommended settings applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ appliedNote() }}</span>
+                <button mat-button type="button" data-testid="undo-preset" (click)="store.undoPreset()">
+                  <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+                </button>
+              </p>
+            }
+            @if (promptHint()) {
+              <p class="note" data-testid="prompt-hint">{{ promptHint() }}</p>
+            }
+            @if (modelMode() === 'checkpoint' && preset()) {
+              <div class="preset">
+                <button mat-stroked-button type="button" data-testid="apply-preset" (click)="applyPreset()">
+                  <mat-icon>tune</mat-icon>
+                  <ng-container i18n="@@defaults.presetApply">Use recommended settings</ng-container>
+                </button>
+                <span class="mo-data" data-testid="preset-values">{{ presetText() }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (videoMode()) {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.voice">Voice (piper)</mat-label>
+            <mat-select
+              [value]="c.defaults.voice"
+              [matTooltip]="c.defaults.voice"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateDefaults({ voice: $event.value, voice_speaker: undefined })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (c.defaults.voice) | middleEllipsis: 24 }}</span>@if (missing(voiceOptions(), c.defaults.voice)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of voiceOptions(); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (voiceSpeakers().length > 1) {
+            <mat-form-field class="span-3">
+              <mat-label i18n="@@scene.speaker">Speaker</mat-label>
+              <mat-select
+                [value]="c.defaults.voice_speaker ?? 0"
+                (selectionChange)="store.updateDefaults({ voice_speaker: $event.value })"
+              >
+                @for (sp of voiceSpeakers(); track sp.id) {
+                  <mat-option [value]="sp.id">{{ speakerLabel(sp.name) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+        }
+
+        <mat-form-field class="span-4">
+          <mat-label i18n="@@defaults.resolution">Resolution</mat-label>
+          <input
+            matInput
+            class="mo-data"
+            [value]="c.defaults.resolution"
+            (change)="store.updateDefaults({ resolution: $any($event.target).value })"
+          />
+          @if (store.validation()?.defaults?.resolution; as err) {
+            <mat-hint class="error">{{ err }}</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="span-4">
+          <mat-label>Sampler</mat-label>
+          <input
+            matInput
+            class="mo-data"
+            [value]="c.defaults.sampler"
+            (change)="store.updateDefaults({ sampler: $any($event.target).value })"
+          />
+        </mat-form-field>
+
+        <mat-form-field class="span-4">
+          <mat-label>Steps</mat-label>
+          <input
+            matInput
+            type="number"
+            min="1"
+            class="mo-data"
+            [value]="c.defaults.steps"
+            (change)="store.updateDefaults({ steps: +$any($event.target).value })"
+          />
+        </mat-form-field>
+
+        @if (videoMode()) {
+          <mat-form-field class="span-4">
+            <mat-label>FPS</mat-label>
+            <input
+              matInput
+              type="number"
+              min="1"
+              class="mo-data"
+              [value]="c.defaults.fps"
+              (change)="store.updateDefaults({ fps: +$any($event.target).value })"
+            />
+          </mat-form-field>
+        }
+
+        @if (videoMode()) {
+          <mat-form-field class="span-4" data-testid="defaults-transition">
+            <mat-label i18n="@@defaults.transition">Fade between scenes (s)</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              max="2"
+              step="0.1"
+              class="mo-data"
+              placeholder="0"
+              [value]="c.defaults.transition_seconds ?? ''"
+              (change)="setTransition($any($event.target).value)"
+            />
+            @if (validation().defaults.transition; as err) {
+              <mat-hint class="error">{{ err }}</mat-hint>
+            } @else {
+              <mat-hint i18n="@@defaults.transitionHint">0 or empty: hard cuts. Each scene can change it.</mat-hint>
+            }
+          </mat-form-field>
+        }
+
+        @if (videoMode()) {
+          <mat-form-field class="span-4" data-testid="defaults-transition-kind">
+            <mat-label i18n="@@defaults.transitionKind">Transition type</mat-label>
+            <mat-select [value]="c.defaults.transition ?? 'fade'" (selectionChange)="setTransitionKind($event.value)">
+              @for (k of transitionKinds; track k) {
+                <mat-option [value]="k">{{ transitionLabel(k) }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint i18n="@@defaults.transitionKindHint">Only matters with a fade longer than 0.</mat-hint>
+          </mat-form-field>
+        }
+
+        <mat-form-field class="wide">
+          <mat-label i18n="@@defaults.subjectPrompt">Subject prompt (global)</mat-label>
+          <input
+            matInput
+            [value]="c.defaults.subject_prompt || ''"
+            (change)="store.updateDefaults({ subject_prompt: $any($event.target).value })"
+          />
+        </mat-form-field>
+
+        <mat-form-field class="wide">
+          <mat-label i18n="@@defaults.negativePrompt">Negative prompt (global)</mat-label>
+          <input
+            matInput
+            [value]="c.defaults.negative_prompt || ''"
+            (change)="store.updateDefaults({ negative_prompt: $any($event.target).value })"
+          />
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel class="panel" data-testid="animate-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@defaults.animateTitle">Animation</mat-panel-title>
+        <mat-panel-description class="mo-data">{{
+          c.defaults.animate ? engineLabel() : '—'
+        }}</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="grid">
+        @if (!videoMode()) {
+          <p class="note wide" data-testid="animate-images-note" i18n="@@defaults.animateImagesNote">
+            Animation is not used in images mode: scenes only generate images.
+          </p>
+        }
+        <mat-checkbox
+          class="wide"
+          data-testid="animate-enable"
+          [checked]="animateOn()"
+          (change)="setAnimateBlock($event.checked)"
+          i18n="@@defaults.animateEnable"
+          >Configure animation</mat-checkbox
+        >
+
+        @if (c.defaults.animate; as a) {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aEngine">Animation engine</mat-label>
+            <mat-select
+              data-testid="animate-engine"
+              [value]="engine()"
+              (selectionChange)="setEngine($event.value)"
+            >
+              <mat-option value="wan">Wan</mat-option>
+              <mat-option value="animatediff">AnimateDiff</mat-option>
+              <mat-option value="minimax-h3" i18n="@@defaults.engineMiniMax">MiniMax H3</mat-option>
+              <mat-option value="ltx-2.3" i18n="@@defaults.engineLtx">LTX 2.3</mat-option>
+            </mat-select>
+            <mat-hint i18n="@@defaults.aEngineHint">Wan moves more; AnimateDiff is lighter and subtler; MiniMax H3 and LTX 2.3 generate video with audio</mat-hint>
+          </mat-form-field>
+          @if (store.engineApplied(); as e) {
+            <p class="note wide" data-testid="engine-applied">
+              <ng-container i18n="@@defaults.engineApplied">Engine applied:</ng-container>{{ ' ' }}<span class="mo-data">{{ e.note.join(' · ') }}</span>
+              <button mat-button type="button" data-testid="undo-engine" (click)="store.undoAnimateEngine()">
+                <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+              </button>
+            </p>
+            @if (e.moduleMissing) {
+              <p class="warn wide" data-testid="engine-module-missing" i18n="@@defaults.engineModuleMissing">
+                The AnimateDiff motion module is not installed: install it under Models, Video tab.
+              </p>
+            }
+            @if (e.miniMaxMissing) {
+              <p class="warn wide" data-testid="engine-minimax-missing" i18n="@@defaults.engineMiniMaxMissing">
+                The MiniMax H3 bundle is not completely installed: install it under Models, Video tab.
+              </p>
+            }
+            @if (e.ltxMissing) {
+              <p class="warn wide" data-testid="engine-ltx-missing" i18n="@@defaults.engineLtxMissing">
+                The LTX 2.3 bundle is not completely installed: install it under Models, Video tab.
+              </p>
+            }
+          }
+          @if (isAnimateDiff()) {
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aCheckpoint">SD 1.5 image model</mat-label>
+              <mat-select
+                data-testid="animate-checkpoint"
+                [value]="a.checkpoint ?? ''"
+                [matTooltip]="a.checkpoint ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ checkpoint: $event.value })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.checkpoint ?? '') | middleEllipsis: 24 }}</span>@if (missing(checkpointOptions(), a.checkpoint)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of checkpointOptions(); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-hint i18n="@@defaults.aCheckpointHint">Must be an SD 1.5 model (not SDXL)</mat-hint>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aModule">Motion module</mat-label>
+              <mat-select
+                data-testid="animate-module"
+                [value]="a.motion_module ?? ''"
+                [matTooltip]="a.motion_module ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ motion_module: $event.value })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.motion_module ?? '') | middleEllipsis: 24 }}</span>@if (missing(moduleOptions(), a.motion_module)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of moduleOptions(); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label>strength</mat-label>
+              <input
+                matInput
+                type="number"
+                step="0.05"
+                min="0.05"
+                max="1"
+                class="mo-data"
+                data-testid="animate-strength"
+                [placeholder]="animateDefaults().strength"
+                [value]="a.strength ?? ''"
+                (change)="store.updateAnimate({ strength: num($any($event.target).value) })"
+              />
+              <mat-hint class="mo-data"
+                ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().strength }}</mat-hint
+              >
+            </mat-form-field>
+            <p class="note wide" data-testid="animatediff-note" i18n="@@defaults.animateDiffNote">
+              Use a resolution with the same aspect ratio as the video (for example 640x352 for 1280x704): the image is center-cropped to that resolution, never stretched. Sides must be multiples of 8 and frames between 8 and 32.
+            </p>
+          } @else if (isMiniMax()) {
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmMode">How the picture is used</mat-label>
+              <mat-select data-testid="animate-mm-mode" [value]="a.first_frame ? 'first' : 'reference'" (selectionChange)="store.setMiniMaxMode($event.value === 'first')">
+                <mat-option value="first" i18n="@@defaults.aMmFirst">First frame: the clip starts from your picture (recommended)</mat-option>
+                <mat-option value="reference" i18n="@@defaults.aMmReference">Reference: the picture is only a model of the subject</mat-option>
+              </mat-select>
+              <mat-hint i18n="@@defaults.aMmModeHint">It also changes the DiT and the turbo LoRA to those of that mode</mat-hint>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmDit">MiniMax H3 model (DiT)</mat-label>
+              <mat-select
+                data-testid="animate-mm-dit"
+                [value]="a.diffusion_model ?? ''"
+                [matTooltip]="a.diffusion_model ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ diffusion_model: $event.value || undefined })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.diffusion_model ?? '') | middleEllipsis: 24 }}</span>@if (missing(animateOptions('diffusion_model'), a.diffusion_model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of animateOptions('diffusion_model'); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmLlm">Text encoder (Qwen3-VL)</mat-label>
+              <mat-select
+                data-testid="animate-mm-llm"
+                [value]="a.llm ?? ''"
+                [matTooltip]="a.llm ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ llm: $event.value || undefined })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.llm ?? '') | middleEllipsis: 24 }}</span>@if (missing(animateOptions('llm'), a.llm)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of animateOptions('llm'); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmVae">Video VAE</mat-label>
+              <mat-select
+                data-testid="animate-mm-vae"
+                [value]="a.vae ?? ''"
+                [matTooltip]="a.vae ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ vae: $event.value || undefined })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.vae ?? '') | middleEllipsis: 24 }}</span>@if (missing(animateOptions('vae'), a.vae)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of animateOptions('vae'); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmAudioVae">Audio VAE</mat-label>
+              <mat-select
+                data-testid="animate-mm-audio-vae"
+                [value]="a.audio_vae ?? ''"
+                [matTooltip]="a.audio_vae ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ audio_vae: $event.value || undefined })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ (a.audio_vae ?? '') | middleEllipsis: 24 }}</span>@if (missing(animateOptions('audio_vae'), a.audio_vae)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                @for (o of animateOptions('audio_vae'); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aMmLora">Turbo LoRA (optional, drafts)</mat-label>
+              <mat-select
+                data-testid="animate-mm-lora"
+                [value]="a.lora ?? ''"
+                [matTooltip]="a.lora ?? ''"
+                matTooltipShowDelay="400"
+                (selectionChange)="store.updateAnimate({ lora: $event.value || undefined })"
+              >
+                <mat-select-trigger><span class="mo-data">{{ a.lora ? (a.lora | middleEllipsis: 24) : noneLabel }}</span>@if (missing(animateOptions('lora'), a.lora)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              <mat-option value="" i18n="@@defaults.aLoraNone">— none (final render) —</mat-option>
+                @for (o of animateOptions('lora'); track o.value) {
+                  <mat-option [value]="o.value">
+                    <span class="mo-data">{{ o.value }}</span>
+                    @if (o.missing) {
+                      <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-hint i18n="@@defaults.aMmLoraHint">With it, 4 steps instead of 20 (about 100 s instead of 290 s per shot), but worse faces</mat-hint>
+            </mat-form-field>
+            <p class="note wide" data-testid="minimax-note" i18n="@@defaults.miniMaxNote">
+              Generates video and audio together from the scene's picture. The resolution sides must be multiples of 32, the frames of the form 17k+5 (22, 39, 56…) and the fps are always 24. It works with 30 GB of RAM thanks to --mmap; it needs a 16 GB GPU.
+            </p>
+          } @else if (isLtx()) {
+            @for (f of ltxFields; track f.key) {
+              <mat-form-field class="span-4">
+                <mat-label>{{ f.label }}</mat-label>
+                <mat-select
+                  [attr.data-testid]="f.testId"
+                  [value]="ltxValue(f.key)"
+                  [matTooltip]="ltxValue(f.key)"
+                  matTooltipShowDelay="400"
+                  (selectionChange)="setLtxFile(f.key, $event.value)"
+                >
+                  <mat-select-trigger><span class="mo-data">{{ ltxValue(f.key) | middleEllipsis: 24 }}</span>@if (missing(animateOptions(f.key), ltxValue(f.key))) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+                  @for (o of animateOptions(f.key); track o.value) {
+                    <mat-option [value]="o.value">
+                      <span class="mo-data">{{ o.value }}</span>
+                      @if (o.missing) {
+                        <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                      }
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+            <p class="note wide" data-testid="ltx-note" i18n="@@defaults.ltxNote">
+              Animates the scene's picture, which is the first frame of the clip, with a distilled LTX-2.3 (8 steps). The resolution sides must be multiples of 32, the frames of the form 8k+1 (9, 17, 49, 57…) and the fps are always 24. It fits a 12 GB card with little margin; it needs about 24 GB of RAM (it uses --mmap). The audio it generates can be used as ambience (option below).
+            </p>
+          } @else {
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aDiffusion">Wan model</mat-label>
+            <mat-select
+              [value]="a.diffusion_model"
+              [matTooltip]="a.diffusion_model"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateAnimate({ diffusion_model: $event.value })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (a.diffusion_model) | middleEllipsis: 24 }}</span>@if (missing(animateOptions('diffusion_model'), a.diffusion_model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of animateOptions('diffusion_model'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aHighNoise">Wan high-noise model (optional, A14B)</mat-label>
+            <mat-select
+              data-testid="animate-highnoise"
+              [value]="a.high_noise_diffusion_model ?? ''"
+              [matTooltip]="a.high_noise_diffusion_model ?? ''"
+              matTooltipShowDelay="400"
+              (selectionChange)="setHighNoiseModel($event.value)"
+            >
+              <mat-select-trigger><span class="mo-data">{{ a.high_noise_diffusion_model ? (a.high_noise_diffusion_model | middleEllipsis: 24) : noneLabel }}</span>@if (missing(animateOptions('high_noise_diffusion_model'), a.high_noise_diffusion_model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              <mat-option value="" i18n="@@defaults.aHighNoiseNone">— none (single model, e.g. Wan 5B) —</mat-option>
+              @for (o of animateOptions('high_noise_diffusion_model'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+            @if (twoExpert()) {
+              <mat-hint i18n="@@defaults.aHighNoiseHint">“Wan model” becomes the low-noise expert</mat-hint>
+            }
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aT5">Text encoder (umt5)</mat-label>
+            <mat-select
+              [value]="a.t5xxl"
+              [matTooltip]="a.t5xxl"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateAnimate({ t5xxl: $event.value })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (a.t5xxl) | middleEllipsis: 24 }}</span>@if (missing(animateOptions('t5xxl'), a.high_noise_diffusion_model)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of animateOptions('t5xxl'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label>VAE</mat-label>
+            <mat-select
+              [value]="a.vae"
+              [matTooltip]="a.vae"
+              matTooltipShowDelay="400"
+              (selectionChange)="store.updateAnimate({ vae: $event.value })"
+            >
+              <mat-select-trigger><span class="mo-data">{{ (a.vae) | middleEllipsis: 24 }}</span>@if (missing(animateOptions('vae'), a.vae)) { <span class="missing" i18n="@@defaults.missing"> ⚠ not on disk</span> }</mat-select-trigger>
+              @for (o of animateOptions('vae'); track o.value) {
+                <mat-option [value]="o.value">
+                  <span class="mo-data">{{ o.value }}</span>
+                  @if (o.missing) {
+                    <span class="missing" i18n="@@defaults.missing">⚠ not on disk</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          }
+
+          @if (isMiniMax() || isLtx()) {
+            <div class="span-8">
+              <mat-checkbox
+                data-testid="animate-model-audio"
+                [checked]="a.model_audio ?? false"
+                (change)="store.updateAnimate({ model_audio: $event.checked || undefined })"
+                i18n="@@defaults.aModelAudio"
+                >Use the model's sound as ambience</mat-checkbox
+              >
+              <p class="note" i18n="@@defaults.aModelAudioHint">It plays once, quietly, under the narration and the music; never reversed.</p>
+            </div>
+          }
+
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aResolution">Resolution</mat-label>
+            <input
+              matInput
+              class="mo-data"
+              [placeholder]="animateDefaults().resolution"
+              [value]="a.resolution ?? ''"
+              (change)="store.updateAnimate({ resolution: $any($event.target).value })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().resolution }}</mat-hint
+            >
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label i18n="@@defaults.aFrames">Frames</mat-label>
+            <input
+              matInput
+              type="number"
+              [min]="isAnimateDiff() ? 8 : isMiniMax() ? 5 : isLtx() ? 9 : 1"
+              [max]="isAnimateDiff() ? 32 : null"
+              [step]="isMiniMax() ? 17 : isLtx() ? 8 : 1"
+              class="mo-data"
+              [placeholder]="'' + animateDefaults().frames"
+              [value]="a.frames ?? ''"
+              (change)="store.updateAnimate({ frames: num($any($event.target).value) })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().frames }}</mat-hint
+            >
+          </mat-form-field>
+          @if (!isMiniMax() && !isLtx()) {
+          <mat-form-field class="span-4">
+            <mat-label>FPS</mat-label>
+            <input
+              matInput
+              type="number"
+              min="1"
+              class="mo-data"
+              [placeholder]="'' + animateDefaults().fps"
+              [value]="a.fps ?? ''"
+              (change)="store.updateAnimate({ fps: num($any($event.target).value) })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().fps }}</mat-hint
+            >
+          </mat-form-field>
+          }
+          <mat-form-field class="span-4">
+            <mat-label>Steps</mat-label>
+            <input
+              matInput
+              type="number"
+              min="1"
+              class="mo-data"
+              [placeholder]="'' + animateDefaults().steps"
+              [value]="a.steps ?? ''"
+              (change)="store.updateAnimate({ steps: num($any($event.target).value) })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().steps }}</mat-hint
+            >
+          </mat-form-field>
+          <mat-form-field class="span-4">
+            <mat-label>cfg_scale</mat-label>
+            <input
+              matInput
+              type="number"
+              step="0.5"
+              min="0"
+              class="mo-data"
+              [placeholder]="animateDefaults().cfg"
+              [value]="a.cfg_scale ?? ''"
+              (change)="store.updateAnimate({ cfg_scale: num($any($event.target).value) })"
+            />
+            <mat-hint class="mo-data"
+              ><ng-container i18n="@@defaults.byDefault">default</ng-container> {{ animateDefaults().cfg }}</mat-hint
+            >
+          </mat-form-field>
+          @if (twoExpert() && !isAnimateDiff()) {
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aHighNoiseSteps">Steps (high noise)</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                class="mo-data"
+                data-testid="animate-highnoise-steps"
+                placeholder="8"
+                [value]="a.high_noise_steps ?? ''"
+                (change)="store.updateAnimate({ high_noise_steps: num($any($event.target).value) })"
+              />
+              <mat-hint class="mo-data"
+                ><ng-container i18n="@@defaults.byDefault">default</ng-container> 8</mat-hint
+              >
+            </mat-form-field>
+            <mat-form-field class="span-4">
+              <mat-label i18n="@@defaults.aHighNoiseCfg">cfg_scale (high noise)</mat-label>
+              <input
+                matInput
+                type="number"
+                step="0.5"
+                min="0"
+                class="mo-data"
+                data-testid="animate-highnoise-cfg"
+                placeholder="3.5"
+                [value]="a.high_noise_cfg_scale ?? ''"
+                (change)="store.updateAnimate({ high_noise_cfg_scale: num($any($event.target).value) })"
+              />
+              <mat-hint class="mo-data"
+                ><ng-container i18n="@@defaults.byDefault">default</ng-container> 3.5</mat-hint
+              >
+            </mat-form-field>
+            <p class="note wide" data-testid="highnoise-note" i18n="@@defaults.aHighNoiseNote">
+              With two experts the animation takes about eight times longer (about 11 minutes per clip versus 85 s with Wan 5B) and reaches about 21 GB of RAM; this is what was measured on an RTX 5060 Ti, not a guarantee.
+            </p>
+          }
+          @if (store.validation()?.defaults?.animate; as err) {
+            <p class="error wide" role="alert">{{ err }}</p>
+          }
+        }
+      </div>
+    </mat-expansion-panel>
+    }
+  </mat-accordion>
+}

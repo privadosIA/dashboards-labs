@@ -1,0 +1,137 @@
+{
+  "version": "1.0",
+  "id": "preset",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Name",
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "The style needs a name."
+        }
+      }
+    },
+    {
+      "key": "rhythm",
+      "type": "number",
+      "label": "Rhythm: seconds of each piece of the script",
+      "defaultValue": 6,
+      "validation": {
+        "required": true,
+        "min": 2,
+        "max": 15,
+        "messages": {
+          "required": "The rhythm is between 2 and 15 seconds.",
+          "min": "The rhythm is between 2 and 15 seconds.",
+          "max": "The rhythm is between 2 and 15 seconds."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "rhythmProblem"
+    },
+    {
+      "key": "dark",
+      "type": "text",
+      "label": "Dark colour",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Write the colour like #aabbcc.",
+          "pattern": "Write the colour like #aabbcc."
+        }
+      }
+    },
+    {
+      "key": "light",
+      "type": "text",
+      "label": "Light colour",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Write the colour like #aabbcc.",
+          "pattern": "Write the colour like #aabbcc."
+        }
+      }
+    },
+    {
+      "key": "accent",
+      "type": "text",
+      "label": "Accent colour",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Write the colour like #aabbcc.",
+          "pattern": "Write the colour like #aabbcc."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "accentProblem"
+    },
+    {
+      "key": "display",
+      "type": "select",
+      "label": "Typeface for big words"
+    },
+    {
+      "key": "body",
+      "type": "select",
+      "label": "Typeface for the verse"
+    },
+    {
+      "key": "defaultMode",
+      "type": "radio",
+      "label": "Mode by default",
+      "defaultValue": "dark",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "concept",
+      "type": "textarea",
+      "label": "Concept",
+      "props": {
+        "rows": 4
+      },
+      "validation": {
+        "maxLength": 200,
+        "messages": {
+          "maxLength": "The concept can have up to 200 characters."
+        }
+      }
+    },
+    {
+      "key": "verseStyle",
+      "type": "select",
+      "label": "Verse style",
+      "defaultValue": "plain"
+    },
+    {
+      "key": "hitStyle",
+      "type": "select",
+      "label": "Word-hit style",
+      "defaultValue": "plain"
+    },
+    {
+      "key": "parts",
+      "type": "multiselect",
+      "label": "Parts of the catalog (none: all the usual ones)"
+    },
+    {
+      "type": "slot",
+      "name": "partsProblem"
+    }
+  ]
+}

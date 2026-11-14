@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.vector-tab {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+.head {
+  margin: 0;
+  font-weight: var(--lab-fw-control);
+}
+
+.dirty {
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+  font-weight: normal;
+}
+
+.uses {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+lab-vector-editor-page {
+  // The vector editor's own layout needs room: the canvas, the layers, the properties and its timeline.
+  min-height: 40rem;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  overflow: hidden;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  align-items: center;
+}

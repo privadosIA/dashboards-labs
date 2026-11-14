@@ -1,0 +1,211 @@
+<div class="timeline" role="group" [attr.aria-label]="t.timeline.label">
+  <div class="labels">
+    <span class="label" [style.height.px]="lane.ruler"></span>
+    <span class="label" [style.height.px]="lane.sections">{{ t.timeline.sections }}</span>
+    <span class="label" [style.height.px]="lane.loudness">{{ t.timeline.loudness }}</span>
+    <span class="label" [style.height.px]="lane.words">{{ t.timeline.words }}</span>
+    <span class="label" [style.height.px]="lane.main">{{ t.timeline.main }}</span>
+    @for (n of extraLanes; track n) {
+      <span class="label" [style.height.px]="lane.extra">{{ t.timeline.extra(n + 1) }}</span>
+    }
+    @for (l of layerLanes(); track l.id) {
+      <span class="label layer-label" data-testid="layer-label" role="button" tabindex="0" [class.reorder-target]="layerTarget() === l.index" [style.height.px]="lane.layer" [attr.title]="t.timeline.moveLayer" [attr.aria-label]="t.timeline.layer(l.index + 1, l.id) + '. ' + t.timeline.moveLayer" (pointerdown)="onLayerLabelDown($event, l.index)" (pointermove)="onLayerLabelMove($event)" (pointerup)="onLayerLabelUp()" (pointercancel)="onLayerLabelUp()" (keydown)="onLayerLabelKey($event, l.index)">{{ t.timeline.layer(l.index + 1, l.id) }}</span>
+    }
+    @if (canAddLayer()) {
+      <span class="label layer-label new" [style.height.px]="lane.newLayer"></span>
+    }
+    @for (row of kfRows(); track row.key) {
+      <span class="label kf-label" data-testid="kf-label" [style.height.px]="lane.keyframe" [attr.title]="t.timeline.keyframes + ': ' + rowLabel(row)">◆ {{ rowLabel(row) }}</span>
+    }
+    @for (row of itemKfRows(); track row.key) {
+      <span class="label kf-label" data-testid="item-kf-label" [style.height.px]="lane.keyframe" [attr.title]="t.timeline.keyframes + ': ' + itemRowLabel(row)">◆ {{ itemRowLabel(row) }}</span>
+    }
+    <span class="zoom">
+      <button type="button" class="magnet" data-testid="magnet" [class.on]="magnet()" [attr.aria-pressed]="magnet()" [attr.aria-label]="t.timeline.magnet" [attr.title]="t.timeline.magnetHint" (click)="toggleMagnet()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v9a6 6 0 0 0 12 0V3h-4v9a2 2 0 0 1-4 0V3z M6 7h4 M14 7h4" /></svg>
+      </button>
+      <button type="button" data-testid="zoom-fit" [attr.aria-label]="t.timeline.zoomFit" [attr.title]="t.timeline.zoomFit" (click)="zoomFit()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4M4 5v14M20 5v14" /></svg>
+      </button>
+      <button type="button" [attr.aria-label]="t.timeline.zoomOut" [attr.title]="t.timeline.zoomOut" (click)="zoomOut()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5M8 10.5h5" /></svg>
+      </button>
+      <button type="button" [attr.aria-label]="t.timeline.zoomIn" [attr.title]="t.timeline.zoomIn" (click)="zoomIn()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" /><path d="M15 15l5 5M8 10.5h5M10.5 8v5" /></svg>
+      </button>
+    </span>
+  </div>
+
+  <div class="scroller" #scroller tabindex="0" (scroll)="onScroll()" (wheel)="onWheel($event)" (keydown)="onKey($event)">
+    <div class="lanes" [style.width.px]="width()" (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+      <svg class="lane ruler" [attr.width]="width()" [attr.height]="lane.ruler">
+        @for (m of marks(); track m.t) {
+          <line class="tick" [attr.x1]="x(m.t)" [attr.x2]="x(m.t)" [attr.y1]="lane.ruler - 8" [attr.y2]="lane.ruler" />
+          <text class="mark" [attr.x]="x(m.t) + 3" [attr.y]="lane.ruler - 10">{{ m.label }}</text>
+        }
+        @for (b of bars(); track b) {
+          <line class="bar" [attr.x1]="x(b)" [attr.x2]="x(b)" y1="0" [attr.y2]="lane.ruler" />
+        }
+      </svg>
+
+      <svg class="lane" [attr.width]="width()" [attr.height]="lane.sections">
+        @for (s of sections(); track s.start) {
+          <svg [attr.x]="x(s.start)" [attr.width]="w(s.start, s.end)" [attr.height]="lane.sections">
+            <rect [class]="'section tone-' + s.tone" width="100%" [attr.height]="lane.sections" />
+            <text class="section-tag" x="4" y="14">{{ s.tag }}</text>
+          </svg>
+        }
+      </svg>
+
+      <svg class="lane" [attr.width]="width()" [attr.height]="lane.loudness">
+        <path class="loudness" [attr.d]="loudnessPath()" />
+      </svg>
+
+      <svg class="lane" [attr.width]="width()" [attr.height]="lane.words">
+        @for (word of words(); track word.start + word.text) {
+          <svg [attr.x]="x(word.start)" [attr.width]="w(word.start, word.end)" [attr.height]="lane.words">
+            <text class="word" x="2" y="14">{{ word.text }}</text>
+          </svg>
+        }
+      </svg>
+
+      <svg class="lane main" [attr.width]="width()" [attr.height]="lane.main">
+        @for (b of blocks(); track b.id) {
+          <g class="block" [class.empty]="isEmpty(b)" [class.selected]="isSelected(b.id)" [class.swap-target]="swapTarget() === b.id" (click)="pick($event, b.id)" (keydown.enter)="pick($event, b.id)" (pointerdown)="onBlockDown($event, b.id)">
+            <svg [attr.x]="x(b.start)" [attr.width]="w(b.start, b.end)" [attr.height]="lane.main">
+              <rect class="block-body" role="button" tabindex="0" [attr.data-piece]="b.id" [attr.aria-pressed]="isSelected(b.id)" [attr.aria-label]="t.layers.piece(b.id) + ': ' + b.part + '. ' + t.timeline.moveKeys" (keydown)="onBlockKey($event, b.id)" x="1" y="2" [attr.width]="w(b.start, b.end) - 2" [attr.height]="lane.main - 4" rx="4" />
+              <text class="block-name" x="8" y="16">{{ isEmpty(b) ? t.layers.empty : b.part }}</text>
+              @if (b.pageParts >= noteFrom) {
+                <text class="page-count" data-testid="page-parts" [class.full]="b.pageParts >= maxParts" [attr.x]="w(b.start, b.end) - 6" [attr.y]="lane.main - 5" text-anchor="end">{{ b.pageParts }}/{{ maxParts }}<title>{{ t.timeline.pageParts(b.pageParts, maxParts) }}</title></text>
+              }
+              @if (grades()[b.id]; as g) {
+                <g class="grade-mark" data-testid="grade-mark" [attr.data-verdict]="g.verdict" [attr.transform]="'translate(' + (w(b.start, b.end) - 32) + ', 11)'">
+                  <title>{{ g.text }}</title>
+                  <circle r="6" />
+                  <text text-anchor="middle" y="3">{{ g.verdict === 'pass' ? '✓' : g.verdict === 'weak' ? '~' : '✕' }}</text>
+                </g>
+              }
+              @if (warnMarks().get(b.id); as m) {
+                <g class="warn-mark" data-testid="warn-mark" [class.soft]="!m.hard" [class.refused]="m.refused" [attr.transform]="'translate(' + (w(b.start, b.end) - 18) + ', 5)'">
+                  <title>{{ m.text }}</title>
+                  <path d="M7 1 L13 12 H1 Z M7 5 v3 M7 10 v.5" />
+                </g>
+              }
+            </svg>
+            @for (d of b.dots; track $index) {
+              <g class="dot-hit" role="button" tabindex="0" [attr.aria-label]="t.timeline.line($index + 1)" (click)="pickLine($event, b.id, $index)" (keydown.enter)="pickLine($event, b.id, $index)">
+                <circle class="dot-area" [attr.cx]="x(d)" [attr.cy]="lane.main - 9" r="8" />
+                <circle class="dot" [class.selected]="isLineSelected(b.id, $index)" [attr.cx]="x(d)" [attr.cy]="lane.main - 9" [attr.r]="isLineSelected(b.id, $index) ? 5 : 3" />
+              </g>
+              @if (isLineSelected(b.id, $index)) {
+                <g class="close" role="button" tabindex="0" [attr.aria-label]="t.timeline.removeLine" (click)="dropLine($event, b.id, $index)" (keydown.enter)="dropLine($event, b.id, $index)">
+                  <title>{{ t.timeline.removeLine }}</title>
+                  <circle [attr.cx]="x(d) + 14" [attr.cy]="lane.main - 19" r="8" />
+                  <path [attr.d]="'M' + (x(d) + 11) + ',' + (lane.main - 22) + ' l6,6 m0,-6 l-6,6'" />
+                </g>
+              }
+            }
+            @if (b.hit !== undefined) {
+              <path class="flag" [attr.d]="'M' + x(b.hit) + ',4 v14 l9,-4 z'" />
+            }
+          </g>
+          @if (b.id !== firstId() && !locked()) {
+            <rect class="cut-handle" data-testid="cut-handle" role="separator" tabindex="0" aria-orientation="vertical" [attr.aria-valuenow]="b.start" [attr.aria-valuetext]="dragLabel(b.start)" [attr.x]="x(b.start) - 4" y="0" width="8" [attr.height]="lane.main" [attr.aria-label]="cutLabel(b.id) + '. ' + t.timeline.moveKeys" (pointerdown)="onCutDown($event, b.id)" (keydown)="onCutKey($event, b.id)" />
+          }
+        }
+      </svg>
+
+      @for (n of extraLanes; track n) {
+        <svg class="lane extra" [attr.data-extra]="n" [class.reorder-target]="laneTarget() === n" [attr.width]="width()" [attr.height]="lane.extra">
+          @for (b of blocks(); track b.id) {
+            @if (b.extras[n]; as e) {
+              <g class="block extra-block" [class.selected]="isSelected(b.id, n)" (click)="pick($event, b.id, n)" (keydown.enter)="pick($event, b.id, n)" (keydown)="onExtraKey($event, b.id, n)" (pointerdown)="onExtraDown($event, b.id, n)">
+                <svg [attr.x]="x(b.start)" [attr.width]="w(b.start, b.end)" [attr.height]="lane.extra">
+                  <rect class="block-body" role="button" tabindex="0" [attr.data-piece]="b.id" [attr.aria-pressed]="isSelected(b.id, n)" [attr.aria-label]="t.timeline.extra(n + 1) + ' ' + t.layers.piece(b.id) + ': ' + e.part + '. ' + t.timeline.extraKeys" x="1" y="2" [attr.width]="w(b.start, b.end) - 2" [attr.height]="lane.extra - 4" rx="3" />
+                  <text class="block-name" x="6" y="15">{{ e.part }}</text>
+                </svg>
+                @if (isSelected(b.id, n)) {
+                  <g class="close" role="button" tabindex="0" [attr.aria-label]="t.timeline.removeExtra" (click)="dropExtra($event, b.id, n)" (keydown.enter)="dropExtra($event, b.id, n)">
+                    <title>{{ t.timeline.removeExtra }}</title>
+                    <circle [attr.cx]="x(b.end) - 12" cy="13" r="8" />
+                    <path [attr.d]="'M' + (x(b.end) - 15) + ',10 l6,6 m0,-6 l-6,6'" />
+                  </g>
+                }
+              </g>
+            }
+          }
+        </svg>
+      }
+
+      @for (l of layerLanes(); track l.id) {
+        <svg class="lane layer-lane" data-testid="layer-lane" [class.reorder-target]="layerTarget() === l.index" [attr.data-layer]="l.id" [attr.data-layer-index]="l.index" [attr.width]="width()" [attr.height]="lane.layer">
+          @for (it of l.items; track it.n) {
+            <g class="block layer-block" data-testid="item-block" [class.selected]="itemSelected(l.id, it.n)" (click)="pickItem($event, l.id, it.n)" (keydown.enter)="pickItem($event, l.id, it.n)" (pointerdown)="onItemDown($event, l.id, it.n, 'item')">
+              <svg [attr.x]="x(it.start)" [attr.width]="w(it.start, it.end)" [attr.height]="lane.layer">
+                <rect class="block-body" role="button" tabindex="0" [attr.aria-pressed]="itemSelected(l.id, it.n)" [attr.aria-label]="itemLabel(l.id, it.n, it.part)" x="1" y="2" [attr.width]="w(it.start, it.end) - 2" [attr.height]="lane.layer - 4" rx="3" />
+                <text class="block-name" x="6" y="15">{{ it.part }}</text>
+                @if (itemMarks().get(l.id + ':' + it.n); as m) {
+                  <g class="warn-mark" data-testid="item-warn-mark" [attr.transform]="'translate(' + (w(it.start, it.end) - 34) + ', 4)'">
+                    <title>{{ m }}</title>
+                    <path d="M7 1 L13 12 H1 Z M7 5 v3 M7 10 v.5" />
+                  </g>
+                }
+              </svg>
+              @if (!locked()) {
+                <rect class="item-handle" data-testid="item-start" [attr.x]="x(it.start) - 3" y="0" width="6" [attr.height]="lane.layer" (pointerdown)="onItemDown($event, l.id, it.n, 'item-start')" />
+                <rect class="item-handle" data-testid="item-end" [attr.x]="x(it.end) - 3" y="0" width="6" [attr.height]="lane.layer" (pointerdown)="onItemDown($event, l.id, it.n, 'item-end')" />
+              }
+              @if (itemSelected(l.id, it.n)) {
+                <g class="close" role="button" tabindex="0" [attr.aria-label]="t.timeline.removeItem" (click)="dropItemBlock($event, l.id, it.n)" (keydown.enter)="dropItemBlock($event, l.id, it.n)">
+                  <title>{{ t.timeline.removeItem }}</title>
+                  <circle [attr.cx]="x(it.end) - 14" cy="11" r="8" />
+                  <path [attr.d]="'M' + (x(it.end) - 17) + ',8 l6,6 m0,-6 l-6,6'" />
+                </g>
+              }
+            </g>
+          }
+        </svg>
+      }
+      @if (canAddLayer()) {
+        <svg class="lane new-layer" data-testid="new-layer" [attr.width]="width()" [attr.height]="lane.newLayer">
+          <text class="new-layer-text" x="8" y="13">{{ t.timeline.newLayer }}</text>
+        </svg>
+      }
+
+      @for (row of kfRows(); track row.key) {
+        <svg class="lane keyframes" data-testid="kf-row" [attr.data-row]="row.key" [attr.width]="width()" [attr.height]="lane.keyframe" [attr.title]="t.timeline.addKeyframeHint" (dblclick)="addKeyframeAt($event, row)">
+          @for (span of row.spans; track span.piece) {
+            <line class="kf-span" [attr.x1]="x(span.start)" [attr.x2]="x(span.end)" [attr.y1]="lane.keyframe / 2" [attr.y2]="lane.keyframe / 2" />
+            @for (f of span.frames; track $index) {
+              <path class="kf" role="button" tabindex="0" data-testid="kf" [class.selected]="keyframeSelected(span, row, $index)" [class.step]="f.ease === 'step'" [attr.d]="diamond(x(span.start + f.t))" [attr.aria-label]="keyframeLabel(row, span, $index)" [attr.aria-pressed]="keyframeSelected(span, row, $index)" (click)="pickKeyframe($event, row, span, $index)" (keydown.enter)="pickKeyframe($event, row, span, $index)" (keydown)="onKeyframeKey($event, row, span, $index)" (pointerdown)="onKeyframeDown($event, row, span, $index)">
+                <title>{{ keyframeLabel(row, span, $index) }}</title>
+              </path>
+            }
+          }
+        </svg>
+      }
+
+      @for (row of itemKfRows(); track row.key) {
+        <svg class="lane keyframes" data-testid="item-kf-row" [attr.data-row]="row.key" [attr.width]="width()" [attr.height]="lane.keyframe" [attr.title]="t.timeline.addKeyframeHint" (dblclick)="addItemKeyframeAt($event, row)">
+          <line class="kf-span" [attr.x1]="x(row.start)" [attr.x2]="x(row.end)" [attr.y1]="lane.keyframe / 2" [attr.y2]="lane.keyframe / 2" />
+          @for (f of row.frames; track $index) {
+            <path class="kf" role="button" tabindex="0" data-testid="kf" [class.selected]="itemKeyframeSelected(row, $index)" [class.step]="f.ease === 'step'" [attr.d]="diamond(x(row.start + f.t))" [attr.aria-label]="itemKeyframeLabel(row, $index)" [attr.aria-pressed]="itemKeyframeSelected(row, $index)" (click)="pickItemKeyframe($event, row, $index)" (keydown.enter)="pickItemKeyframe($event, row, $index)" (keydown)="onItemKeyframeKey($event, row, $index)" (pointerdown)="onItemKeyframeDown($event, row, $index)">
+              <title>{{ itemKeyframeLabel(row, $index) }}</title>
+            </path>
+          }
+        </svg>
+      }
+
+      <div class="playhead" [style.left.px]="x(playhead())"></div>
+      @if (drag(); as d) {
+        @if (d.kind !== 'swap') {
+          <div class="guide" data-testid="guide" [style.left.px]="x(d.time)"></div>
+          <div class="drag-time" data-testid="drag-time" [style.left.px]="x(d.time)">{{ dragLabel(d.time) }}</div>
+        }
+      }
+      @if (dropAt(); as d) {
+        <div class="drop-line" data-testid="drop-line" [attr.data-lane]="laneName(d.lane)" [style.left.px]="x(d.t)"></div>
+      }
+    </div>
+  </div>
+</div>

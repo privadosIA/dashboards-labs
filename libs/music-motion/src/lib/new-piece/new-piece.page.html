@@ -1,0 +1,101 @@
+<section class="new">
+  <a class="back" [routerLink]="link('pieces')">← {{ common.nav.pieces }}</a>
+  <h1>{{ n.title }}</h1>
+
+  @if (working()) {
+    <div class="progress" role="status" aria-live="polite" data-testid="progress">
+      <span class="spinner" aria-hidden="true"></span>
+      <div class="what">
+        <strong data-testid="stage">{{ stage() }}</strong>
+        <span class="time" data-testid="elapsed">{{ n.progress.elapsed(elapsed()) }}</span>
+        <p class="meta">{{ n.progress.keepOpen }}</p>
+        @if (phase() === 'design') {
+          <p class="meta" data-testid="created-note">{{ n.progress.created }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!loaded()) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (missing()) {
+    <div class="panel" role="alert" data-testid="missing">
+      <p>{{ refused() || t.songMissing }}</p>
+      <a [routerLink]="link('songs')">{{ common.back }}</a>
+    </div>
+  } @else {
+    <p class="intro">{{ n.intro }}</p>
+
+    <ol class="steps" data-testid="steps">
+      @for (label of steps; track $index) {
+        <li>
+          <button type="button" [class.on]="step() === $index" [attr.aria-current]="step() === $index ? 'step' : null" [attr.data-testid]="'step-' + $index" [disabled]="!canGo($any($index))" (click)="go($any($index))">
+            <span class="num">{{ $index + 1 }}</span> {{ label }}
+          </button>
+        </li>
+      }
+    </ol>
+    <p class="meta" data-testid="step-of">{{ n.stepOf(step() + 1, steps.length) }}</p>
+
+    @switch (step()) {
+      @case (0) {
+        <div class="columns">
+          <div class="panel idea">
+            <h2 class="sub">{{ n.prompt.title }}</h2>
+            <app-prompt-step [(prompt)]="prompt" [(valid)]="promptValid" [(assistant)]="assistant" [own]="isOwn()" />
+          </div>
+          <app-look-step [(look)]="look" />
+        </div>
+        <div class="nav">
+          <button type="button" class="primary" data-testid="next" (click)="go(1)">{{ n.next }}</button>
+        </div>
+      }
+      @case (1) {
+        <app-song-step [songs]="songs()" [error]="songsError()" [chosen]="song()" (picked)="pick($event)" />
+        <div class="nav">
+          <button type="button" data-testid="back" (click)="go(0)">{{ n.back }}</button>
+          <button type="button" class="primary" data-testid="next" [disabled]="!song()" (click)="go(2)">{{ n.next }}</button>
+        </div>
+      }
+      @case (2) {
+        <div class="columns options-grid">
+          <div class="panel options">
+            <dynamic-form
+              [schema]="schema()"
+              [(model)]="model"
+              [showDefaultActions]="false"
+              showErrors="always"
+              (statusChange)="valid.set($event === 'VALID')"
+              (formSubmit)="create()"
+            />
+            @if (slow()) {
+              <p class="note" data-testid="slow">{{ t.slowNote }}</p>
+            }
+            @if (refused()) {
+              <p class="refused" role="alert" data-testid="refused">{{ refused() }}</p>
+            }
+            <div class="nav">
+              <button type="button" data-testid="back" (click)="go(1)">{{ n.back }}</button>
+              <button type="button" class="create" data-testid="create" [disabled]="!valid() || !promptValid() || working()" (click)="create()">
+                {{ working() ? t.creating : t.create }}
+              </button>
+            </div>
+          </div>
+          <aside class="panel summary" data-testid="summary">
+            <h2 class="sub">{{ n.options.summary }}</h2>
+            <p class="song" data-testid="song"><span>{{ n.options.song }}:</span> <strong>{{ song()?.title }}</strong> · {{ clock(song()?.seconds ?? 0) }} <button type="button" class="link" data-testid="change-song" (click)="go(1)">{{ n.song.change }}</button></p>
+            <p class="song" data-testid="look"><span>{{ n.options.look }}:</span> <strong>{{ lookName(look()) || n.options.noLook }}</strong> <button type="button" class="link" data-testid="change-look" (click)="go(0)">{{ n.song.change }}</button></p>
+            <p class="song" data-testid="text"><span>{{ n.options.text }}:</span> <strong>{{ prompt().trim() || n.options.noText }}</strong> <button type="button" class="link" data-testid="change-text" (click)="go(0)">{{ n.song.change }}</button></p>
+            <p class="song" data-testid="assistant"><span>{{ n.options.assistant }}:</span> <strong>{{ assistant().provider || n.options.routing }}{{ assistant().model ? ' · ' + assistant().model : '' }}</strong> <button type="button" class="link" data-testid="change-assistant" (click)="go(0)">{{ n.song.change }}</button></p>
+            <h3 class="sub">{{ n.options.nextTitle }}</h3>
+            <ol class="next" data-testid="next-steps">
+              @for (item of n.options.next; track $index) {
+                <li>{{ item }}</li>
+              }
+            </ol>
+          </aside>
+        </div>
+      }
+    }
+  }
+</section>

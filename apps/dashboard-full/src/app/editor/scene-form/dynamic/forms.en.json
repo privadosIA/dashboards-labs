@@ -1,0 +1,1399 @@
+{
+  "version": "1.0",
+  "id": "scene",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "narration",
+      "type": "hidden"
+    },
+    {
+      "key": "pictureMode",
+      "type": "hidden"
+    },
+    {
+      "key": "overlayOn",
+      "type": "hidden"
+    },
+    {
+      "key": "slots.serverError",
+      "type": "slot",
+      "props": {
+        "slot": "serverError"
+      },
+      "layout": {
+        "col": 12
+      }
+    },
+    {
+      "key": "id",
+      "type": "text",
+      "label": "id",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "scene-id"
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "id"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.preview",
+      "type": "slot",
+      "props": {
+        "slot": "preview"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.picture",
+      "type": "slot",
+      "props": {
+        "slot": "picture"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.motionPart",
+      "type": "slot",
+      "props": {
+        "slot": "motionPart"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "pictureMode",
+              "operator": "eq",
+              "value": "part"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "motion_graphic",
+      "type": "textarea",
+      "label": "What the graphic shows",
+      "description": "An animated page written by the model and drawn by Chrome, as long as the narration. Titles, lists, charts, diagrams.",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "motion-graphic"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "any": [
+                {
+                  "field": "pictureMode",
+                  "operator": "eq",
+                  "value": "motion"
+                },
+                {
+                  "field": "ctx.autoPart",
+                  "operator": "truthy"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "motionGraphic"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.pictureSource",
+      "type": "slot",
+      "props": {
+        "slot": "pictureSource"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.pictures",
+      "type": "slot",
+      "props": {
+        "slot": "pictures"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.images",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "prompt",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "scene-prompt"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.generated",
+          "operator": "truthy"
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "prompt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.assistPrompt",
+      "type": "slot",
+      "props": {
+        "slot": "assistPrompt"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.generated",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.describe",
+      "type": "slot",
+      "props": {
+        "slot": "describe"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.generated",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "negative_prompt",
+      "type": "textarea",
+      "label": "negative_prompt",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "scene-negative"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.generated",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.init",
+      "type": "slot",
+      "props": {
+        "slot": "init"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.generated",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "type": "group",
+      "id": "basics",
+      "columns": 3,
+      "fields": [
+        {
+          "key": "seed",
+          "type": "number",
+          "label": "seed",
+          "placeholder": "random",
+          "description": "Empty = random seed per run",
+          "props": {
+            "attributes": {
+              "data-testid": "scene-seed"
+            }
+          }
+        },
+        {
+          "key": "lora",
+          "type": "select",
+          "label": "lora",
+          "options": {
+            "source": "remote",
+            "endpoint": "scene:loras"
+          },
+          "logic": {
+            "showWhen": {
+              "field": "ctx.generated",
+              "operator": "truthy"
+            }
+          },
+          "props": {
+            "attributes": {
+              "data-testid": "scene-lora"
+            }
+          }
+        },
+        {
+          "key": "variants",
+          "type": "number",
+          "label": "variants",
+          "props": {
+            "attributes": {
+              "data-testid": "scene-variants",
+              "min": 1
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "field": "ctx.images",
+              "operator": "truthy"
+            }
+          },
+          "validation": {
+            "validators": [
+              {
+                "name": "sceneRule",
+                "args": {
+                  "rule": "variants"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "cssClass": "df-group--plain"
+    },
+    {
+      "key": "slots.quality",
+      "type": "slot",
+      "props": {
+        "slot": "quality"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.qualityOn",
+          "operator": "truthy"
+        }
+      },
+      "fields": [
+        {
+          "type": "group",
+          "id": "render-row",
+          "columns": 3,
+          "cssClass": "df-group--plain",
+          "fields": [
+            {
+              "key": "render.resolution",
+              "type": "text",
+              "label": "Resolution",
+              "props": {
+                "attributes": {
+                  "data-testid": "scene-render-resolution"
+                }
+              }
+            },
+            {
+              "key": "render.steps",
+              "type": "number",
+              "label": "Steps",
+              "props": {
+                "attributes": {
+                  "min": 1,
+                  "data-testid": "scene-render-steps"
+                }
+              }
+            },
+            {
+              "key": "render.cfg_scale",
+              "type": "number",
+              "label": "cfg_scale",
+              "placeholder": "sd's own",
+              "props": {
+                "attributes": {
+                  "min": 0,
+                  "step": 0.5,
+                  "data-testid": "scene-render-cfg"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "id": "animation-row",
+          "columns": 3,
+          "cssClass": "df-group--plain",
+          "fields": [
+            {
+              "key": "animation.resolution",
+              "type": "text",
+              "label": "Animation: resolution",
+              "props": {
+                "attributes": {
+                  "data-testid": "scene-anim-resolution"
+                }
+              },
+              "logic": {
+                "showWhen": {
+                  "field": "ctx.animates",
+                  "operator": "truthy"
+                }
+              }
+            },
+            {
+              "key": "animation.frames",
+              "type": "number",
+              "label": "Animation: frames",
+              "props": {
+                "attributes": {
+                  "min": 1,
+                  "data-testid": "scene-anim-frames"
+                }
+              },
+              "logic": {
+                "showWhen": {
+                  "field": "ctx.animates",
+                  "operator": "truthy"
+                }
+              }
+            },
+            {
+              "key": "animation.steps",
+              "type": "number",
+              "label": "Animation: steps",
+              "props": {
+                "attributes": {
+                  "min": 1,
+                  "data-testid": "scene-anim-steps"
+                }
+              },
+              "logic": {
+                "showWhen": {
+                  "field": "ctx.animates",
+                  "operator": "truthy"
+                }
+              }
+            }
+          ],
+          "logic": {
+            "showWhen": {
+              "field": "ctx.animates",
+              "operator": "truthy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "slots.narrationHead",
+      "type": "slot",
+      "props": {
+        "slot": "narrationHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "tts_text",
+      "type": "textarea",
+      "label": "tts_text",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "scene-tts-text"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "narration",
+              "operator": "eq",
+              "value": "tts"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "narration"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "group",
+      "id": "voice-row",
+      "columns": 2,
+      "cssClass": "df-group--plain",
+      "fields": [
+        {
+          "key": "voice",
+          "type": "select",
+          "label": "This scene's voice",
+          "options": {
+            "source": "remote",
+            "endpoint": "scene:voices"
+          },
+          "props": {
+            "attributes": {
+              "data-testid": "scene-voice"
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "all": [
+                {
+                  "field": "ctx.video",
+                  "operator": "truthy"
+                },
+                {
+                  "field": "narration",
+                  "operator": "eq",
+                  "value": "tts"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "speaker",
+          "type": "select",
+          "label": "Speaker",
+          "options": {
+            "source": "remote",
+            "endpoint": "scene:speakers"
+          },
+          "props": {
+            "attributes": {
+              "data-testid": "scene-speaker"
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "all": [
+                {
+                  "field": "ctx.video",
+                  "operator": "truthy"
+                },
+                {
+                  "field": "narration",
+                  "operator": "eq",
+                  "value": "tts"
+                },
+                {
+                  "field": "ctx.hasSpeakers",
+                  "operator": "truthy"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "slots.listen",
+      "type": "slot",
+      "props": {
+        "slot": "listen"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "narration",
+              "operator": "eq",
+              "value": "tts"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "speed",
+      "type": "number",
+      "label": "speed",
+      "layout": {
+        "col": 3
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "scene-speed",
+          "min": 0.1,
+          "step": 0.1
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "narration",
+              "operator": "eq",
+              "value": "tts"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "silence_seconds",
+      "type": "number",
+      "label": "silence_seconds",
+      "layout": {
+        "col": 3
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "scene-silence",
+          "min": 0.5,
+          "step": 0.5
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "narration",
+              "operator": "eq",
+              "value": "silence"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "narration"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.cameraHead",
+      "type": "slot",
+      "props": {
+        "slot": "cameraHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.cameraOn",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "motionType",
+      "type": "select",
+      "label": "type",
+      "layout": {
+        "col": 3
+      },
+      "options": [
+        {
+          "value": "static",
+          "label": "static"
+        },
+        {
+          "value": "zoom_in",
+          "label": "zoom_in"
+        },
+        {
+          "value": "zoom_out",
+          "label": "zoom_out"
+        },
+        {
+          "value": "pan_left",
+          "label": "pan_left"
+        },
+        {
+          "value": "pan_right",
+          "label": "pan_right"
+        },
+        {
+          "value": "handheld",
+          "label": "handheld"
+        },
+        {
+          "value": "rotate_cw",
+          "label": "rotate_cw"
+        },
+        {
+          "value": "rotate_ccw",
+          "label": "rotate_ccw"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "scene-motion-type"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.cameraOn",
+          "operator": "truthy"
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "motion"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.cameraIntensity",
+      "type": "slot",
+      "props": {
+        "slot": "cameraIntensity"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.cameraOn",
+              "operator": "truthy"
+            },
+            {
+              "field": "motionType",
+              "operator": "neq",
+              "value": "static"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.animateHead",
+      "type": "slot",
+      "props": {
+        "slot": "animateHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.cameraOn",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "animate",
+      "type": "checkbox",
+      "label": "Animate this scene",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "scene-animate-toggle"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.cameraOn",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "motion_prompt",
+      "type": "textarea",
+      "label": "motion_prompt",
+      "layout": {
+        "col": 12
+      },
+      "placeholder": "How the scene moves. Empty: the scene prompt is used",
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "scene-motion-prompt"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.cameraOn",
+              "operator": "truthy"
+            },
+            {
+              "field": "animate",
+              "operator": "truthy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.assistMotion",
+      "type": "slot",
+      "props": {
+        "slot": "assistMotion"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.cameraOn",
+              "operator": "truthy"
+            },
+            {
+              "field": "animate",
+              "operator": "truthy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.animTrim",
+      "type": "slot",
+      "props": {
+        "slot": "animTrim"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.cameraOn",
+              "operator": "truthy"
+            },
+            {
+              "field": "animate",
+              "operator": "truthy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.animateMotionNote",
+      "type": "slot",
+      "props": {
+        "slot": "animateMotionNote"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.cameraOn",
+              "operator": "truthy"
+            },
+            {
+              "field": "animate",
+              "operator": "truthy"
+            },
+            {
+              "field": "motionType",
+              "operator": "neq",
+              "value": "static"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.animateError",
+      "type": "slot",
+      "props": {
+        "slot": "animateError"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.cameraOn",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.overlayHead",
+      "type": "slot",
+      "props": {
+        "slot": "overlayHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.overlayBlock",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "overlay.text",
+      "type": "textarea",
+      "label": "Overlay text",
+      "description": "The text as it is, or a description (“big title with the name and a line below”). It is animated over the scene's picture or video.",
+      "layout": {
+        "col": 12
+      },
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "overlay-text"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.overlayBlock",
+              "operator": "truthy"
+            },
+            {
+              "field": "overlayOn",
+              "operator": "truthy"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "overlay"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "group",
+      "id": "overlay-row",
+      "columns": 3,
+      "cssClass": "df-group--plain",
+      "fields": [
+        {
+          "key": "overlay.position",
+          "type": "select",
+          "label": "Position",
+          "options": [
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            }
+          ],
+          "props": {
+            "attributes": {
+              "data-testid": "overlay-position"
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "all": [
+                {
+                  "field": "ctx.overlayBlock",
+                  "operator": "truthy"
+                },
+                {
+                  "field": "overlayOn",
+                  "operator": "truthy"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "overlay.start",
+          "type": "number",
+          "label": "From (s)",
+          "description": "Empty = from the start",
+          "props": {
+            "attributes": {
+              "data-testid": "overlay-start",
+              "min": 0,
+              "step": 0.1
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "all": [
+                {
+                  "field": "ctx.overlayBlock",
+                  "operator": "truthy"
+                },
+                {
+                  "field": "overlayOn",
+                  "operator": "truthy"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "overlay.end",
+          "type": "number",
+          "label": "To (s)",
+          "description": "Empty = until the end",
+          "props": {
+            "attributes": {
+              "data-testid": "overlay-end",
+              "min": 0,
+              "step": 0.1
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "all": [
+                {
+                  "field": "ctx.overlayBlock",
+                  "operator": "truthy"
+                },
+                {
+                  "field": "overlayOn",
+                  "operator": "truthy"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "slots.overlayPage",
+      "type": "slot",
+      "props": {
+        "slot": "overlayPage"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.overlayBlock",
+              "operator": "truthy"
+            },
+            {
+              "field": "overlayOn",
+              "operator": "truthy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.overlayAdd",
+      "type": "slot",
+      "props": {
+        "slot": "overlayAdd"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.overlayBlock",
+              "operator": "truthy"
+            },
+            {
+              "field": "overlayOn",
+              "operator": "falsy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "slots.transitionHead",
+      "type": "slot",
+      "props": {
+        "slot": "transitionHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "type": "group",
+      "id": "transition-row",
+      "columns": 2,
+      "cssClass": "df-group--plain",
+      "fields": [
+        {
+          "key": "transition_seconds",
+          "type": "number",
+          "label": "Fade (s)",
+          "props": {
+            "attributes": {
+              "data-testid": "scene-transition-input",
+              "min": 0,
+              "max": 2,
+              "step": 0.1
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "field": "ctx.video",
+              "operator": "truthy"
+            }
+          },
+          "validation": {
+            "validators": [
+              {
+                "name": "sceneRule",
+                "args": {
+                  "rule": "transition"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "transition",
+          "type": "select",
+          "label": "Type",
+          "description": "Empty: the project’s. 0: a hard cut. The first scene ignores it.",
+          "options": [
+            {
+              "value": "",
+              "label": "The project's"
+            },
+            {
+              "value": "fade",
+              "label": "Crossfade"
+            },
+            {
+              "value": "fadeblack",
+              "label": "Fade through black"
+            },
+            {
+              "value": "fadewhite",
+              "label": "Fade through white"
+            },
+            {
+              "value": "dissolve",
+              "label": "Dissolve"
+            },
+            {
+              "value": "wipeleft",
+              "label": "Wipe left"
+            },
+            {
+              "value": "wiperight",
+              "label": "Wipe right"
+            },
+            {
+              "value": "wipeup",
+              "label": "Wipe up"
+            },
+            {
+              "value": "wipedown",
+              "label": "Wipe down"
+            },
+            {
+              "value": "slideleft",
+              "label": "Slide left"
+            },
+            {
+              "value": "slideright",
+              "label": "Slide right"
+            },
+            {
+              "value": "slideup",
+              "label": "Slide up"
+            },
+            {
+              "value": "slidedown",
+              "label": "Slide down"
+            },
+            {
+              "value": "circleopen",
+              "label": "Circle open"
+            },
+            {
+              "value": "circleclose",
+              "label": "Circle close"
+            },
+            {
+              "value": "radial",
+              "label": "Radial"
+            },
+            {
+              "value": "pixelize",
+              "label": "Pixelate"
+            }
+          ],
+          "props": {
+            "attributes": {
+              "data-testid": "scene-transition-kind"
+            }
+          },
+          "logic": {
+            "showWhen": {
+              "field": "ctx.video",
+              "operator": "truthy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "slots.lookHead",
+      "type": "slot",
+      "props": {
+        "slot": "lookHead"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "slots.grain",
+      "type": "slot",
+      "props": {
+        "slot": "grain"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      }
+    },
+    {
+      "key": "whiteBalance",
+      "type": "select",
+      "label": "white balance",
+      "layout": {
+        "col": 4
+      },
+      "options": [
+        {
+          "value": "neutral",
+          "label": "neutral"
+        },
+        {
+          "value": "warm",
+          "label": "warm"
+        },
+        {
+          "value": "cool",
+          "label": "cool"
+        },
+        {
+          "value": "fluorescent",
+          "label": "fluorescent"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "scene-white-balance"
+        }
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.video",
+          "operator": "truthy"
+        }
+      },
+      "validation": {
+        "validators": [
+          {
+            "name": "sceneRule",
+            "args": {
+              "rule": "look"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "slots.animateImagesNote",
+      "type": "slot",
+      "props": {
+        "slot": "animateImagesNote"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "field": "ctx.animateImagesNote",
+          "operator": "truthy"
+        }
+      }
+    }
+  ]
+}

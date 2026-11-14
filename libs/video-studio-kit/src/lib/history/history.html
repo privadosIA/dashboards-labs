@@ -1,0 +1,49 @@
+<h2 class="title">{{ t.history.title }}</h2>
+@if (items().length === 0) {
+  <div class="empty">
+    <p>{{ t.history.empty }}</p>
+  </div>
+} @else {
+  <lab-paged-list listId="video-history" [data]="items()" [lang]="lang">
+    <ng-template let-page>
+      <ul>
+        @for (item of typed(page); track item.id) {
+          @if (item.kind === 'edit') {
+            <li [attr.data-state]="item.edit.state">
+              <app-edit-card [edit]="item.edit" (open)="openEdit.emit($event)" (remove)="removeEdit.emit($event)" />
+            </li>
+          } @else {
+            @let g = item.generation;
+            <li [attr.data-state]="g.state">
+              <div class="head">
+                <h3 class="prompt">{{ g.settings.prompt || g.settings.startImage?.name || g.inputs?.[0]?.name }}</h3>
+                <span class="state">{{ t.history.states[g.state] }}</span>
+              </div>
+              <p class="pills">
+                <span class="pill">{{ modelName(g) }}</span>
+                <span class="pill">{{ g.settings.duration }} s</span>
+                <span class="pill">{{ g.settings.aspectRatio }}</span>
+                <span class="pill">{{ g.settings.quality }}</span>
+              </p>
+              <app-inputs-list [inputs]="g.inputs ?? []" />
+              @if (g.state === 'queued' || g.state === 'running') {
+                <progress max="100" [value]="g.progress" [attr.aria-label]="t.history.states[g.state]"></progress>
+              }
+              @if (g.state === 'failed') {
+                <p class="error" role="alert">{{ g.error }}</p>
+              }
+              <div class="actions">
+                @if (g.state === 'done') {
+                  <button type="button" (click)="open.emit(g)">{{ t.history.open }}</button>
+                  <a [href]="tickets.withTicket(g.videoUrl ?? '')" download>{{ t.history.download }}</a>
+                }
+                <button type="button" (click)="repeat.emit(g)">{{ t.history.repeat }}</button>
+                <button type="button" (click)="remove.emit(g)">{{ t.history.remove }}</button>
+              </div>
+            </li>
+          }
+        }
+      </ul>
+    </ng-template>
+  </lab-paged-list>
+}

@@ -1,0 +1,15 @@
+<article class="row" [attr.data-state]="piece().state">
+  <div class="main">
+    <h2>{{ piece().title }}</h2>
+    <p class="meta">{{ t.song }}: {{ song() }}</p>
+  </div>
+  <div class="facts">
+    <span class="state" data-testid="state">{{ state() }}</span>
+    @if (busy()) {
+      <span class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="piece().progress"><span [style.width.%]="piece().progress"></span></span>
+    }
+    <span class="meta">{{ t.format(piece().width, piece().height, piece().fps) }}</span>
+    <span class="meta">{{ t.created }}: {{ created() }}</span>
+  </div>
+  <button type="button" class="ctl primary open" (click)="open.emit(piece())">{{ t.open }}</button>
+</article>

@@ -1,0 +1,386 @@
+:host {
+  display: block;
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-body);
+}
+
+.props {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+}
+
+.none {
+  margin: 0;
+  padding: var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.heading {
+  margin: 0 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  text-transform: uppercase;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+}
+
+// The groups of plain fields (the transform, the shape) use the width in columns when the panel is wide, so that the panel needs no scroll.
+.group.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--lab-space-1) var(--lab-space-4);
+
+  // In columns the names are short: the number sits right beside its name.
+  .field label,
+  .field .label {
+    flex-basis: 3.75rem;
+  }
+
+  > .heading,
+  > .note,
+  > .field.sub,
+  > .problem {
+    grid-column: 1 / -1;
+  }
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  min-height: 1.75rem;
+
+  label,
+  .label {
+    flex: 0 0 5rem;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &.sub {
+    padding-left: 5rem;
+  }
+
+  // A number is a few digits: it keeps a size of its own instead of growing with the panel; the text and the choices take what is left.
+  input[type='number'] {
+    flex: 0 0 4.5rem;
+    width: 4.5rem;
+    min-width: 0;
+  }
+
+  input[type='text'],
+  select {
+    flex: 1;
+  }
+
+  input[type='number'],
+  input[type='text'],
+  select {
+    min-width: 0;
+    height: 1.75rem;
+    padding: 0 var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-bg);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+
+  input.small {
+    flex: 0 0 4.5rem;
+  }
+
+  input[type='range'] {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--lab-accent);
+  }
+
+  input[type='color'] {
+    width: 2.5rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-bg);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.key {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: transparent;
+  cursor: pointer;
+
+  svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    fill: none;
+    stroke: var(--lab-ink-dim);
+    stroke-width: 1.2;
+  }
+
+  /* A property that has keyframes shows a filled diamond; one that has a keyframe at the playhead shows it in the accent colour. */
+  .animated & svg {
+    fill: var(--lab-ink-dim);
+  }
+
+  .keyed & svg,
+  &[aria-pressed='true'] svg {
+    fill: var(--lab-danger);
+    stroke: var(--lab-danger);
+  }
+}
+
+.badge {
+  flex: 1;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}
+
+.link {
+  padding: 0 var(--lab-space-1);
+  border: 0;
+  background: transparent;
+  color: var(--lab-accent);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.problem {
+  margin: 0;
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.modal {
+  width: min(26rem, 92vw);
+  padding: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+
+  &::backdrop {
+    background: color-mix(in srgb, black 60%, transparent);
+  }
+}
+
+// The form that makes a property a parameter: the name and the description take a line each, the default and the limits share one.
+.param-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-4);
+
+  .wide,
+  .actions {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lab-space-1);
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  input {
+    height: 1.75rem;
+    padding: 0 var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-bg);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--lab-space-2);
+  }
+
+  button {
+    height: 2rem;
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .primary {
+    border-color: var(--lab-accent);
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+}
+
+.tool.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  padding: 0;
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+// A small space between the buttons that align and the ones that distribute.
+.buttons .gap {
+  width: var(--lab-space-2);
+}
+
+.tool {
+  min-height: 1.75rem;
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--lab-accent);
+  }
+
+  &:disabled {
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  // On the line of the align buttons, at its end.
+  &.end {
+    margin-left: auto;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  &.hint {
+    padding-left: 5rem;
+  }
+}
+
+.beat-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  padding-bottom: var(--lab-space-1);
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.link-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--lab-danger);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.add-link select {
+  flex: 1;
+}
+
+// The choice of the property to link to the beat is a short word (X, Scale, Rotation): it keeps a size of its own beside its button, not the whole width.
+.add-link select {
+  flex: 0 0 9rem;
+  width: 9rem;
+}
+
+// The fill and the stroke: the choice of how it is painted keeps a size of its own beside its name, and what completes it (the colour or the variable, and the link
+// that makes it a parameter) goes on the same line when there is room, instead of under it.
+.paint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--lab-space-3);
+
+  .field select {
+    flex: 0 0 11rem;
+    width: 11rem;
+  }
+
+  // The link that makes it a parameter, and the colour or variable, go to the right end of the line.
+  .field.sub {
+    padding-left: 0;
+    margin-left: auto;
+  }
+}

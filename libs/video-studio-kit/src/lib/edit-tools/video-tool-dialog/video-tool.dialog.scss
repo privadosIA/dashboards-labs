@@ -1,0 +1,206 @@
+.tool-dialog {
+  display: grid;
+  gap: var(--lab-space-3);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h2 {
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+}
+
+.description {
+  font-size: var(--lab-fs-body);
+  color: var(--lab-ink-dim);
+}
+
+// What the tool is and what to know before using it: plain text, not boxes (they are not buttons). The facts share a line, the warnings are one per line.
+.notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+
+  &.warnings {
+    display: grid;
+  }
+}
+
+.source,
+.settings,
+.motions {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+// A title and, beside it, the small button that does it (an icon: its name is the tooltip and the accessible name).
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  cursor: pointer;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+// The video, the image and the library of motions on one line (the image and the library are only for the tools that take them); each says what it is
+// above its button, which then only has to say what it does.
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--lab-space-2) var(--lab-space-3);
+
+  h3 {
+    white-space: nowrap;
+  }
+
+  .source {
+    min-width: 0;
+  }
+}
+
+.picked {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.hint,
+.empty,
+.status {
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.status.failed {
+  color: var(--lab-danger);
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-body);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  // The buttons stay in view while the rest scrolls, when the window is shorter than the dialog.
+  position: sticky;
+  bottom: calc(-1 * var(--lab-space-4));
+  margin: 0 calc(-1 * var(--lab-space-4)) calc(-1 * var(--lab-space-4));
+  padding: var(--lab-space-3) var(--lab-space-4) var(--lab-space-4);
+  background: var(--lab-surface);
+  border-top: 1px solid var(--lab-line);
+}
+
+.actions button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-body);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.actions button.primary {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font: inherit;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+  cursor: pointer;
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    box-shadow: inset 0 0 0 1px var(--lab-control-line);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.start {
+  display: grid;
+  gap: var(--lab-space-2);
+
+  video {
+    width: 100%;
+    max-height: 14rem;
+    object-fit: contain;
+    border-radius: var(--lab-radius);
+    background: var(--lab-player-bg);
+  }
+
+  input[type='range'] {
+    width: 100%;
+    accent-color: var(--lab-accent);
+  }
+}

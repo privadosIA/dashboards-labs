@@ -1,0 +1,103 @@
+{
+  "version": "1.0",
+  "id": "custom",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "textarea",
+      "label": "Title",
+      "placeholder": "Enter song title…",
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "title"
+        }
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 80,
+        "messages": {
+          "required": "Write a title."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "titleCount"
+    },
+    {
+      "key": "lyrics",
+      "type": "textarea",
+      "label": "Lyrics",
+      "placeholder": "Enter song lyrics…",
+      "props": {
+        "rows": 6,
+        "attributes": {
+          "data-testid": "lyrics"
+        }
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Write the lyrics."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "lyricsTools"
+    },
+    {
+      "type": "group",
+      "id": "style-box",
+      "title": "Style",
+      "columns": 1,
+      "cssClass": "style-box",
+      "fields": [
+        {
+          "key": "style",
+          "type": "textarea",
+          "placeholder": "Enter song styles or select from below…",
+          "props": {
+            "rows": 3,
+            "attributes": {
+              "data-testid": "style"
+            }
+          }
+        },
+        {
+          "type": "slot",
+          "name": "styleTags"
+        }
+      ]
+    },
+    {
+      "key": "gender",
+      "type": "select",
+      "label": "Vocal Gender",
+      "defaultValue": "random",
+      "options": [
+        {
+          "value": "random",
+          "label": "Random"
+        },
+        {
+          "value": "female",
+          "label": "Female"
+        },
+        {
+          "value": "male",
+          "label": "Male"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "gender"
+        }
+      }
+    }
+  ]
+}

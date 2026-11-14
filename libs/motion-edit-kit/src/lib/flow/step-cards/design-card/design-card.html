@@ -1,0 +1,48 @@
+<section class="design" data-testid="design-card">
+  @switch (step()?.status) {
+    @case ('running') {
+      <p class="hint" role="status" data-testid="proposing">{{ t.proposingDesign }}</p>
+      @if (busy()) {
+        <p class="hint" role="status" data-testid="busy">{{ t.busy }}</p>
+      }
+    }
+    @case ('failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.failed(why(step()?.reason)) }}</p>
+      <button type="button" data-testid="retry" (click)="run()">{{ t.retry }}</button>
+    }
+    @case ('stale') {
+      <p class="note" role="status" data-testid="stale">{{ t.stale }}</p>
+      <div class="actions">
+        <button type="button" data-testid="keep" (click)="keep()">{{ t.keep }}</button>
+        <button type="button" data-testid="again-open" (click)="openAgain()">{{ t.again }}</button>
+      </div>
+    }
+    @case ('waiting') {
+      @if (summary(); as s) {
+        <div class="review" data-testid="review">
+          <p class="hint" data-testid="sent">{{ t.sent(s.prompt, s.askedModel, s.askedProvider) }}</p>
+          <p data-testid="source">{{ s.source === 'assistant' ? t.byAssistant(s.model ?? '') : t.byRule(s.fallbackReason ?? '') }}</p>
+          @if (s.design; as d) {
+            <p data-testid="design-summary">{{ t.designSummary(d.concept) }}</p>
+            <p class="hint" data-testid="design-colours">{{ d.dark }} · {{ d.light }} · {{ d.accent }}</p>
+            <p class="hint" data-testid="design-fonts">{{ t.fonts(d.display, d.body) }}</p>
+          }
+          <p class="hint" data-testid="replacements">{{ t.replacements(s.replacements) }}</p>
+          <div class="actions">
+            <button type="button" data-testid="again-open" (click)="openAgain()">{{ t.again }}</button>
+            <a class="button" data-testid="edit-in-editor" [routerLink]="editorLink()" [queryParams]="editorQuery()">{{ t.editInEditor }}</a>
+            <button type="button" class="primary" data-testid="continue" (click)="continue()">{{ t.continue }}</button>
+          </div>
+          <label class="auto">
+            <input type="checkbox" data-testid="auto" [checked]="auto()" (change)="setAuto($any($event.target).checked)" />
+            {{ t.auto }}
+          </label>
+        </div>
+      }
+    }
+  }
+
+  @if (again()) {
+    <app-propose-again [prompt]="summary()?.prompt ?? flow()?.prompt ?? ''" [model]="summary()?.askedModel ?? ''" [provider]="summary()?.askedProvider ?? ''" [models]="models()" (submitted)="proposeAgain($event)" (cancelled)="again.set(false)" />
+  }
+</section>

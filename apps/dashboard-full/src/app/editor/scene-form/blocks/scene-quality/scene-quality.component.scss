@@ -1,0 +1,38 @@
+:host {
+  display: block;
+}
+
+.quality {
+  margin-block: var(--lab-space-3);
+  background: var(--lab-surface);
+
+  &__levels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lab-space-3);
+    margin-bottom: var(--lab-space-3);
+
+    // The level the scene is at: the others are not.
+    button.active {
+      border-color: var(--lab-accent);
+      color: var(--lab-accent);
+      background: var(--lab-surface);
+    }
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

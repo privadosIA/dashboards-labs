@@ -1,0 +1,30 @@
+<dialog #dialog class="modal" [attr.aria-label]="t.title" data-testid="help" (close)="open.set(false)" (click)="backdrop($event)">
+  @if (open()) {
+    <div class="box">
+      <header class="bar">
+        <h2>{{ t.title }}</h2>
+        <button type="button" class="close" data-testid="help-close" [attr.aria-label]="t.close" [attr.title]="t.close" (click)="open.set(false)">×</button>
+      </header>
+      @for (group of t.groups; track group.name) {
+        <section>
+          <h3>{{ group.name }}</h3>
+          <dl>
+            @for (row of group.rows; track row.keys) {
+              <dt><kbd>{{ row.keys }}</kbd></dt>
+              <dd>{{ row.does }}</dd>
+            }
+          </dl>
+        </section>
+      }
+      <section data-testid="help-vector">
+        <h3>{{ tv.helpTitle }}</h3>
+        <dl>
+          @for (row of tv.helpRows; track row.keys) {
+            <dt><kbd>{{ row.keys }}</kbd></dt>
+            <dd>{{ row.does }}</dd>
+          }
+        </dl>
+      </section>
+    </div>
+  }
+</dialog>

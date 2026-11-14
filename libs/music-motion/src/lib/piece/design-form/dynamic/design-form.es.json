@@ -1,0 +1,107 @@
+{
+  "version": "1.0",
+  "id": "design-form",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "dark",
+      "type": "text",
+      "label": "Color oscuro",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      },
+      "layout": {
+        "cssClass": "color-field"
+      }
+    },
+    {
+      "key": "light",
+      "type": "text",
+      "label": "Color claro",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      },
+      "layout": {
+        "cssClass": "color-field"
+      }
+    },
+    {
+      "key": "display",
+      "type": "select",
+      "label": "Tipografía de las palabras grandes",
+      "layout": {
+        "cssClass": "font-field"
+      }
+    },
+    {
+      "key": "body",
+      "type": "select",
+      "label": "Tipografía del verso",
+      "layout": {
+        "cssClass": "font-field"
+      }
+    },
+    {
+      "key": "accent",
+      "type": "text",
+      "label": "Color de acento",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": {
+          "required": "Escribe el color como #aabbcc.",
+          "pattern": "Escribe el color como #aabbcc."
+        }
+      },
+      "layout": {
+        "cssClass": "color-field"
+      }
+    },
+    {
+      "key": "verseStyle",
+      "type": "select",
+      "label": "Cómo se marca el verso al cantarse",
+      "defaultValue": "plain",
+      "layout": {
+        "cssClass": "style-field"
+      }
+    },
+    {
+      "key": "hitStyle",
+      "type": "select",
+      "label": "Cómo se ve el golpe de palabra",
+      "defaultValue": "plain",
+      "layout": {
+        "cssClass": "style-field"
+      }
+    },
+    {
+      "type": "slot",
+      "name": "accentProblem"
+    },
+    {
+      "key": "defaultMode",
+      "type": "radio",
+      "label": "Modo por defecto",
+      "defaultValue": "dark",
+      "props": {
+        "inline": true
+      },
+      "layout": {
+        "cssClass": "mode-field"
+      }
+    }
+  ]
+}

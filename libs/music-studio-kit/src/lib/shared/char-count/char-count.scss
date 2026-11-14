@@ -1,0 +1,11 @@
+.count {
+  margin: calc(-1 * var(--lab-space-2)) 0 var(--lab-space-2);
+  text-align: right;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-variant-numeric: tabular-nums;
+
+  &.limit {
+    color: var(--lab-danger);
+  }
+}

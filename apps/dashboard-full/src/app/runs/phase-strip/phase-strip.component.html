@@ -1,0 +1,65 @@
+@if (model(); as m) {
+  <div class="strip" [class.strip--settle]="settle()">
+    <div class="strip__head">
+      <span class="strip__scene"></span>
+      @for (p of m.phases; track p) {
+        <span class="strip__phase mo-data">{{ p }}</span>
+      }
+    </div>
+
+    @for (row of m.rows; track row.sceneId) {
+      <div class="strip__row">
+        <span class="strip__scene mo-data">{{ row.sceneId }}</span>
+        @for (cell of row.cells; track cell.phase; let ci = $index) {
+          <span
+            class="seg"
+            [class]="'seg seg--' + cell.state"
+            [style.--settle-i]="ci"
+            [attr.title]="cell.phase + ': ' + stateLabel(cell.state)"
+          >
+            @if (cell.state === 'done' && cell.durationMs != null) {
+              <span class="seg__time mo-data">{{ cell.durationMs | moDuration }}</span>
+            } @else if (cell.state === 'cache') {
+              <span class="seg__label" i18n="@@strip.cache">cache</span>
+            } @else if (cell.state === 'running') {
+              <span class="seg__label" i18n="@@strip.running">running</span>
+            } @else if (cell.state === 'failed') {
+              <span class="seg__label" i18n="@@strip.failed">failed</span>
+            } @else if (cell.state === 'stopped') {
+              <span class="seg__label" i18n="@@strip.stopped">stopped</span>
+            } @else if (cell.state === 'na') {
+              <span class="seg__label">∅</span>
+            }
+          </span>
+        }
+      </div>
+    }
+
+    @if (m.globalRow; as g) {
+      <div class="strip__row strip__row--global">
+        <span class="strip__scene mo-data">_global</span>
+        @for (cell of g.cells; track cell.phase) {
+          <span class="seg" [class]="'seg seg--' + cell.state" [attr.title]="cell.phase">
+            <span class="seg__label mo-data">{{ cell.phase }}</span>
+            @if (cell.state === 'done' && cell.durationMs != null) {
+              <span class="seg__time mo-data">{{ cell.durationMs | moDuration }}</span>
+            }
+          </span>
+        }
+      </div>
+    }
+
+    @for (w of m.warnings; track $index) {
+      <p class="strip__warn">
+        <mat-icon inline>warning</mat-icon>
+        <span class="mo-data">{{ w.message }}</span>
+      </p>
+    }
+    @if (m.errorMessage; as err) {
+      <p class="strip__error" role="alert">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ err }}</span>
+      </p>
+    }
+  </div>
+}

@@ -1,0 +1,134 @@
+@if (piece(); as p) {
+  <section class="panel" data-testid="piece">
+    <h2>{{ extra() === undefined ? ti.piece(p.id) : ti.extra(extra()! + 1, partName()) }}</h2>
+
+    @if (refused()) {
+      <p class="refused" role="alert" data-testid="refused">{{ t.refusedAt(p.id) }} {{ refused() }}</p>
+    }
+
+    @if (marks().length) {
+      <ul class="marks" data-testid="warnings">
+        @for (m of marks(); track $index) {
+          <li [class.soft]="m.soft">{{ m.text }}</li>
+        }
+      </ul>
+    }
+
+    <label class="field">
+      <span>{{ t.part }}</span>
+      <select class="ctl part" data-testid="part" [disabled]="locked()" (change)="choose(value($event))">
+        @for (c of choices(); track c) {
+          <option [value]="c" [selected]="c === partName()">{{ c }}</option>
+        }
+      </select>
+    </label>
+    @if (graded(); as g) {
+      <section class="graded" data-testid="piece-review" [attr.data-verdict]="g.verdict">
+        <strong>{{ ts.review.title }}: {{ g.score }} / 10 · {{ ts.review.mark[g.verdict] }}</strong>
+        @if (g.error) {
+          <p class="meta">{{ ts.review.failed(g.error) }}</p>
+        } @else if (g.notes.length) {
+          <ul data-testid="piece-review-notes">
+            @for (n of g.notes; track $index) {
+              <li>{{ n }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="meta">{{ ts.review.noNotes }}</p>
+        }
+      </section>
+    }
+    @if (extra() === undefined && sceneOn()) {
+      <div class="scene" data-testid="scene-actions">
+        @if (part()?.scene) {
+          <span class="badge" data-testid="scene-badge">{{ ts.badge }}</span>
+          <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="scene-edit" [disabled]="locked()" [attr.title]="ts.editSceneHint" (click)="editScene.emit({ piece: p.id, part: partName() })">{{ ts.editScene }}</button>
+        }
+        <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="scene-write" [disabled]="locked()" [attr.title]="ts.sceneHint" (click)="writeScene.emit(p.id)">{{ ts.scene }}</button>
+      </div>
+    }
+    @if (part(); as part) {
+      <p class="meta">{{ part.description }} · {{ ti.levels }}: {{ part.levels.join(', ') }}</p>
+      @if (!supported()) {
+        <p class="warn" data-testid="replaced">{{ ti.replaced(level()) }}</p>
+      }
+      <app-collapsible [title]="ti.params" key="params">
+        @if (part.params.length === 0) {
+          <p class="meta">{{ ti.noParams }}</p>
+        } @else {
+          <lab-part-params [part]="part" [values]="values()" [level]="level()" [locked]="locked()" (paramsChange)="params($event)" />
+        }
+      </app-collapsible>
+      <app-animate-panel [script]="script()" [index]="index()" [extra]="extra()" [part]="part" [catalog]="catalog()" [playhead]="playhead()" [selected]="keyframe()" [locked]="locked()" (edit)="edit.emit($event)" (pick)="pick.emit($event)" />
+    } @else {
+      <p class="warn" data-testid="not-in-catalog">{{ ti.notInCatalog }}</p>
+    }
+
+    @if (extra() === undefined) {
+      <app-collapsible [title]="t.mode" key="mode">
+        <label class="field">
+          <select class="ctl mode" data-testid="mode" [disabled]="locked()" (change)="setMode(value($event))">
+            <option value="" [selected]="!p.mode">{{ t.modeAuto(ti.modes[sectionMode()]) }}</option>
+            <option value="dark" [selected]="p.mode === 'dark'">{{ ti.modes.dark }}</option>
+            <option value="light" [selected]="p.mode === 'light'">{{ ti.modes.light }}</option>
+          </select>
+        </label>
+      </app-collapsible>
+
+      @if (themed()) {
+        <app-collapsible [title]="ts.theme.transitionPiece" key="transition">
+          <p class="meta">{{ ts.theme.transitionPieceHint }}</p>
+          <div class="slider">
+            <input type="range" min="0" max="2" step="0.05" data-testid="piece-transition" [attr.aria-label]="ts.theme.transitionPiece" [disabled]="locked()" [value]="shownTransition()" (input)="setTransition($event)" />
+            <output data-testid="piece-transition-value">{{ ownTransition() === undefined ? ts.theme.transitionInherit + ': ' : '' }}{{ ts.theme.seconds(shownTransition()) }}</output>
+          </div>
+          @if (ownTransition() !== undefined) {
+            <button type="button" class="ctl" data-testid="piece-transition-inherit" [disabled]="locked()" (click)="inheritTransition()">{{ ts.theme.transitionInherit }}</button>
+          }
+        </app-collapsible>
+      }
+
+      <app-collapsible [title]="t.lines" key="lines">
+        <app-lines-editor [piece]="p" [index]="index()" [script]="script()" [songMap]="songMap()" [locked]="locked()" (edit)="edit.emit($event)" />
+      </app-collapsible>
+      <app-collapsible [title]="t.hit" key="hit">
+        <app-hit-editor [piece]="p" [index]="index()" [songMap]="songMap()" [locked]="locked()" (edit)="edit.emit($event)" />
+      </app-collapsible>
+
+      <app-collapsible [title]="t.extras" key="extras">
+      @if (extras().length === 0) {
+        <p class="meta">{{ t.extrasNone }}</p>
+      }
+      <ul class="extras">
+        @for (e of extras(); track $index; let k = $index) {
+          <li data-testid="extra">
+            <span class="extra-name">{{ k + 1 }}. {{ e.part }}</span>
+            <button type="button" class="ctl danger remove" data-testid="remove-extra" [disabled]="locked()" (click)="remove(k)">{{ t.removeExtra }}</button>
+          </li>
+        }
+      </ul>
+      @if (full()) {
+        <p class="meta">{{ t.extrasFull }}</p>
+      } @else {
+        <label class="field">
+          <span>{{ t.addExtra }}</span>
+          <select class="ctl add-extra" data-testid="add-extra" [disabled]="locked()" (change)="add(value($event)); $any($event.target).value = ''">
+            <option value="">{{ t.chooseExtra }}</option>
+            @for (c of addable(); track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </label>
+      }
+      </app-collapsible>
+
+      <app-collapsible [title]="t.stage" key="stage">
+        <app-stage-editor [stage]="p.stage" [catalog]="catalog()" [locked]="locked()" (stageChange)="stage($event)" />
+      </app-collapsible>
+
+      <app-collapsible [title]="t.ownDesign" key="own-design">
+        <app-piece-design [piece]="p" [catalog]="catalog()" [song]="songDesign()" [locked]="locked()" (designChange)="design($event)" />
+      </app-collapsible>
+    }
+  </section>
+}

@@ -1,0 +1,39 @@
+.own {
+  display: grid;
+  gap: var(--lab-space-2);
+  justify-items: start;
+  padding-top: var(--lab-space-2);
+  border-top: 1px solid var(--lab-line);
+
+  dynamic-form {
+    justify-self: stretch;
+  }
+}
+
+h4 {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.give,
+.back {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "id": "motion-control",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "motion",
+      "type": "hidden"
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Qué debe pasar (opcional)",
+      "placeholder": "Describe la escena o el movimiento.",
+      "props": {
+        "rows": 3
+      }
+    },
+    {
+      "key": "strength",
+      "type": "number",
+      "label": "Fuerza del movimiento (de 0,2 a 1)",
+      "defaultValue": 0.6,
+      "props": {
+        "step": 0.05
+      }
+    },
+    {
+      "key": "start",
+      "type": "hidden",
+      "defaultValue": 0
+    }
+  ]
+}

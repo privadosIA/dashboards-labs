@@ -1,0 +1,105 @@
+.modal {
+  width: min(52rem, 94vw);
+  max-height: 90vh;
+  padding: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+
+  &::backdrop {
+    background: color-mix(in srgb, black 60%, transparent);
+  }
+}
+
+.box {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3) var(--lab-space-4);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: var(--lab-fs-section);
+    font-weight: var(--lab-fw-title);
+  }
+}
+
+.close {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-title);
+  line-height: 1.4;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--lab-accent);
+    border-color: var(--lab-accent);
+  }
+}
+
+.describe {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+.field {
+  display: grid;
+  gap: var(--lab-space-1);
+
+  span,
+  small {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+    font: inherit;
+    resize: vertical;
+  }
+}
+
+.meta {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  margin: 0;
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.ok {
+  margin: 0;
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-success);
+  border-radius: var(--lab-radius);
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+}
+
+.again {
+  justify-self: start;
+}

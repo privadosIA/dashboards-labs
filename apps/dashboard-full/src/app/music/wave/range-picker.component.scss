@@ -1,0 +1,20 @@
+:host {
+  display: block;
+}
+
+.picker {
+  display: grid;
+  gap: var(--lab-space-2, 8px);
+}
+
+.picker__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3, 12px);
+}
+
+.picker__hint {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

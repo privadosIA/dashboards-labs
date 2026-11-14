@@ -1,0 +1,437 @@
+<header class="head">
+  <h1 class="head__title" i18n="@@create.title">Create</h1>
+  <p class="head__desc" i18n="@@create.desc">Say or write what you want: a video, an image or a song. It is made here and you see it when it is done.</p>
+</header>
+
+<section class="list" appAutoAnimate aria-live="polite" data-testid="create-list">
+  @if (chronological().length > 0) {
+    <div class="session">
+      <button mat-button class="touch" type="button" (click)="clearScreen()" data-testid="create-clear-screen"><mat-icon>cleaning_services</mat-icon><span i18n="@@create.clearScreen">Clear screen</span></button>
+    </div>
+  }
+  @if (chronological().length === 0) {
+    <p class="empty" data-testid="create-empty" i18n="@@create.empty">You have not asked for anything yet. Tap the microphone and tell me what you want, or type it below.</p>
+  }
+  @for (item of chronological(); track item.key) {
+    <article class="card" [attr.data-key]="item.key" [attr.data-phase]="item.phase()" data-testid="create-card">
+      <p class="card__ask">{{ item.text }}</p>
+      @if (item.attachments.length > 0) {
+        <ul class="chips">
+          @for (a of item.attachments; track a.file.name) {
+            <li class="chip"><mat-icon inline>{{ a.kind === 'audio' ? 'audiotrack' : a.kind === 'video' ? 'movie' : 'image' }}</mat-icon><span class="chip__name">{{ a.file.name }}</span></li>
+          }
+        </ul>
+      }
+
+      @switch (item.phase()) {
+        @case ('planning') {
+          <p class="state" data-testid="create-planning"><mat-spinner diameter="20" /> <span i18n="@@create.planning">Understanding what you ask…</span></p>
+        }
+
+        @case ('review') {
+          @if (item.draft(); as d) {
+            <div class="review" data-keep data-testid="create-review">
+              <p class="label" i18n="@@create.understood">This is what I understood</p>
+              @if (item.manual() === 'busy') {
+                <p class="note" data-testid="create-manual" i18n="@@create.manualBusy">The assistant is waiting for what is being generated to finish, so I used your words as they are. You can confirm like this or correct the text.</p>
+              } @else if (item.manual() === 'unavailable') {
+                <p class="note" data-testid="create-manual" i18n="@@create.manualOff">The assistant is not available, so I used your words as they are. Choose what you want and confirm, or correct the text.</p>
+              } @else if (item.manual() === 'refused') {
+                <p class="note" data-testid="create-manual" i18n="@@create.manualRefused">The assistant's model declined to write this text, so I used your words as they are: that is what will be sent to the generator. Choose what you want and confirm, or correct the text.</p>
+              } @else if (item.kindSource() === 'default') {
+                <p class="note" i18n="@@create.kindGuess">I could not tell whether it is a video, an image or a song: you choose.</p>
+              }
+              <app-option-row class="kinds" [label]="kindLabel" [options]="kindOptions" [value]="d.kind" [fill]="true" testId="create-kinds" (picked)="setKind(item, $event)" />
+
+              <mat-form-field class="field" subscriptSizing="dynamic">
+                <mat-label i18n="@@create.titleField">Title</mat-label>
+                <input matInput [ngModel]="d.title" (ngModelChange)="edit(item, 'title', $event)" data-testid="create-title" />
+              </mat-form-field>
+
+              <app-option-row class="levels" [label]="levelsLabel(d.kind)" [options]="levelOptions(d.kind)" [value]="d.resolution" [fill]="true" testId="create-levels" (picked)="edit(item, 'resolution', $event)" />
+              <p class="note" data-testid="level-help">
+                @if (d.kind === 'music') { <ng-container i18n="@@create.levelHelpMusic">One song. Draft is the fastest; High, the best quality this machine can do.</ng-container> }
+                @else { <ng-container i18n="@@create.levelHelp">Draft is small and quick; High is the largest size this machine can do.</ng-container> }
+              </p>
+
+              @if (d.kind === 'music') {
+                @if (item.generators().length > 1) {
+                  <app-option-row class="generators" [label]="generatorLabelText" [options]="generatorOptions(item)" [value]="d.generator" [disabled]="item.suggesting()" [wrap]="true" testId="create-generators" (picked)="pickGenerator(item, $event)" />
+                }
+                @if (item.generators().length > 0) {
+                  <p class="note" data-testid="generator-help">{{ generatorHelp(item) }}</p>
+                }
+                <div class="row">
+                  <app-option-row class="lengths" [label]="lengthLabel" [options]="lengthOptions" [value]="lengthOf(d.seconds)" testId="create-lengths" (picked)="setLength(item, $event)" />
+                  @if (generatorInfo(item).instrumental) {
+                    <mat-slide-toggle [checked]="d.instrumental" (change)="edit(item, 'instrumental', $event.checked)" data-testid="create-instrumental" i18n="@@create.instrumental">No vocals</mat-slide-toggle>
+                  }
+                </div>
+              }
+
+              @if (d.kind === 'video' && motionAvailable()) {
+                <mat-button-toggle-group class="animation" [value]="d.animation" (change)="edit(item, 'animation', $event.value)" hideSingleSelectionIndicator aria-label="Type of video" i18n-aria-label="@@create.animationLabel" data-testid="create-animation">
+                  <mat-button-toggle value="image" data-testid="animation-image" i18n="@@create.animationImage">Animate a picture</mat-button-toggle>
+                  <mat-button-toggle value="graphic" data-testid="animation-graphic" i18n="@@create.animationGraphic">Animated graphic</mat-button-toggle>
+                </mat-button-toggle-group>
+              }
+
+              @if (d.kind !== 'music' && d.animation === 'image' && (item.styles().length > 1 || canRetouch(item, d.kind))) {
+                @if (d.style === 'edit' && canRetouch(item, d.kind)) {
+                  <button mat-button type="button" class="touch" (click)="edit(item, 'style', 'auto')" data-testid="style-no-edit" i18n="@@create.noRetouch">Do not retouch: make a new picture</button>
+                } @else {
+                <mat-button-toggle-group class="styles" [value]="d.style" (change)="edit(item, 'style', $event.value)" hideSingleSelectionIndicator aria-label="Look" i18n-aria-label="@@create.styleLabel" data-testid="create-styles">
+                  <mat-button-toggle value="auto" data-testid="style-auto" i18n="@@create.styleAuto">Automatic</mat-button-toggle>
+                  @if (item.styles().includes('photo')) {
+                    <mat-button-toggle value="photo" data-testid="style-photo" i18n="@@create.stylePhoto">Photorealistic</mat-button-toggle>
+                  }
+                  @if (item.styles().includes('anime')) {
+                    <mat-button-toggle value="anime" data-testid="style-anime" i18n="@@create.styleAnime">Anime</mat-button-toggle>
+                  }
+                  @if (item.styles().includes('general')) {
+                    <mat-button-toggle value="general" data-testid="style-general" i18n="@@create.styleGeneral">General</mat-button-toggle>
+                  }
+                  @for (s of otherStyles(item.styles()); track s) {
+                    <mat-button-toggle [value]="s" [attr.data-testid]="'style-' + s">{{ label(s) }}</mat-button-toggle>
+                  }
+                  @if (canRetouch(item, d.kind)) {
+                    <mat-button-toggle value="edit" data-testid="style-edit" i18n="@@create.styleEdit">Retouch</mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+                }
+                <p class="note" data-testid="style-help">{{ help(d.style) }}</p>
+              }
+              @if (d.kind === 'image' && hasPicture(item) && d.style === 'edit') {
+                <app-edit-engine-select testId="create-edit-engine" [engines]="item.editEngines()" [value]="d.editEngine ?? null" (picked)="edit(item, 'editEngine', $event)" />
+              }
+              @if (d.kind === 'image' && hasPicture(item) && d.style !== 'edit') {
+                <div class="strength" data-testid="create-picture-start">
+                  <span i18n="@@create.strength">How much it changes</span>
+                  <mat-slider min="0.1" max="1" step="0.05" discrete>
+                    <input matSliderThumb [value]="d.strength" (valueChange)="edit(item, 'strength', $event)" data-testid="create-strength" aria-label="How much it changes" i18n-aria-label="@@create.strength" />
+                  </mat-slider>
+                  <span class="mo-data">{{ d.strength }}</span>
+                </div>
+                <p class="note" i18n="@@create.useStartNote">With little change it looks like the original; with a lot, the text reinterprets it. The text describes how it should end up.</p>
+                @if (!item.canEdit()) {
+                  <p class="note" data-testid="create-no-edit-model" i18n="@@create.noEditModel">To retouch it with instructions, install FLUX.1 Kontext or Qwen-Image-Edit in Models.</p>
+                }
+              }
+              @if (d.kind === 'video') {
+                <mat-form-field class="field" subscriptSizing="dynamic">
+                  <mat-label i18n="@@create.speechField">What it says (optional)</mat-label>
+                  <textarea matInput rows="2" [ngModel]="d.speech" (ngModelChange)="edit(item, 'speech', $event)" data-testid="create-speech"></textarea>
+                </mat-form-field>
+                @if (d.animation === 'image' && item.engines(); as e) {
+                  @if (e.options.length > 1) {
+                    <mat-radio-group class="engines" [value]="d.engine" (change)="edit(item, 'engine', $event.value)" aria-label="Video engine" i18n-aria-label="@@create.engineLabel" data-testid="create-engines">
+                      <mat-radio-button class="engine" value="auto" data-testid="engine-auto">
+                        <span i18n="@@create.engineAuto">Automatic</span>
+                        @if (e.auto; as a) {
+                          <span class="engine__meta">{{ a.label }} · {{ duration(a.seconds) }}</span>
+                        }
+                      </mat-radio-button>
+                      @for (o of e.options; track o.id) {
+                        <mat-radio-button class="engine" [value]="o.id" [attr.data-testid]="'engine-' + o.id">
+                          {{ o.label }}
+                          <span class="engine__meta">{{ duration(o.seconds) }}</span>
+                        </mat-radio-button>
+                      }
+                    </mat-radio-group>
+                  }
+                  @if (d.engine === 'auto' && e.auto?.speechPick) {
+                    <p class="note" data-testid="create-speech-note" i18n="@@create.speechLtx">Since there is speech, I picked LTX 2.3: it is the one that can say it.</p>
+                  } @else if (d.engine === 'auto' && e.auto?.noSpeechEngine) {
+                    <p class="note" data-testid="create-speech-note" i18n="@@create.speechNoLtx">LTX 2.3 would say the line better, but it is not installed or does not fit here: the narration voice will read it.</p>
+                  }
+                }
+              }
+
+              <mat-expansion-panel class="texts" hideToggle="false" [expanded]="d.kind === 'music'">
+                <mat-expansion-panel-header><mat-panel-title i18n="@@create.seeText">See the text that will be sent</mat-panel-title></mat-expansion-panel-header>
+                @if (d.kind === 'music') {
+                  <app-combo-chips [combos]="flow.tagCombos()" (picked)="pickCombo(item, $event)" />
+                  @if (generatorInfo(item).style === 'sentence') {
+                    <mat-form-field class="field" subscriptSizing="dynamic">
+                      <mat-label i18n="@@create.style">Style</mat-label>
+                      <textarea matInput rows="3" [ngModel]="d.caption" (ngModelChange)="edit(item, 'caption', $event)" data-testid="create-caption"></textarea>
+                    </mat-form-field>
+                  } @else if (generatorInfo(item).vocabulary) {
+                    <p class="note" i18n="@@create.tagsLabel">Style tags</p>
+                    <app-tag-picker [value]="d.tags" [categories]="flow.tagVocabulary()" (valueChange)="edit(item, 'tags', $event)" data-testid="create-tags" />
+                  } @else {
+                    <mat-form-field class="field" subscriptSizing="dynamic">
+                      <mat-label i18n="@@create.tagsFree">Style tags (in English, separated by commas)</mat-label>
+                      <textarea matInput rows="2" [ngModel]="d.tags" (ngModelChange)="edit(item, 'tags', $event)" data-testid="create-tags-free"></textarea>
+                    </mat-form-field>
+                  }
+                  @if (!d.instrumental) {
+                    <mat-form-field class="field" subscriptSizing="dynamic">
+                      <mat-label i18n="@@create.lyrics">Lyrics</mat-label>
+                      <textarea matInput rows="6" [ngModel]="d.lyrics" (ngModelChange)="edit(item, 'lyrics', $event)" data-testid="create-lyrics"></textarea>
+                    </mat-form-field>
+                  }
+                  @if (item.suggesting()) {
+                    <mat-progress-bar mode="indeterminate" data-testid="suggesting"></mat-progress-bar>
+                  }
+                  @if (item.pendingGenerator() !== null) {
+                    <div class="pending" role="alert" data-testid="suggest-confirm">
+                      <p i18n="@@create.replaceAsk">What you wrote will be replaced by a new suggestion.</p>
+                      <button mat-flat-button type="button" (click)="flow.acceptPending(item)" data-testid="suggest-replace" i18n="@@create.replace">Replace</button>
+                      <button mat-button type="button" (click)="flow.cancelPending(item)" data-testid="suggest-keep" i18n="@@create.keep">Leave it as it is</button>
+                    </div>
+                  } @else if (!item.manual()) {
+                    <button mat-stroked-button type="button" [disabled]="item.suggesting()" (click)="flow.regenerate(item)" data-testid="suggest-again">
+                      <mat-icon>refresh</mat-icon>
+                      <ng-container i18n="@@create.regenerate">Regenerate suggestion</ng-container>
+                    </button>
+                  }
+                  @if (item.suggestNote()) {
+                    <p class="note warn" role="status" data-testid="suggest-note">{{ item.suggestNote() }}</p>
+                  }
+                } @else {
+                  <mat-form-field class="field" subscriptSizing="dynamic">
+                    <mat-label>
+                      @if (d.style === 'edit') { <ng-container i18n="@@create.editPrompt">Retouch instruction (in English)</ng-container> }
+                      @else { <ng-container i18n="@@create.imagePrompt">Image</ng-container> }
+                    </mat-label>
+                    <textarea matInput rows="4" [ngModel]="d.imagePrompt" (ngModelChange)="edit(item, 'imagePrompt', $event)" data-testid="create-image-prompt"></textarea>
+                  </mat-form-field>
+                  @if (d.kind === 'video') {
+                    <mat-form-field class="field" subscriptSizing="dynamic">
+                      <mat-label i18n="@@create.motionPrompt">Movement</mat-label>
+                      <textarea matInput rows="2" [ngModel]="d.motionPrompt" (ngModelChange)="edit(item, 'motionPrompt', $event)"></textarea>
+                    </mat-form-field>
+                  }
+                }
+              </mat-expansion-panel>
+
+              @for (w of item.warnings(); track w) {
+                <p class="note note--warn">{{ w }}</p>
+              }
+              @if (item.error()) {
+                <p class="note note--error" role="alert" data-testid="create-error">{{ item.error() }}</p>
+              }
+              <div class="actions">
+                <button data-start mat-flat-button class="touch" type="button" (click)="flow.confirm(item)" data-testid="create-confirm" i18n="@@create.confirm">Do it</button>
+                <button mat-button class="touch" type="button" (click)="remove(item)" data-testid="create-dismiss" i18n="@@create.discard">Discard</button>
+              </div>
+            </div>
+          }
+        }
+
+        @case ('preparing') {
+          <div class="state" data-testid="create-preparing">
+            <mat-spinner diameter="20" />
+            <span i18n="@@create.preparing">Getting it ready…</span>
+          </div>
+          @if (item.uploading(); as up) {
+            <mat-progress-bar mode="determinate" [value]="up * 100" aria-label="Uploading" i18n-aria-label="@@create.uploading" />
+          } @else if (item.uploading() === 0) {
+            <mat-progress-bar mode="indeterminate" aria-label="Uploading" i18n-aria-label="@@create.uploading" />
+          }
+        }
+
+        @case ('queued') {
+          <ng-container *ngTemplateOutlet="chosen; context: { $implicit: item }" />
+          <p class="state" data-testid="create-queued">
+            <mat-spinner diameter="20" />
+            <span>
+              @if (item.queuePosition(); as pos) {
+                <ng-container i18n="@@create.queuePos">Queued, place {{ pos }}</ng-container>
+              } @else {
+                <ng-container i18n="@@create.queued">Queued</ng-container>
+              }
+            </span>
+          </p>
+          <div class="actions"><button data-cancel mat-button class="touch" type="button" (click)="flow.cancel(item)" i18n="@@create.cancel">Cancel</button></div>
+        }
+
+        @case ('running') {
+          <ng-container *ngTemplateOutlet="chosen; context: { $implicit: item }" />
+          <div data-testid="create-running">
+            <mat-progress-bar [mode]="item.progress().ratio > 0 ? 'determinate' : 'indeterminate'" [value]="item.progress().ratio * 100" aria-label="Progress" i18n-aria-label="@@create.progress" />
+            <p class="meta">
+              @if (item.progress().phase) {
+                <span class="mo-data">{{ item.progress().phase }}</span> ·
+              }
+              <ng-container i18n="@@create.percent">{{ (item.progress().ratio * 100).toFixed(0) }} %</ng-container>
+            </p>
+          </div>
+          <div class="actions"><button data-cancel mat-button class="touch" type="button" (click)="flow.cancel(item)" i18n="@@create.cancel">Cancel</button></div>
+        }
+
+        @case ('done') {
+          @if (item.result(); as r) {
+            <div class="result" data-testid="create-result">
+              @switch (r.kind) {
+                @case ('video') {
+                  <div class="player"><video controls playsinline preload="metadata" [src]="r.url"></video></div>
+                }
+                @case ('image') {
+                  <img class="media" [src]="r.url" alt="Result" i18n-alt="@@create.resultAlt" />
+                }
+                @case ('music') {
+                  @if (r.cover) {
+                    <img class="cover" [src]="r.cover" alt="" />
+                  }
+                  <audio class="audio" controls preload="metadata" [src]="r.url"></audio>
+                }
+              }
+              <div class="actions">
+                <a mat-stroked-button class="touch" [href]="r.url" download data-testid="create-download"><mat-icon>download</mat-icon><span i18n="@@create.download">Download</span></a>
+                <button mat-stroked-button class="touch" type="button" [disabled]="sharer.busy() === r.url" (click)="sharer.share(r.url)" data-testid="create-share"><mat-icon>share</mat-icon><span i18n="@@create.share">Share</span></button>
+                @if (r.kind === 'image') {
+                  <button mat-button class="touch" type="button" (click)="editResult(r.url)" data-testid="create-edit"><mat-icon>edit</mat-icon><span i18n="@@create.edit">Edit</span></button>
+                }
+                <button mat-button class="touch" type="button" (click)="flow.again(item)" data-testid="create-again" i18n="@@create.again">Another variation</button>
+                <button data-keep mat-button class="touch" type="button" (click)="remove(item)" data-testid="create-remove" i18n="@@create.close">Remove</button>
+              </div>
+              @if (item.error()) {
+                <p class="note note--error" role="alert" data-testid="create-error">{{ item.error() }}</p>
+              }
+            </div>
+          }
+        }
+
+        @case ('failed') {
+          <p class="note note--error" role="alert" data-testid="create-failed">{{ item.error() }}</p>
+          <div class="actions">
+            @if (canRetry(item)) {
+              <button mat-flat-button class="touch" type="button" (click)="flow.retry(item)" data-testid="create-retry" i18n="@@create.retry">Try again</button>
+            }
+            <button data-keep mat-button class="touch" type="button" (click)="remove(item)" i18n="@@create.close">Remove</button>
+          </div>
+        }
+      }
+    </article>
+  }
+  <div #end class="end"></div>
+</section>
+
+<ng-template #chosen let-item>
+  @if (item.chosen(); as c) {
+    <p class="meta" data-testid="create-chosen">
+      {{ c.lines.join(' · ') }}
+      @if (c.seconds > 0) {
+        · <ng-container i18n="@@create.estimate">about {{ duration(c.seconds) }}</ng-container>
+        @if (c.source === 'history') {
+          <span class="meta__source" data-testid="create-estimate-source" i18n="@@create.estimateHistory">(from what your machine has taken, {{ c.executions }} runs)</span>
+        } @else if (c.source === 'mixed') {
+          <span class="meta__source" data-testid="create-estimate-source" i18n="@@create.estimateMixed">(partly from what your machine has taken and partly from a table)</span>
+        } @else if (c.source === 'table') {
+          <span class="meta__source" data-testid="create-estimate-source" i18n="@@create.estimateTable">(from a table: your machine has no history yet)</span>
+        }
+      }
+    </p>
+  }
+</ng-template>
+
+<form class="composer" data-keep [class.composer--open]="open()" (submit)="$event.preventDefault(); send()" data-testid="create-composer">
+  @if (files().length > 0) {
+    <ul class="chips">
+      @for (a of files(); track a.file) {
+        <li class="chip">
+          <mat-icon inline>{{ a.kind === 'audio' ? 'audiotrack' : a.kind === 'video' ? 'movie' : 'image' }}</mat-icon><span class="chip__name">{{ a.file.name }}</span>
+          <button type="button" class="chip__x" (click)="detach(a)" aria-label="Remove attachment" i18n-aria-label="@@create.removeFile"><mat-icon inline>close</mat-icon></button>
+        </li>
+      }
+    </ul>
+  }
+  <input #file hidden type="file" accept="image/*,video/*,audio/*,.mp3,.wav" multiple (change)="attach(file)" data-testid="create-file" />
+  @if (kindChoice() === null) {
+    <div class="pick" data-testid="create-pick">
+      <p class="pick__label" i18n="@@create.pickLabel">What do you want to create?</p>
+      <div class="pick__row">
+        <button mat-flat-button class="touch pick__btn" type="button" (click)="chooseKind('video')" data-testid="pick-video"><mat-icon>movie</mat-icon><span i18n="@@create.kindVideo">Video</span></button>
+        <button mat-flat-button class="touch pick__btn" type="button" (click)="chooseKind('image')" data-testid="pick-image"><mat-icon>image</mat-icon><span i18n="@@create.kindImage">Image</span></button>
+        <button mat-flat-button class="touch pick__btn" type="button" (click)="chooseKind('music')" data-testid="pick-music"><mat-icon>music_note</mat-icon><span i18n="@@create.kindMusic">Music</span></button>
+      </div>
+      <div class="pick__more">
+        <button mat-button class="touch" type="button" (click)="chooseKind('auto')" data-testid="pick-auto" i18n="@@create.pickAuto">Let the AI decide</button>
+        <button mat-icon-button class="touch" type="button" (click)="file.click()" aria-label="Attach" i18n-aria-label="@@create.attach" data-testid="create-attach-pick"><mat-icon>attach_file</mat-icon></button>
+      </div>
+    </div>
+  } @else {
+    <div class="composer__top" data-testid="create-head">
+      <button mat-button class="touch" type="button" (click)="changeKind()" data-testid="create-back"><mat-icon>arrow_back</mat-icon><span i18n="@@create.changeKind">Change type</span></button>
+      <span class="composer__kindname mo-data" data-testid="create-kindname">{{ kindName() }}</span>
+      @if (open()) {
+        <span class="composer__spacer"></span>
+        @if (text()) {
+          <button type="button" mat-button (click)="text.set('')" data-testid="create-clear"><mat-icon>backspace</mat-icon><span i18n="@@create.clear">Clear text</span></button>
+        }
+        <button type="button" mat-button (click)="fold()" data-testid="create-fold"><mat-icon>expand_more</mat-icon><span i18n="@@create.fold">Fold</span></button>
+      }
+    </div>
+    @if (micBlock() === 'insecure') {
+      <p class="note" data-testid="create-insecure" i18n="@@create.insecure">Dictating needs HTTPS (see docs/SERVER.md, "HTTPS for the microphone").</p>
+    } @else if (micBlock() === 'unsupported') {
+      <p class="note" i18n="@@create.unsupported">This browser cannot record audio. You can type what you want.</p>
+    } @else if (micBlock() === 'server') {
+      <p class="note" data-testid="create-no-dictation">
+        <ng-container i18n="@@create.noDictation">The server cannot transcribe voice right now.</ng-container> {{ serverReason() }}
+      </p>
+    }
+    @if (state() === 'recording') {
+      <p class="rec" role="status" data-testid="create-recording"><span class="rec__dot"></span><ng-container i18n="@@create.recording">Recording</ng-container> {{ seconds() }} s —
+        @if (recordingFor() === 'song') { <ng-container i18n="@@create.recSongHint">bring the phone close to the speaker and tap the button to finish (20 to 30 seconds are enough)</ng-container> }
+        @else { <ng-container i18n="@@create.recHint">tap the microphone to finish</ng-container> }</p>
+    } @else if (state() === 'listening') {
+      <p class="rec" role="status" data-testid="create-listening"><mat-spinner diameter="18" /> <ng-container i18n="@@create.listening">Listening to the song and describing it…</ng-container></p>
+    } @else if (state() === 'transcribing') {
+      <p class="rec" role="status" data-testid="create-transcribing"><mat-spinner diameter="18" /> <ng-container i18n="@@create.transcribing">Turning your voice into text…</ng-container></p>
+    }
+    @if (note()) {
+      @if (heardText()?.note === note()) {
+        <p class="note note--warn" role="status" data-testid="create-note">{{ note() }}</p>
+        <button mat-flat-button class="touch" type="button" (click)="reviewHeard()" data-testid="create-review-heard"><mat-icon>undo</mat-icon><span i18n="@@create.heardReview">Review</span></button>
+      } @else {
+        <p class="note note--warn" role="status" data-testid="create-note">{{ note() }}</p>
+      }
+    }
+    @if (improving()) {
+      <mat-progress-bar mode="indeterminate" data-testid="improving" aria-label="Improving the text" i18n-aria-label="@@create.improving"></mat-progress-bar>
+    }
+    @if (improvedFrom() !== null) {
+      <p class="note" data-testid="create-improved">
+        <ng-container i18n="@@create.improved">Text improved with AI. Check it before sending.</ng-container>
+        <button mat-button class="touch" type="button" (click)="undoImprove()" data-testid="create-improve-undo" i18n="@@create.improveUndo">Undo</button>
+      </p>
+    }
+    @if (micBlock() === '' && state() === 'idle' && listenOpen()) {
+      <div class="method" data-testid="create-method">
+        <span class="method__label" i18n="@@create.methodLabel">Recognise the song with</span>
+        <mat-button-toggle-group [value]="songMethod()" (change)="songMethod.set($event.value)" hideSingleSelectionIndicator aria-label="How to recognise the song" i18n-aria-label="@@create.methodAria">
+          <mat-button-toggle value="whisper" data-testid="method-whisper">Whisper</mat-button-toggle>
+          <mat-button-toggle value="clap" data-testid="method-clap" [disabled]="!methodUsable('clap')" [title]="methodWhy('clap')">LAION-CLAP</mat-button-toggle>
+          <mat-button-toggle value="muq" data-testid="method-muq" [disabled]="!methodUsable('muq')" [title]="methodWhy('muq')">MuQ</mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="method__hint" i18n="@@create.methodHint">Tap the ear again to start listening.</span>
+        <button mat-button type="button" (click)="listenOpen.set(false)" data-testid="method-close" i18n="@@create.cancel">Cancel</button>
+      </div>
+    }
+    <div class="composer__row">
+      <button mat-icon-button class="touch composer__attach" type="button" (click)="file.click()" aria-label="Attach" i18n-aria-label="@@create.attach" data-testid="create-attach"><mat-icon>attach_file</mat-icon></button>
+      <textarea
+        class="composer__text"
+        [rows]="open() ? 6 : 2"
+        [ngModel]="text()"
+        (ngModelChange)="text.set($event)"
+        (focus)="open.set(true)"
+        (keydown.escape)="fold()"
+        name="text"
+        [placeholder]="placeholder()"
+        data-testid="create-text"
+      ></textarea>
+      @if (assistantAvailable()) {
+        <button mat-icon-button class="touch composer__improve" type="button" (click)="improve()" [disabled]="!text().trim() || improving() || state() !== 'idle'" aria-label="Improve with AI" i18n-aria-label="@@create.improve" title="Improve with AI" i18n-title="@@create.improve" data-testid="create-improve"><mat-icon>auto_fix_high</mat-icon></button>
+      }
+      @if (micBlock() === '') {
+        <button mat-icon-button class="touch mic composer__mic" [class.mic--on]="state() === 'recording' && recordingFor() === 'speech'" type="button" (click)="toggleMic()" [disabled]="state() === 'transcribing' || state() === 'listening' || (state() === 'recording' && recordingFor() === 'song')" [attr.aria-pressed]="state() === 'recording' && recordingFor() === 'speech'" [attr.aria-label]="micTip" data-testid="create-mic"><mat-icon>{{ state() === 'recording' && recordingFor() === 'speech' ? 'stop' : 'mic' }}</mat-icon></button>
+        <button mat-icon-button class="touch mic composer__ear" [class.mic--on]="listenOpen() || (state() === 'recording' && recordingFor() === 'song')" type="button" (click)="toggleListen()" [disabled]="state() === 'transcribing' || state() === 'listening' || (state() === 'recording' && recordingFor() === 'speech')" [attr.aria-pressed]="state() === 'recording' && recordingFor() === 'song'" [attr.aria-label]="listenTip" [title]="listenTip" data-testid="create-listen"><mat-icon>{{ state() === 'recording' && recordingFor() === 'song' ? 'stop' : 'hearing' }}</mat-icon></button>
+      }
+      <button mat-icon-button data-start class="touch send composer__send" type="submit" [disabled]="!canSend()" aria-label="Send" i18n-aria-label="@@create.send" data-testid="create-send"><mat-icon>send</mat-icon></button>
+    </div>
+  }
+</form>

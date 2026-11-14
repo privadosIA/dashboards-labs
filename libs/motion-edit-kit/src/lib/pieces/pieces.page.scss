@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+
+.pieces {
+  padding: var(--lab-space-3) 0;
+}
+
+header {
+  margin-bottom: var(--lab-space-4);
+
+  h1 {
+    margin: 0 0 var(--lab-space-2);
+    font-size: var(--lab-fs-title);
+    font-weight: var(--lab-fw-title);
+  }
+
+  p {
+    margin: 0 0 var(--lab-space-3);
+    color: var(--lab-ink-dim);
+  }
+}
+
+
+header .ctl {
+  margin-inline-end: var(--lab-space-2);
+}
+
+a.ctl {
+  display: inline-block;
+  padding: var(--lab-space-1) var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  text-decoration: none;
+}
+
+.done {
+  margin-left: var(--lab-space-3);
+  color: var(--lab-success);
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notice {
+  padding: var(--lab-space-4);
+  border: 1px dashed var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  color: var(--lab-ink-dim);
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}
+
+.import {
+  margin-bottom: var(--lab-space-4);
+}

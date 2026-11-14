@@ -1,0 +1,108 @@
+:host {
+  display: block;
+  grid-column: 1 / -1;
+  margin: -4px 0 12px;
+}
+
+.describe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.describe__wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--lab-fs-meta);
+}
+
+.describe__note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.proposal {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px dashed var(--lab-accent);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface);
+}
+
+.proposal__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: 600;
+}
+
+.chip {
+  padding: 1px 8px;
+  border: 1px solid var(--lab-line);
+  border-radius: 999px;
+  font-weight: 400;
+}
+
+.proposal__text {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.proposal__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.describe__error {
+  margin-top: 8px;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  max-width: 80ch;
+
+  p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+  }
+
+  mat-icon {
+    flex: none;
+  }
+}
+
+.shots {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.shot {
+  display: grid;
+  gap: 4px;
+}
+
+.shot__prompt {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  font: inherit;
+  resize: vertical;
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}

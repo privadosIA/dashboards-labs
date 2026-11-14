@@ -1,0 +1,10 @@
+export { LanguageService } from './lib/core/language';
+export { MUSIC_STUDIO_OPTIONS, type MusicStudioOptions } from './lib/core/options';
+export { textsFor, type Texts } from './lib/core/texts';
+export { EnginesButton } from './lib/engines/engines-button/engines-button';
+export { provideMusicStudio } from './lib/provide-music-studio';
+export { musicStudioRoutes } from './lib/routes';
+export { type EngineStatus, type GeneratorName, type Song, type SongRequest, type SongState, type WriteRequest, type Written, isFinished } from './lib/song/model';
+export { takeEntry, type SongEntry } from './lib/song/take-entry';
+export { SONGS } from './lib/song/tokens';
+export { AssistFailed, EngineFailed, SongRefused, type SongPort } from './lib/song/port';

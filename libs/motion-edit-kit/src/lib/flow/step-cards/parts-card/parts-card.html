@@ -1,0 +1,86 @@
+<section class="parts" data-testid="parts-card">
+  @if (flow()) {
+    <p class="hint" data-testid="sent">{{ t.sent(flow()!.plan.parts.length, model(), provider()) }}</p>
+  }
+
+  @switch (step()?.status) {
+    @case ('failed') {
+      <p class="problem" role="alert" data-testid="failed">{{ t.stepFailed(why(step()?.reason)) }}</p>
+      <div class="actions">
+        <button type="button" data-testid="retry" (click)="run()">{{ t.retry }}</button>
+        <button type="button" data-testid="skip" (click)="skip()">{{ t.skip }}</button>
+      </div>
+    }
+    @default {
+      @if (busy()) {
+        <p class="hint" role="status" data-testid="busy">{{ t.stepFailed('busy') }}</p>
+      }
+      <ul class="items" data-testid="items">
+        @for (item of items(); track item.name) {
+          <li [attr.data-testid]="'part-' + item.name" [attr.data-status]="item.status">
+            <strong>{{ item.name }}</strong>
+            <span class="request">{{ item.request }}</span>
+            @switch (item.status) {
+              @case ('there') {
+                <span class="hint" data-testid="there">{{ t.there }}</span>
+              }
+              @case ('writing') {
+                <span class="hint" role="status">{{ t.writing(item.name) }}</span>
+              }
+              @case ('failed') {
+                <span class="problem" role="alert" data-testid="item-failed">{{ t.failed(item.error ?? '') }}</span>
+              }
+              @case ('approved') {
+                <span class="ok" data-testid="approved">{{ t.approved(item.partName ?? item.name) }}</span>
+              }
+              @case ('dropped') {
+                <span class="hint" data-testid="dropped">{{ t.dropped }}</span>
+              }
+              @case ('ready') {
+                <span class="hint">{{ t.ready }}</span>
+                <span class="previews">
+                  @for (p of item.preview; track p) {
+                    <img [src]="preview(p)" alt="" loading="lazy" data-testid="preview" />
+                  } @empty {
+                    <span class="hint">{{ t.noPreview }}</span>
+                  }
+                </span>
+              }
+            }
+            @if (item.status === 'ready' || item.status === 'failed') {
+              <span class="actions">
+                @if (item.status === 'ready') {
+                  <button type="button" class="primary" data-testid="approve" [disabled]="working() !== null" (click)="approve(item)">{{ t.approve }}</button>
+                }
+                <button type="button" data-testid="ask-again" [disabled]="working() !== null" (click)="openAsk(item)">{{ t.askAgain }}</button>
+                <button type="button" data-testid="drop" [disabled]="working() !== null" (click)="drop(item)">{{ t.drop }}</button>
+              </span>
+            }
+            @if (asking() === item.name) {
+              <span class="ask" data-testid="ask-form">
+                <dynamic-form [schema]="schema" [(model)]="form" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+                <span class="actions">
+                  <button type="button" class="primary" data-testid="ask-submit" [disabled]="!valid()" (click)="ask(item)">{{ t.askSubmit }}</button>
+                  <button type="button" data-testid="ask-cancel" (click)="asking.set(null)">{{ t.askCancel }}</button>
+                </span>
+              </span>
+            }
+          </li>
+        }
+      </ul>
+      @if (problem()) {
+        <p class="problem" role="alert" data-testid="problem">{{ t.problem(problem()) }}</p>
+      }
+      @if (step()?.status === 'waiting') {
+        @if (suggest()) {
+          <p class="note" data-testid="suggest">{{ t.suggest }} <button type="button" data-testid="back-to-script" (click)="backToScript()">{{ t.backToScript }}</button></p>
+        }
+        <label class="auto">
+          <input type="checkbox" data-testid="auto" [checked]="auto()" (change)="setAuto($any($event.target).checked)" />
+          {{ t.auto }}
+        </label>
+        <button type="button" class="primary" data-testid="continue" (click)="continue()">{{ t.continue }}</button>
+      }
+    }
+  }
+</section>

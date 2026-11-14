@@ -1,0 +1,18 @@
+<article class="card" data-testid="scene-card" [attr.data-state]="entry().state" [attr.data-verdict]="verdict()">
+  <header>
+    <strong data-testid="scene-card-block">{{ entry().scriptPiece }}</strong>
+    <span class="state" data-testid="scene-card-state">{{ t.cardStates[entry().state] }}</span>
+  </header>
+  @if (score() !== undefined) {
+    <p class="score" data-testid="scene-card-score">{{ t.cardScore(score()!) }}</p>
+  }
+  @if (note()) {
+    <p class="note" data-testid="scene-card-note">{{ note() }}</p>
+  }
+  @if (entry().error) {
+    <p class="problem" role="alert" data-testid="scene-card-error">{{ t.failed(entry().error!) }}</p>
+  }
+  @if (entry().draftId && entry().state !== 'pending' && entry().state !== 'writing') {
+    <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="scene-card-open" (click)="open.emit(entry())">{{ t.cardOpen }}</button>
+  }
+</article>

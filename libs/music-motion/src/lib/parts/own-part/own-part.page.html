@@ -1,0 +1,49 @@
+<section class="own-part">
+  <a class="back" [routerLink]="link('parts')">← {{ t.back }}</a>
+
+  @if (state() === undefined) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (state() === 'ready') {
+    <header>
+      <h1>{{ t.ownTitle }}: {{ name }}</h1>
+      @if (part(); as p) {
+        <p class="meta" data-testid="description">{{ p.description }}</p>
+      }
+      <p>{{ t.ownIntro }}</p>
+      @if (vectorPlace(); as place) {
+        <p><a class="edit-link" data-testid="open-in-vector" [routerLink]="place.path" [queryParams]="place.query">{{ links.openInVector }}</a></p>
+      }
+    </header>
+
+    <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+    <app-part-preview [manifest]="manifestText()" [fragment]="fragmentText()" />
+    <app-ask-change [manifest]="manifestText()" [fragment]="fragmentText()" />
+
+    @if (problems().length) {
+      <div class="problem" role="alert" data-testid="problems">
+        <ul>
+          @for (p of problems(); track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+      </div>
+    }
+    @if (refused()) {
+      <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+    }
+    @if (saved() && !problems().length) {
+      <p class="ok" role="status" data-testid="saved">{{ t.ownSaved }}</p>
+    }
+    <div class="actions">
+      <button type="button" class="save" data-testid="save" [disabled]="!valid() || saving()" (click)="save()">{{ saving() ? t.saving : t.ownSave }}</button>
+    </div>
+  } @else {
+    <div class="panel" role="alert" data-testid="unavailable">
+      <p>{{ state() === 'builtin' ? t.ownBuiltin : state() === 'failed' ? t.ownLoadFailed : t.ownMissing }}</p>
+      @if (error()) {
+        <p class="reason" data-testid="reason">{{ error() }}</p>
+      }
+      <a [routerLink]="link('parts')">{{ common.back }}</a>
+    </div>
+  }
+</section>

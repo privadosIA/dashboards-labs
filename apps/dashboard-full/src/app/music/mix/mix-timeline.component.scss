@@ -1,0 +1,215 @@
+:host {
+  display: block;
+}
+
+.tl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+
+  &__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--lab-space-2);
+  }
+
+  &__zoom {
+    min-width: 7ch;
+    text-align: center;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__snap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+    margin-left: var(--lab-space-4);
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+
+    select {
+      min-height: 32px;
+      padding: 0 var(--lab-space-2);
+      color: var(--lab-ink);
+      background: var(--lab-surface);
+      border: 1px solid var(--lab-line);
+      border-radius: var(--lab-radius-control);
+    }
+  }
+
+  // The row headers stay put while the lanes scroll sideways.
+  &__body {
+    display: flex;
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius-control);
+    background: var(--lab-surface);
+    overflow: hidden;
+  }
+
+  &__heads {
+    flex: 0 0 9.5rem;
+    width: 9.5rem;
+    min-width: 0;
+    overflow: hidden;
+    border-right: 1px solid var(--lab-line);
+  }
+
+  &__headspace {
+    height: 24px;
+    border-bottom: 1px solid var(--lab-line);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-1);
+    height: 56px;
+    min-width: 0;
+    padding: 0 var(--lab-space-2);
+    border-bottom: 1px solid var(--lab-line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &--selected {
+      background: color-mix(in srgb, var(--lab-accent) 6%, transparent);
+    }
+  }
+
+  &__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__scroll {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  &__canvas {
+    position: relative;
+    min-width: 100%;
+  }
+
+  &__grid {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--lab-line);
+    opacity: 0.45;
+    z-index: 1;
+    pointer-events: none;
+
+    &--bar {
+      opacity: 1;
+    }
+  }
+
+  &__ruler {
+    position: relative;
+    height: 24px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--lab-line);
+  }
+
+  &__tick {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    padding-left: 4px;
+    border-left: 1px solid var(--lab-line);
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+    line-height: 24px;
+  }
+
+  // The whole mix being played: one bar across every row.
+  &__playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--lab-ink);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--lab-bg) 70%, transparent);
+    cursor: ew-resize;
+    touch-action: none;
+
+    // A wider area to grab, and a knob so it looks movable.
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -8px;
+      width: 18px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 0 0 5px 5px;
+      background: var(--lab-ink);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-accent);
+      outline-offset: 3px;
+    }
+  }
+
+  // One track listened to alone: a short marker inside its own row.
+  &__solo {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    z-index: 3;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--lab-ink);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--lab-bg) 70%, transparent);
+    cursor: ew-resize;
+    touch-action: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      bottom: -6px;
+      left: -8px;
+      width: 18px;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-accent);
+      outline-offset: 3px;
+    }
+  }
+
+  &__lane {
+    position: relative;
+    height: 56px;
+    border-bottom: 1px solid var(--lab-line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &--selected {
+      background: color-mix(in srgb, var(--lab-accent) 6%, transparent);
+    }
+  }
+}

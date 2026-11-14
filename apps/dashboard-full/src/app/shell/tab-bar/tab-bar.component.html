@@ -1,0 +1,12 @@
+<nav class="tabs" [class.tabs--hidden]="typing()" aria-label="Sections" i18n-aria-label="@@shell.sections" data-testid="tab-bar">
+  @for (t of tabs(); track t.path) {
+    <a class="tabs__tab lab-plain-link" [routerLink]="t.path" routerLinkActive="tabs__tab--active" ariaCurrentWhenActive="page">
+      <mat-icon aria-hidden="true">{{ t.icon }}</mat-icon>
+      <span class="tabs__label">{{ t.label }}</span>
+    </a>
+  }
+  <button class="tabs__tab" type="button" (click)="more.emit()" data-testid="tab-more">
+    <mat-icon aria-hidden="true">more_horiz</mat-icon>
+    <span class="tabs__label">{{ moreLabel() }}</span>
+  </button>
+</nav>

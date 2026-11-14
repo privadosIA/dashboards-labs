@@ -1,0 +1,201 @@
+// The global rules the editor needs and no component stylesheet can hold: the form library draws its fields outside the component (the inspector's design form and the new-part dialog), and
+// the small controls (`.ctl`) are plain elements. A host includes this once in its global styles (`@use '.../motion-edit-kit/src/lib/styles/editor'; @include editor.editor();`). The tokens that
+// pin the form library and Material to the host's look (`.df-form { --df-color-… }`, `html { --mat-… }`) stay the host's. Every rule is scoped to `.motion-edit-kit`, the class of the list
+// and of the editor page, so a host's own forms and buttons are not touched.
+@mixin editor {
+  .motion-edit-kit .df-form {
+    // Compact fields: a floating label still fits, the box is a pill-sized 2.5 rem.
+    --mat-form-field-container-height: 2.5rem;
+    --mat-form-field-filled-with-label-container-padding-top: 1.1rem;
+    --mat-form-field-filled-with-label-container-padding-bottom: 0.2rem;
+    --mat-form-field-container-vertical-padding: 0.5rem;
+    --mat-form-field-container-text-size: var(--lab-fs-body);
+    --mat-form-field-container-text-line-height: 1.2;
+    --mat-form-field-outlined-label-text-populated-size: var(--lab-fs-meta);
+    --mat-form-field-filled-label-text-size: var(--lab-fs-body);
+    --mat-select-trigger-text-size: var(--lab-fs-body);
+    --mat-form-field-subscript-text-size: var(--lab-fs-meta);
+    // the labels read well on the field in both themes (Material's own are a translucent grey)
+    --mat-form-field-filled-label-text-color: var(--lab-ink-dim);
+    --mat-form-field-filled-focus-label-text-color: var(--lab-ink-dim);
+    --mat-form-field-filled-hover-label-text-color: var(--lab-ink-dim);
+    --mat-form-field-outlined-label-text-color: var(--lab-ink-dim);
+    --mat-form-field-outlined-focus-label-text-color: var(--lab-ink-dim);
+    --mat-form-field-outlined-hover-label-text-color: var(--lab-ink-dim);
+    // Material's dark field is a mid grey the labels do not read on: the field follows the tokens
+    --mat-form-field-filled-container-color: var(--lab-surface-high);
+    --mat-form-field-filled-disabled-container-color: var(--lab-surface-high);
+  }
+
+
+  .motion-edit-kit .df-form .mat-mdc-form-field {
+    font-size: var(--lab-fs-body);
+  }
+
+  .motion-edit-kit .df-form .mat-mdc-form-field-infix {
+    min-height: 0 !important;
+    padding-top: 1rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .motion-edit-kit .df-form .mdc-floating-label--float-above {
+    font-size: var(--lab-fs-meta) !important;
+  }
+
+  // A field with nothing to say under it takes no room (Material keeps a line free for hints and errors).
+  .motion-edit-kit .df-form .mat-mdc-form-field-subscript-wrapper:empty,
+  .motion-edit-kit .df-form .mat-mdc-form-field:not(.mat-form-field-invalid) .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  // With the empty line of Material gone, each field keeps its own gap to what follows.
+  .motion-edit-kit .df-form .mat-mdc-form-field {
+    margin-bottom: var(--lab-field-gap);
+  }
+
+  // Fields are rounded boxes with a thin border (Material's filled field is round only on top, with a line below).
+  .motion-edit-kit .df-form .mdc-text-field--filled {
+    border-radius: var(--lab-radius-pill);
+    box-shadow: inset 0 0 0 1px var(--lab-line);
+  }
+
+  .motion-edit-kit .df-form .mdc-text-field--filled .mdc-line-ripple {
+    display: none;
+  }
+
+  .motion-edit-kit .df-form .mat-mdc-form-field.mat-focused .mdc-text-field--filled {
+    box-shadow: inset 0 0 0 1px var(--lab-accent);
+  }
+
+  .motion-edit-kit .df-form .mat-mdc-form-field.mat-form-field-invalid .mdc-text-field--filled {
+    box-shadow: inset 0 0 0 1px var(--lab-danger);
+  }
+
+  // The design lives in the narrow column of the inspector: the colours go two to a row (the third on its own), everything else one to a row,
+  // so that no label is cut.
+  .motion-edit-kit .df-form .df-grid > formly-field {
+    grid-column: span 12;
+
+    &.color-field {
+      grid-column: span 6;
+    }
+
+    &.color-field:last-of-type {
+      grid-column: span 12;
+    }
+  }
+
+  // The song's design, in lines of fields: the dark and the light colour and the two typefaces on the first; the accent colour and the two looks (how the verse is marked, how a
+  // word's hit looks) on the second; under them the modes (the default and one per section) grouped, three to a line. The idea, a plain box, takes the whole width at the bottom
+  // (the host draws it under the form).
+  .motion-edit-kit .df-form:has(.mode-field) {
+    // The design takes the whole width of its block (a host may cap a form's width for reading; this one is a block of fields to fill, with the idea under it).
+    max-width: none;
+    // Lower fields, so that the block takes less of the column.
+    --mat-form-field-container-height: 2.5rem;
+    --mat-form-field-filled-with-label-container-padding-top: 1rem;
+  }
+
+  .motion-edit-kit .df-form .df-grid:has(> .mode-field) {
+    > formly-field.color-field,
+    > formly-field.font-field {
+      grid-column: span 3;
+    }
+
+    > formly-field.color-field ~ formly-field.color-field ~ formly-field.color-field,
+    > formly-field.style-field,
+    > formly-field.mode-field {
+      grid-column: span 4;
+    }
+
+    // A colour box is as tall as a combo's, so that the colour above a mode is as far from it as a combo is (and the first line is even).
+    > formly-field.color-field .mat-mdc-text-field-wrapper {
+      min-height: 2.75rem;
+    }
+
+    > formly-field.mode-field {
+      --df-field-gap: var(--lab-space-2);
+      --mat-radio-state-layer-size: 28px;
+    }
+  }
+
+  // The assistant's two choices (the provider and the model) are small and share a line, not a field each across the whole column: the form is drawn by the library, so the
+  // rule is global.
+  .motion-edit-kit .assistant-form.df-form {
+    --mat-form-field-container-height: 2.75rem;
+    --mat-form-field-filled-with-label-container-padding-top: 1.1rem;
+
+    .df-grid {
+      display: flex;
+      flex-wrap: wrap;
+      // The two sit side by side with the same space the dashboard puts between fields (`npm run forms:audit` measures it).
+      column-gap: var(--lab-field-gap);
+
+      > formly-field {
+        flex: 0 0 16rem;
+        width: 16rem;
+        max-width: 100%;
+      }
+    }
+  }
+
+  // The small controls of the editor (selects, number and text boxes, buttons): compact, rounded, with the tokens' colours. They are plain
+  // elements with the class `ctl`; the forms drawn by the form library have their own look in _forms.scss.
+  .motion-edit-kit .ctl {
+    box-sizing: border-box;
+    min-width: 0;
+    height: 2rem;
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius-pill);
+    background: var(--lab-surface-high);
+    color: var(--lab-ink);
+    font: inherit;
+    font-size: var(--lab-fs-body);
+    line-height: 1;
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-focus);
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  .motion-edit-kit select.ctl {
+    padding-right: var(--lab-space-2);
+  }
+
+  .motion-edit-kit input.ctl[type='number'] {
+    padding: 0 var(--lab-space-2);
+  }
+
+  .motion-edit-kit button.ctl {
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: var(--lab-surface-high);
+    }
+
+    &.primary {
+      border-color: var(--lab-accent);
+      background: var(--lab-accent);
+      color: var(--lab-on-accent);
+      font-weight: var(--lab-fw-control);
+
+      &:hover:not(:disabled) {
+        background: var(--lab-accent);
+        filter: brightness(1.08);
+      }
+    }
+
+    &.danger {
+      color: var(--lab-danger);
+    }
+  }
+}

@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  gap: var(--lab-space-4);
+  flex-wrap: wrap;
+  align-items: flex-start;
+
+  // Fields grow downwards (hint, error); keep every top edge on one line and
+  // centre the controls that are not fields on the input row (40px).
+  > :not(mat-form-field):not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}
+
+.wide {
+  width: 100%;
+}
+
+.id {
+  width: 240px;
+}
+
+.language {
+  width: 260px;
+}
+
+.title {
+  width: 280px;
+}
+
+.adapter {
+  width: 260px;
+}
+
+.missing {
+  color: var(--lab-warn);
+}
+
+.narrow {
+  width: 170px;
+}
+
+.instrumental {
+  margin-bottom: var(--lab-space-3);
+}
+
+textarea {
+  max-width: 80ch;
+}
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  color: var(--lab-danger);
+  border: 1px solid var(--lab-danger);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  font-size: var(--lab-fs-meta);
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.extract {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-2);
+}
+
+.extract__why {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

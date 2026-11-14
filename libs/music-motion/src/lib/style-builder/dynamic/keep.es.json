@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "id": "keep",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    { "key": "keep", "type": "select", "label": "Dónde guardarlo", "defaultValue": "browser" }
+  ]
+}

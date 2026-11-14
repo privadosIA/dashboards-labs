@@ -1,0 +1,31 @@
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  object-fit: cover;
+}
+
+.chip {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

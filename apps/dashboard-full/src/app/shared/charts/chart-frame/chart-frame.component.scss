@@ -1,0 +1,67 @@
+.frame {
+  margin: 0;
+  padding: var(--lab-space-3) var(--lab-space-4);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  box-shadow: var(--lab-elev-1);
+  min-width: 0;
+}
+
+.frame__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lab-space-2);
+}
+
+.frame__title {
+  margin: 0;
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  letter-spacing: var(--lab-tracking-tight);
+}
+
+.frame__desc {
+  margin: var(--lab-space-1) 0 var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  max-width: 80ch;
+}
+
+.frame__body {
+  min-width: 0;
+}
+
+.frame__table {
+  overflow-x: auto;
+  max-width: 100%;
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: var(--lab-fs-meta);
+  }
+
+  th,
+  td {
+    padding: var(--lab-space-1) var(--lab-space-2);
+    border-bottom: 1px solid var(--lab-line);
+    text-align: left;
+  }
+
+  th {
+    font-weight: var(--lab-fw-title);
+    color: var(--lab-ink-dim);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

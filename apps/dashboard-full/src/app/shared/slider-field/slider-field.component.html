@@ -1,0 +1,7 @@
+<div class="slider">
+  <label>{{ label() }}</label>
+  <mat-slider [min]="min()" [max]="max()" [step]="step()" discrete>
+    <input matSliderThumb [attr.data-testid]="testId()" [value]="value()" (valueChange)="valueChange.emit($event)" />
+  </mat-slider>
+  <span class="mo-data">{{ value() }}</span>
+</div>

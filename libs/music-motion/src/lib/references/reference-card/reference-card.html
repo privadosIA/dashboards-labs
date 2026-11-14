@@ -1,0 +1,25 @@
+<article class="card" [class]="'state-' + reference().state" [attr.data-testid]="'reference-' + reference().id">
+  <div class="head">
+    <h2>{{ reference().title }}</h2>
+    <span class="state" data-testid="state">{{ t.states[reference().state] }}</span>
+  </div>
+  @if (reference().tags.length) {
+    <ul class="tags" data-testid="tags">
+      @for (tag of reference().tags; track tag) {
+        <li>{{ tag }}</li>
+      }
+    </ul>
+  }
+  @if (taught(); as n) {
+    <p class="taught" data-testid="taught">{{ t.taught(n.styles, n.parts) }}</p>
+  }
+  @if (reference().state === 'analysing') {
+    <p class="meta" role="status" data-testid="analysing">{{ t.analysingNote }}</p>
+  } @else if (reference().state === 'failed' && reference().error) {
+    <p class="error" data-testid="error">{{ t.failedReason }} {{ reference().error }}</p>
+  }
+  <div class="actions">
+    <button type="button" class="open" data-testid="open" (click)="open.emit(reference())">{{ t.open }}</button>
+    <button type="button" data-testid="remove" (click)="remove.emit(reference())">{{ t.remove }}</button>
+  </div>
+</article>

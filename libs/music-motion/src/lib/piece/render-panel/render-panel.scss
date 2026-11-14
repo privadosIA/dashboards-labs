@@ -1,0 +1,80 @@
+.render {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.forecast {
+  font-weight: var(--lab-fw-control);
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.slow {
+  color: var(--lab-warn);
+}
+
+.problem {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.progress {
+  height: 0.5rem;
+  overflow: hidden;
+  background: var(--lab-surface-high);
+  border-radius: var(--lab-radius-pill);
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--lab-accent);
+    transition: width 0.4s ease;
+  }
+}
+
+video {
+  width: 100%;
+  max-height: 28rem;
+  background: var(--lab-player-bg);
+  border-radius: var(--lab-radius);
+}
+
+.download {
+  width: fit-content;
+  color: var(--lab-accent);
+}
+
+.draw {
+  justify-self: start;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    cursor: not-allowed;
+  }
+}

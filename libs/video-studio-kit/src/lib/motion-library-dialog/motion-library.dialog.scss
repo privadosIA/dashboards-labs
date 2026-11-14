@@ -1,0 +1,139 @@
+.library-dialog {
+  display: grid;
+  gap: var(--lab-space-4);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h2 {
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  color: var(--lab-ink-dim);
+}
+
+.list,
+.add {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.add {
+  padding-top: var(--lab-space-4);
+  border-top: 1px solid var(--lab-line);
+}
+
+.limits {
+  display: grid;
+  gap: var(--lab-space-1);
+
+  ul {
+    margin: 0;
+    padding-left: var(--lab-space-4);
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+  }
+}
+
+.hint,
+.empty {
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+}
+
+.picked {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.retry {
+  margin-left: var(--lab-space-2);
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-body);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.actions button,
+.pick button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-body);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.actions button.primary {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font: inherit;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-title);
+  cursor: pointer;
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    color: var(--lab-ink-dim);
+    box-shadow: inset 0 0 0 1px var(--lab-control-line);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}

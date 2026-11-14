@@ -1,0 +1,39 @@
+.tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lab-space-2);
+  margin: var(--lab-space-1) 0 var(--lab-space-3);
+}
+
+.tool {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.ai {
+  color: var(--lab-accent);
+}
+
+// The hint takes the whole first row of the grid the tags sit in.
+.menu-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--lab-space-1) var(--lab-space-3) var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

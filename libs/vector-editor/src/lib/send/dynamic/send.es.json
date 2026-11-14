@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "id": "send",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nombre de la parte",
+      "placeholder": "logo-giratorio",
+      "description": "Letras minúsculas y cifras, unidas por guiones.",
+      "validation": {
+        "required": true,
+        "maxLength": 48,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "messages": {
+          "required": "La parte necesita un nombre.",
+          "maxLength": "El nombre puede tener hasta 48 caracteres.",
+          "pattern": "Usa letras minúsculas y cifras unidas por guiones, como logo-giratorio."
+        }
+      }
+    },
+    {
+      "key": "description",
+      "type": "text",
+      "label": "Descripción",
+      "validation": {
+        "required": true,
+        "maxLength": 200,
+        "messages": {
+          "required": "Di en una frase qué hace la parte.",
+          "maxLength": "La descripción puede tener hasta 200 caracteres."
+        }
+      }
+    },
+    { "key": "level_simple", "type": "checkbox", "label": "Nivel simple", "defaultValue": true },
+    { "key": "level_medium", "type": "checkbox", "label": "Nivel medio", "defaultValue": true },
+    { "key": "level_advanced", "type": "checkbox", "label": "Nivel avanzado", "defaultValue": true },
+    {
+      "key": "cost_ms",
+      "type": "number",
+      "label": "Coste de dibujar un fotograma (ms)",
+      "defaultValue": 40,
+      "validation": {
+        "required": true,
+        "min": 1,
+        "max": 10000,
+        "messages": {
+          "required": "Hace falta el coste.",
+          "min": "El coste es de 1 ms como mínimo.",
+          "max": "El coste es de 10000 ms como máximo."
+        }
+      }
+    }
+  ]
+}

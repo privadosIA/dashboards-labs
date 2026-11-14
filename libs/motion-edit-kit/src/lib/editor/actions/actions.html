@@ -1,0 +1,23 @@
+<div class="actions">
+  <button type="button" class="ctl" data-testid="export" [disabled]="exporting()" (click)="export()">{{ exporting() ? t.exporting : t.export }}</button>
+  <button type="button" class="ctl primary" data-testid="render" [disabled]="busy() || starting()" (click)="render()">{{ busy() || starting() ? t.rendering : t.render }}</button>
+</div>
+<p class="meta" data-testid="estimate">{{ estimate() }}</p>
+@if (busy()) {
+  <p class="meta" role="status" data-testid="progress">{{ t.progress(piece().progress) }}</p>
+}
+@if (piece().state === 'failed' && piece().error) {
+  <p class="problem" role="alert" data-testid="piece-failed">{{ t.failedPiece }} {{ piece().error }}</p>
+}
+@if (video(); as v) {
+  <a class="video" data-testid="video" [href]="v" target="_blank" rel="noopener">{{ t.video }}</a>
+}
+@if (saved()) {
+  <p class="ok" role="status" data-testid="saved">{{ saved() }}</p>
+}
+@if (exportRefused()) {
+  <p class="problem" role="alert" data-testid="export-refused">{{ exportRefused() }}</p>
+}
+@if (renderRefused()) {
+  <p class="problem" role="alert" data-testid="render-refused">{{ renderRefused() }}</p>
+}

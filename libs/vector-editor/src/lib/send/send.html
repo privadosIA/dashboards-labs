@@ -1,0 +1,71 @@
+<dialog #dialog class="modal" data-testid="send" [attr.aria-label]="t.title" (close)="open.set(false)" (click)="backdrop($event)">
+  @if (open()) {
+    <div class="box">
+      <header class="bar">
+        <h2>{{ replacing() && view() === 'form' ? t.replaceTitle(doc().partName ?? '') : t.title }}</h2>
+        <button type="button" class="close" data-testid="send-close" [attr.aria-label]="t.close" [attr.title]="t.close" (click)="open.set(false)">×</button>
+      </header>
+
+      @switch (view()) {
+        @case ('working') {
+          <p role="status" class="status" data-testid="send-working">{{ checking() ? t.checking : t.working }}</p>
+        }
+        @case ('review') {
+          <p role="status" class="status" data-testid="send-review">{{ t.review }}</p>
+          <ul class="previews" data-testid="send-previews">
+            @for (src of draft()?.previews ?? []; track src; let i = $index) {
+              <li><img [src]="src" [alt]="t.previewAlt(i + 1)" width="160" height="90" /></li>
+            }
+          </ul>
+          <div class="actions">
+            <button type="button" class="primary" data-testid="send-approve" (click)="approve()">{{ t.approve }}</button>
+            <button type="button" data-testid="send-back" (click)="back()">{{ t.cancel }}</button>
+          </div>
+        }
+        @case ('done') {
+          <p role="status" class="status ok" data-testid="send-done">{{ doneText() }}</p>
+          <div class="actions">
+            <button type="button" class="primary" data-testid="send-finish" (click)="open.set(false)">{{ t.close }}</button>
+          </div>
+        }
+        @default {
+          <dynamic-form
+            [schema]="schema"
+            [(model)]="model"
+            [showDefaultActions]="false"
+            showErrors="touched"
+            (statusChange)="valid.set($event === 'VALID')"
+          />
+          @if (!anyLevel()) {
+            <p class="problem" role="alert" data-testid="send-no-levels">{{ t.noLevels }}</p>
+          }
+          @if (!moves()) {
+            <p class="problem" role="alert" data-testid="send-still">{{ t.doesNotMove }}</p>
+          }
+          @if (tooBig()) {
+            <p class="problem" role="alert" data-testid="send-too-big">{{ t.tooBig(sizeText(), limitText) }}</p>
+          }
+          @if (problems().length) {
+            <div class="problem" role="alert" data-testid="send-problems">
+              <p>{{ t.failed }}</p>
+              <ul>
+                @for (p of problems(); track p) {
+                  <li>{{ p }}</li>
+                }
+              </ul>
+            </div>
+          }
+          <div class="actions">
+            @if (replacing()) {
+              <button type="button" class="primary" data-testid="send-replace" [disabled]="!ready()" (click)="replace()">{{ t.replace }}</button>
+              <button type="button" data-testid="send-new" [disabled]="!ready()" (click)="send()">{{ t.sendNew }}</button>
+            } @else {
+              <button type="button" class="primary" data-testid="send-confirm" [disabled]="!ready()" (click)="send()">{{ t.confirm }}</button>
+            }
+            <button type="button" data-testid="send-cancel" (click)="open.set(false)">{{ t.cancel }}</button>
+          </div>
+        }
+      }
+    </div>
+  }
+</dialog>

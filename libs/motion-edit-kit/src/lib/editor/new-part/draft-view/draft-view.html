@@ -1,0 +1,118 @@
+@if (draft(); as d) {
+  <div class="draft" data-testid="draft" [attr.data-state]="d.state">
+    <header class="head">
+      <strong data-testid="draft-name">{{ name() || d.request }}</strong>
+      <span class="state" [attr.data-state]="d.state" data-testid="draft-state">{{ t.states[d.state] }}</span>
+      <span class="meta">{{ t.attempts(d.attempts) }}</span>
+    </header>
+    @if (d.brief) {
+      <p class="meta request" data-testid="draft-brief">{{ ts.brief }}: {{ d.brief }}</p>
+    } @else if (d.request) {
+      <p class="meta request">{{ d.request }}</p>
+    }
+
+    @if (d.state === 'writing') {
+      <p class="meta" role="status" data-testid="draft-writing">{{ t.writingNote }}</p>
+    } @else if (d.state === 'failed') {
+      <p class="problem" role="alert" data-testid="draft-failed">{{ t.reason }} {{ d.error }}</p>
+      @if (d.problems.length) {
+        <ul class="problems">
+          @for (p of d.problems; track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+      }
+      <div class="actions">
+        <button type="button" class="ctl" data-testid="draft-retry" (click)="retry()">{{ t.retry }}</button>
+        <button type="button" class="ctl danger" data-testid="draft-remove" (click)="remove()">{{ removing() ? t.removeAsk : t.remove }}</button>
+      </div>
+    } @else {
+      @if (d.preview.length) {
+        <section>
+          <h3>{{ t.preview }}</h3>
+          <ul class="pictures" data-testid="draft-pictures">
+            @for (p of d.preview; track p) {
+              <li><img [src]="src(p)" alt="" loading="lazy" /></li>
+            }
+          </ul>
+        </section>
+      }
+      @if (d.review; as r) {
+        <section class="review" data-testid="draft-review">
+          <h3>{{ ts.reviewTitle }}</h3>
+          @if (r.error) {
+            <p class="problem" role="status" data-testid="draft-review-error">{{ ts.reviewError(r.error) }}</p>
+          } @else {
+            <p class="verdict" [attr.data-verdict]="verdict()" data-testid="draft-review-score">
+              @if (r.score !== undefined) {
+                <strong>{{ ts.score(r.score) }}</strong>
+              }
+              @if (verdict(); as v) {
+                <span>{{ ts.verdict[v] }}</span>
+              }
+            </p>
+            @if (r.notes.length) {
+              <p class="meta">{{ ts.notes }}</p>
+              <ul class="notes" data-testid="draft-review-notes">
+                @for (n of r.notes; track $index) {
+                  <li>{{ n }}</li>
+                }
+              </ul>
+            }
+            @if (r.attempts.length > 1) {
+              <p class="meta">{{ ts.climb }}</p>
+              <ol class="climb" data-testid="draft-review-attempts">
+                @for (a of r.attempts; track $index) {
+                  <li>{{ ts.attempt($index + 1, a.score ?? 0) }}</li>
+                }
+              </ol>
+            }
+          }
+        </section>
+      }
+      @if (d.warnings?.length) {
+        <div class="warnings" role="status" data-testid="draft-warnings">
+          <p class="meta">{{ ts.warnings }}</p>
+          <ul>
+            @for (w of d.warnings; track $index) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <label class="field">
+        <span>{{ t.manifest }}</span>
+        <textarea rows="8" spellcheck="false" data-testid="draft-manifest" [value]="manifest()" (input)="typeManifest($event)"></textarea>
+      </label>
+      <label class="field">
+        <span>{{ t.fragment }}</span>
+        <textarea rows="14" spellcheck="false" data-testid="draft-fragment" [value]="fragment()" (input)="typeFragment($event)"></textarea>
+      </label>
+      @if (problems().length) {
+        <div class="problem" role="alert" data-testid="draft-problems">
+          <p>{{ t.problems }}</p>
+          <ul>
+            @for (p of problems(); track $index) {
+              <li>{{ p }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (saved() && !problems().length) {
+        <p class="ok" role="status" data-testid="draft-saved">{{ t.saved }}</p>
+      }
+      <div class="actions">
+        <button type="button" class="ctl" data-testid="draft-template" (click)="useTemplate()">{{ t.template }}</button>
+        <button type="button" class="ctl" data-testid="draft-save" [disabled]="!dirty() || saving()" (click)="save()">{{ saving() ? t.saving : t.save }}</button>
+        <button type="button" class="ctl primary" data-testid="draft-approve" [disabled]="!canApprove()" (click)="approve()">{{ approving() ? t.approving : t.approve }}</button>
+        <button type="button" class="ctl danger" data-testid="draft-remove" (click)="remove()">{{ removing() ? t.removeAsk : t.remove }}</button>
+      </div>
+      <p class="meta" data-testid="draft-warning">{{ t.approveWarning }}</p>
+    }
+    @if (refused()) {
+      <p class="problem" role="alert" data-testid="draft-refused">{{ refused() }}</p>
+    }
+  </div>
+} @else if (refused()) {
+  <p class="problem" role="alert" data-testid="draft-refused">{{ refused() }}</p>
+}

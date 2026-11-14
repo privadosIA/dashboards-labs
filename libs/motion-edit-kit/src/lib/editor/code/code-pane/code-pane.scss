@@ -1,0 +1,49 @@
+.code-pane {
+  position: relative;
+  min-width: 0;
+  height: clamp(22rem, 62vh, 46rem);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+  overflow: hidden;
+
+  &-host {
+    position: absolute;
+    inset: 0;
+  }
+
+  &-note {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    gap: var(--lab-space-2);
+    margin: 0;
+    padding: var(--lab-space-4);
+    color: var(--lab-ink-dim);
+    text-align: center;
+  }
+
+  &-retry {
+    justify-self: center;
+    padding: var(--lab-space-1) var(--lab-space-3);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius-pill);
+    background: transparent;
+    color: var(--lab-ink);
+    font: inherit;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--lab-accent);
+      color: var(--lab-accent);
+    }
+  }
+}
+
+// Monaco draws this one outside the component, so the class is global (the component has no encapsulation).
+.code-pane-selected {
+  background: color-mix(in srgb, var(--lab-accent) 18%, transparent);
+  border-radius: 2px;
+}

@@ -1,0 +1,48 @@
+<details class="script" data-testid="script">
+  <summary>
+    <h2>{{ t.title }}</h2>
+    @if (whole()) {
+      <span class="covers" data-testid="covers">{{ t.covers }}</span>
+    }
+  </summary>
+  <p class="hint">{{ t.hint }}</p>
+
+  <ol class="rows">
+    @for (p of draft().pieces; track p.id; let i = $index) {
+      <li>
+        <app-script-row
+          [piece]="p"
+          [index]="i"
+          [count]="draft().pieces.length"
+          [catalog]="catalog()"
+          [level]="piece().level"
+          [style]="piece().style"
+          [defaultMode]="defaultMode()"
+          [song]="songDesign()"
+          [locked]="locked()"
+          [problem]="problemOf(p.id)"
+          (edit)="edit(i, $event)"
+          (params)="editParams(i, $event)"
+          (stage)="editStage(i, $event)"
+          (addExtra)="addExtraPart(i, $event)"
+          (removeExtra)="removeExtraPart(i, $event)"
+          (extraPart)="changeExtraPart(i, $event)"
+          (extraParams)="changeExtraParams(i, $event)"
+          (pieceDesign)="changePieceDesign(i, $event)"
+          (show)="show(i)"
+        />
+      </li>
+    }
+  </ol>
+
+  @if (general()) {
+    <p class="problem" role="alert" data-testid="problem">{{ general() }}</p>
+  }
+  @if (done() && !refused()) {
+    <p class="ok" role="status" data-testid="saved">{{ t.saved }}</p>
+  }
+  <div class="actions">
+    <button type="button" class="save" data-testid="save-script" [disabled]="!dirty() || working() || locked()" (click)="save()">{{ working() ? t.saving : t.save }}</button>
+    <button type="button" data-testid="discard" [disabled]="!dirty() || working()" (click)="discard()">{{ t.discard }}</button>
+  </div>
+</details>

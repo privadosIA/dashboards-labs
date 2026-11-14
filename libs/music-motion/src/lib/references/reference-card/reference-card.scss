@@ -1,0 +1,106 @@
+.card {
+  --state: var(--lab-ink-dim);
+
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3) var(--lab-space-3) var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-left: 6px solid var(--state);
+  border-radius: var(--lab-radius-panel);
+
+  &.state-analysing {
+    --state: var(--lab-accent);
+  }
+
+  &.state-ready {
+    --state: var(--lab-success);
+  }
+
+  &.state-failed {
+    --state: var(--lab-danger);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.state {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--state);
+  border-radius: var(--lab-radius-pill);
+  color: var(--state);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0 var(--lab-space-2);
+    background: var(--lab-surface-high);
+    border-radius: var(--lab-radius-pill);
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.meta,
+.error {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.meta {
+  color: var(--lab-ink-dim);
+}
+
+.error {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}
+
+.open {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.taught {
+  margin: 0;
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+}

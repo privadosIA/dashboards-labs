@@ -1,0 +1,189 @@
+section {
+  margin-bottom: var(--lab-space-5);
+
+  h3 {
+    font-size: var(--lab-fs-section);
+    font-weight: 600;
+    margin: 0 0 var(--lab-space-3);
+  }
+}
+
+mo-panel.launch {
+  margin-bottom: var(--lab-space-5);
+}
+
+// The launch form in three groups by purpose: what to run, where, and options.
+.launch__groups {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--lab-space-4) var(--lab-space-5);
+}
+
+// What the project list shows (modes and origins) is a filter, not a launch option: it has its own row.
+.launch__filters {
+  grid-column: span 12;
+}
+
+.group {
+  grid-column: span 12;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: var(--lab-space-3);
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0 var(--lab-space-4);
+  }
+}
+
+@media (min-width: 1100px) {
+  .group:nth-of-type(1) {
+    grid-column: span 7;
+  }
+
+  .group:nth-of-type(2) {
+    grid-column: span 5;
+  }
+}
+
+.launch__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2) var(--lab-space-5);
+
+  mat-checkbox {
+    white-space: nowrap;
+  }
+}
+
+// The single filled button of the view.
+.launch__action {
+  margin-top: var(--lab-space-4);
+}
+
+// Durations line up in one right-aligned column for comparison.
+.duration {
+  display: block;
+  text-align: right;
+}
+
+.warn {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0;
+  max-width: 80ch;
+}
+
+.cache__table {
+  border-collapse: collapse;
+  background: var(--lab-surface);
+
+  th,
+  td {
+    border: 1px solid var(--lab-line);
+    padding: 4px 10px;
+    font-size: var(--lab-fs-meta);
+    text-align: left;
+  }
+
+  th {
+    color: var(--lab-ink-dim);
+    font-weight: 400;
+  }
+}
+
+.chip {
+  font-family: var(--lab-font-mono);
+  font-size: var(--lab-fs-meta);
+  padding: 1px 6px;
+  border: 1px solid var(--lab-line);
+  color: var(--lab-ink-dim);
+
+  &--hit,
+  &--succeeded {
+    border-color: var(--lab-success);
+    color: var(--lab-success);
+  }
+
+  &--run,
+  &--running,
+  &--queued {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+
+  &--failed,
+  &--cancelled,
+  &--interrupted {
+    border-color: var(--lab-danger);
+    color: var(--lab-danger);
+  }
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+}
+
+
+.history__tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.history__tools .danger {
+  --mat-button-outlined-label-text-color: var(--lab-danger);
+  --mat-button-outlined-outline-color: var(--lab-danger);
+}
+
+.modes {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--lab-space-3);
+}
+
+.hidden-modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  color: var(--lab-ink-dim);
+}
+
+// Long option lists are cut with an ellipsis; the tooltip shows them whole.
+.clip {
+  display: inline-block;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}

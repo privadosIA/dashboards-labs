@@ -1,0 +1,6 @@
+<nav class="sections" aria-label="Animation" i18n-aria-label="@@animation.sections" data-testid="animation-sections">
+  @for (t of tabs; track t.path) {
+    <a [routerLink]="t.path" routerLinkActive="sections__link--on" class="sections__link" [attr.data-testid]="'animation-' + t.path">{{ t.label }}</a>
+  }
+</nav>
+<router-outlet />

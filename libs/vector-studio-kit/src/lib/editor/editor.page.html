@@ -1,0 +1,59 @@
+<section class="editor vector-studio-kit" data-testid="editor-page">
+  @if (draft(); as d) {
+    <p class="banner" role="status" data-testid="draft-found">
+      {{ t.draftFound(when(d.at)) }}
+      <button type="button" class="ctl" data-testid="draft-continue" (click)="continueDraft()">{{ t.draftContinue }}</button>
+      <button type="button" class="ctl" data-testid="draft-discard" (click)="discardDraft()">{{ t.draftDiscard }}</button>
+    </p>
+  }
+  @if (pending(); as p) {
+    <p class="banner" role="alertdialog" data-testid="open-ask">
+      {{ t.openAsk(p.name) }}
+      <button type="button" class="ctl" data-testid="open-new" (click)="openPending('new')">{{ t.openNew }}</button>
+      <button type="button" class="ctl" data-testid="open-add" (click)="openPending('add')">{{ t.openAdd }}</button>
+      <button type="button" class="ctl" data-testid="open-cancel" (click)="pending.set(undefined)">{{ t.cancel }}</button>
+    </p>
+  }
+  @if (store.doc().nodes.length === 0 && !draft()) {
+    <p class="banner" role="status" data-testid="empty-hint">
+      {{ t.emptyHint }}
+      <button type="button" class="ctl" data-testid="example-hint" (click)="loadExample()">{{ t.example }}</button>
+      @if (canDescribe()) {
+        {{ t.describeHint }}
+        <button type="button" class="ctl" data-testid="describe-hint" (click)="describeOpen.set(true)">{{ t.describe }}</button>
+      }
+    </p>
+  }
+  @if (notice(); as n) {
+    <p class="banner" [class.problem]="n.problem" [attr.role]="n.problem ? 'alert' : 'status'" data-testid="notice">
+      {{ n.text }}
+      <button type="button" class="ctl" data-testid="notice-close" [attr.aria-label]="t.dismiss" (click)="notice.set(undefined)">×</button>
+    </p>
+  }
+
+  <lab-vector-editor-page [store]="store">
+    <div toolbar class="tools" role="toolbar" [attr.aria-label]="t.toolbar">
+      <label class="name">
+        <span class="sr">{{ t.name }}</span>
+        <input type="text" data-testid="doc-name" [placeholder]="t.untitled" [attr.aria-label]="t.name" [value]="store.doc().name ?? ''" (input)="rename($event)" />
+      </label>
+      <button type="button" class="ctl" data-testid="open" (click)="chooseFile()">{{ t.open }}</button>
+      <input #file class="sr" type="file" accept=".svg,.json,image/svg+xml,application/json" tabindex="-1" aria-hidden="true" data-testid="file-input" (change)="fileChosen($event)" />
+      <button type="button" class="ctl" data-testid="example" (click)="loadExample()">{{ t.example }}</button>
+      @if (canDescribe()) {
+        <button type="button" class="ctl" data-testid="describe" (click)="describeOpen.set(true)">{{ t.describe }}</button>
+      }
+      <button type="button" class="ctl" data-testid="save" (click)="save()">{{ t.save }}</button>
+      <app-export-menu [doc]="store.doc()" [playhead]="store.playhead()" [(open)]="exportOpen" (notice)="say($event)" />
+      <button type="button" class="ctl" data-testid="send" (click)="sendOpen.set(true)">{{ t.send }}</button>
+      <button type="button" class="ctl" data-testid="undo" [disabled]="!store.canUndo()" (click)="store.undo()">{{ t.undo }}</button>
+      <button type="button" class="ctl" data-testid="redo" [disabled]="!store.canRedo()" (click)="store.redo()">{{ t.redo }}</button>
+      <button type="button" class="ctl help" data-testid="help-open" [attr.aria-label]="t.help" [attr.title]="t.help" (click)="helpOpen.set(true)">?</button>
+    </div>
+  </lab-vector-editor-page>
+  <lab-vector-send [doc]="store.doc()" [sink]="sink" [(open)]="sendOpen" (sent)="sent($event)" />
+  @if (canDescribe()) {
+    <lab-vector-describe [sink]="svgSink" [preferred]="preferredModel" [(open)]="describeOpen" (written)="described($event)" />
+  }
+  <app-help-dialog [(open)]="helpOpen" />
+</section>

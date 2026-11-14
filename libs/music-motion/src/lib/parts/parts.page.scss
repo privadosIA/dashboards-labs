@@ -1,0 +1,160 @@
+.parts {
+  display: grid;
+  gap: var(--lab-space-4);
+}
+
+h1 {
+  margin: 0 0 var(--lab-space-1);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+header p {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.list {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  --state: var(--lab-ink-dim);
+
+  // Name, state, request and buttons share one row and wrap only when the card is narrow.
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-1) var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3) var(--lab-space-2) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-left: 6px solid var(--state);
+  border-radius: var(--lab-radius-panel);
+
+  &.state-writing {
+    --state: var(--lab-accent);
+  }
+
+  &.state-ready {
+    --state: var(--lab-success);
+  }
+
+  &.state-failed {
+    --state: var(--lab-danger);
+  }
+}
+
+.head {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: baseline;
+  gap: var(--lab-space-2);
+  min-width: 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.state {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--state);
+  border-radius: var(--lab-radius-pill);
+  color: var(--state);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+  white-space: nowrap;
+}
+
+.meta,
+.error {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  color: var(--lab-ink-dim);
+}
+
+.error {
+  flex: 1 1 100%;
+  color: var(--lab-danger);
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+  margin-left: auto;
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+}
+
+.open {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.notice {
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+
+  p {
+    margin: 0;
+  }
+}
+
+.refused {
+  margin: 0;
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-danger);
+  border-radius: var(--lab-radius);
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.scratch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-4);
+  margin: 0;
+}
+
+.new {
+  color: var(--lab-accent);
+  font-weight: var(--lab-fw-control);
+}
+
+.mine {
+  display: grid;
+  gap: var(--lab-space-3);
+}
+
+.mine-title {
+  font-size: var(--lab-fs-title);
+}
+
+// The link looks like the other links of the page: the host styles links.
+.edit-link {
+  white-space: nowrap;
+}

@@ -1,0 +1,66 @@
+<mo-page-header
+  [title]="store.projectId()"
+  description="The project settings and scenes. Changes are applied when you press Save."
+  i18n-description="@@editor.desc"
+>
+  <a moActions mat-stroked-button [routerLink]="['/runs']" [queryParams]="{ project: store.projectId() }">
+    <mat-icon>play_circle</mat-icon>
+    <ng-container i18n="@@editor.toRuns">Project runs</ng-container>
+  </a>
+  <button moActions mat-stroked-button [disabled]="!store.dirty() || store.saving()" (click)="discard()">
+    <ng-container i18n="@@editor.discard">Discard changes</ng-container>
+  </button>
+  <button moActions mat-flat-button [disabled]="!store.canSave()" (click)="save()">
+    <mat-icon>save</mat-icon>
+    <ng-container i18n="@@editor.save">Save</ng-container>
+  </button>
+</mo-page-header>
+
+@if (store.loading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.serverError(); as err) {
+  @if (!err.sceneId) {
+    <p class="server-error" role="alert">
+      <mat-icon inline>error</mat-icon>
+      <span class="mo-data">{{ err.message }}</span>
+    </p>
+  }
+}
+
+@for (w of store.warnings(); track w) {
+  <p class="warning">
+    <mat-icon inline>warning</mat-icon>
+    {{ w }}
+  </p>
+}
+
+@if (store.config()) {
+  <app-defaults-panel />
+  @if (!store.toMusic()) {
+    <app-bgm-panel />
+    <app-motion-defaults-panel />
+  }
+  @if (choiceNotApplied) {
+    <p class="notice" role="status" data-testid="choice-not-applied">
+      <mat-icon inline>info</mat-icon>
+      <span i18n="@@editor.choiceNotApplied">
+        The project was created, but the chosen style and quality could not be applied: use the “Style and quality” panel.
+      </span>
+    </p>
+  }
+  @if (store.toMusic()) {
+    <p class="notice" role="status" data-testid="to-music-notice">
+      <mat-icon inline>info</mat-icon>
+      <span i18n="@@editor.toMusic">
+        On save, the project will switch to music: its {{ store.config()?.scenes?.length ?? 0 }} scenes will no longer be used and will be removed from scenes.yaml, and the music studio will open. Until then nothing is lost: “Discard changes” or choosing another mode undoes it.
+      </span>
+    </p>
+  } @else {
+    <div class="layout">
+      <app-scene-reel class="reel" />
+      <app-scene-form class="detail" />
+    </div>
+  }
+}

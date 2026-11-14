@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "id": "retouch",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "model",
+      "type": "select",
+      "label": "Model"
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What to change",
+      "placeholder": "Describe the change, e.g. \"as a watercolor, with sunset light\".",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Write what you want to change."
+        }
+      }
+    },
+    {
+      "key": "negativePrompt",
+      "type": "textarea",
+      "label": "Negative prompt (optional)",
+      "placeholder": "What to avoid, e.g. blurry, extra fingers.",
+      "props": {
+        "rows": 2
+      }
+    },
+    {
+      "key": "strength",
+      "type": "number",
+      "label": "Strength (0.05 to 1)",
+      "defaultValue": 0.6,
+      "props": {
+        "step": 0.05
+      },
+      "layout": {
+        "cssClass": "number-field"
+      },
+      "validation": {
+        "required": true,
+        "min": 0.05,
+        "max": 1,
+        "messages": {
+          "required": "The strength must be from 0.05 to 1.",
+          "min": "The strength must be from 0.05 to 1.",
+          "max": "The strength must be from 0.05 to 1."
+        }
+      }
+    },
+    {
+      "key": "variants",
+      "type": "number",
+      "label": "Variants (1 to {max})",
+      "defaultValue": 2,
+      "layout": {
+        "cssClass": "number-field"
+      },
+      "validation": {
+        "required": true,
+        "min": 1,
+        "max": 4,
+        "pattern": "^[0-9]+$",
+        "messages": {
+          "required": "The variants must be a number from 1 to {max}.",
+          "min": "The variants must be a number from 1 to {max}.",
+          "max": "The variants must be a number from 1 to {max}.",
+          "pattern": "The variants must be a whole number."
+        }
+      }
+    }
+  ]
+}

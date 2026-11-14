@@ -1,0 +1,58 @@
+<details class="capture" data-testid="capture" [open]="open()" (toggle)="open.set($any($event.target).open)">
+  <summary>
+    <h3>{{ t.capture.title }}</h3>
+  </summary>
+  <p class="hint">{{ t.capture.hint }}</p>
+
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false">
+    <ng-template dfSlot="actions">
+      <div class="actions">
+        <input #file type="file" accept="audio/*,video/*" hidden data-testid="capture-file" (change)="pick($event)" />
+        <button type="button" class="import" data-testid="capture-import" [disabled]="listening()" (click)="file.click()">
+          {{ listening() ? t.capture.listening : '↑ ' + t.capture.button }}
+        </button>
+        <button type="button" class="import" data-testid="capture-url-go" [disabled]="!validUrl() || listening()" (click)="fromUrl()">
+          {{ listening() ? t.capture.listening : t.capture.fromUrl }}
+        </button>
+      </div>
+    </ng-template>
+  </dynamic-form>
+
+  @if (stopped()) {
+    <button type="button" class="link" data-testid="capture-open-engines" (click)="openEngines()">{{ t.engines.open }}</button>
+  }
+
+  <div class="status" role="status" aria-live="polite">
+    @if (error(); as e) {
+      <p class="error" data-testid="capture-error">{{ t.capture.errors[e] }}</p>
+    }
+    @if (heard(); as h) {
+      <div class="heard" data-testid="capture-heard">
+        <p class="sounds"><strong>{{ t.capture.heardTitle }}</strong> {{ h.style }}</p>
+        @if (h.bpm || h.keyscale) {
+          <p class="measures" data-testid="capture-measures">
+            @if (h.bpm) {
+              <span>{{ t.capture.tempo.replace('{bpm}', '' + h.bpm) }}</span>
+            }
+            @if (h.keyscale) {
+              <span>{{ h.keyscale }}</span>
+            }
+          </p>
+        }
+        @if (h.genreUnknown) {
+          <p class="note">{{ t.capture.noGenre }}</p>
+        }
+        @if (added().length) {
+          <p class="added"><strong>{{ t.capture.added }}</strong></p>
+          <ul class="tags" data-testid="capture-added">
+            @for (tag of added(); track tag) {
+              <li>{{ tag }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="note" data-testid="capture-none">{{ t.capture.noTags }}</p>
+        }
+      </div>
+    }
+  </div>
+</details>

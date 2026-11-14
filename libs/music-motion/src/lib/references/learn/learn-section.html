@@ -1,0 +1,37 @@
+<section class="learn" data-testid="learn">
+  <h2>{{ t.title }}</h2>
+  <p class="meta">{{ t.intro }}</p>
+  <p class="meta" data-testid="nothing-enters">{{ t.nothingEnters }}</p>
+
+  <div class="controls">
+    <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" />
+    <button type="button" class="go" data-testid="learn-go" [disabled]="!canLearn()" (click)="learn()">
+      {{ starting() ? t.starting : running() ? t.running : current() ? t.again : t.action }}
+    </button>
+  </div>
+  @if (!ready()) {
+    <p class="meta" data-testid="learn-not-ready">{{ t.notReady }}</p>
+  }
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="learn-refused">{{ refused() }}</p>
+  }
+
+  @if (current(); as l) {
+    <app-learning-view [learning]="l" />
+  }
+
+  <section class="history" data-testid="learn-history">
+    <h3>{{ t.history }}</h3>
+    @if (history().length === 0) {
+      <p class="meta" data-testid="history-empty">{{ t.historyEmpty }}</p>
+    }
+    <ul>
+      @for (h of history(); track h.id) {
+        <li [class.on]="current()?.id === h.id" data-testid="history-item">
+          <span>{{ when(h) }} · {{ t.strictnesses[h.strictness] }} · {{ summary(h) }}</span>
+          <button type="button" data-testid="history-open" [disabled]="current()?.id === h.id" (click)="open(h)">{{ current()?.id === h.id ? t.current : t.open }}</button>
+        </li>
+      }
+    </ul>
+  </section>
+</section>

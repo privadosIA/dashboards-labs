@@ -1,0 +1,15 @@
+export { LanguageService } from './lib/core/language';
+export { DATASET_STUDIO_BASE, DATASET_STUDIO_OPTIONS, type DatasetStudioOptions } from './lib/core/options';
+export { textsFor, type KindTexts, type Texts } from './lib/core/texts';
+export { ENGINES, type EnginesPort } from './lib/engines/port';
+export { InMemoryEngines } from './lib/engines/in-memory';
+export { ServerEngines } from './lib/engines/server.adapter';
+export { WRITER, MemoryWriter, ServerWriter, type WriterPort } from './lib/generate/writer';
+export { BRIEF_LIMIT, KINDS, briefFits, generationMode, isTupleKind, kindOf, type EnginesQuery, type GenerationMode, type KindDef, type KindId, type KindPanels } from './lib/kinds/kinds';
+export { DatasetStudioNav } from './lib/nav/dataset-studio-nav';
+export { provideDatasetStudio } from './lib/provide-dataset-studio';
+export { PROMPTS, type PromptsPort } from './lib/presets/port';
+export { LocalPrompts, ServerPrompts, FallbackPrompts } from './lib/presets/adapters';
+export { providePrompts } from './lib/presets/provide-prompts';
+export type { ImportReport, Preset, PresetBundle, PresetKind } from './lib/presets/model';
+export { datasetStudioRoutes, type DatasetStudioRoutesOptions } from './lib/routes';

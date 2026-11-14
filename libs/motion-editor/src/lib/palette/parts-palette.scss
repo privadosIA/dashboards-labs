@@ -1,0 +1,151 @@
+:host {
+  display: block;
+  color: var(--lab-ink);
+}
+
+.palette {
+  display: grid;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background: var(--lab-surface);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  font: inherit;
+  font-size: var(--lab-fs-body);
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.items {
+  display: grid;
+  gap: var(--lab-space-1);
+  max-height: min(calc(100vh - 20rem), 20rem);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // a part that does not fit what is chosen is dimmed by its colour, not by opacity: an opacity would also fade the badge below the contrast it needs
+  &.off .name {
+    color: var(--lab-ink-dim);
+  }
+
+  &.text {
+    border-style: dashed;
+    border-color: var(--lab-accent);
+  }
+}
+
+.grip {
+  color: var(--lab-ink-dim);
+  letter-spacing: -0.2em;
+  user-select: none;
+}
+
+.body {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: var(--lab-fw-control);
+  font-size: var(--lab-fs-body);
+}
+
+.badge {
+  margin-left: var(--lab-space-2);
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-accent);
+  font-size: var(--lab-fs-meta);
+  font-weight: normal;
+}
+
+.meta {
+  overflow: hidden;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.warn {
+    color: var(--lab-warn);
+  }
+}
+
+.plus {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.none {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

@@ -1,0 +1,61 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  margin-top: var(--lab-space-2);
+}
+
+.frame {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+  background: repeating-conic-gradient(var(--lab-surface-high) 0% 25%, var(--lab-surface) 0% 50%) 50% / 16px 16px;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  max-width: 640px;
+
+  mat-slider {
+    flex: 1;
+  }
+}
+
+.source {
+  width: 100%;
+  min-height: 12rem;
+  resize: vertical;
+  padding: var(--lab-space-2);
+  color: var(--lab-ink);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  // The buttons share one line with room to breathe, and wrap only when the column is narrow.
+  gap: var(--lab-space-4);
+  margin-top: var(--lab-space-1);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.server-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

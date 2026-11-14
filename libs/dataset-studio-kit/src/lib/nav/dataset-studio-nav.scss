@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex: 1;
+}
+
+nav {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3);
+
+  a {
+    padding: var(--lab-space-1) var(--lab-space-2);
+    border-radius: var(--lab-radius);
+    color: var(--lab-ink-dim);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--lab-accent);
+    }
+
+    // The current link reads by weight and by the ink colour (the host may tint it): the accent alone on a tint is not enough contrast.
+    &.active {
+      color: var(--lab-ink);
+      font-weight: 600;
+    }
+  }
+}

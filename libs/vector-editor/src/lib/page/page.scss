@@ -1,0 +1,186 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 30rem;
+}
+
+.page {
+  display: grid;
+  grid-template-columns: var(--left, 15rem) 6px minmax(0, 1fr) 6px var(--right, 17rem);
+  grid-template-rows: auto minmax(0, 1fr) 6px var(--bottom, 14rem);
+  height: 100%;
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  grid-column: 1 / -1;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border-bottom: 1px solid var(--lab-line);
+  background: var(--lab-surface);
+}
+
+.toolbar:empty {
+  display: none;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--lab-space-2);
+  background: var(--lab-surface);
+}
+
+.tree {
+  grid-column: 1;
+}
+
+.centre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  grid-column: 3;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--lab-space-2);
+}
+
+.stage-row {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  min-height: 0;
+}
+
+lab-vector-canvas {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+// The transport (play, step, loop, rate) and the tools share one line above the canvas, the tools on the right, so that the canvas and the properties have the room.
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2) var(--lab-space-4);
+}
+
+lab-vector-transport {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1);
+  margin-left: auto;
+}
+
+.tool {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-bg);
+  cursor: pointer;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: var(--lab-ink);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    border-color: var(--lab-accent);
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--lab-accent);
+    background: var(--lab-accent);
+
+    svg {
+      stroke: var(--lab-on-accent);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border: 1px solid var(--lab-warn);
+  border-radius: var(--lab-radius);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+}
+
+.dismiss {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.props {
+  grid-column: 5;
+}
+
+.time {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  padding: 0;
+}
+
+.split {
+  background: var(--lab-line);
+  touch-action: none;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--lab-accent);
+    outline: none;
+  }
+
+  &.vertical {
+    cursor: col-resize;
+    grid-row: 2;
+  }
+
+  &.horizontal {
+    cursor: row-resize;
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+.split[data-testid='split-left'] {
+  grid-column: 2;
+}
+
+.split[data-testid='split-right'] {
+  grid-column: 4;
+}

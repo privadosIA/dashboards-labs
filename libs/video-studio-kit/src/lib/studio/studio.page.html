@@ -1,0 +1,23 @@
+<div class="studio studio-kit">
+  <section class="frame side" [attr.aria-label]="t.panel.title">
+    <app-studio-tabs [(tab)]="tab" />
+    <div class="tab" id="panel-create" role="tabpanel" aria-labelledby="tab-create" [hidden]="tab() !== 'create'">
+      <app-create-panel [settings]="draft()" (generate)="generate($event)" />
+    </div>
+    <div class="tab" id="panel-edit" role="tabpanel" aria-labelledby="tab-edit" [hidden]="tab() !== 'edit'">
+      <app-edit-tools (startImage)="useStartImage($event)" />
+    </div>
+  </section>
+  <section class="frame history" [attr.aria-label]="t.history.title">
+    @if (createError()) {
+      <p class="error" role="alert">{{ t.panel.createFailed }} {{ createError() }}</p>
+    }
+    <app-history [generations]="generations()" [edits]="edits()" [models]="models()" (open)="open($event)" (repeat)="repeat($event)" (remove)="remove($event)" (openEdit)="openEdit($event)" (removeEdit)="removeEdit($event)" />
+    @if (demo) {
+      <label class="demo">
+        <input type="checkbox" [checked]="failArmed()" (change)="failNext($event)" />
+        <span>{{ t.demo.title }}: {{ t.demo.failNext }}</span>
+      </label>
+    }
+  </section>
+</div>

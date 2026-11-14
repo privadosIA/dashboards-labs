@@ -1,0 +1,59 @@
+@if (routing.external('assistant')) {
+  <div class="model" data-testid="assist-model-external">
+    <span class="dim" i18n="@@assist.modelOf">AI model:</span>
+    <span class="mo-data" data-testid="assist-model-declared">{{ routing.task('assistant')?.model || '—' }}</span>
+    <span class="dim">· {{ routing.task('assistant')?.name }}</span>
+  </div>
+} @else {
+<div class="model" data-testid="assist-model">
+  <mat-form-field class="model__field" subscriptSizing="dynamic">
+    <mat-label i18n="@@assist.model">AI model</mat-label>
+    <mat-select
+      data-testid="assist-model-select"
+      [value]="store.selected()"
+      (selectionChange)="store.choose($event.value)"
+      (openedChange)="opened($event)"
+    >
+      <mat-select-trigger>
+        @if (store.selected(); as sel) {
+          <span class="mo-data">{{ sel }}</span>
+        } @else {
+          <ng-container i18n="@@assist.modelDefault">Default</ng-container>
+          @if (store.defaultModel()) {
+            <span class="mo-data"> ({{ store.defaultModel() }})</span>
+          }
+        }
+      </mat-select-trigger>
+      <mat-option value="" data-testid="assist-model-default">
+        <ng-container i18n="@@assist.modelDefault">Default</ng-container>
+        @if (store.defaultModel()) {
+          <span class="mo-data"> ({{ store.defaultModel() }})</span>
+        }
+      </mat-option>
+      @if (extraChoice(); as extra) {
+        <mat-option [value]="extra"><span class="mo-data">{{ extra }}</span></mat-option>
+      }
+      @for (m of store.models(); track m.name) {
+        <mat-option [value]="m.name" [attr.data-testid]="'assist-model-' + m.name">
+          <span class="mo-data">{{ m.name }}</span>
+          <span class="dim"> · {{ size(m) }}</span>
+          @if (warn(m) === 'memory') {
+            <span class="warn" i18n="@@assist.modelNoFit"> ⚠ does not fit in free memory</span>
+          } @else if (warn(m) === 'slow') {
+            <span class="warn" i18n="@@assist.modelSlow"> ⚠ slow on CPU</span>
+          }
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (warning() === 'memory') {
+    <p class="warn" role="status" data-testid="assist-model-warning" i18n="@@assist.modelNoFitNote">
+      This model does not fit in free memory right now: the assistant will refuse to use it.
+    </p>
+  } @else if (warning() === 'slow') {
+    <p class="warn" role="status" data-testid="assist-model-warning" i18n="@@assist.modelSlowNote">
+      Models larger than about 14 GB are very slow on CPU.
+    </p>
+  }
+</div>
+}

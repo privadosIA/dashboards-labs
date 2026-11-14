@@ -1,0 +1,59 @@
+<mo-panel heading="Tasks" i18n-heading="@@tasks.title">
+  <p class="note" i18n="@@tasks.intro">
+    Which provider runs each task. By default, the built-in Ollama. If you choose one that is not this computer, what the task sends will leave your machine and you will be asked to accept it. Nothing switches provider by itself.
+  </p>
+  @if (routing(); as r) {
+    <ul class="rows" data-testid="tasks-list">
+      @for (task of tasks; track task) {
+        <li class="row" [attr.data-testid]="'task-' + task">
+          <div class="row__label">
+            <span>{{ label(task) }}</span>
+            <app-provider-badge [tasks]="task" />
+          </div>
+          <mat-form-field class="row__select" subscriptSizing="dynamic">
+            <mat-label i18n="@@tasks.provider">Provider</mat-label>
+            <mat-select
+              [attr.data-testid]="'task-select-' + task"
+              [value]="current(task)"
+              [disabled]="saving()"
+              (selectionChange)="choose(task, $event.value, $event.source)"
+            >
+              @for (p of providers(); track p.id) {
+                <mat-option [value]="p.id" [disabled]="!!unavailable(p, task)" [attr.data-testid]="'task-option-' + task + '-' + p.id">
+                  {{ p.name }}
+                  @if (p.remote && !p.builtin) {
+                    <span class="dim"> · ☁</span>
+                  }
+                  @if (unavailable(p, task); as why) {
+                    <span class="dim" data-testid="task-option-reason"> · {{ why }}</span>
+                  }
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="row__model">
+            <span i18n="@@tasks.model">Model:</span>
+            <span class="mo-data" [attr.data-testid]="'task-model-' + task">{{ r.routing[task]?.model || '—' }}</span>
+          </p>
+          @if (errors()[task]; as e) {
+            <p class="error" role="alert" [attr.data-testid]="'task-error-' + task">{{ e }}</p>
+          }
+        </li>
+      }
+    </ul>
+    <mat-form-field class="cap" subscriptSizing="dynamic">
+      <mat-label i18n="@@tasks.cap">Call cap per job to a remote provider</mat-label>
+      <input
+        matInput
+        type="number"
+        min="1"
+        data-testid="task-cap"
+        [value]="r.max_calls"
+        (change)="setCap($any($event.target).value)"
+      />
+    </mat-form-field>
+    @if (capError(); as e) {
+      <p class="error" role="alert" data-testid="task-cap-error">{{ e }}</p>
+    }
+  }
+</mo-panel>

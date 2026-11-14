@@ -1,0 +1,22 @@
+.state,
+.notice {
+  display: flex;
+  gap: var(--lab-space-2);
+  align-items: center;
+  margin: 0 0 var(--lab-space-4);
+  max-width: 80ch;
+}
+
+.state {
+  color: var(--lab-warn);
+}
+
+.notice {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.state mat-icon,
+.notice mat-icon {
+  flex: none;
+}

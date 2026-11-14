@@ -1,0 +1,19 @@
+<section class="picture" data-testid="scene-picture">
+  <mat-button-toggle-group
+    [value]="mode()"
+    (change)="modeChange.emit($event.value)"
+    i18n-aria-label="@@scene.pictureLabel"
+    aria-label="Scene image source"
+    data-testid="picture-mode"
+  >
+    <mat-button-toggle value="ai" i18n="@@scene.pictureAi">Generate with AI</mat-button-toggle>
+    <mat-button-toggle value="own" i18n="@@scene.pictureOwn">My image</mat-button-toggle>
+    <mat-button-toggle value="clip" i18n="@@scene.pictureClip" data-testid="picture-mode-clip">My clip</mat-button-toggle>
+    @if (motionAllowed()) {
+      <mat-button-toggle value="motion" i18n="@@scene.pictureMotion" data-testid="picture-mode-motion">Motion graphic</mat-button-toggle>
+    }
+    @if (partAllowed()) {
+      <mat-button-toggle value="part" i18n="@@scene.picturePart" data-testid="picture-mode-part">Part of the catalog</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+</section>

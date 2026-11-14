@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "id": "motion-add",
+  "layout": { "columns": 1 },
+  "fields": [
+    { "key": "title", "type": "text", "label": "Título (opcional)", "placeholder": "Paseo lento" },
+    { "key": "tags", "type": "text", "label": "Etiquetas (opcional, separadas por comas)", "placeholder": "paseo, lento" },
+    { "key": "source", "type": "text", "label": "O la dirección de un vídeo de YouTube", "placeholder": "https://www.youtube.com/watch?v=…" }
+  ]
+}

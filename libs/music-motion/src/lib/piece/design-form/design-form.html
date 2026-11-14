@@ -1,0 +1,37 @@
+<details class="design" data-testid="design">
+  <summary>
+    <h2>{{ t.title }}</h2>
+    <div class="swatches" role="img" [attr.aria-label]="t.swatches">
+      @for (s of swatches(); track s.key) {
+        <span class="swatch" [style.background]="s.value" [attr.title]="s.value"></span>
+      }
+    </div>
+    <span class="origin" data-testid="origin">{{ origin() }}</span>
+  </summary>
+
+  <dynamic-form
+    [schema]="schema()"
+    [(model)]="model"
+    [showDefaultActions]="false"
+    showErrors="always"
+    (statusChange)="valid.set($event === 'VALID')"
+    (formSubmit)="save()"
+  >
+    <ng-template dfSlot="accentProblem">
+      @if (accentProblem()) {
+        <p class="problem" role="alert" data-testid="accent-problem">{{ accentProblem() }}</p>
+      }
+    </ng-template>
+  </dynamic-form>
+  <app-concept-box [texts]="t" [value]="concept()" [disabled]="locked()" (changed)="setConcept($event)" />
+
+  @if (otherProblem()) {
+    <p class="problem" role="alert" data-testid="problem">{{ otherProblem() }}</p>
+  }
+  @if (done() && !refused()) {
+    <p class="ok" role="status" data-testid="saved">{{ t.saved }}</p>
+  }
+  <button type="button" class="save" data-testid="save-design" [disabled]="!valid() || working() || locked()" (click)="save()">
+    {{ working() ? t.saving : t.save }}
+  </button>
+</details>

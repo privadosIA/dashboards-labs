@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "id": "projects",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "type": "table",
+      "id": "projects",
+      "dataKey": "projects",
+      "filter": true,
+      "filterLabel": "Search",
+      "pageSize": 10,
+      "pageSizeOptions": [
+        4,
+        10,
+        20,
+        50,
+        100
+      ],
+      "persistState": "session",
+      "columns": [
+        {
+          "key": "id",
+          "label": "Identifier",
+          "sortable": true,
+          "template": "id"
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "template": "name",
+          "sortable": true
+        },
+        {
+          "key": "count",
+          "label": "Scenes / tracks",
+          "type": "number",
+          "sortable": true
+        },
+        {
+          "key": "sizeBytes",
+          "label": "Size",
+          "template": "size",
+          "sortable": true
+        },
+        {
+          "key": "actions",
+          "label": "Actions",
+          "template": "actions"
+        }
+      ]
+    }
+  ]
+}

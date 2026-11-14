@@ -1,0 +1,62 @@
+<dialog #dialog class="modal" [attr.aria-label]="title()" data-testid="scene-dialog" (close)="open.set(false)" (click)="backdrop($event)">
+  @if (open()) {
+    <div class="box">
+      <header class="bar">
+        <h2>{{ title() }}</h2>
+        <button type="button" class="close" data-testid="scene-close" [attr.aria-label]="t.close" [attr.title]="t.close" (click)="open.set(false)">×</button>
+      </header>
+
+      @if (editPart(); as name) {
+        <section class="describe" data-testid="scene-edit">
+          @if (reading()) {
+            <p class="meta" role="status">{{ t.loading }}</p>
+          } @else if (refused()) {
+            <p class="problem" role="alert" data-testid="scene-refused">{{ refused() }}</p>
+          } @else {
+            <label class="field">
+              <span>{{ t.manifest }}</span>
+              <textarea rows="8" spellcheck="false" data-testid="scene-manifest" [value]="manifest()" (input)="typeManifest($event)"></textarea>
+            </label>
+            <label class="field">
+              <span>{{ t.fragment }}</span>
+              <textarea rows="14" spellcheck="false" data-testid="scene-fragment" [value]="fragment()" (input)="typeFragment($event)"></textarea>
+            </label>
+            @if (problems().length) {
+              <div class="problem" role="alert" data-testid="scene-problems">
+                <p>{{ t.problems }}</p>
+                <ul>
+                  @for (p of problems(); track $index) {
+                    <li>{{ p }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            @if (savedName(); as saved) {
+              <p class="ok" role="status" data-testid="scene-saved">{{ t.saved(saved) }}</p>
+            }
+            <button type="button" class="ctl primary" data-testid="scene-save" [disabled]="saving()" (click)="save()">{{ saving() ? t.saving : t.save }}</button>
+          }
+        </section>
+      } @else if (done(); as part) {
+        <p class="ok" role="status" data-testid="scene-done">{{ t.approvedSet(part, target()?.label ?? '') }}</p>
+        <button type="button" class="ctl" data-testid="scene-done-close" (click)="open.set(false)">{{ t.close }}</button>
+      } @else if (current(); as id) {
+        <button type="button" class="ctl again" data-testid="scene-again" (click)="again()">← {{ t.askAgain }}</button>
+        <app-draft-view [id]="id" (approved)="onApproved($event)" (closed)="again()" />
+      } @else {
+        <section class="describe">
+          <p class="meta">{{ t.briefHint }}</p>
+          <dynamic-form [schema]="schema()" [(model)]="value" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+          @if (reviewing()) {
+            <p class="meta">{{ t.reviewHint }}</p>
+          }
+          <lab-assistant-picker [(value)]="assistant" [routingModels]="routingModels()" [allowAdd]="false" [title]="t.assistant" [hint]="t.assistantHint" />
+          @if (refused()) {
+            <p class="problem" role="alert" data-testid="scene-refused">{{ refused() }}</p>
+          }
+          <button type="button" class="ctl primary" data-testid="scene-ask" [disabled]="!canAsk()" (click)="ask()">{{ asking() ? t.asking : t.ask }}</button>
+        </section>
+      }
+    </div>
+  }
+</dialog>

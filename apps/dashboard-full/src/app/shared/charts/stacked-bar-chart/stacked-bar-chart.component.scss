@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-size: 11px;
+  font-family: var(--lab-font-mono);
+}
+
+.grid {
+  stroke: var(--lab-line);
+  stroke-width: 1;
+}
+
+.tick {
+  fill: var(--lab-ink-dim);
+}
+
+.col {
+  outline: none;
+
+  .hit {
+    fill: transparent;
+  }
+
+  &:hover .hit,
+  &:focus-visible .hit {
+    fill: var(--lab-surface-high);
+  }
+}
+
+.seg--ok {
+  fill: var(--lab-success);
+}
+
+.pat-bad-bg {
+  fill: var(--lab-surface);
+}
+
+.pat-bad-line {
+  stroke: var(--lab-danger);
+  stroke-width: 3;
+}
+
+.pat-dim-bg {
+  fill: var(--lab-surface);
+}
+
+.pat-dim-dot {
+  fill: var(--lab-ink-dim);
+}
+
+.seg--bad,
+.seg--dim {
+  stroke: var(--lab-ink-dim);
+  stroke-width: 0.5;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-4);
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 1px solid var(--lab-line);
+
+  &--ok {
+    background: var(--lab-success);
+  }
+
+  &--bad {
+    background: repeating-linear-gradient(45deg, var(--lab-danger) 0 2px, var(--lab-surface) 2px 5px);
+  }
+
+  &--dim {
+    background: radial-gradient(circle, var(--lab-ink-dim) 1px, var(--lab-surface) 1.5px) 0 0 / 5px 5px;
+  }
+}
+
+.readout {
+  margin: 4px 0 0;
+  min-height: 1.4em;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}

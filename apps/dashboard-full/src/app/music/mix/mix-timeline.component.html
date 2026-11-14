@@ -1,0 +1,111 @@
+<div class="tl" data-testid="mix-timeline">
+  <div class="tl__tools">
+    <button mat-icon-button type="button" data-testid="zoom-out" (click)="zoom(-1)" [disabled]="px() <= 4" i18n-aria-label="@@mix.zoomOut" aria-label="Zoom out">
+      <mat-icon>zoom_out</mat-icon>
+    </button>
+    <span class="mo-data tl__zoom" data-testid="zoom-value">{{ px() }} px/s</span>
+    <button mat-icon-button type="button" data-testid="zoom-in" (click)="zoom(1)" [disabled]="px() >= 160" i18n-aria-label="@@mix.zoomIn" aria-label="Zoom in">
+      <mat-icon>zoom_in</mat-icon>
+    </button>
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="crossfade"
+      [disabled]="pendingCrossfades().length === 0"
+      (click)="crossfade()"
+      [matTooltip]="crossfadeTip"
+    >
+      <mat-icon>join_inner</mat-icon>
+      <ng-container i18n="@@mix.crossfade">Crossfade overlaps</ng-container>
+    </button>
+    <label class="tl__snap">
+      <span i18n="@@mix.snap">Snap</span>
+      <select data-testid="snap" [value]="snap()" (change)="setSnap($any($event.target).value)">
+        @for (s of snapOptions(); track s.value) {
+          <option [value]="s.value" [selected]="s.value === snap()">{{ s.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <div class="tl__body">
+  <div class="tl__heads">
+    <div class="tl__headspace" aria-hidden="true"></div>
+    @for (r of rows(); track r.i) {
+      <div class="tl__head" [class.tl__head--selected]="selected() === r.i" [attr.data-testid]="'head-' + r.i">
+        <button
+          mat-icon-button
+          type="button"
+          class="tl__play"
+          [attr.data-testid]="'play-' + r.i"
+          [disabled]="!r.playable"
+          [attr.aria-pressed]="playing() === r.i"
+          [attr.aria-label]="(playing() === r.i ? stopLabel : playLabel) + ' ' + r.label"
+          [matTooltip]="r.playable ? (playing() === r.i ? stopLabel : playLabel) : noAudioLabel"
+          (click)="preview(r.i)"
+        >
+          <mat-icon>{{ playing() === r.i ? 'stop' : 'play_arrow' }}</mat-icon>
+        </button>
+        <span class="tl__name mo-data" [matTooltip]="r.label">{{ r.label }}</span>
+      </div>
+    }
+  </div>
+  <div class="tl__scroll" #scroller>
+    <div class="tl__canvas" #canvas [style.width.px]="width()">
+      @for (l of gridLines(); track l.x) {
+        <span class="tl__grid" [class.tl__grid--bar]="l.bar" data-testid="grid-line" aria-hidden="true" [style.left.px]="l.x"></span>
+      }
+      <div class="tl__ruler" data-testid="ruler" aria-hidden="true" (click)="rulerClick($event)">
+        @for (t of ticks(); track t) {
+          <span class="tl__tick mo-data" [style.left.px]="t * px()">{{ clock(t) }}</span>
+        }
+      </div>
+      @for (r of rows(); track r.i) {
+        <div class="tl__lane mix-lane" [class.tl__lane--selected]="selected() === r.i" [attr.data-testid]="'lane-' + r.i">
+          <app-mix-clip
+            [clip]="r.clip"
+            [label]="r.label"
+            [peaks]="r.peaks"
+            [pxPerSecond]="px()"
+            [snap]="snap()"
+            [anchor]="anchorOf(r.clip, r.peaks).anchor"
+            [period]="anchorOf(r.clip, r.peaks).period"
+            [selected]="selected() === r.i"
+            (picked)="selected.set(r.i)"
+            (moved)="move(r.i, $event)"
+            (trimmed)="trim(r.i, $event)"
+          />
+          @if (playing() === r.i && soloX() !== null) {
+            <span
+              class="tl__solo"
+              data-testid="solo-marker"
+              role="slider"
+              tabindex="0"
+              [attr.aria-label]="soloLabel"
+              aria-valuemin="0"
+              [attr.aria-valuenow]="soloX()! / px()"
+              [style.left.px]="soloX()"
+              (pointerdown)="dragStart($event, 'solo')"
+              (keydown)="nudge($event, 'solo')"
+            ></span>
+          }
+        </div>
+      }
+      @if (playheadX() !== null) {
+        <span
+          class="tl__playhead"
+          data-testid="playhead"
+          role="slider"
+          tabindex="0"
+          [attr.aria-label]="mixLabel"
+          aria-valuemin="0"
+          [attr.aria-valuenow]="playheadX()! / px()"
+          [style.left.px]="playheadX()"
+          (pointerdown)="dragStart($event, 'mix')"
+          (keydown)="nudge($event, 'mix')"
+        ></span>
+      }
+    </div>
+  </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+@if (wave(); as w) {
+  <svg class="wave" [attr.viewBox]="'0 0 ' + w.width + ' 100'" preserveAspectRatio="none" aria-hidden="true">
+    <path [attr.d]="w.d" />
+  </svg>
+  @if (interactive()) {
+    <svg
+      class="wave wave--played"
+      [style.clip-path]="'inset(0 ' + (100 - headPct()) + '% 0 0)'"
+      [attr.viewBox]="'0 0 ' + w.width + ' 100'"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path [attr.d]="w.d" />
+    </svg>
+    @if (shown(); as r) {
+      <div
+        class="wave__range"
+        [class.wave__range--over]="over()"
+        [style.left.%]="startPct()"
+        [style.width.%]="endPct() - startPct()"
+        data-testid="wave-range"
+      ></div>
+      <span
+        class="wave__handle wave__handle--start"
+        role="slider"
+        tabindex="0"
+        [attr.aria-disabled]="!editable()"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="r.end"
+        [attr.aria-valuenow]="r.start"
+        [attr.aria-valuetext]="valueText(r.start)"
+        [style.left.%]="startPct()"
+        data-testid="wave-start"
+        i18n-aria-label="@@songWave.start"
+        aria-label="Start of the part"
+        (pointerdown)="onHandleDown('start', $event)"
+        (keydown)="onHandleKey('start', $event)"
+      ></span>
+      <span
+        class="wave__handle wave__handle--end"
+        role="slider"
+        tabindex="0"
+        [attr.aria-disabled]="!editable()"
+        [attr.aria-valuemin]="r.start"
+        [attr.aria-valuemax]="duration()"
+        [attr.aria-valuenow]="r.end"
+        [attr.aria-valuetext]="valueText(r.end)"
+        [style.left.%]="endPct()"
+        data-testid="wave-end"
+        i18n-aria-label="@@songWave.end"
+        aria-label="End of the part"
+        (pointerdown)="onHandleDown('end', $event)"
+        (keydown)="onHandleKey('end', $event)"
+      ></span>
+    }
+    <div class="wave__head" [style.left.%]="headPct()" data-testid="wave-head"></div>
+  }
+}

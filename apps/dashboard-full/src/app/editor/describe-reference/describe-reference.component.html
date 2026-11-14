@@ -1,0 +1,153 @@
+@if (available()) {
+<div class="describe" data-testid="describe">
+  @if (busyHere()) {
+    <span class="describe__wait" role="status" data-testid="describe-wait">
+      <mat-progress-spinner mode="indeterminate" diameter="16" />
+      <span>
+        <ng-container i18n="@@describe.working">Describing…</ng-container>
+        <span class="mo-data" data-testid="describe-elapsed">{{ store.elapsed() }} s</span>
+        <span class="describe__note" i18n="@@describe.gpuNote">uses the GPU for a few seconds; a clip takes longer</span>
+      </span>
+    </span>
+    <button data-cancel mat-button type="button" data-testid="describe-cancel" (click)="store.cancel()" i18n="@@describe.cancel">
+      Cancel
+    </button>
+  } @else {
+    <input #file type="file" hidden [accept]="accept" data-testid="describe-file" (change)="pick(file)" />
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="describe-pick"
+      [disabled]="!!store.busy()"
+      (mouseenter)="warm()"
+      (focus)="warm()"
+      (click)="warm(); file.click()"
+    >
+      <mat-icon>image_search</mat-icon>
+      <ng-container i18n="@@describe.pick">Describe a reference</ng-container>
+    </button>
+    <app-provider-badge [tasks]="['describe_image', 'describe_video']" />
+    @if (!store.external()) {
+      <mat-checkbox
+        data-testid="describe-detail"
+        [checked]="store.detail()"
+        (change)="store.detail.set($event.checked)"
+        i18n="@@describe.detail"
+        >More detail</mat-checkbox
+      >
+    }
+    <mat-button-toggle-group
+      [value]="store.split() ? 'split' : 'one'"
+      (change)="store.split.set($event.value === 'split')"
+      i18n-aria-label="@@describe.splitLabel"
+      aria-label="How a clip is described"
+      data-testid="describe-split"
+    >
+      <mat-button-toggle value="one" i18n="@@describe.splitOne">One scene</mat-button-toggle>
+      <mat-button-toggle value="split" i18n="@@describe.splitMany" data-testid="describe-split-many"
+        >Several scenes (one per shot)</mat-button-toggle
+      >
+    </mat-button-toggle-group>
+    @if (remoteCalls(); as rc) {
+      <span class="describe__note" data-testid="describe-calls" i18n="@@describe.calls">up to {{ rc.calls }} calls to {{ rc.name }}</span>
+    } @else {
+      <span class="describe__note" i18n="@@describe.localNote">It is read on your machine; the reference is only used to write the text</span>
+    }
+  }
+</div>
+} @else {
+  <app-model-notice task="describe_image" />
+}
+
+@if (proposal(); as p) {
+  <div class="proposal" data-testid="describe-proposal">
+    <p class="proposal__label">
+      <ng-container i18n="@@describe.proposal">Proposal</ng-container>
+      <span class="chip mo-data" data-testid="describe-model" i18n="@@describe.by">described by {{ p.provider && p.provider !== 'ollama' ? p.model + ' · ' + p.provider : p.model }}</span>
+    </p>
+    @if (p.shots; as shots) {
+      <ul class="shots" data-testid="describe-shots">
+        @for (sh of shots; track $index) {
+          <li class="shot" [attr.data-testid]="'describe-shot-' + $index">
+            <mat-checkbox
+              [checked]="sh.keep"
+              [attr.data-testid]="'describe-shot-keep-' + $index"
+              (change)="store.setShot($index, { keep: $event.checked })"
+              i18n="@@describe.shotLabel"
+              >Shot {{ $index + 1 }} · {{ seconds(sh.start) }}–{{ seconds(sh.end) }} s</mat-checkbox
+            >
+            <textarea
+              class="shot__prompt mo-data"
+              rows="3"
+              [value]="sh.prompt"
+              [disabled]="!sh.keep"
+              [attr.data-testid]="'describe-shot-prompt-' + $index"
+              i18n-aria-label="@@describe.shotPrompt"
+              aria-label="Shot prompt"
+              (change)="store.setShot($index, { prompt: $any($event.target).value })"
+            ></textarea>
+            @if (sh.motion) {
+              <p class="describe__note" i18n="@@describe.shotMotion">Movement: {{ sh.motion }}</p>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      @if (p.noCuts) {
+        <p class="describe__note" data-testid="describe-no-cuts" i18n="@@describe.noCuts">
+          No cuts were found in the clip: it is a single scene.
+        </p>
+      }
+      <p class="proposal__text mo-data" data-testid="describe-prompt">{{ p.prompt }}</p>
+    }
+    @if (p.motion && !p.shots) {
+      <p class="proposal__label" i18n="@@describe.motion">Movement</p>
+      <p class="proposal__text mo-data" data-testid="describe-motion">{{ p.motion }}</p>
+      @if (!animates()) {
+        <p class="describe__note" i18n="@@describe.motionNote">The scene is not animated: the movement will not be applied.</p>
+      }
+    }
+    <div class="proposal__actions">
+      @if (p.shots) {
+        <button
+          mat-flat-button
+          type="button"
+          data-testid="describe-use"
+          [disabled]="keptShots() === 0"
+          (click)="use()"
+          i18n="@@describe.createScenes"
+        >
+          Create {{ keptShots() }} scenes
+        </button>
+      } @else {
+        <button mat-flat-button type="button" data-testid="describe-use" (click)="use()" i18n="@@describe.use">Use</button>
+      }
+      <button mat-button type="button" data-testid="describe-discard" (click)="store.discard()" i18n="@@describe.discard">
+        Discard
+      </button>
+    </div>
+  </div>
+}
+
+@if (failure(); as f) {
+  <div class="describe__error" role="alert" data-testid="describe-error" [attr.data-kind]="f.kind">
+    <p>
+      <mat-icon inline>error</mat-icon>
+      <span>{{ f.message }}</span>
+    </p>
+    <div class="proposal__actions">
+      @for (a of alternatives(); track a.provider + a.model) {
+        <button mat-stroked-button type="button" data-testid="describe-retry" (click)="retry(a)">
+          <ng-container i18n="@@describe.retryWith">Try with</ng-container>
+          <span class="mo-data">{{ a.model }}</span>
+          @if (a.name) {
+            <span class="mo-data">· {{ a.name }}</span>
+          }
+        </button>
+      }
+      <button mat-button type="button" data-testid="describe-dismiss" (click)="store.dismissFailure()" i18n="@@describe.dismiss">
+        Close
+      </button>
+    </div>
+  </div>
+}

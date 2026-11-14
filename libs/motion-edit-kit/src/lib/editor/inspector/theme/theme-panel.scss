@@ -1,0 +1,127 @@
+.theme {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding-top: var(--lab-space-3);
+  border-top: 1px solid var(--lab-line);
+
+  h3,
+  h4 {
+    margin: 0;
+  }
+
+  h3 {
+    font-size: var(--lab-fs-section);
+    font-weight: var(--lab-fw-title);
+  }
+
+  h4 {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+    font-weight: var(--lab-fw-control);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+.block {
+  display: grid;
+  gap: var(--lab-space-2);
+  align-content: start;
+}
+
+.meta,
+.problem {
+  margin: 0;
+  font-size: var(--lab-fs-meta);
+}
+
+.meta {
+  color: var(--lab-ink-dim);
+}
+
+.problem {
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.drawings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-2);
+    padding: var(--lab-space-1) var(--lab-space-2);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius);
+  }
+
+  img {
+    object-fit: contain;
+    background: var(--lab-surface);
+    border-radius: var(--lab-radius);
+  }
+}
+
+.pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--lab-space-2);
+
+  .field {
+    display: grid;
+    gap: var(--lab-space-1);
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  input[type='text'] {
+    padding: var(--lab-space-1) var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+}
+
+.choose {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+
+  &.off {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.licences {
+  margin: 0;
+  padding-left: var(--lab-space-4);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  input[type='range'] {
+    flex: 1;
+    accent-color: var(--lab-accent);
+  }
+
+  output {
+    min-width: 3.5rem;
+    text-align: right;
+    font-size: var(--lab-fs-meta);
+  }
+}

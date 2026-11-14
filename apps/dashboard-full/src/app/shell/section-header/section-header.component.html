@@ -1,0 +1,43 @@
+<header class="bar" data-testid="section-header">
+  <a
+    class="brand lab-plain-link"
+    routerLink="/projects"
+    (click)="home($event)"
+    data-testid="section-home"
+    aria-label="mediaOrquestator: back to Projects"
+    i18n-aria-label="@@sectionHeader.home"
+  >
+    <span class="mark" aria-hidden="true"><mat-icon>play_arrow</mat-icon></span>
+    <span class="name">mediaOrquestator</span>
+  </a>
+  <span class="title" data-testid="section-title">{{ title() }}</span>
+  <div class="controls">
+    <button mat-button type="button" (click)="connectionDialog.open()" data-testid="connection">
+      <mat-icon>lan</mat-icon>
+      <span i18n="@@shell.connection">Connection</span>
+    </button>
+    @if (conn.remote()) {
+      <span class="server mo-data" [title]="conn.server()">{{ conn.server() }}</span>
+    }
+    <mat-button-toggle-group
+      class="lang"
+      [value]="lang"
+      (change)="setLang($event.value)"
+      hideSingleSelectionIndicator
+      aria-label="Language"
+      i18n-aria-label="@@shell.language"
+      data-testid="lang-switch"
+    >
+      <mat-button-toggle value="en" data-testid="lang-en">English</mat-button-toggle>
+      <mat-button-toggle value="es" data-testid="lang-es">Español</mat-button-toggle>
+    </mat-button-toggle-group>
+    <mat-slide-toggle
+      class="theme"
+      [checked]="theme.light()"
+      (change)="theme.set($event.checked)"
+      data-testid="theme-toggle"
+      i18n="@@shell.lightTheme"
+      >Light theme</mat-slide-toggle
+    >
+  </div>
+</header>

@@ -1,0 +1,211 @@
+.import {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  // it scrolls inside only when the window is too short for it
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  padding: var(--lab-space-4);
+  color: var(--lab-ink);
+}
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+}
+
+.lead,
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.filled {
+  margin: 0;
+  padding: var(--lab-space-3);
+  border-radius: var(--lab-radius);
+  background: color-mix(in srgb, var(--lab-accent) 12%, var(--lab-surface));
+  font-size: var(--lab-fs-meta);
+}
+
+.hint,
+small {
+  font-size: var(--lab-fs-meta);
+}
+
+.file {
+  margin: 0;
+  font-family: var(--lab-font-mono);
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+  overflow-wrap: anywhere;
+}
+
+.close {
+  width: var(--lab-control-h);
+  height: var(--lab-control-h);
+  border: 0;
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--lab-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+// The four counts of the report, as pills.
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: var(--lab-space-1) var(--lab-space-3);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius-pill);
+    background: var(--lab-surface-high);
+    font-size: var(--lab-fs-meta);
+  }
+
+  strong {
+    font-family: var(--lab-font-mono);
+    font-size: var(--lab-fs-body);
+  }
+
+  .warn {
+    border-color: var(--lab-danger);
+    color: var(--lab-danger);
+  }
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+
+  pre {
+    max-height: 9rem;
+    margin: 0;
+    overflow: auto;
+    font-family: var(--lab-font-mono);
+    font-size: var(--lab-fs-meta);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lab-control-line) transparent;
+  }
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+
+  input {
+    min-height: var(--lab-control-h);
+    padding: 0 var(--lab-space-3);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface-high);
+    color: var(--lab-ink);
+    font: inherit;
+    font-size: var(--lab-fs-body);
+
+    &:focus-visible {
+      outline: 2px solid var(--lab-focus);
+      outline-offset: 2px;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--lab-danger);
+    }
+  }
+
+  .bad {
+    color: var(--lab-danger);
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--lab-space-2);
+
+  button {
+    flex: 1;
+  }
+}
+
+.primary,
+.secondary {
+  min-height: var(--lab-control-h-lg);
+  padding: 0 var(--lab-space-4);
+  border-radius: var(--lab-radius);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}
+
+.primary {
+  border: 0;
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.secondary {
+  border: 1px solid var(--lab-control-line);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+}
+
+.reason {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.error {
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

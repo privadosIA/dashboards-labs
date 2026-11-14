@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.brief {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+h3 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+p {
+  margin: 0;
+}
+
+.mode,
+.hint {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.counter {
+  justify-self: end;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter--over,
+.problem {
+  color: var(--lab-danger);
+}
+
+.problem {
+  font-size: var(--lab-fs-meta);
+}

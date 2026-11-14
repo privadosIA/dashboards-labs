@@ -1,0 +1,25 @@
+<div class="picker" data-testid="range-picker">
+  <app-song-wave
+    [seekable]="true"
+    [editable]="true"
+    [peaks]="peaks()"
+    [position]="position()"
+    [range]="range()"
+    [snap]="snap()"
+    (seek)="seek($event)"
+    (rangeChange)="rangeChange.emit($event)"
+  />
+  <mo-audio-player #player [src]="url()" [label]="file()" (position)="setPosition($event)" />
+  <div class="picker__bar">
+    <button mat-stroked-button type="button" data-testid="hear-range" [disabled]="!range()" (click)="hear()">
+      <mat-icon>play_circle</mat-icon>
+      <ng-container i18n="@@rangePicker.hear">Listen to the part</ng-container>
+    </button>
+    @if (grid()) {
+      <mat-checkbox data-testid="snap-beat" [checked]="snapOn()" (change)="snapOn.set($event.checked)" i18n="@@rangePicker.snap">Snap to the beat (Alt: to the bar)</mat-checkbox>
+    }
+    @if (peaks()) {
+      <span class="picker__hint" i18n="@@rangePicker.hint">Drag on the waveform to pick the part.</span>
+    }
+  </div>
+</div>

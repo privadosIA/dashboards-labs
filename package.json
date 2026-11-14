@@ -1,0 +1,88 @@
+{
+  "name": "dashboards-lab",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Workspace para construir dashboards independientes contra el servidor de mediaOrquestator",
+  "type": "module",
+  "workspaces": [
+    "mock-api"
+  ],
+  "scripts": {
+    "mock": "npm run start -w mock-api",
+    "test": "node --test \"scripts/**/*.test.mjs\" && npm test --workspaces --if-present && ng test --no-watch",
+    "contract:sync": "node scripts/sync-contract.mjs",
+    "contract:check": "node scripts/sync-contract.mjs --check",
+    "test:coverage": "node -e \"require('fs').mkdirSync('coverage',{recursive:true})\" && node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \"scripts/**/*.test.mjs\" \"mock-api/**/*.test.mjs\" && ng test --no-watch --coverage",
+    "client:generate": "node scripts/generate-client.mjs",
+    "client:check": "node scripts/generate-client.mjs --check",
+    "dynamic:check": "node scripts/check-dynamic.mjs",
+    "theme:check": "node scripts/check-theme.mjs",
+    "dashboard-full:mock": "node scripts/serve-against-server.mjs dashboard-full --mock",
+    "tutorial:shots": "node scripts/tutorial-shots.mjs",
+    "tutorial:check": "node scripts/check-tutorials.mjs",
+    "sample:video": "node scripts/make-sample-video.mjs",
+    "sample:dataset": "node scripts/make-sample-dataset.mjs",
+    "sample:sync": "node scripts/sync-sample.mjs",
+    "dashboard-full:i18n": "ng extract-i18n dashboard-full --output-path apps/dashboard-full/src/locale && node apps/dashboard-full/i18n-sync.mjs",
+    "dashboard-full:serve": "ng serve dashboard-full",
+    "dashboard-full:serve:tutorial": "ng serve dashboard-full --configuration tutorial",
+    "dashboard-full:build": "ng build dashboard-full",
+    "dashboard-full:e2e": "bash apps/dashboard-full/e2e/run-e2e.sh --project=desktop",
+    "a11y:audit": "node scripts/a11y-audit.mjs",
+    "forms:audit": "node scripts/form-gap-audit.mjs",
+    "dashboard-full:e2e:mobile": "bash apps/dashboard-full/e2e/run-e2e.sh --project=mobile --project=landscape"
+  },
+  "dependencies": {
+    "@angular/cdk": "^22.2.2",
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/material": "^22.2.2",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.2.4",
+    "@angular/service-worker": "^22.2.4",
+    "@core/dynamic-forms": "file:vendor/core-dynamic-forms-2.19.1.tgz",
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "@fontsource/archivo": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/material-symbols-outlined": "^5.3.9",
+    "@formkit/auto-animate": "0.10.2",
+    "@ngx-formly/core": "^11.0.0",
+    "@ngx-formly/material": "^11.0.0",
+    "js-yaml": "^5.4.3",
+    "monaco-editor": "^0.57.0",
+    "motion": "14.12.0",
+    "openapi-typescript-helpers": "^0.1.0",
+    "rxjs": "~7.8.0",
+    "swagger-ui-dist": "^5.34.1",
+    "tslib": "^2.3.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.0.4",
+    "@angular/cli": "^22.0.4",
+    "@angular/compiler-cli": "^22.0.0",
+    "@angular/localize": "^22.2.4",
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^4.1.12",
+    "jsdom": "^28.0.0",
+    "openapi-typescript": "^7.13.0",
+    "tailwindcss": "4.3.5",
+    "typescript": "~6.0.2",
+    "vitest": "^4.0.8"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    },
+    "dompurify": "3.4.17"
+  }
+}

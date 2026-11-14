@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  align-content: end;
+  gap: var(--lab-space-1);
+  min-height: 3.25rem;
+  padding: var(--lab-space-2) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--lab-accent) 22%, transparent), transparent 60%),
+    var(--lab-surface-high);
+}
+
+.kind {
+  margin: 0;
+  color: var(--lab-accent);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.model {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.change {
+  position: absolute;
+  top: var(--lab-space-2);
+  right: var(--lab-space-2);
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}

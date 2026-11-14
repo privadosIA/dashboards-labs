@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "id": "ask-part",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "request",
+      "type": "textarea",
+      "label": "Qué tiene que hacer la parte",
+      "props": {
+        "rows": 2
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 500,
+        "messages": {
+          "required": "Escribe qué tiene que hacer la parte.",
+          "maxLength": "La frase puede tener hasta 500 caracteres."
+        }
+      }
+    },
+    {
+      "key": "source",
+      "type": "radio",
+      "label": "Imagen (opcional)",
+      "defaultValue": "none",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "reference",
+      "type": "select",
+      "label": "Referencia",
+      "logic": {
+        "showWhen": {
+          "field": "source",
+          "operator": "eq",
+          "value": "frame"
+        },
+        "resetOnHide": true
+      }
+    }
+  ]
+}

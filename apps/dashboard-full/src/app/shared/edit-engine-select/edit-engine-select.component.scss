@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.engine {
+  margin-bottom: var(--lab-space-1);
+  // The two engines side by side and as tall as the other buttons; a thumb tall on a phone.
+  --mat-button-toggle-height: 40px;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+
+  @media (max-width: 599px) {
+    --mat-button-toggle-height: 44px;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

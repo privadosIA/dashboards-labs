@@ -1,0 +1,61 @@
+.builder {
+  display: grid;
+  gap: var(--lab-space-4);
+}
+
+.back {
+  color: var(--lab-accent);
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+  overflow-wrap: anywhere;
+}
+
+.intro,
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.edit,
+.panel {
+  display: grid;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.keep {
+  display: grid;
+  gap: var(--lab-space-2);
+}
+
+.problem {
+  margin: 0;
+  color: var(--lab-danger);
+  overflow-wrap: anywhere;
+}
+
+.save {
+  justify-self: start;
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    background: transparent;
+    border-color: var(--lab-line);
+    color: var(--lab-ink-dim);
+    cursor: default;
+  }
+}

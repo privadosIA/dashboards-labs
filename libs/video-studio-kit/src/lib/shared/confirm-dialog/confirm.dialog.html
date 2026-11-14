@@ -1,0 +1,8 @@
+<div class="confirm">
+  <h2>{{ ask.title }}</h2>
+  <p>{{ ask.message }}</p>
+  <div class="actions">
+    <button type="button" (click)="ref.close(false)">{{ t.confirm.cancel }}</button>
+    <button type="button" class="danger" (click)="ref.close(true)">{{ t.confirm.remove }}</button>
+  </div>
+</div>

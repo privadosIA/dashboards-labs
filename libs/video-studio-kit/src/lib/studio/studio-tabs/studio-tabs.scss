@@ -1,0 +1,32 @@
+.tabs {
+  display: flex;
+  gap: var(--lab-space-4);
+  border-bottom: 1px solid var(--lab-line);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--lab-ink);
+  }
+
+  &.on {
+    color: var(--lab-ink);
+    border-bottom-color: var(--lab-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 2px;
+  }
+}

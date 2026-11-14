@@ -1,0 +1,19 @@
+<div class="stage" #stage [style.aspect-ratio]="size().width + ' / ' + size().height" [attr.aria-label]="t.frame.title" role="img">
+  <div class="canvas" [style.width.px]="size().width" [style.height.px]="size().height" [style.transform]="'scale(' + scale() + ')'">
+    <iframe #frame0 class="frame" [class.on]="visible() === 0 || (blend() > 0 && visible() === 1)" [style.opacity]="visible() === 1 && blend() > 0 ? blend() : null" sandbox="allow-scripts" [attr.title]="t.frame.title" tabindex="-1" (load)="loaded(0)"></iframe>
+    <iframe #frame1 class="frame" [class.on]="visible() === 1 || (blend() > 0 && visible() === 0)" [style.opacity]="visible() === 0 && blend() > 0 ? blend() : null" sandbox="allow-scripts" [attr.title]="t.frame.title" tabindex="-1" (load)="loaded(1)"></iframe>
+  </div>
+  @if (current() < 0) {
+    <p class="empty">{{ t.frame.empty }}</p>
+  }
+  @if (badge(); as b) {
+    <span class="badge" tabindex="0" [attr.title]="b.gaps.join('\n')">
+      {{ b.label }}
+      <span class="gaps" role="tooltip">
+        @for (g of b.gaps; track g) {
+          <span>{{ g }}</span>
+        }
+      </span>
+    </span>
+  }
+</div>

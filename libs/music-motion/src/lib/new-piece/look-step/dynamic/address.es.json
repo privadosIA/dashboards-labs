@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "address",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "address",
+      "type": "text",
+      "label": "Dirección de YouTube",
+      "validation": {
+        "required": true,
+        "pattern": "^https://(www\\.|m\\.|music\\.)?(youtube\\.com|youtu\\.be)/\\S+$",
+        "messages": {
+          "required": "Pega la dirección de un vídeo de YouTube.",
+          "pattern": "Debe ser una dirección https de YouTube, como https://youtu.be/…"
+        }
+      }
+    }
+  ]
+}

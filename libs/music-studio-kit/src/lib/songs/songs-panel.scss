@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.title {
+  margin: 0 0 var(--lab-space-3);
+  font-size: var(--lab-fs-title);
+  font-weight: var(--lab-fw-title);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.empty,
+.loading {
+  padding: var(--lab-space-5) var(--lab-space-3);
+  color: var(--lab-ink-dim);
+  text-align: center;
+}
+
+.empty {
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.empty p {
+  margin: 0 0 var(--lab-space-2);
+}
+
+.lead {
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-title);
+  font-weight: 600;
+}
+
+.error {
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

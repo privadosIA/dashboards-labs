@@ -1,0 +1,51 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@lab/assist-kit": ["./libs/assist-kit/src/public-api.ts"],
+      "@lab/assist-kit/testing": ["./libs/assist-kit/src/testing/index.ts"],
+      "@lab/animation-core": ["./libs/animation-core/src/public-api.ts"],
+      "@lab/animation-core/testing": ["./libs/animation-core/src/testing/index.ts"],
+      "@lab/animation-dataset": ["./libs/animation-dataset/src/public-api.ts"],
+      "@lab/api-client": ["./libs/api-client/src/public-api.ts"],
+      "@lab/dataset-studio-kit": ["./libs/dataset-studio-kit/src/public-api.ts"],
+      "@lab/dataset-import": ["./libs/dataset-import/src/public-api.ts"],
+      "@lab/forms-kit": ["./libs/forms-kit/src/public-api.ts"],
+      "@lab/motion-edit-kit": ["./libs/motion-edit-kit/src/public-api.ts"],
+      "@lab/motion-editor": ["./libs/motion-editor/src/public-api.ts"],
+      "@lab/motion-editor/code": ["./libs/motion-editor/src/code-api.ts"],
+      "@lab/motion-ui": ["./libs/motion-ui/src/public-api.ts"],
+      "@lab/motion-parts": ["./libs/motion-parts/src/public-api.ts"],
+      "@lab/music-motion": ["./libs/music-motion/src/public-api.ts"],
+      "@lab/music-studio-kit": ["./libs/music-studio-kit/src/public-api.ts"],
+      "@lab/paged-list": ["./libs/paged-list/src/public-api.ts"],
+      "@lab/server-connection": ["./libs/server-connection/src/public-api.ts"],
+      "@lab/theme-switch": ["./libs/theme-switch/src/public-api.ts"],
+      "@lab/vector-editor": ["./libs/vector-editor/src/public-api.ts"],
+      "@lab/vector-editor/testing": ["./libs/vector-editor/src/testing/index.ts"],
+      "@lab/vector-studio-kit": ["./libs/vector-studio-kit/src/public-api.ts"],
+      "@lab/video-studio-kit": ["./libs/video-studio-kit/src/public-api.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [{ "path": "./tsconfig.spec.json" }]
+}

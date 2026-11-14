@@ -1,0 +1,22 @@
+<div class="style-tags" role="group" [attr.aria-label]="t.style.pick">
+  <div class="categories">
+    @for (c of vocabulary().categories; track c.id) {
+      <button type="button" class="chip category" [class.open]="open() === c.id" [attr.aria-expanded]="open() === c.id" [attr.data-testid]="'category-' + c.id" (click)="show(c.id)"># {{ label(c.id) }}</button>
+    }
+    <button type="button" class="chip category" [class.open]="open() === popular" [attr.aria-expanded]="open() === popular" data-testid="category-popular" (click)="show(popular)">★ {{ t.style.popular }}</button>
+  </div>
+
+  @if (open() === popular) {
+    <div class="options" data-testid="combos">
+      @for (c of vocabulary().combos; track c.id) {
+        <button type="button" class="chip" [class.on]="comboOn(c.tags)" [attr.aria-pressed]="comboOn(c.tags)" [attr.data-testid]="'combo-' + c.id" (click)="combo.emit(c.tags)">{{ c.name }}</button>
+      }
+    </div>
+  } @else if (open()) {
+    <div class="options" data-testid="tags">
+      @for (tag of tags(); track tag) {
+        <button type="button" class="chip" [class.on]="isPicked(tag)" [attr.aria-pressed]="isPicked(tag)" [attr.data-testid]="'tag-' + tag" (click)="toggle.emit(tag)">{{ tag }}</button>
+      }
+    </div>
+  }
+</div>

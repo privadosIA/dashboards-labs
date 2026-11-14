@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  // The host's header takes `--studio-offset` of the screen (the shell sets it where it is not the 3rem of a plain bar).
+  height: calc(100vh - var(--studio-offset, 3rem));
+  min-height: 34rem;
+}
+
+lab-vector-editor-page {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: 0;
+  padding: var(--lab-space-2) var(--lab-space-4);
+  border-bottom: 1px solid var(--lab-line);
+  background: var(--lab-surface-high);
+  font-size: var(--lab-fs-body);
+
+  &.problem {
+    color: var(--lab-danger);
+  }
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  width: 100%;
+}
+
+.name input {
+  height: 2rem;
+  width: 14rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  font-size: var(--lab-fs-body);
+  border-radius: var(--lab-radius);
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.ctl {
+  height: 2rem;
+  padding: 0 var(--lab-space-3);
+  border: 1px solid var(--lab-control-line);
+  font-size: var(--lab-fs-body);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--lab-surface-high);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+
+  &.help {
+    width: 2rem;
+    padding: 0;
+    margin-left: auto;
+  }
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

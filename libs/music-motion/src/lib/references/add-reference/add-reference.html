@@ -1,0 +1,19 @@
+<section class="add" data-testid="add-reference">
+  <h2>{{ t.add }}</h2>
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+  <div class="file">
+    <label class="choose" for="reference-file">{{ t.chooseFile }}</label>
+    <input #picker id="reference-file" type="file" accept="video/*" data-testid="file" (change)="pick($event)" />
+    <span class="name" data-testid="file-name">{{ file()?.name ?? t.noFile }}</span>
+    @if (file()) {
+      <button type="button" data-testid="clear-file" (click)="clear(picker)">{{ t.clearFile }}</button>
+    }
+  </div>
+  @if (!sourceOk()) {
+    <p class="hint" data-testid="source-hint">{{ t.sourceNeeded }}</p>
+  }
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+  }
+  <button type="button" class="submit" data-testid="add" [disabled]="!valid() || !sourceOk() || working()" (click)="add(picker)">{{ working() ? t.adding : t.addAction }}</button>
+</section>

@@ -1,0 +1,123 @@
+{
+  "version": "1.0",
+  "id": "flow-plan",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "text",
+      "label": "Título de la canción",
+      "validation": {
+        "maxLength": 120,
+        "messages": {
+          "maxLength": "El título puede tener hasta 120 caracteres."
+        }
+      }
+    },
+    {
+      "key": "lyrics",
+      "type": "textarea",
+      "label": "Letra (vacía: el asistente no escribe ninguna, o la canción es instrumental)",
+      "props": {
+        "rows": 4
+      }
+    },
+    {
+      "key": "style",
+      "type": "text",
+      "label": "Estilo de la canción"
+    },
+    {
+      "key": "generator",
+      "type": "select",
+      "label": "Generador",
+      "defaultValue": "ace-step"
+    },
+    {
+      "key": "instrumental",
+      "type": "checkbox",
+      "label": "Instrumental (sin voz)",
+      "defaultValue": false
+    },
+    {
+      "key": "seconds",
+      "type": "number",
+      "label": "Duración en segundos (vacía: la de siempre, dos minutos)",
+      "validation": {
+        "min": 10,
+        "max": 600,
+        "messages": {
+          "min": "De 10 a 600 segundos.",
+          "max": "De 10 a 600 segundos."
+        }
+      }
+    },
+    {
+      "key": "animStyle",
+      "type": "radio",
+      "label": "Estilo de la animación",
+      "defaultValue": "typographic",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "level",
+      "type": "radio",
+      "label": "Nivel",
+      "defaultValue": "simple",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "fps",
+      "type": "radio",
+      "label": "Fotogramas por segundo (fps)",
+      "defaultValue": "30",
+      "props": {
+        "inline": true
+      }
+    },
+    {
+      "key": "resolution",
+      "type": "text",
+      "label": "Resolución",
+      "defaultValue": "1280x720",
+      "validation": {
+        "required": true,
+        "pattern": "^[0-9]{3,4}x[0-9]{3,4}$",
+        "messages": {
+          "required": "Hace falta la resolución, como 1280x720.",
+          "pattern": "Escribe la resolución como ancho x alto, como 1280x720."
+        }
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Cómo debe ser la animación (las propuestas leen esto)",
+      "props": {
+        "rows": 3
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 2000,
+        "messages": {
+          "required": "Escribe cómo debe ser la animación.",
+          "maxLength": "El texto puede tener hasta 2000 caracteres."
+        }
+      }
+    },
+    {
+      "key": "parts",
+      "type": "textarea",
+      "label": "Partes que se quieren, una por línea como nombre: qué hace (opcional)",
+      "props": {
+        "rows": 3
+      }
+    }
+  ]
+}

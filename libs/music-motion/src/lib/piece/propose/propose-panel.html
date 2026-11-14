@@ -1,0 +1,44 @@
+<section class="propose" data-testid="propose">
+  <h2>{{ t.title }}</h2>
+
+  <div class="direction">
+    <dynamic-form [schema]="schema" [model]="form()" (modelChange)="changed($event)" [showDefaultActions]="false" showErrors="always" />
+    <p class="meta" data-testid="prompt-counter" [class.over]="length() > max">{{ t.counter(length(), max) }}</p>
+    <p class="meta">{{ t.promptHint }}</p>
+  </div>
+
+  <app-assistant-field [(value)]="assistant" [disabled]="proposing()" />
+
+  @if (proposing()) {
+    <p class="note" role="status" data-testid="proposing-note">{{ t.proposingNote }}</p>
+  }
+
+  <div class="actions">
+    <button type="button" data-testid="propose-design" [disabled]="busy()" (click)="ask('design')">{{ working() === 'design' ? t.working : t.design }}</button>
+    <button type="button" data-testid="propose-script" [disabled]="busy()" (click)="ask('script')">{{ working() === 'script' ? t.working : t.script }}</button>
+    <button type="button" class="both" data-testid="propose-all" [disabled]="busy()" (click)="ask('all')">{{ working() === 'all' ? t.working : t.both }}</button>
+  </div>
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="problem">{{ refused() }}</p>
+  }
+  @if (result(); as r) {
+    <div class="result" role="status" data-testid="result">
+      <p>{{ doneText() }}</p>
+      <p class="source" [class.fallback]="r.source === 'fallback'" data-testid="source">{{ t.source[r.source] }}</p>
+      @if (r.model) {
+        <p class="meta" data-testid="model-used">{{ t.modelUsed(r.model) }}</p>
+      }
+      @if (r.fallbackReason) {
+        <p class="meta" data-testid="reason">{{ t.reason(r.fallbackReason) }}</p>
+      }
+      @if (replacements().length) {
+        <p>{{ t.replaced }}</p>
+        <ul data-testid="replacements">
+          @for (item of replacements(); track $index) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

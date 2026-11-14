@@ -1,0 +1,121 @@
+<section class="page" [attr.data-testid]="overlay() ? 'overlay-page' : 'motion-page'">
+  @if (page(); as p) {
+    @if (p.exists) {
+      @if (p.summary) {
+        <p class="note mo-data" data-testid="motion-summary">{{ p.summary }}</p>
+      }
+      @if (editing()) {
+        <textarea
+          class="source mo-data"
+          rows="14"
+          spellcheck="false"
+          data-testid="motion-source"
+          [value]="draft()"
+          (input)="draft.set($any($event.target).value)"
+        ></textarea>
+        <div class="actions">
+          <button mat-flat-button type="button" data-testid="motion-save" [disabled]="busy() !== ''" (click)="saveEdit()">
+            <ng-container i18n="@@motion.save">Save the page</ng-container>
+          </button>
+          <button mat-button type="button" [disabled]="busy() !== ''" (click)="editing.set(false)" i18n="@@motion.cancel">Cancel</button>
+        </div>
+      } @else {
+        @if (srcdoc(); as doc) {
+          <iframe
+            #frame
+            class="frame"
+            data-testid="motion-frame"
+            sandbox="allow-scripts"
+            referrerpolicy="no-referrer"
+            i18n-title="@@motion.frameTitle"
+            title="Preview of the page"
+            [srcdoc]="doc"
+            (load)="loaded()"
+          ></iframe>
+          <div class="player">
+            <button mat-icon-button type="button" data-testid="motion-play" (click)="toggle()" [attr.aria-label]="playing() ? 'pause' : 'play'">
+              <mat-icon>{{ playing() ? 'pause' : 'play_arrow' }}</mat-icon>
+            </button>
+            <mat-slider min="0" [max]="p.duration" step="0.05">
+              <input matSliderThumb data-testid="motion-time" [value]="time()" (valueChange)="setTime($event)" />
+            </mat-slider>
+            <span class="mo-data">{{ time().toFixed(2) }} / {{ p.duration.toFixed(1) }} s</span>
+          </div>
+        }
+        @if (timeline(); as tl) {
+          @if (long()) {
+            <p class="note" data-testid="timeline-long" i18n="@@timeline.long">This scene lasts more than 4 s: its timeline opens in a window you can move, resize and maximize.</p>
+          } @else {
+            <app-motion-timeline [timeline]="tl" [duration]="p.duration" [time]="time()" (changed)="timelineChanged($event)" (seekTo)="setTime($event)" />
+          }
+        } @else if (hasBlock()) {
+          <p class="note" data-testid="motion-bad-timeline" i18n="@@timeline.invalid">The timeline block of this page cannot be read; fix it in the page's code.</p>
+        } @else {
+          <p class="note" data-testid="motion-no-timeline" i18n="@@timeline.none">This page animates with CSS and has no timeline, so there are no tracks to edit. If you want one, write another page.</p>
+        }
+      }
+    } @else {
+      <p class="note" data-testid="motion-empty" i18n="@@motion.empty">There is no page yet: it is written by itself when a run starts, or you can ask for it now.</p>
+    }
+  }
+
+  @if (!editing() && !modelAvailable()) {
+    <app-model-notice task="motion_graphics" />
+    @if (page(); as p) {
+      @if (!p.exists) {
+        <p class="note" data-testid="motion-no-model" i18n="@@motion.noModelNoPage">Without the model the page cannot be written; if you already have one, put it in the project's motion/ folder, named after the scene.</p>
+      }
+    }
+  }
+  @if (!editing()) {
+    <div class="actions">
+      @if (page()?.exists) {
+        <button mat-stroked-button type="button" data-testid="motion-edit" (click)="startEditing()">
+          <mat-icon>edit</mat-icon>
+          <ng-container i18n="@@motion.edit">Edit the page</ng-container>
+        </button>
+      }
+      @if (timeline() && long()) {
+        <button mat-stroked-button type="button" data-testid="timeline-open" (click)="openTimeline()">
+          <mat-icon>timeline</mat-icon>
+          <ng-container i18n="@@timeline.open">Open the timeline</ng-container>
+        </button>
+      }
+      @if (timelineDirty()) {
+        <button mat-flat-button type="button" data-testid="timeline-save" [disabled]="busy() !== ''" (click)="saveTimeline()" i18n="@@timeline.save">Save the changes</button>
+      }
+      @if (modelAvailable()) {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="motion-generate"
+          [disabled]="blocked() !== '' || busy() !== ''"
+          (click)="generate()"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          @if (page()?.exists) {
+            <ng-container i18n="@@motion.regenerate">Write another page</ng-container>
+          } @else {
+            <ng-container i18n="@@motion.generate">Write the page</ng-container>
+          }
+        </button>
+      }
+      <ng-content select="[slot=actions]" />
+      @if (busy() === 'generating') {
+        <span class="note" role="status" i18n="@@motion.writing">The model is writing and checking the page…</span>
+      }
+    </div>
+    @if (timelineDirty()) {
+      <p class="note" data-testid="timeline-unsaved" i18n="@@timeline.unsaved">There are unsaved changes: you see them here, but the video uses the saved page.</p>
+    }
+    @if (modelAvailable() && blocked(); as why) {
+      <p class="note" data-testid="motion-blocked">{{ why }}</p>
+    }
+  }
+  @if (error(); as msg) {
+    <p class="server-error" role="alert" data-testid="motion-error">
+      <mat-icon inline>error</mat-icon>
+      <span class="mo-data">{{ msg }}</span>
+    </p>
+  }
+</section>

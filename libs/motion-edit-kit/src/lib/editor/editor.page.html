@@ -1,0 +1,197 @@
+@switch (status()) {
+  @case ('loading') {
+    <p class="notice" role="status">{{ t.loading }}</p>
+  }
+  @case ('missing') {
+    <section class="notice" data-testid="missing">
+      <p>{{ t.notFound(id()) }}</p>
+      <p class="hint">{{ t.notFoundHint }}</p>
+      <a [routerLink]="list">{{ t.back }}</a>
+    </section>
+  }
+  @case ('failed') {
+    <section class="notice" role="alert" data-testid="failed">
+      <p>{{ t.loadFailed }} {{ failure() }}</p>
+      <a [routerLink]="list">{{ t.back }}</a>
+    </section>
+  }
+  @case ('ready') {
+    @if (piece(); as p) {
+      @if (flowId(); as fid) {
+        <app-flow-bar [flow]="fid" [step]="flowStep()" [dirty]="dirty()" [saving]="saving()" (continued)="continueFlow()" />
+      }
+      <header class="head">
+        <a class="back" [routerLink]="list">← {{ t.back }}</a>
+        <h1>{{ p.title }}</h1>
+        <div class="edit-bar" role="toolbar" [attr.aria-label]="texts.editing.save">
+          <button type="button" class="ctl" data-testid="undo" [disabled]="!canUndo() || frozen()" [attr.title]="texts.editing.undo" (click)="undo()">{{ texts.editing.undo }}</button>
+          <button type="button" class="ctl" data-testid="split" [disabled]="frozen()" [attr.title]="texts.editing.splitHint" (click)="split()">{{ texts.editing.split }}</button>
+          <button type="button" class="ctl danger" data-testid="remove-piece" [disabled]="frozen() || (!selection() && !itemSelection())" [attr.title]="selectedEmpty() ? texts.editing.removeSlotHint : texts.editing.removePieceHint" (click)="removeSelected()">{{ itemSelection() ? texts.inspector.item.remove : selection()?.line !== undefined ? texts.editing.removeText : selection()?.extra !== undefined ? texts.editing.removeExtraPart : selectedEmpty() ? texts.editing.removeSlot : texts.editing.removePiece }}</button>
+          <button type="button" class="ctl" data-testid="redo" [disabled]="!canRedo() || frozen()" [attr.title]="texts.editing.redo" (click)="redo()">{{ texts.editing.redo }}</button>
+          @if (dirty()) {
+            <span class="dirty" data-testid="dirty">{{ texts.editing.unsaved }}</span>
+            <button type="button" class="ctl" data-testid="discard" [disabled]="saving()" (click)="discard()">{{ texts.editing.discard }}</button>
+          }
+          @if (justSaved()) {
+            <span class="ok" role="status" data-testid="saved">{{ texts.editing.saved }}</span>
+          }
+          <button type="button" class="ctl primary" data-testid="save" [disabled]="!dirty() || saving() || locked() || animateBlocked() || layersBlocked()" [attr.title]="animateBlocked() ? texts.inspector.animate.unsupported : layersBlocked() ? texts.editing.layersBlocked : null" (click)="save()">{{ saving() ? texts.editing.saving : texts.editing.save }}</button>
+        </div>
+        <app-actions [piece]="p" (started)="onRenderStarted()" />
+        <button type="button" class="ctl help" data-testid="help-open" [attr.aria-label]="texts.help.open" [attr.title]="texts.help.open" (click)="helpOpen.set(true)">?</button>
+      </header>
+      @if (draft(); as d) {
+        <p class="banner" role="status" data-testid="draft-found">
+          {{ texts.editing.draftFound(draftWhen(d.at)) }}
+          @if (draftSummary(); as sum) {
+            <span data-testid="draft-changes">{{ texts.editing.draftChanges(sum.pieces, sum.design, sum.layers) }}</span>
+            @if (sum.serverMoved) {
+              <strong data-testid="draft-moved">{{ texts.editing.draftMoved }}</strong>
+            }
+          }
+          <button type="button" class="ctl" data-testid="draft-restore" (click)="restoreDraft()">{{ texts.editing.draftRestore }}</button>
+          <button type="button" class="ctl" data-testid="draft-dismiss" (click)="dismissDraft()">{{ texts.editing.draftDismiss }}</button>
+        </p>
+      }
+      @if (notice()) {
+        <p class="banner" role="status" data-testid="notice">{{ notice() }}</p>
+      }
+      @if (previewProblem()) {
+        <p class="banner problem" role="status" data-testid="preview-problem">{{ texts.editor.previewProblem(previewProblem()!) }}</p>
+      }
+      @if (coverageWarning()) {
+        <p class="banner problem" role="status" data-testid="coverage-warning">{{ coverageWarning() }}</p>
+      }
+      @if (saveProblem()) {
+        <p class="banner problem" role="alert" data-testid="save-problem">{{ saveProblem() }}</p>
+      }
+
+      @if (busy()) {
+        <p class="banner" role="status" data-testid="drawing">{{ t.drawing(p.progress) }}</p>
+      }
+      @if (proposing()) {
+        <p class="banner" role="status" data-testid="proposing">{{ t.proposing }}</p>
+      }
+      @if (locked()) {
+        <p class="banner" data-testid="locked">{{ texts.editing.locked }}</p>
+      }
+      @if (animateBlocked()) {
+        <p class="banner problem" role="alert" data-testid="animate-blocked">
+          {{ texts.inspector.animate.unsupported }}
+          <button type="button" class="ctl" data-testid="animate-blocked-remove" [disabled]="frozen()" (click)="removeAllKeyframes()">{{ texts.inspector.animate.removeAll }}</button>
+        </p>
+      }
+      @if (layersBlocked()) {
+        <p class="banner problem" role="alert" data-testid="layers-blocked">
+          {{ texts.editing.layersBlocked }}
+          <button type="button" class="ctl" data-testid="layers-blocked-remove" [disabled]="frozen()" (click)="removeAllLayers()">{{ texts.editing.removeAllLayers }}</button>
+        </p>
+      }
+      @if (pausedByCode()) {
+        <p class="banner problem" role="status" data-testid="code-paused">
+          {{ texts.code.paused }}
+          @if (view() !== 'code') {
+            <button type="button" class="ctl" data-testid="code-go" (click)="setView('code')">{{ texts.code.goToCode }}</button>
+          }
+          <button type="button" class="ctl" data-testid="code-revert" (click)="revertCode()">{{ texts.code.revert }}</button>
+        </p>
+      }
+
+      <div class="views tabs" role="tablist" [attr.aria-label]="texts.code.tabs.label">
+        <button type="button" role="tab" class="tab" id="view-visual" data-testid="view-visual" [attr.aria-selected]="view() === 'visual'" [class.on]="view() === 'visual'" (click)="setView('visual')">{{ texts.code.tabs.visual }}</button>
+        <button type="button" role="tab" class="tab" id="view-code" data-testid="view-code" [attr.aria-selected]="view() === 'code'" [class.on]="view() === 'code'" (click)="setView('code')">{{ texts.code.tabs.code }}</button>
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          id="view-vector"
+          data-testid="view-vector"
+          [attr.aria-selected]="view() === 'vector'"
+          [class.on]="view() === 'vector'"
+          [disabled]="!vectorEnabled()"
+          [attr.title]="vectorOff() || null"
+          [attr.aria-label]="texts.code.tabs.vector + (vector.dirty() ? ' · ' + texts.vector.dirty : '')"
+          (click)="setView('vector')"
+        >
+          {{ texts.code.tabs.vector }}
+          @if (vector.dirty()) {
+            <span class="dot" data-testid="vector-tab-dirty" aria-hidden="true">●</span>
+          }
+        </button>
+        @if (!vectorEnabled() && vectorOff()) {
+          <span class="why" data-testid="vector-off">{{ vectorOff() }}</span>
+        }
+      </div>
+
+      <div class="grid" [class.code-view]="view() === 'code'" [class.vector-view]="view() === 'vector'">
+        <div class="side">
+          <div class="tabs" role="tablist" [attr.aria-label]="t.regions.layers + ' / ' + t.regions.library">
+            <button type="button" role="tab" class="tab" id="tab-layers" data-testid="tab-layers" aria-controls="panel-layers" [attr.aria-selected]="sideTab() === 'layers'" [class.on]="sideTab() === 'layers'" (click)="sideTab.set('layers')">{{ t.regions.layers }}</button>
+            <button type="button" role="tab" class="tab" id="tab-library" data-testid="tab-library" aria-controls="panel-library" [attr.aria-selected]="sideTab() === 'library'" [class.on]="sideTab() === 'library'" (click)="sideTab.set('library')">{{ t.regions.library }}</button>
+          </div>
+          <section class="layers" id="panel-layers" role="tabpanel" aria-labelledby="tab-layers" [hidden]="sideTab() !== 'layers'">
+            <lab-motion-layers [script]="doc()!.script" [selection]="selection()" [playhead]="clock.time()" (select)="onLayerSelect($event)" (visibility)="hidden.set($event)" [locked]="frozen()" (removePiece)="onRemovePiece($event)" (addPiece)="split()" />
+          </section>
+          <section class="library" id="panel-library" role="tabpanel" aria-labelledby="tab-library" [hidden]="sideTab() !== 'library'">
+ <button type="button" class="ctl new-part" data-testid="new-part-open" [attr.title]="texts.newPart.openHint" (click)="newPartOpen.set(true)">{{ texts.newPart.open }}</button>
+            <app-new-vector-part (chosen)="vectorFileChosen($event)" />
+            <lab-parts-palette [heading]="false" [parts]="catalog()!.parts" [level]="p.level" [locked]="frozen()" [unavailable]="unavailableParts()" (add)="onPaletteAdd($event)" (replace)="onPaletteReplace($event)" (addLayer)="onPaletteAddLayer($event)" />
+          </section>
+        </div>
+
+        <div class="main">
+        <section class="stage" [attr.aria-label]="t.regions.preview">
+          <app-collapsible look="panel" key="preview" [title]="t.regions.preview" [(open)]="stageOpen">
+            <div class="stage-body">
+              <lab-preview-frame-host [pages]="pages()" [time]="clock.shown()" />
+              <lab-preview-transport [clock]="clock" [songMap]="p.songMap" />
+              <button type="button" class="ctl enlarge" data-testid="preview-enlarge" (click)="previewOpen.set(true)">{{ t.enlargePreview }}</button>
+            </div>
+          </app-collapsible>
+        </section>
+
+        <aside class="inspector" [attr.aria-label]="t.regions.inspector">
+          <app-inspector [doc]="doc()!" [piece]="p" [catalog]="catalog()!" [selection]="selection()" [itemSelection]="itemSelection()" [locked]="frozen()" [refusedPieces]="refusedPieces()" [refusedDesign]="refusedDesign()" [warnings]="warnings()" [playhead]="clock.time()" (pick)="selection.set($event)" (pickItem)="pickItem($event)" (edit)="onEdit($event)" [review]="review()" (writeScene)="writeScene($event)" (editScene)="editScene($event)" (deselect)="selection.set(null); itemSelection.set(null)" />
+        </aside>
+
+        <section class="code" [attr.aria-label]="texts.code.tabs.code" data-testid="code-view">
+          @if (codeOpened()) {
+            <app-code-pane [text]="sync.text()" [declarations]="declarations()" [diagnostics]="sync.diagnostics()" [highlight]="codeHighlight()" [readOnly]="locked()" (textChange)="sync.edit($event)" (cursorAt)="onCodeCursor($event)" />
+            <p class="code-status" [class.bad]="sync.paused()" role="status" data-testid="code-status">
+              {{ sync.paused() ? texts.code.status.errors(sync.errorCount()) : texts.code.status.ok }}
+              @if (codeWarnings() > 0) {
+                · {{ texts.code.status.warnings(codeWarnings()) }}
+              }
+            </p>
+            <p class="code-hint">{{ texts.code.hint }}</p>
+          }
+        </section>
+
+        <section class="vector" [attr.aria-label]="texts.code.tabs.vector" data-testid="vector-view">
+          @if (vector.open()) {
+            <app-vector-tab [session]="vector" [beatAt]="vectorBeatAt()" [loudnessAt]="vectorLoudnessAt()" [uses]="vectorUses()" (saved)="onVectorSaved($event)" (help)="helpOpen.set(true)" (closed)="vectorClosed()" />
+          }
+        </section>
+
+        </div>
+
+        <section class="timeline" [attr.aria-label]="t.regions.timeline">
+          <lab-motion-timeline [songMap]="p.songMap" [script]="doc()!.script" [playhead]="clock.time()" [selection]="selection()" [itemSelection]="itemSelection()" [(zoom)]="zoom" (seek)="onSeek($event)" (select)="selection.set($event)" (selectItem)="pickItem($event)" (removeItem)="pickItem($event); removeSelected()" (itemRefused)="onItemRefused($event)" (removeExtra)="selection.set($event); removeSelected()" (removeLine)="selection.set($event); removeSelected()" (dropItem)="onPaletteDrop($event)" (edit)="onTimelineEdit($event)" [(magnet)]="magnet" [warnings]="warnings()" [refused]="refusedPieces()" [grades]="grades()" [catalog]="catalog()" [locked]="frozen()" />
+        </section>
+
+        @if (sceneOn()) {
+          <app-scenes-strip class="scenes" [piece]="id()" [initial]="p.scenes" [dirty]="dirty()" [locked]="frozen()" [reviewing]="reviewOn()" [prepare]="prepareApproval" (open)="openCard($event)" (approved)="onScenesApproved($event)" />
+        }
+
+        @if (reviewOn()) {
+          <app-review-panel class="reviews" [piece]="id()" [review]="review()" [locked]="frozen()" (changed)="review.set($event)" (select)="onReviewSelect($event)" />
+        }
+      </div>
+      <app-help-dialog [(open)]="helpOpen" />
+      <app-vector-leave [what]="vectorAsk()?.what ?? null" (answer)="answerVector($event)" />
+      <app-new-part [(open)]="newPartOpen" (approved)="onPartApproved($event)" />
+      <app-scene-dialog [(open)]="sceneOpen" [piece]="id()" [target]="sceneTarget()" [reviewing]="reviewOn()" [draftId]="sceneDraft()" [editPart]="sceneEditing()" (approved)="onSceneApproved($event)" (edited)="onSceneEdited($event)" />
+      <app-preview-modal [(open)]="previewOpen" [pages]="pages()" [clock]="clock" [songMap]="p.songMap" />
+    }
+  }
+}

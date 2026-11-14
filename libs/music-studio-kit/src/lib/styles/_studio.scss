@@ -1,0 +1,84 @@
+// The global rules the studio needs and no component stylesheet can hold: the form library draws its fields outside the
+// component, and the menu of the structure tags lives in the overlay. A host includes this once in its global styles
+// (`@use '.../music-studio-kit/src/lib/styles/studio'; @include studio.studio();`). The tokens that pin the form library
+// and Material to the host's look (`.df-form { --df-color-… }`, `html { --mat-… }`) stay the host's. The rules for the form
+// library's fields are scoped to `.studio-kit`, the class of the page and of the dialogs of the studio that have a form, so
+// a host's own forms are not touched.
+@mixin studio {
+  // A field with nothing to say under it takes no room (Material keeps a line free for hints and errors).
+  .studio-kit .df-form .mat-mdc-form-field-subscript-wrapper:empty,
+  .studio-kit .df-form .mat-mdc-form-field:not(.mat-form-field-invalid) .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  // With the empty line of Material gone, each field keeps its own gap to what follows.
+  .studio-kit .df-form .mat-mdc-form-field {
+    margin-bottom: var(--lab-field-gap);
+  }
+
+  // The Style group is one framed panel: its text, the category chips and the tags of the open category.
+  .studio-kit .df-form .style-box.df-group {
+    padding: var(--lab-space-3);
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface-high);
+
+    legend {
+      padding: 0 var(--lab-space-1);
+      color: var(--lab-ink);
+      font-size: var(--lab-fs-body);
+      font-weight: var(--lab-fw-control);
+    }
+  }
+
+  // Fields are rounded boxes with a thin border (Material's filled field is round only on top, with a line below).
+  .studio-kit .df-form .mdc-text-field--filled {
+    border-radius: var(--lab-radius);
+    box-shadow: inset 0 0 0 1px var(--lab-line);
+  }
+
+  .studio-kit .df-form .mdc-text-field--filled .mdc-line-ripple {
+    display: none;
+  }
+
+  .studio-kit .df-form .mat-mdc-form-field.mat-focused .mdc-text-field--filled {
+    box-shadow: inset 0 0 0 1px var(--lab-accent);
+  }
+
+  .studio-kit .df-form .mat-mdc-form-field.mat-form-field-invalid .mdc-text-field--filled {
+    box-shadow: inset 0 0 0 1px var(--lab-danger);
+  }
+
+  // Inside the Style panel the fields sit on the panel's own surface.
+  .studio-kit .df-form .style-box.df-group .mdc-text-field--filled {
+    background: var(--lab-surface);
+  }
+
+  // The select beside Generate has nothing under it.
+  .studio-kit .go .df-form .mat-mdc-form-field {
+    margin-bottom: 0;
+  }
+
+  // The prompt of the AI dialog has its tips as a placeholder: several lines, dim, kept until the user writes.
+  .studio-kit .df-form textarea[data-testid='ai-prompt']::placeholder {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+    opacity: 1;
+    white-space: pre-line;
+  }
+
+  // The structure tags menu is a grid of small tags (its panel lives in the overlay, outside the component).
+  .structure-menu .mat-mdc-menu-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--lab-space-2);
+    padding: var(--lab-space-2);
+  }
+
+  .structure-menu .mat-mdc-menu-item {
+    min-height: 2.25rem;
+    border: 1px solid var(--lab-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-surface);
+  }
+}

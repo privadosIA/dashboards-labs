@@ -1,0 +1,117 @@
+<mo-page-header
+  title="Settings"
+  i18n-title="@@settings.title"
+  description="The server's settings. For now, where Ollama is, which the prompt assistant, describing a reference and the quality check use."
+  i18n-description="@@settings.desc"
+/>
+
+@if (loadFailed()) {
+  <p class="error" role="alert" data-testid="settings-load-error" i18n="@@settings.loadFailed">
+    The server's settings could not be read.
+  </p>
+}
+
+@if (ollama(); as o) {
+  <mo-panel heading="Ollama" i18n-heading="@@settings.ollama">
+    <p class="current" data-testid="settings-current">
+      <span i18n="@@settings.inUse">In use:</span>
+      <span class="mo-data" data-testid="settings-host">{{ o.host }}</span>
+      <span class="chip" data-testid="settings-source" [attr.data-source]="o.source">{{ sourceLabel(o.source) }}</span>
+    </p>
+
+    @if (remote()) {
+      <p class="warning" role="alert" data-testid="settings-remote-warning">
+        <mat-icon inline>warning</mat-icon>
+        <span i18n="@@settings.remoteWarning"
+          >This address is not this computer: the images, clips and texts sent by the assistant, “Describe a reference” and the quality check will leave this machine for it.</span
+        >
+      </p>
+    }
+
+    <mat-form-field class="wide">
+      <mat-label i18n="@@settings.address">Ollama address</mat-label>
+      <input
+        matInput
+        data-testid="settings-input"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="192.0.2.50:11434"
+        [value]="input()"
+        (input)="edit($any($event.target).value)"
+      />
+      <mat-hint i18n="@@settings.hint">Server and port, for example 192.0.2.50:11434. Empty: the environment's.</mat-hint>
+    </mat-form-field>
+
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="settings-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+
+    <div class="actions">
+      <button mat-stroked-button type="button" data-testid="settings-test" [disabled]="testing() || saving()" (click)="runTest()">
+        <mat-icon>wifi_find</mat-icon>
+        <ng-container i18n="@@settings.test">Test connection</ng-container>
+      </button>
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="settings-save"
+        [disabled]="saving() || testing() || !input().trim() || input().trim() === o.saved"
+        (click)="save()"
+        i18n="@@settings.save"
+      >
+        Save
+      </button>
+      @if (o.saved) {
+        <button mat-button type="button" data-testid="settings-reset" [disabled]="saving()" (click)="useEnvironment()" i18n="@@settings.reset">
+          Use the environment's
+        </button>
+      }
+    </div>
+
+    @if (testing()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (test(); as t) {
+      <div class="result" data-testid="settings-test-result" [attr.data-ok]="t.ok">
+        @if (t.ok) {
+          <p class="ok">
+            <mat-icon inline>check_circle</mat-icon>
+            <span class="mo-data" i18n="@@settings.answers">Answers at {{ t.host }}, version {{ t.version }}.</span>
+          </p>
+          @if (t.models?.length) {
+            <ul class="models" data-testid="settings-models">
+              @for (m of t.models; track m.name) {
+                <li>
+                  <span class="mo-data">{{ m.name }}</span>
+                  @if (m.vision) {
+                    <span class="chip" data-testid="settings-vision" i18n="@@settings.vision">reads pictures</span>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="note" i18n="@@settings.noModels">It has no models installed.</p>
+          }
+        } @else {
+          <p class="error" role="alert" data-testid="settings-test-error">
+            <mat-icon inline>error</mat-icon>
+            <span class="mo-data">{{ t.error }}</span>
+          </p>
+        }
+      </div>
+    }
+  </mo-panel>
+}
+
+<app-database-card />
+<app-monitoring-card />
+<app-browser-card [browser]="browser()" (changed)="browser.set($event)" />
+<app-heartmula-card [heartmula]="heartmula()" (changed)="heartmula.set($event)" />
+<app-diffrhythm2-card [diffrhythm2]="diffrhythm2()" (changed)="diffrhythm2.set($event)" />
+<app-motion-model-card [model]="motionModel()" (changed)="motionModel.set($event); providersVersion.set(providersVersion() + 1)" />
+<app-providers-card (changed)="providersVersion.set(providersVersion() + 1)" />
+<app-tasks-card [version]="providersVersion()" />

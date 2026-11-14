@@ -1,0 +1,43 @@
+<section class="builder">
+  <a class="back" [routerLink]="link('presets')">← {{ t.back }}</a>
+
+  @switch (state()) {
+    @case ('loading') {
+      <p role="status">{{ common.loading }}</p>
+    }
+    @case ('missing') {
+      <div class="panel" role="alert" data-testid="missing">
+        <p>{{ refused() || t.missing }}</p>
+        <a [routerLink]="link('presets')">{{ common.back }}</a>
+      </div>
+    }
+    @default {
+      <h1>{{ editing() ? t.editTitle : t.title }}</h1>
+      <p class="intro">{{ t.intro }}</p>
+
+      <section class="edit">
+        <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')">
+          <ng-template dfSlot="partPicker">
+            <app-part-picker [catalog]="catalog()?.parts ?? []" [(chosen)]="parts" />
+          </ng-template>
+        </dynamic-form>
+
+        <div class="keep">
+          <p class="hint">{{ t.keepHint }}</p>
+          @if (ready().length === 0) {
+            <p class="hint" data-testid="no-ready">{{ t.noReady }}</p>
+          }
+          <dynamic-form [schema]="keepSchema()" [(model)]="keepModel" [showDefaultActions]="false" />
+        </div>
+
+        @if (!durable() && keep() === 'browser') {
+          <p class="problem" role="alert" data-testid="not-durable">{{ t.browserNote }}</p>
+        }
+        @if (refused()) {
+          <p class="problem" role="alert" data-testid="refused">{{ refused() }}</p>
+        }
+        <button type="button" class="save" data-testid="save" [disabled]="!valid() || working()" (click)="save()">{{ working() ? t.saving : t.save }}</button>
+      </section>
+    }
+  }
+</section>

@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-1) var(--lab-space-2);
+  border-bottom: 1px solid var(--lab-line);
+  background: var(--lab-surface-high);
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--lab-space-1);
+  }
+
+  select,
+  button {
+    height: 1.75rem;
+    padding: 0 var(--lab-space-2);
+    border: 1px solid var(--lab-control-line);
+    border-radius: var(--lab-radius);
+    background: var(--lab-bg);
+    color: var(--lab-ink);
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  select:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: 1px;
+  }
+}
+
+.clock {
+  margin-left: auto;
+  font-family: var(--lab-font-mono);
+  color: var(--lab-ink-dim);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.labels {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--lab-line);
+  background: var(--lab-surface-high);
+}
+
+.ruler-label,
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  height: 1.75rem;
+  padding: 0 var(--lab-space-2);
+  overflow: hidden;
+  color: var(--lab-ink-dim);
+  white-space: nowrap;
+}
+
+.label .node {
+  overflow: hidden;
+  color: var(--lab-ink);
+  text-overflow: ellipsis;
+}
+
+.tracks {
+  position: relative;
+  min-width: 0;
+  margin: 0 var(--lab-space-3);
+}
+
+.ruler {
+  position: relative;
+  height: 1.75rem;
+  border-bottom: 1px solid var(--lab-line);
+  cursor: col-resize;
+  touch-action: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    outline-offset: -2px;
+  }
+}
+
+.tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 0.35rem;
+  background: var(--lab-line);
+
+  &.major {
+    height: 0.7rem;
+    background: var(--lab-ink-dim);
+  }
+}
+
+.tick-label {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 3px;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  white-space: nowrap;
+}
+
+.row {
+  position: relative;
+  height: 1.75rem;
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.diamond {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+
+  svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: var(--lab-ink-dim);
+    stroke: var(--lab-ink);
+    stroke-width: 1;
+  }
+
+  &.selected svg {
+    fill: var(--lab-accent);
+    stroke: var(--lab-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lab-focus);
+    border-radius: var(--lab-radius);
+  }
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+  transform: translateX(-6px);
+
+  /* The line itself is thin; the 12 px around it are what the pointer can take hold of. */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 5px;
+    width: 2px;
+    background: var(--lab-danger);
+  }
+
+  &:hover::before {
+    width: 3px;
+    left: 4.5px;
+  }
+}
+
+.grip {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  width: 10px;
+  height: 10px;
+  background: var(--lab-danger);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.diamond {
+  z-index: 2;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--lab-space-3) 0;
+  color: var(--lab-ink-dim);
+}

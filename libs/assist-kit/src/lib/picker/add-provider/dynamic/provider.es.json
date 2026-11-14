@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "id": "assist-provider",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nombre",
+      "validation": {
+        "required": true,
+        "maxLength": 60,
+        "messages": {
+          "required": "Ponle un nombre."
+        }
+      }
+    },
+    {
+      "key": "kind",
+      "type": "radio",
+      "label": "Tipo",
+      "defaultValue": "openai",
+      "options": [
+        {
+          "value": "openai",
+          "label": "Compatible con OpenAI (OpenAI, OpenRouter, un router, LM Studio…)"
+        },
+        {
+          "value": "ollama",
+          "label": "Otro Ollama"
+        }
+      ]
+    },
+    {
+      "key": "baseUrl",
+      "type": "text",
+      "label": "Dirección base",
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Hace falta la dirección, como https://openrouter.ai/api/v1."
+        }
+      }
+    },
+    {
+      "key": "key",
+      "type": "password",
+      "label": "Clave de la API (opcional en un Ollama)"
+    },
+    {
+      "key": "model",
+      "type": "text",
+      "label": "Modelo",
+      "validation": {
+        "required": true,
+        "maxLength": 200,
+        "messages": {
+          "required": "Escribe el modelo que usar."
+        }
+      }
+    }
+  ]
+}

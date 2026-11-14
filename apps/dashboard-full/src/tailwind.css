@@ -1,0 +1,100 @@
+/*
+ * The Tailwind bridge of dashboard-full: Tailwind draws with this dashboard's own --lab-* tokens and nothing else.
+ * Plain CSS on purpose (Tailwind cannot be preprocessed by Sass); it holds no colour literal (npm run theme:check).
+ * It loads Tailwind's theme and utilities, not its reset (preflight): the dashboard keeps its own base styles.
+ * Each dashboard owns its copy; see docs/TAILWIND_BRIDGE.md.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+/* Only the templates of this dashboard and of the libraries it shows. Add a line when it starts to show another library. */
+@source './app';
+@source '../../../libs/motion-edit-kit/src';
+@source '../../../libs/motion-editor/src';
+@source '../../../libs/motion-parts/src';
+@source '../../../libs/music-motion/src';
+@source '../../../libs/music-studio-kit/src';
+@source '../../../libs/paged-list/src';
+@source '../../../libs/server-connection/src';
+@source '../../../libs/vector-editor/src';
+@source '../../../libs/vector-studio-kit/src';
+@source '../../../libs/video-studio-kit/src';
+
+@theme inline {
+  /* Tailwind's defaults for these go away: a class from them must not draw a colour, size, corner or shadow that is not a token. */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+
+  --color-lab-bg: var(--lab-bg);
+  --color-lab-surface: var(--lab-surface);
+  --color-lab-surface-high: var(--lab-surface-high);
+  --color-lab-ink: var(--lab-ink);
+  --color-lab-focus: var(--lab-focus);
+  --color-lab-ink-dim: var(--lab-ink-dim);
+  --color-lab-line: var(--lab-line);
+  --color-lab-accent: var(--lab-accent);
+  --color-lab-on-accent: var(--lab-on-accent);
+  --color-lab-success: var(--lab-success);
+  --color-lab-warn: var(--lab-warn);
+  --color-lab-danger: var(--lab-danger);
+  --color-lab-control-line: var(--lab-control-line);
+  --color-lab-player-bg: var(--lab-player-bg);
+  --color-lab-player-fg: var(--lab-player-fg);
+  --color-lab-player-fg-dim: var(--lab-player-fg-dim);
+  --color-lab-scrim: var(--lab-scrim);
+  --color-lab-scrim-strong: var(--lab-scrim-strong);
+  --color-lab-shadow: var(--lab-shadow);
+
+  --font-sans: var(--lab-font);
+  --font-display: var(--lab-font-display);
+  --font-mono: var(--lab-font-mono);
+  --text-lab-meta: var(--lab-fs-meta);
+  --text-lab-body: var(--lab-fs-body);
+  --text-lab-section: var(--lab-fs-section);
+  --text-lab-title: var(--lab-fs-title);
+  --text-lab-page: var(--lab-fs-page);
+  --text-lab-hero: var(--lab-fs-hero);
+  --font-weight-lab-control: var(--lab-fw-control);
+  --font-weight-lab-title: var(--lab-fw-title);
+
+  /* p-4 is four times the dashboard's own unit. */
+  --spacing: var(--lab-space-1);
+
+  --radius-lab: var(--lab-radius);
+  --radius-lab-panel: var(--lab-radius-panel);
+  --radius-lab-pill: var(--lab-radius-pill);
+  --radius-lab-control: var(--lab-radius-control);
+  --shadow-lab: 0 0.25rem 1rem var(--lab-shadow);
+
+  /* The owner's curve; @lab/motion-ui exports the same one for scripted animations. */
+  --ease-lab: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+ * Reduced motion: the transitions and the lift/press effects written with utilities stop moving.
+ * Translate and scale are switched off only for the hover and active variants, so a layout that
+ * centres with a translate keeps working.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [class*='transition'],
+  [class*='animate-'],
+  [class*='ease-lab'] {
+    transition-duration: 0s !important;
+    animation: none !important;
+  }
+
+  [class*='hover:-translate'],
+  [class*='hover:translate'],
+  [class*='hover:scale'],
+  [class*='active:scale'],
+  [class*='active:translate'] {
+    translate: none !important;
+    scale: none !important;
+  }
+}

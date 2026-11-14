@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "id": "generator",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "generator",
+      "type": "select",
+      "label": "Generador",
+      "options": [],
+      "props": { "attributes": { "data-testid": "generator" } }
+    }
+  ]
+}

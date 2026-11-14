@@ -1,0 +1,32 @@
+export { provideMotionEditor, MOTION_EDITOR_LANG, type MotionEditorOptions } from './lib/provide-motion-editor';
+export { motionEditorTexts, type MotionEditorLang, type MotionEditorTexts } from './lib/texts';
+export { gapText } from './lib/gap-text';
+
+export { sliceSongMap, beatOfSlice, loudnessOfSlice, round3, type BeatPosition, type SongSlice } from './lib/preview/song-slice';
+export { scenesOf, resolveParams, designWith, modeFor, hasWord, type Fidelity, type Gap, type SceneActor, type SceneHit, type SceneInput, type SceneLine, type ScenePart, type ScenesInput } from './lib/preview/scene-model';
+export { buildScenePage, fillSlots, PageBuildError } from './lib/preview/page-builder';
+export { placeholderFragment } from './lib/preview/placeholder-fragment';
+export { wrapForPreview, PREVIEW_CSP } from './lib/preview/preview-wrapper';
+export { FONT_STACKS, fontCss, fontKnown, knownFont } from './lib/preview/fonts';
+export { FragmentSource } from './lib/preview/fragment-source';
+export { LocalPageSource, ServerPageSource, scenesUsing, type PageInput, type PageSource, type ScenePage } from './lib/preview/page-source';
+export { PreviewClock, quantise, type ClockAudio, type ClockOptions, type ClockScheduler } from './lib/preview/clock';
+export { beatAt, timeText, type BeatReading } from './lib/preview/beat-at';
+export { planFrames, sceneAt, PRELOAD_SECONDS, type FramePlan, type PlannedPage, type Slots } from './lib/preview/frame-host/frame-plan';
+export { FrameHost } from './lib/preview/frame-host/frame-host';
+export { Transport } from './lib/preview/transport/transport';
+export { transportKey } from './lib/preview/transport/keys';
+
+export { TimeScale, barBeats, inRange, rulerStep, clampScale, MIN_PX_PER_SECOND, MAX_PX_PER_SECOND, BEATS_PER_BAR } from './lib/timeline/scale';
+export { sameItemSelection, sameSelection, type ItemSelection, type Selection } from './lib/timeline/selection';
+export { blocksOf, type ExtraBlock, type PieceBlock } from './lib/timeline/blocks';
+export { MotionTimeline, type DropLane, type TimelineEdit } from './lib/timeline/timeline';
+export { MotionLayers } from './lib/layers/layers';
+export { hiddenParts } from './lib/layers/visibility';
+export { EditorStore, COALESCE_MS, type Doc } from './lib/store/editor-store';
+export { writeDraft, readDraft, clearDraft, worthOffering, summarizeDraft, type Draft, type DraftSummary } from './lib/store/draft-storage';
+export { PartsPalette } from './lib/palette/parts-palette';
+export { PALETTE_MIME, itemFromJson, itemToJson, type PaletteItem } from './lib/palette/palette-item';
+export { period, snapBoundary, snapHit, snapToSections } from './lib/snap/snap';
+export { checkDoc, type Warning, type WarningKind } from './lib/store/checks';
+export { warningText } from './lib/store/warning-text';

@@ -1,0 +1,14 @@
+@if (!link.reachable()) {
+  <div class="banner banner--error" role="alert" data-testid="server-down">
+    <mat-icon aria-hidden="true">cloud_off</mat-icon>
+    <span class="banner__text" i18n="@@banner.serverDown">Cannot connect to the server. Check that it is running and that this device can reach it.</span>
+    <button mat-button type="button" [disabled]="link.checking()" (click)="link.check()" data-testid="server-retry" i18n="@@banner.retry">Retry</button>
+  </div>
+}
+@if (update.ready()) {
+  <div class="banner" role="status" data-testid="update-ready">
+    <mat-icon aria-hidden="true">system_update</mat-icon>
+    <span class="banner__text" i18n="@@banner.updateReady">There is a new version of the app.</span>
+    <button mat-button type="button" (click)="update.apply()" data-testid="update-apply" i18n="@@banner.update">Update</button>
+  </div>
+}

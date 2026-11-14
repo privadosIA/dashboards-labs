@@ -1,0 +1,14 @@
+<div class="tags-dialog">
+  <header>
+    <h2>{{ t.style.pick }}</h2>
+    <button type="button" class="close" [attr.aria-label]="t.ai.close" data-testid="tags-close" (click)="ref.close()">&times;</button>
+  </header>
+
+  <app-style-tags [vocabulary]="data.vocabulary" [style]="store.style()" (toggle)="store.toggleTag($event)" (combo)="store.toggleCombo($event)" />
+
+  @if (store.style().trim()) {
+    <p class="current" data-testid="tags-current">{{ store.style() }}</p>
+  }
+
+  <button type="button" class="done" data-testid="tags-done" (click)="ref.close()">{{ t.style.done }}</button>
+</div>

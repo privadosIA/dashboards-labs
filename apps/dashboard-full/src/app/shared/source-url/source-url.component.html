@@ -1,0 +1,36 @@
+<div class="url" data-testid="source-url">
+  <mat-form-field class="url__field">
+    <mat-label i18n="@@sourceUrl.label">YouTube video address</mat-label>
+    <input
+      matInput
+      type="url"
+      class="mo-data"
+      data-testid="source-url-input"
+      placeholder="https://www.youtube.com/watch?v=…"
+      [value]="url()"
+      [disabled]="busy()"
+      (input)="onInput($any($event.target).value)"
+      (keydown.enter)="add()"
+    />
+    <mat-hint i18n="@@sourceUrl.hint">Only the audio is taken. Use material you have the rights to.</mat-hint>
+  </mat-form-field>
+
+  @if (busy()) {
+    <span class="url__wait" role="status" data-testid="source-url-wait">
+      <mat-progress-spinner mode="indeterminate" diameter="16" />
+      <ng-container i18n="@@sourceUrl.working">Downloading…</ng-container>
+    </span>
+    <button mat-button type="button" data-testid="source-url-cancel" (click)="cancel()" i18n="@@sourceUrl.cancel">
+      Cancel
+    </button>
+  } @else {
+    <button mat-stroked-button type="button" data-testid="source-url-add" [disabled]="!url().trim()" (click)="add()">
+      <mat-icon>link</mat-icon>
+      <ng-container i18n="@@sourceUrl.add">Add</ng-container>
+    </button>
+  }
+
+  @if (error(); as err) {
+    <p class="url__error" role="alert" data-testid="source-url-error">{{ err }}</p>
+  }
+</div>

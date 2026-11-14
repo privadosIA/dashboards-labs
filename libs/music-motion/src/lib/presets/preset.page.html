@@ -1,0 +1,53 @@
+<section class="preset">
+  <a class="back" [routerLink]="link('presets')">← {{ t.back }}</a>
+
+  @if (preset() === undefined) {
+    <p role="status">{{ common.loading }}</p>
+  } @else if (preset(); as p) {
+    <h1>{{ p.name }}</h1>
+    @if (p.adjustments.length) {
+      <div class="adjusted" data-testid="adjustments">
+        <p>{{ t.adjustments }}</p>
+        <ul>
+          @for (a of p.adjustments; track $index) {
+            <li>{{ a }}</li>
+          }
+        </ul>
+      </div>
+    }
+    <section class="edit">
+      <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')">
+        <ng-template dfSlot="rhythmProblem">
+          @if (rhythmProblem()) {
+            <p class="problem" role="alert" data-testid="rhythm-problem">{{ rhythmProblem() }}</p>
+          }
+        </ng-template>
+        <ng-template dfSlot="accentProblem">
+          @if (accentProblem()) {
+            <p class="problem" role="alert" data-testid="accent-problem">{{ accentProblem() }}</p>
+          }
+        </ng-template>
+        <ng-template dfSlot="partsProblem">
+          @if (partsProblem()) {
+            <p class="problem" role="alert" data-testid="parts-problem">{{ partsProblem() }}</p>
+          }
+        </ng-template>
+      </dynamic-form>
+      @if (otherProblem()) {
+        <p class="problem" role="alert" data-testid="problem">{{ otherProblem() }}</p>
+      }
+      @if (done() && !refused()) {
+        <p class="ok" role="status" data-testid="saved">{{ t.saved }}</p>
+      }
+      <button type="button" class="save" data-testid="save" [disabled]="!valid() || working()" (click)="save()">{{ working() ? t.saving : t.save }}</button>
+    </section>
+  } @else {
+    <div class="panel" role="alert" data-testid="missing">
+      <p>{{ error() ? t.loadFailed : t.missing }}</p>
+      @if (error()) {
+        <p class="reason" data-testid="reason">{{ error() }}</p>
+      }
+      <a [routerLink]="link('presets')">{{ common.back }}</a>
+    </div>
+  }
+</section>

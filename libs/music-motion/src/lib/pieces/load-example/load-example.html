@@ -1,0 +1,28 @@
+@if (available) {
+  <div class="example" data-testid="example">
+    <div class="actions">
+      <button type="button" data-testid="load-example" (click)="load()">{{ t.exampleLoad }}</button>
+      <button type="button" class="secondary" data-testid="import-dataset" (click)="picker.click()">{{ t.importLabel }}</button>
+      <input #picker type="file" accept="application/json,.json" hidden data-testid="import-file" (change)="import($event)" />
+    </div>
+    @if (problems().length) {
+      <div class="problems" role="alert" data-testid="import-problems">
+        <p>{{ t.importRefused }}</p>
+        <ul>
+          @for (p of problems(); track $index) {
+            <li>{{ p }}</li>
+          }
+        </ul>
+        @if (more() > 0) {
+          <p>{{ t.importMore.replace('{n}', '' + more()) }}</p>
+        }
+      </div>
+    } @else if (done() === 'example') {
+      <p class="done" role="status" data-testid="example-loaded">{{ t.exampleLoaded }}</p>
+    } @else if (done() === 'import') {
+      <p class="done" role="status" data-testid="import-done">{{ t.imported }}</p>
+    } @else {
+      <p class="hint">{{ t.exampleHint }}</p>
+    }
+  </div>
+}

@@ -1,0 +1,91 @@
+<section class="browser" data-testid="preset-browser">
+  <h3>{{ t.title }}</h3>
+
+  <dynamic-form class="search" [schema]="schema" [(model)]="form" [showDefaultActions]="false" />
+
+  @if (!kind()) {
+    <div class="chips" role="group" [attr.aria-label]="t.title" data-testid="kind-chips">
+      <button type="button" class="chip" [class.chip--on]="!activeKind()" [attr.aria-pressed]="!activeKind()" data-testid="kind-all" (click)="setKind(null)">{{ t.allKinds }}</button>
+      @for (k of kindIds; track k) {
+        <button type="button" class="chip" [class.chip--on]="activeKind() === k" [attr.aria-pressed]="activeKind() === k" [attr.data-testid]="'kind-' + k" (click)="setKind(k)">{{ t.kinds[k] }}</button>
+      }
+    </div>
+  }
+
+  @if (topTags().length || tags().length) {
+    <div class="chips" role="group" [attr.aria-label]="t.tags" data-testid="tag-chips">
+      @for (tag of tags(); track tag) {
+        <button type="button" class="chip chip--on" aria-pressed="true" [attr.data-testid]="'tag-' + tag" (click)="toggleTag(tag)">{{ tag }}</button>
+      }
+      @for (tag of topTags(); track tag) {
+        @if (!tags().includes(tag)) {
+          <button type="button" class="chip" aria-pressed="false" [attr.data-testid]="'tag-' + tag" (click)="toggleTag(tag)">{{ tag }}</button>
+        }
+      }
+    </div>
+  }
+
+  @if (pinned().length) {
+    <div class="pinned" data-testid="pinned">
+      <span class="label">{{ t.pinnedTitle }}</span>
+      @for (p of pinned(); track p.id) {
+        <button type="button" class="chip chip--on" [attr.data-testid]="'pinned-' + p.id" [attr.aria-label]="t.unpin + ': ' + p.title" (click)="togglePin(p)">{{ p.title }} ✕</button>
+      }
+    </div>
+  }
+
+  @if (localOnly()) {
+    <p class="hint" data-testid="local-note">{{ t.local }}</p>
+  }
+  @if (loadFailed()) {
+    <p class="problem" role="alert" data-testid="load-failed">{{ t.loadFailed(loadFailed()) }}</p>
+  }
+  @if (problem()) {
+    <p class="problem" role="alert" data-testid="delete-failed">{{ problem() }}</p>
+  }
+
+  @if (result()) {
+    <p class="hint" data-testid="count">{{ t.count(items().length, total()) }}</p>
+    @if (!items().length && !loadFailed()) {
+      <p class="hint" data-testid="empty">{{ t.empty }}</p>
+    }
+    <ul class="cards">
+      @for (p of items(); track p.id) {
+        <li class="card" [attr.data-testid]="'preset-' + p.id">
+          <div class="head">
+            <h4>{{ p.title }}</h4>
+            @if (p.own) {
+              <span class="badge">{{ t.own }}</span>
+            }
+            @if (p.nsfw) {
+              <span class="badge badge--warn">{{ t.nsfw }}</span>
+            }
+          </div>
+          <p class="line">{{ line(p) }}</p>
+          @if (p.tags.length) {
+            <p class="tags">{{ p.tags.join(' · ') }}</p>
+          }
+          <p class="source" [attr.data-testid]="'source-' + p.id">{{ t.source(p.source, p.licence) }}</p>
+          <div class="actions">
+            @if (insertable()) {
+              <button type="button" class="primary" [attr.data-testid]="'insert-' + p.id" (click)="insert.emit(p)">{{ t.insert }}</button>
+            }
+            <button
+              type="button"
+              [attr.data-testid]="'pin-' + p.id"
+              [attr.aria-pressed]="isPinned(p)"
+              [disabled]="!isPinned(p) && full()"
+              [attr.title]="!isPinned(p) && full() ? t.pinnedMax(max) : null"
+              (click)="togglePin(p)"
+            >
+              {{ isPinned(p) ? t.unpin : t.pin }}
+            </button>
+            @if (p.own) {
+              <button type="button" class="danger" [attr.data-testid]="'delete-' + p.id" (click)="remove(p)">{{ t.delete }}</button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

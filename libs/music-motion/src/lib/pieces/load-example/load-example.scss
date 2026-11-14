@@ -1,0 +1,59 @@
+.example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px dashed var(--lab-control-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+p {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.done {
+  color: var(--lab-success);
+}
+
+.problems {
+  flex-basis: 100%;
+  color: var(--lab-danger);
+
+  p {
+    color: inherit;
+  }
+
+  ul {
+    margin: var(--lab-space-1) 0;
+    padding-left: var(--lab-space-4);
+    font-size: var(--lab-fs-meta);
+    overflow-wrap: anywhere;
+  }
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &.secondary {
+    background: transparent;
+    color: var(--lab-ink);
+    border-color: var(--lab-control-line);
+  }
+}

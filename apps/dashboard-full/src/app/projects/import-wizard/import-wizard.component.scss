@@ -1,0 +1,64 @@
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+
+.field {
+  width: 100%;
+}
+
+.step-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.totals {
+  font-size: var(--lab-fs-body);
+}
+
+.rejected {
+  color: var(--lab-danger);
+}
+
+.mapped {
+  color: var(--lab-ink-dim);
+}
+
+.discarded {
+  color: var(--lab-ink-dim);
+  font-style: italic;
+}
+
+.entries {
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--lab-line);
+  padding: 8px 8px 8px 24px;
+}
+
+.yaml {
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--lab-line);
+  background: var(--lab-bg);
+  padding: 8px;
+  font-size: var(--lab-fs-meta);
+}
+
+h3 {
+  font-size: var(--lab-fs-body);
+  font-weight: 600;
+  margin: 16px 0 4px;
+}
+
+.mode {
+  margin-bottom: 12px;
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+}

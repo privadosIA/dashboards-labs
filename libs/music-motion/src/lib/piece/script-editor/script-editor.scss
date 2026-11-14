@@ -1,0 +1,82 @@
+@use '../../shared/collapsible' as collapsible;
+
+@include collapsible.collapsible('.script');
+
+.script {
+  padding: var(--lab-space-3) var(--lab-space-4);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--lab-fs-section);
+  font-weight: var(--lab-fw-title);
+}
+
+.covers {
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+}
+
+.hint {
+  margin: 0;
+  color: var(--lab-ink-dim);
+}
+
+.rows {
+  display: grid;
+  gap: var(--lab-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.problem,
+.ok {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  color: var(--lab-danger);
+}
+
+.ok {
+  color: var(--lab-success);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+button {
+  min-height: var(--lab-control-h);
+  padding: 0 var(--lab-space-4);
+  border: 1px solid var(--lab-control-line);
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: var(--lab-ink);
+  font-weight: var(--lab-fw-control);
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--lab-ink-dim);
+    cursor: not-allowed;
+  }
+}
+
+.save {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: var(--lab-on-accent);
+
+  &:disabled {
+    background: var(--lab-surface-high);
+    border-color: var(--lab-line);
+    color: var(--lab-ink-dim);
+  }
+}

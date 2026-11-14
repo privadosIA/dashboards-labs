@@ -1,0 +1,70 @@
+<section class="strip" data-testid="scenes-strip" [attr.data-state]="batch()?.state ?? 'idle'">
+  <header class="bar">
+    @if (batch(); as b) {
+      <strong data-testid="strip-progress">{{ t.progress(b.done, b.total) }}</strong>
+      <span class="state" data-testid="strip-state">{{ t.state[b.state] }}</span>
+      @if (writing() && current()) {
+        <span class="meta" data-testid="strip-current">{{ t.current(current()) }}</span>
+      }
+      <progress class="meter" [max]="b.total || 1" [value]="b.done" [attr.aria-label]="t.progress(b.done, b.total)"></progress>
+    } @else {
+      <strong>{{ t.title }}</strong>
+    }
+    <span class="grow"></span>
+    @if (writing()) {
+      <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="strip-stop" [disabled]="stopping()" (click)="stop()">{{ t.cancel }}</button>
+    } @else {
+      <button type="button" class="ctl transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="strip-write" [disabled]="locked() || configuring()" [attr.title]="t.writeAllHint" (click)="configure()">{{ t.writeAll }}</button>
+      @if (ready() > 0) {
+        <button type="button" class="ctl primary transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5" data-testid="strip-approve" [disabled]="approving() || locked()" (click)="approveAll()">{{ approving() ? t.approveWorking : t.approveAll(ready()) }}</button>
+      }
+    }
+  </header>
+
+  @if (stopping()) {
+    <p class="meta" role="status" data-testid="strip-stopping">{{ t.cancelled }}</p>
+  }
+
+  @if (configuring() && !writing()) {
+    <div class="config" data-testid="strip-config">
+      <p class="meta">{{ t.writeAllHint }}</p>
+      <dynamic-form [schema]="schema()" [(model)]="value" [showDefaultActions]="false" showErrors="always" (statusChange)="valid.set($event === 'VALID')" />
+      <lab-assistant-picker [(value)]="assistant" [routingModels]="routingModels()" [allowAdd]="false" />
+      <div class="actions">
+        <button type="button" class="ctl primary" data-testid="strip-start" [disabled]="!valid() || starting()" (click)="start()">{{ starting() ? t.starting : t.start }}</button>
+        <button type="button" class="ctl" data-testid="strip-config-close" (click)="configuring.set(false)">{{ t.close }}</button>
+      </div>
+    </div>
+  }
+
+  @if (askingClean()) {
+    <div class="ask" role="alertdialog" [attr.aria-label]="t.approveAllDirty" data-testid="strip-dirty">
+      <p>{{ t.approveAllDirty }}</p>
+      <div class="actions">
+        <button type="button" class="ctl primary" data-testid="strip-dirty-save" [disabled]="approving()" (click)="clean('save')">{{ t.approveSave }}</button>
+        <button type="button" class="ctl danger" data-testid="strip-dirty-discard" [disabled]="approving()" (click)="clean('discard')">{{ t.approveDiscard }}</button>
+        <button type="button" class="ctl" data-testid="strip-dirty-cancel" [disabled]="approving()" (click)="askingClean.set(false)">{{ t.approveCancel }}</button>
+      </div>
+    </div>
+  }
+
+  @if (result(); as r) {
+    <p class="ok" role="status" data-testid="strip-approved">{{ t.approved(r.approved.length, r.notApproved.length) }}</p>
+  } @else if (ready() > 0 && !writing()) {
+    <p class="meta" data-testid="strip-explain">{{ t.explain }}</p>
+  }
+  @if (batch()?.error; as error) {
+    <p class="problem" role="alert" data-testid="strip-error">{{ t.failed(error) }}</p>
+  }
+  @if (refused()) {
+    <p class="problem" role="alert" data-testid="strip-refused">{{ refused() }}</p>
+  }
+
+  @if (cards().length) {
+    <ul class="cards" data-testid="strip-cards">
+      @for (d of cards(); track d.scriptPiece) {
+        <li><app-scene-card [entry]="d" (open)="open.emit($event)" /></li>
+      }
+    </ul>
+  }
+</section>

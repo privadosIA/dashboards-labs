@@ -1,0 +1,76 @@
+.filters {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+  // Every control is 40 px tall (the group's 1 px borders are inside it) and they all start on the same line;
+  // left to their own heights the selects (a floating label) and the button groups sat at different heights.
+
+  > mat-form-field,
+  > app-mode-select,
+  > mat-button-toggle-group {
+    height: 40px;
+  }
+
+  > mat-button-toggle-group {
+    box-sizing: border-box;
+    --mat-button-toggle-height: 38px;
+  }
+}
+
+// The bar's place is kept whether it shows or not, so the content below does not jump when a request starts and ends.
+.loading {
+  height: 4px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-surface);
+
+  &__label {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__value {
+    font-size: var(--lab-fs-title);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  max-width: 80ch;
+}
+
+.warn {
+  color: var(--lab-warn);
+}
+
+.slowest h3 {
+  font-size: var(--lab-fs-section);
+  font-weight: 600;
+  margin: 0 0 8px;
+}

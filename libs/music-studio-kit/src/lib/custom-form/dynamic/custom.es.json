@@ -1,0 +1,103 @@
+{
+  "version": "1.0",
+  "id": "custom",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "title",
+      "type": "textarea",
+      "label": "Título",
+      "placeholder": "Escribe el título de la canción…",
+      "props": {
+        "rows": 2,
+        "attributes": {
+          "data-testid": "title"
+        }
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 80,
+        "messages": {
+          "required": "Escribe un título."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "titleCount"
+    },
+    {
+      "key": "lyrics",
+      "type": "textarea",
+      "label": "Letra",
+      "placeholder": "Escribe la letra de la canción…",
+      "props": {
+        "rows": 6,
+        "attributes": {
+          "data-testid": "lyrics"
+        }
+      },
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Escribe la letra."
+        }
+      }
+    },
+    {
+      "type": "slot",
+      "name": "lyricsTools"
+    },
+    {
+      "type": "group",
+      "id": "style-box",
+      "title": "Estilo",
+      "columns": 1,
+      "cssClass": "style-box",
+      "fields": [
+        {
+          "key": "style",
+          "type": "textarea",
+          "placeholder": "Escribe estilos o elígelos debajo…",
+          "props": {
+            "rows": 3,
+            "attributes": {
+              "data-testid": "style"
+            }
+          }
+        },
+        {
+          "type": "slot",
+          "name": "styleTags"
+        }
+      ]
+    },
+    {
+      "key": "gender",
+      "type": "select",
+      "label": "Voz",
+      "defaultValue": "random",
+      "options": [
+        {
+          "value": "random",
+          "label": "Aleatoria"
+        },
+        {
+          "value": "female",
+          "label": "Femenina"
+        },
+        {
+          "value": "male",
+          "label": "Masculina"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "gender"
+        }
+      }
+    }
+  ]
+}
