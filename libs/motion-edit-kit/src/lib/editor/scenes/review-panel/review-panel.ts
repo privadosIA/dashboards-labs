@@ -27,7 +27,7 @@ export class ReviewPanel {
   /** The review changed (it started, advanced or ended). */
   readonly changed = output<PieceReview>();
   /** A note was chosen: the script piece it is about. */
-  readonly select = output<string>();
+  readonly choose = output<string>();
 
   private readonly port = inject(ANIMATION);
   private readonly destroyed = inject(DestroyRef);

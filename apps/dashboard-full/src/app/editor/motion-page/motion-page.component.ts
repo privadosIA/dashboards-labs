@@ -88,7 +88,7 @@ export class MotionPageComponent {
   /** The preview as the frame takes it: the page is sandboxed and has its own content policy, so it is trusted as a document. */
   protected readonly srcdoc = computed<SafeHtml | null>(() => {
     const preview = this.page()?.preview;
-    return preview ? this.sanitizer.bypassSecurityTrustHtml(preview) : null;
+    return preview ? this.sanitizer.bypassSecurityTrustHtml(preview) : null; // NOSONAR: the preview is the page the server drew, shown in a sandboxed iframe with its own content policy
   });
 
   constructor() {

@@ -14,7 +14,7 @@ export class HeaderCard {
   readonly model = input<string>('');
   /** What the model is, shown as a tooltip when the pointer rests on the card. */
   readonly description = input<string>('');
-  readonly change = output<void>();
+  readonly changed = output<void>();
 
   protected readonly t = textsFor(inject(LanguageService).lang);
 }

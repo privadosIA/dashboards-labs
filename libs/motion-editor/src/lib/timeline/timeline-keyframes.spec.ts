@@ -44,7 +44,7 @@ function setup(script: Script = SCRIPT) {
   const picks: (Selection | null)[] = [];
   const seeks: number[] = [];
   fixture.componentInstance.edit.subscribe((e) => edits.push(e));
-  fixture.componentInstance.select.subscribe((s) => picks.push(s));
+  fixture.componentInstance.choose.subscribe((s) => picks.push(s));
   fixture.componentInstance.seek.subscribe((t) => seeks.push(t));
   const lanes = el.querySelector('.lanes') as HTMLElement;
   const at = (type: string, clientX: number, init: MouseEventInit = {}) => lanes.dispatchEvent(new MouseEvent(type, { clientX, bubbles: true, ...init }));

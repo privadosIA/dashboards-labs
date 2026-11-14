@@ -10,6 +10,7 @@ import { provideServerConnection } from '@lab/server-connection';
 
 import { stubStorage } from '../../testing/memory-storage';
 import { AUDIO_FACTORY } from './audio';
+import { MONACO } from './code/code-pane/code-pane';
 import { EditorPage } from './editor.page';
 
 class FakeAudio {
@@ -47,6 +48,7 @@ async function setup(options: { features?: string[]; withLayer?: boolean; hideFe
   }
   TestBed.configureTestingModule({
     providers: [
+      { provide: MONACO, useValue: () => Promise.reject(new Error('no monaco in tests')) },
       provideRouter([]),
       provideHttpClient(),
       provideServerConnection({ lang: 'en' }),

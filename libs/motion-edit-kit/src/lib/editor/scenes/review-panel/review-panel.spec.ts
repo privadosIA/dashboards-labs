@@ -23,7 +23,7 @@ async function create(options: { lang?: 'es' | 'en'; review?: PieceReview } = {}
     changes.push(r);
     fixture.componentRef.setInput('review', r);
   });
-  fixture.componentInstance.select.subscribe((id) => selected.push(id));
+  fixture.componentInstance.choose.subscribe((id) => selected.push(id));
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
   const q = (id: string) => el.querySelector(`[data-testid="${id}"]`) as HTMLElement | null;

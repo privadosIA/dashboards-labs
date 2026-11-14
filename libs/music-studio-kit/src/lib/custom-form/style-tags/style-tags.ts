@@ -22,7 +22,7 @@ export class StyleTags {
   readonly vocabulary = input.required<TagVocabulary>();
   /** The style as written: the chips of the tags it holds show as picked. */
   readonly style = input.required<string>();
-  readonly toggle = output<string>();
+  readonly toggled = output<string>();
   readonly combo = output<readonly string[]>();
 
   protected readonly t = textsFor(inject(LanguageService).lang);

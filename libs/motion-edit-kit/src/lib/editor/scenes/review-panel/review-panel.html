@@ -48,7 +48,7 @@
         <ul class="scenes" data-testid="review-scenes">
           @for (s of r.scenes; track s.scriptPiece) {
             <li>
-              <button type="button" class="scene" data-testid="review-scene" [attr.data-verdict]="verdict(s)" (click)="select.emit(s.scriptPiece)">
+              <button type="button" class="scene" data-testid="review-scene" [attr.data-verdict]="verdict(s)" (click)="choose.emit(s.scriptPiece)">
                 <strong>{{ t.block(s.scriptPiece) }}</strong>
                 <span class="score">{{ s.score }} / 10 · {{ t.mark[verdict(s)] }}</span>
                 @if (s.error) {

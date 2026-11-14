@@ -514,7 +514,9 @@ describe('MusicPageComponent', () => {
       await click('[data-testid="create-all"]');
       http.expectOne('/api/projects/songs/config').flush({ saved: true });
       await settle();
-      http.expectOne('/api/projects/songs/runs').flush({ run: RUN, queue_position: 0 });
+      const launch = http.expectOne('/api/projects/songs/runs');
+      expect(launch.request.method).toBe('POST');
+      launch.flush({ run: RUN, queue_position: 0 });
     });
 
     it('when the run ends, lists the songs it exported', async () => {

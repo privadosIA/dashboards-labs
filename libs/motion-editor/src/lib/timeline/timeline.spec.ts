@@ -45,7 +45,7 @@ function setup(selection: Selection | null = null, lang: 'es' | 'en' = 'en') {
   const seeks: number[] = [];
   const picks: (Selection | null)[] = [];
   fixture.componentInstance.seek.subscribe((t) => seeks.push(t));
-  fixture.componentInstance.select.subscribe((s) => picks.push(s));
+  fixture.componentInstance.choose.subscribe((s) => picks.push(s));
   const blocks = () => Array.from(el.querySelectorAll('.lane.main .block'));
   return { fixture, el, seeks, picks, blocks, zoom: () => fixture.componentInstance.zoom() };
 }
@@ -306,7 +306,7 @@ describe('MotionTimeline', () => {
       it('swaps what a block draws with the piece before or after with [ and ], and selects where it went', () => {
         const { el, edits, fixture } = drag();
         const picks: (Selection | null)[] = [];
-        fixture.componentInstance.select.subscribe((s) => picks.push(s));
+        fixture.componentInstance.choose.subscribe((s) => picks.push(s));
         const body = (n: number) => el.querySelectorAll('.lane.main .block-body')[n];
         press(body(0), ']');
         expect(edits.map((e) => e.phase)).toEqual(['apply']);
@@ -339,7 +339,7 @@ describe('MotionTimeline', () => {
         const { handles, edits, last, fixture, el } = drag();
         void handles;
         const picks: (Selection | null)[] = [];
-        fixture.componentInstance.select.subscribe((s) => picks.push(s));
+        fixture.componentInstance.choose.subscribe((s) => picks.push(s));
         const extra = (n: number) => el.querySelector(`.lane.extra[data-extra="${n}"] .block-body[data-piece="p2"]`)!;
         press(extra(0), 'ArrowDown');
         expect(edits.map((e) => e.phase)).toEqual(['apply']);

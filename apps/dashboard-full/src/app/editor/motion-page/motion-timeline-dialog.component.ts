@@ -56,7 +56,7 @@ export class MotionTimelineDialogComponent {
 
   protected readonly srcdoc = computed<SafeHtml | null>(() => {
     const preview = this.session.page()?.preview;
-    return preview ? this.sanitizer.bypassSecurityTrustHtml(preview) : null;
+    return preview ? this.sanitizer.bypassSecurityTrustHtml(preview) : null; // NOSONAR: the preview is the page the server drew, shown in a sandboxed iframe with its own content policy
   });
 
   constructor() {

@@ -12,6 +12,7 @@ import { provideServerConnection } from '@lab/server-connection';
 import { MOTION_EDIT_OPTIONS } from '../core/options';
 import { stubStorage } from '../../testing/memory-storage';
 import { AUDIO_FACTORY } from './audio';
+import { MONACO } from './code/code-pane/code-pane';
 import { EditorPage } from './editor.page';
 
 class FakeAudio {
@@ -30,6 +31,7 @@ async function setup(features?: readonly string[]) {
   await firstValueFrom(port.loadSample());
   TestBed.configureTestingModule({
     providers: [
+      { provide: MONACO, useValue: () => Promise.reject(new Error('no monaco in tests')) },
       { provide: MOTION_EDIT_OPTIONS, useValue: { lang: 'en' } },
       { provide: ASSIST_OPTIONS, useValue: { lang: 'en' } },
       { provide: ASSIST_PROVIDERS, useValue: new MemoryProviders(() => of(['qwen3:8b'])) },

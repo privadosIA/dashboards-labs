@@ -23,7 +23,7 @@ export class MotionLayers {
   readonly selection = input<Selection | null>(null);
   /** The song time of the playhead: the row of the piece that holds it is marked and kept in view. */
   readonly playhead = input(0);
-  readonly select = output<Selection | null>();
+  readonly choose = output<Selection | null>();
   /** While the piece is being drawn or proposed the list only shows. */
   readonly locked = input(false);
   /** The remove button of a piece row was pressed: the page decides (the last piece cannot go). */
@@ -72,7 +72,7 @@ export class MotionLayers {
   }
 
   protected pick(piece: string, extra?: number): void {
-    this.select.emit(extra === undefined ? { piece } : { piece, extra });
+    this.choose.emit(extra === undefined ? { piece } : { piece, extra });
   }
 
   protected toggleOpen(piece: string): void {

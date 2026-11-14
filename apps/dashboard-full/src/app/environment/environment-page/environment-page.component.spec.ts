@@ -87,7 +87,9 @@ describe('EnvironmentPageComponent', () => {
   it('refresh fetches a fresh report', async () => {
     const cmp = fixture.componentInstance as unknown as { refresh(): void };
     cmp.refresh();
-    http.expectOne('/api/environment').flush(REPORT);
+    const asked = http.expectOne('/api/environment');
+    expect(asked.request.method).toBe('GET');
+    asked.flush(REPORT);
   });
   /** Answers, in order of arrival, what a freeing asks of the server. */
   async function settle(answers: Record<string, unknown>): Promise<void> {

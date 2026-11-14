@@ -274,7 +274,9 @@ describe('MotionPageComponent', () => {
     fixture.detectChanges();
     http.match((r) => r.url.startsWith('/api/environment')).forEach((r) => r.flush(report(true)));
     http.match((r) => r.url === '/api/models/availability').forEach((r) => r.flush(ALL_AVAILABLE));
-    http.expectOne('/api/projects/demo/scenes/gfx/motion?overlay=1').flush({ ...PAGE, overlay: true });
+    const asked = http.expectOne('/api/projects/demo/scenes/gfx/motion?overlay=1');
+    expect(asked.request.method).toBe('GET');
+    asked.flush({ ...PAGE, overlay: true });
     await settle();
   });
 

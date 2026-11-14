@@ -11,6 +11,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { stubStorage } from '../../testing/memory-storage';
 import { MOTION_EDIT_BASE, MOTION_EDIT_OPTIONS } from '../core/options';
 import { AUDIO_FACTORY } from './audio';
+import { MONACO } from './code/code-pane/code-pane';
 import { EditorPage } from './editor.page';
 
 class FakeAudio {
@@ -28,6 +29,7 @@ async function setup(query: Record<string, string>, base = '') {
   await firstValueFrom(port.loadSample());
   TestBed.configureTestingModule({
     providers: [
+      { provide: MONACO, useValue: () => Promise.reject(new Error('no monaco in tests')) },
       { provide: MOTION_EDIT_OPTIONS, useValue: { lang: 'en' } },
       { provide: MOTION_EDIT_BASE, useValue: base },
       provideRouter([]),

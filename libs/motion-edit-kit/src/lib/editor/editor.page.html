@@ -130,7 +130,7 @@
             <button type="button" role="tab" class="tab" id="tab-library" data-testid="tab-library" aria-controls="panel-library" [attr.aria-selected]="sideTab() === 'library'" [class.on]="sideTab() === 'library'" (click)="sideTab.set('library')">{{ t.regions.library }}</button>
           </div>
           <section class="layers" id="panel-layers" role="tabpanel" aria-labelledby="tab-layers" [hidden]="sideTab() !== 'layers'">
-            <lab-motion-layers [script]="doc()!.script" [selection]="selection()" [playhead]="clock.time()" (select)="onLayerSelect($event)" (visibility)="hidden.set($event)" [locked]="frozen()" (removePiece)="onRemovePiece($event)" (addPiece)="split()" />
+            <lab-motion-layers [script]="doc()!.script" [selection]="selection()" [playhead]="clock.time()" (choose)="onLayerSelect($event)" (visibility)="hidden.set($event)" [locked]="frozen()" (removePiece)="onRemovePiece($event)" (addPiece)="split()" />
           </section>
           <section class="library" id="panel-library" role="tabpanel" aria-labelledby="tab-library" [hidden]="sideTab() !== 'library'">
  <button type="button" class="ctl new-part" data-testid="new-part-open" [attr.title]="texts.newPart.openHint" (click)="newPartOpen.set(true)">{{ texts.newPart.open }}</button>
@@ -176,7 +176,7 @@
         </div>
 
         <section class="timeline" [attr.aria-label]="t.regions.timeline">
-          <lab-motion-timeline [songMap]="p.songMap" [script]="doc()!.script" [playhead]="clock.time()" [selection]="selection()" [itemSelection]="itemSelection()" [(zoom)]="zoom" (seek)="onSeek($event)" (select)="selection.set($event)" (selectItem)="pickItem($event)" (removeItem)="pickItem($event); removeSelected()" (itemRefused)="onItemRefused($event)" (removeExtra)="selection.set($event); removeSelected()" (removeLine)="selection.set($event); removeSelected()" (dropItem)="onPaletteDrop($event)" (edit)="onTimelineEdit($event)" [(magnet)]="magnet" [warnings]="warnings()" [refused]="refusedPieces()" [grades]="grades()" [catalog]="catalog()" [locked]="frozen()" />
+          <lab-motion-timeline [songMap]="p.songMap" [script]="doc()!.script" [playhead]="clock.time()" [selection]="selection()" [itemSelection]="itemSelection()" [(zoom)]="zoom" (seek)="onSeek($event)" (choose)="selection.set($event)" (selectItem)="pickItem($event)" (removeItem)="pickItem($event); removeSelected()" (itemRefused)="onItemRefused($event)" (removeExtra)="selection.set($event); removeSelected()" (removeLine)="selection.set($event); removeSelected()" (dropItem)="onPaletteDrop($event)" (edit)="onTimelineEdit($event)" [(magnet)]="magnet" [warnings]="warnings()" [refused]="refusedPieces()" [grades]="grades()" [catalog]="catalog()" [locked]="frozen()" />
         </section>
 
         @if (sceneOn()) {
@@ -184,7 +184,7 @@
         }
 
         @if (reviewOn()) {
-          <app-review-panel class="reviews" [piece]="id()" [review]="review()" [locked]="frozen()" (changed)="review.set($event)" (select)="onReviewSelect($event)" />
+          <app-review-panel class="reviews" [piece]="id()" [review]="review()" [locked]="frozen()" (changed)="review.set($event)" (choose)="onReviewSelect($event)" />
         }
       </div>
       <app-help-dialog [(open)]="helpOpen" />

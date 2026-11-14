@@ -89,6 +89,6 @@ describe('StorageDialogComponent', () => {
     const fixture = await open();
     (fixture.nativeElement.querySelector('[data-testid=storage-clean-cache]') as HTMLButtonElement).click();
     await new Promise((r) => setTimeout(r));
-    http.expectNone('/api/projects/demo/storage/clean');
+    expect(http.match('/api/projects/demo/storage/clean')).toHaveLength(0);
   });
 });

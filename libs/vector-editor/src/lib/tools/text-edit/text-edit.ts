@@ -29,7 +29,7 @@ export class VectorTextEdit {
   readonly fontFamily = input.required<string>();
   readonly fontWeight = input(400);
   readonly commit = output<string>();
-  readonly cancel = output<void>();
+  readonly cancelled = output<void>();
 
   protected readonly t = vectorTexts(inject(VECTOR_EDITOR_LANG));
   private readonly field = viewChild.required<ElementRef<HTMLTextAreaElement>>('field');
@@ -62,6 +62,6 @@ export class VectorTextEdit {
     if (this.finished) return;
     this.finished = true;
     if (keep) this.commit.emit(this.field().nativeElement.value);
-    else this.cancel.emit();
+    else this.cancelled.emit();
   }
 }

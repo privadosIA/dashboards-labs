@@ -185,7 +185,7 @@
               <mat-icon>stop</mat-icon>
             </button>
           </div>
-          <mo-audio-player #nowPlayer [src]="url(now)" [label]="now.title" (ended)="next()" (failed)="markMissing(now.key); next()" />
+          <mo-audio-player #nowPlayer [src]="url(now)" [label]="now.title" (finished)="next()" (failed)="markMissing(now.key); next()" />
         </section>
       }
 

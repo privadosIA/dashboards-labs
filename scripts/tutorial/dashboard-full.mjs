@@ -452,7 +452,7 @@ export default {
     {
       file: '54-configuracion-ollama',
       path: '/settings',
-      setup: (page) => answer(page, 'POST', '**/api/settings/ollama/test', { ok: true, host: 'http://192.0.2.50:11434', remote: true, version: '0.12.3', models: [{ name: 'gemma4:26b', vision: true }, { name: 'qwen3:8b', vision: false }] }),
+      setup: (page) => answer(page, 'POST', '**/api/settings/ollama/test', { ok: true, host: 'http://192.0.2.50:11434', remote: true, version: '0.12.3', models: [{ name: 'gemma4:26b', vision: true }, { name: 'qwen3:8b', vision: false }] }), // NOSONAR: Ollama answers on plain http, and the server shows the address as it normalised it
       steps: [{ waitFor: '[data-testid="settings-input"]' }, { fill: ['[data-testid="settings-input"]', '192.0.2.50:11434'] }, { click: '[data-testid="settings-test"]' }, { waitFor: '[data-testid="settings-remote-warning"]' }, { wait: 400 }],
       marks: [{ selector: '[data-testid="settings-current"]' }, { selector: '[data-testid="settings-input"]' }, { selector: '[data-testid="settings-remote-warning"]' }, { selector: '[data-testid="settings-test-result"]' }],
     },

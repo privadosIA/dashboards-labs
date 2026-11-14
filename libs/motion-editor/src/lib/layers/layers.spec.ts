@@ -24,7 +24,7 @@ function setup(selection: Selection | null = null, lang: 'es' | 'en' = 'en') {
   const el = fixture.nativeElement as HTMLElement;
   const picks: (Selection | null)[] = [];
   const hides: ReadonlySet<string>[] = [];
-  fixture.componentInstance.select.subscribe((s) => picks.push(s));
+  fixture.componentInstance.choose.subscribe((s) => picks.push(s));
   fixture.componentInstance.visibility.subscribe((v) => hides.push(v));
   const click = (node: Element | null) => {
     (node as HTMLElement).click();

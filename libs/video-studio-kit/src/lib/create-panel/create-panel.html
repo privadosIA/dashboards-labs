@@ -1,5 +1,5 @@
 <div class="scroll">
-  <app-header-card [model]="modelName()" [description]="description()" (change)="modelRow().open()" />
+  <app-header-card [model]="modelName()" [description]="description()" (changed)="modelRow().open()" />
 
   <dynamic-form
     [schema]="schema()"

@@ -20,7 +20,7 @@ export class AudioPlayerComponent implements OnDestroy {
   readonly label = input<string>('');
   readonly failed = output<void>();
   /** The file played to its end (not when the user pauses it). */
-  readonly ended = output<void>();
+  readonly finished = output<void>();
   /** Seconds into the file while it plays, when it pauses or is moved; null when it ended. */
   readonly position = output<number | null>();
 
@@ -74,7 +74,7 @@ export class AudioPlayerComponent implements OnDestroy {
   protected onEnded(): void {
     this.onStop();
     this.position.emit(null);
-    this.ended.emit();
+    this.finished.emit();
   }
 
   protected onSeeked(): void {

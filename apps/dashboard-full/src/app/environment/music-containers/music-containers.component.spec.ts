@@ -77,7 +77,9 @@ describe('MusicContainersComponent', () => {
   it('stops a running one', async () => {
     await open({ heartmula: running });
     el().querySelector<HTMLButtonElement>('[data-testid=container-stop]')!.click();
-    http.expectOne('/api/music/engines/heartmula/stop').flush({ container: { state: 'stopped' } });
+    const stop = http.expectOne('/api/music/engines/heartmula/stop');
+    expect(stop.request.method).toBe('POST');
+    stop.flush({ container: { state: 'stopped' } });
     await fixture.whenStable();
     http.expectOne('/api/music/engines?stats=1').flush({ engines: { heartmula: stopped } });
   });

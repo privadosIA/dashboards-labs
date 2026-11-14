@@ -208,7 +208,7 @@ describe('GalleryPageComponent preselection (?project=)', () => {
   it('ignores an unknown project without error or requests', async () => {
     const { http, fixture } = await open('nope');
     fixture.detectChanges();
-    http.expectNone((r) => r.url.includes('/artifacts/'));
+    expect(http.match((r) => r.url.includes('/artifacts/'))).toHaveLength(0);
     http.verify();
   });
 });

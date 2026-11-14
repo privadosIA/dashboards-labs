@@ -18,7 +18,7 @@ import { parseTags } from '../../song/style';
 export class SongCard {
   readonly song = input.required<Song>();
   readonly retry = output<Song>();
-  readonly cancel = output<Song>();
+  readonly cancelled = output<Song>();
   readonly remove = output<Song>();
 
   protected readonly t = textsFor(inject(LanguageService).lang);

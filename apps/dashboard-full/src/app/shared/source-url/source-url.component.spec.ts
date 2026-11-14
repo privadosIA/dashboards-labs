@@ -91,8 +91,8 @@ describe('SourceUrlComponent', () => {
     await type(URL_OK);
     q('source-url-input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     fixture.detectChanges();
-    http.expectOne(ENDPOINT);
+    expect(http.expectOne(ENDPOINT).request.method).toBe('POST');
     fixture.componentInstance['add']();
-    http.expectNone(ENDPOINT);
+    expect(http.match(ENDPOINT)).toHaveLength(0);
   });
 });

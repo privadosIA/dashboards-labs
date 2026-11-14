@@ -10,7 +10,7 @@
       <ng-template let-page>
         <ul class="list" data-testid="songs">
           @for (song of page; track song.id) {
-            <li><app-song-card [song]="song" (retry)="retry($event)" (cancel)="cancel($event)" (remove)="remove($event)" /></li>
+            <li><app-song-card [song]="song" (retry)="retry($event)" (cancelled)="cancel($event)" (remove)="remove($event)" /></li>
           }
         </ul>
       </ng-template>

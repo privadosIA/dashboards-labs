@@ -99,7 +99,7 @@ export class MotionTimeline {
   /** Pixels a second. */
   readonly zoom = model(40);
   readonly seek = output<number>();
-  readonly select = output<Selection | null>();
+  readonly choose = output<Selection | null>();
   readonly removeExtra = output<Selection>();
   readonly removeLine = output<Selection>();
   readonly selectItem = output<ItemSelection | null>();
@@ -246,7 +246,7 @@ export class MotionTimeline {
   protected pickKeyframe(event: Event, row: KeyframeRow, span: KeyframeSpan, n: number): void {
     event.stopPropagation();
     if (this.justDragged) return;
-    this.select.emit({ piece: span.piece, ...(row.extra !== undefined ? { extra: row.extra } : {}), param: row.param, keyframe: n });
+    this.choose.emit({ piece: span.piece, ...(row.extra !== undefined ? { extra: row.extra } : {}), param: row.param, keyframe: n });
   }
 
   /** Pressing a diamond: dragging it moves the keyframe in time, with the magnet unless Alt is held, and never out of the piece or past its neighbours. */
@@ -275,7 +275,7 @@ export class MotionTimeline {
     if (value === undefined) return;
     const frame: Keyframe = { t, value, ease: 'linear' };
     this.edit.emit({ phase: 'apply', change: (s) => addKeyframe(s, s.pieces.findIndex((p) => p.id === span.piece), row.param, frame, row.extra) });
-    this.select.emit({ piece: span.piece, ...(row.extra !== undefined ? { extra: row.extra } : {}), param: row.param, keyframe: span.frames.filter((f) => f.t < t - 0.005).length });
+    this.choose.emit({ piece: span.piece, ...(row.extra !== undefined ? { extra: row.extra } : {}), param: row.param, keyframe: span.frames.filter((f) => f.t < t - 0.005).length });
   }
 
   /** The lane of a drop as the markup names it. */
@@ -409,7 +409,7 @@ export class MotionTimeline {
 
   protected pickLine(event: Event, piece: string, line: number): void {
     event.stopPropagation();
-    this.select.emit({ piece, line });
+    this.choose.emit({ piece, line });
   }
 
   protected dropLine(event: Event, piece: string, line: number): void {
@@ -599,7 +599,7 @@ export class MotionTimeline {
       event.preventDefault();
       event.stopPropagation();
       this.edit.emit({ phase: 'apply', change: (s) => swapContents(s, s.pieces.findIndex((p) => p.id === id), s.pieces.findIndex((p) => p.id === other.id)) });
-      this.select.emit({ piece: other.id });
+      this.choose.emit({ piece: other.id });
       this.focusAfter = `.lane.main .block-body[data-piece="${other.id}"]`;
       return;
     }
@@ -668,7 +668,7 @@ export class MotionTimeline {
     event.preventDefault();
     event.stopPropagation();
     this.edit.emit({ phase: 'apply', change: (s) => moveExtra(s, s.pieces.findIndex((p) => p.id === id), extra, to) });
-    this.select.emit({ piece: id, extra: to });
+    this.choose.emit({ piece: id, extra: to });
     this.focusAfter = `.lane.extra[data-extra="${to}"] .block-body[data-piece="${id}"]`;
   }
 
@@ -685,7 +685,7 @@ export class MotionTimeline {
       g.moving = true;
       if (g.kind === 'cut' || g.kind === 'body' || g.kind === 'keyframe' || g.layer !== undefined) this.edit.emit({ phase: 'begin' });
       if (g.layer !== undefined) this.selectItem.emit({ layer: g.layer, item: g.item!, ...(g.kind === 'item-keyframe' ? { param: g.param!, keyframe: g.keyframe! } : {}) });
-      else this.select.emit(g.kind === 'extra' ? { piece: g.id, extra: g.extra } : g.kind === 'keyframe' ? { piece: g.id, ...(g.extra !== undefined ? { extra: g.extra } : {}), param: g.param!, keyframe: g.keyframe! } : { piece: g.id });
+      else this.choose.emit(g.kind === 'extra' ? { piece: g.id, extra: g.extra } : g.kind === 'keyframe' ? { piece: g.id, ...(g.extra !== undefined ? { extra: g.extra } : {}), param: g.param!, keyframe: g.keyframe! } : { piece: g.id });
     }
     if (g.kind === 'extra') {
       const box = this.scroller().nativeElement.getBoundingClientRect();
@@ -820,7 +820,7 @@ export class MotionTimeline {
   protected pick(event: Event, piece: string, extra?: number): void {
     event.stopPropagation();
     if (this.justDragged) return;
-    this.select.emit(extra === undefined ? { piece } : { piece, extra });
+    this.choose.emit(extra === undefined ? { piece } : { piece, extra });
   }
 
   protected dropExtra(event: Event, piece: string, extra: number): void {

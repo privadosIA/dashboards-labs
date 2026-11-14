@@ -39,7 +39,7 @@
 
   <footer>
     @if (!finished()) {
-      <button type="button" data-testid="song-cancel" (click)="cancel.emit(song())">{{ t.songs.cancel }}</button>
+      <button type="button" data-testid="song-cancel" (click)="cancelled.emit(song())">{{ t.songs.cancel }}</button>
     }
     @if (state().phase === 'failed' || state().phase === 'cancelled') {
       <button type="button" data-testid="song-retry" (click)="retry.emit(song())">{{ t.songs.retry }}</button>

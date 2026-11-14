@@ -336,7 +336,7 @@ describe('DefaultsPanelComponent: model sets and animation', () => {
   it('does not ask for the video inventory when nothing uses the animation block', async () => {
     await mount(BASE);
     await expandAll();
-    http.expectNone('/api/assets'); // verified again by afterEach
+    expect(http.match('/api/assets')).toHaveLength(0);
   });
 
   it('flags "no está en disco" only on a file that is really missing, not on every selection', async () => {
