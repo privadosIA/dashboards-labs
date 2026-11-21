@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>mediaOrquestator · En obras / Under works</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="obras.css" />
+  </head>
+  <body>
+    <main class="obras" aria-labelledby="obras-title">
+      <div class="obras__mark" aria-hidden="true"></div>
+
+      <section lang="es">
+        <h1 id="obras-title">Estamos en obras</h1>
+        <p>El servidor está apagado o no se puede alcanzar ahora mismo. Esta página vuelve sola a la aplicación en cuanto responda.</p>
+      </section>
+      <section lang="en">
+        <h1>We are under works</h1>
+        <p>The server is switched off or cannot be reached right now. This page goes back to the app by itself as soon as it answers.</p>
+      </section>
+
+      <p class="obras__status" role="status" aria-live="polite" data-testid="obras-status">
+        <span lang="es" data-state="waiting">Comprobando…</span>
+        <span lang="en" data-state="waiting">Checking…</span>
+        <span lang="es" data-state="off" hidden>Sigue apagado. Última comprobación: <time data-time></time></span>
+        <span lang="en" data-state="off" hidden>Still off. Last check: <time data-time></time></span>
+      </p>
+
+      <button type="button" class="obras__retry" data-retry>
+        <span lang="es">Reintentar ahora</span>
+        <span lang="en">Retry now</span>
+      </button>
+    </main>
+    <noscript>
+      <p class="obras__noscript" lang="es">Activa JavaScript para que esta página vuelva sola, o recárgala más tarde.</p>
+      <p class="obras__noscript" lang="en">Turn on JavaScript so this page goes back by itself, or reload it later.</p>
+    </noscript>
+    <script src="obras.js"></script>
+  </body>
+</html>

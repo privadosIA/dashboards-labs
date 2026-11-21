@@ -720,7 +720,7 @@ export class CreateFlowService {
         seconds: plan?.seconds ?? 0,
       };
     }
-    const plan = videoRequestPlan(starter, d, catalog.entries, machine);
+    const plan = videoRequestPlan(starter, d, catalog.entries, machine, env.voices ?? []);
     if (!plan) throw new Error($localize`:@@create.errNoModel:No image model that fits this machine is installed: install one in Models.`);
     const cfg = plan.config;
     const lines = [plan.graphic ? `${$localize`:@@create.graphic:animated graphic`} · ${cfg.defaults.resolution}` : `${cfg.defaults.model.replace(/^models\//, '').replace(/\.[a-z]+$/i, '')} · ${cfg.defaults.resolution}`];

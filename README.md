@@ -1,5 +1,7 @@
 # dashboards-lab
 
+> **Live examples:** videos, songs, animation and images made with mediaOrquestator on a local machine, with how they were made: [orquestator.xuxo.net](https://orquestator.xuxo.net/) (es/en).
+
 The public edition of the dashboards of **mediaOrquestator**: the server's management dashboard (`apps/dashboard-full`) and the libraries it is built from. They share the API contract, the server mock, the generated client and the forms system.
 
 **This repository contains no server code.** It only consumes its contract (`contract/openapi.yaml`), a versioned copy

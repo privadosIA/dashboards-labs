@@ -30,6 +30,8 @@ export interface RequestDraft {
   engine: 'auto' | VideoChoiceId;
   /** The words a video has to say; empty = none. */
   speech: string;
+  /** The language of the request (ISO 639-1) as the assistant read it: the narration voice is chosen to match it. */
+  language?: string;
   /**
    * The look of the pictures: a model of that style, 'edit' (retouch the picture attached: the words are an
    * instruction), or 'auto' (the usual model; a picture attached then starts a generation, img2img).
@@ -97,6 +99,7 @@ export function draftFromPlan(plan: RequestPlan): RequestDraft {
     seconds: SONG_LENGTHS[lengthFor(plan.seconds)],
     engine: 'auto',
     speech: plan.kind === 'video' ? (plan.speech ?? '') : '',
+    ...(plan.language ? { language: plan.language } : {}),
     style: 'auto',
     strength: DEFAULT_STRENGTH,
   };
@@ -248,25 +251,58 @@ export interface VideoRequestPlan extends EasyPlan {
  * picked, or else the best the machine allows. A video's speech is said by LTX 2.3 itself (written in its movement
  * prompt, with the frames it needs and its audio on) and by the narration voice with any other engine.
  */
-export function videoRequestPlan(starter: ProjectConfig, d: RequestDraft, catalog: CatalogEntry[], machine: AutoMachine): VideoRequestPlan | null {
-  const plan = d.kind === 'video' && d.animation === 'graphic' ? graphicRequestPlan(starter, d) : modelRequestPlan(starter, d, catalog, machine);
+const ES_WORDS = new Set(['el', 'la', 'los', 'las', 'que', 'de', 'un', 'una', 'y', 'en', 'es', 'con', 'por', 'para', 'todo', 'hola', 'gracias', 'bienvenidos', 'bienvenidas', 'mi', 'tu', 'su', 'lo', 'se', 'al', 'del', 'muy', 'como', 'esto', 'esta', 'este', 'nuestro', 'vamos']);
+const EN_WORDS = new Set(['the', 'and', 'is', 'are', 'to', 'of', 'in', 'that', 'it', 'you', 'hello', 'welcome', 'this', 'with', 'for', 'all', 'my', 'your', 'we', 'starts', 'everything', 'idea', 'make']);
+
+/**
+ * The language of the words a video says, read from the words: the assistant echoes the language of the interface, not of the text, and a Spanish line
+ * read by an English voice is unintelligible. An accent or an inverted mark means Spanish; else the commoner small words decide; a tie leaves `fallback`.
+ */
+export function speechLanguage(text: string, fallback?: string): string | undefined {
+  if (/[¿¡ñáéíóúü]/i.test(text)) return 'es';
+  const words = text.toLowerCase().match(/[a-z]+/g) ?? [];
+  const es = words.filter((w) => ES_WORDS.has(w)).length;
+  const en = words.filter((w) => EN_WORDS.has(w)).length;
+  return es > en ? 'es' : en > es ? 'en' : fallback;
+}
+
+/**
+ * The Piper voice that narrates a request in its language: an installed voice whose name starts with the language (`es_ES-davefx-medium.onnx`
+ * for `es`), the first of them; none when the language is unknown or no voice speaks it (the project's voice then reads it).
+ */
+export function narrationVoice(language: string | undefined, voices: AssetEntry[]): string | undefined {
+  const lang = (language ?? '').toLowerCase().slice(0, 2);
+  if (!lang) return undefined;
+  const home = ({ es: 'es_ES', en: 'en_US' } as Record<string, string>)[lang] ?? '';
+  const found = voices
+    .map((v) => v.name)
+    .filter((n) => n.endsWith('.onnx') && n.toLowerCase().startsWith(`${lang}_`))
+    .sort((x, y) => Number(y.startsWith(home)) - Number(x.startsWith(home)) || x.localeCompare(y)); // the usual region of the language first
+  return found.length ? `voices/${found[0]}` : undefined;
+}
+
+export function videoRequestPlan(starter: ProjectConfig, d: RequestDraft, catalog: CatalogEntry[], machine: AutoMachine, voices: AssetEntry[] = []): VideoRequestPlan | null {
+  const plan = d.kind === 'video' && d.animation === 'graphic' ? graphicRequestPlan(starter, d, voices) : modelRequestPlan(starter, d, catalog, machine, voices);
   if (!plan) return null;
   const resolution = scaleResolution(plan.config.defaults.resolution, d.resolution);
   return resolution === plan.config.defaults.resolution ? plan : { ...plan, config: { ...plan.config, defaults: { ...plan.config.defaults, resolution } } };
 }
 
 /** An animated graphic: one motion-graphic scene written by the language model and drawn by Chrome; no picture model, no engine. */
-function graphicRequestPlan(starter: ProjectConfig, d: RequestDraft): VideoRequestPlan {
+function graphicRequestPlan(starter: ProjectConfig, d: RequestDraft, voices: AssetEntry[]): VideoRequestPlan {
   const text = d.imagePrompt.trim() || d.title;
   const speech = d.speech.trim();
-  const scene: Scene = { id: 'escena_1', prompt: text, negative_prompt: '', tts_text: speech, speed: 1, lora: '', silence_seconds: 5, motion_graphic: text };
+  const scene: Scene = { id: 'escena_1', prompt: text, negative_prompt: '', tts_text: speech, speed: 1, lora: '', motion_graphic: text };
+  if (!speech) scene.silence_seconds = 5; // a scene is either narrated or silent: the server rejects both
+  const voice = speech ? narrationVoice(speechLanguage(speech, d.language), voices) : undefined;
+  if (voice) scene.voice = voice;
   const defaults = { ...starter.defaults };
   delete defaults.animate;
   const config: ProjectConfig = { ...starter, output: { ...starter.output, mode: 'video' }, defaults, scenes: [scene] };
   return { config, video: null, imageEntry: null, speechPick: false, noSpeechEngine: false, speechBy: speech ? 'narration' : '', graphic: true };
 }
 
-function modelRequestPlan(starter: ProjectConfig, d: RequestDraft, catalog: CatalogEntry[], machine: AutoMachine): VideoRequestPlan | null {
+function modelRequestPlan(starter: ProjectConfig, d: RequestDraft, catalog: CatalogEntry[], machine: AutoMachine, voices: AssetEntry[]): VideoRequestPlan | null {
   const speech = d.kind === 'video' ? d.speech.trim() : '';
   const withScene: ProjectConfig = {
     ...starter,
@@ -296,6 +332,9 @@ function modelRequestPlan(starter: ProjectConfig, d: RequestDraft, catalog: Cata
     return { ...plan, config, speechBy: 'model' };
   }
   scene.tts_text = speech;
+  delete scene.silence_seconds; // a scene is either narrated or silent: the server rejects both
+  const voice = narrationVoice(speechLanguage(speech, d.language), voices);
+  if (voice) scene.voice = voice; // a Spanish line read by an English voice is unintelligible
   return { ...plan, config, speechBy: 'narration' };
 }
 

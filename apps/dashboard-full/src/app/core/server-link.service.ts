@@ -1,6 +1,15 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, InjectionToken, inject, signal } from '@angular/core';
 
 import { ConnectionService } from '@lab/server-connection';
+
+/** The page that says the home server is off; the VPS in front of the dashboard serves it (and the build ships it). */
+export const OBRAS_PATH = '/obras.html';
+
+/** Where to go when the VPS says the server is off: `location.replace`, so Back does not bounce between the two pages. */
+export const OBRAS_NAVIGATE = new InjectionToken<(path: string) => void>('OBRAS_NAVIGATE', {
+  providedIn: 'root',
+  factory: () => (path) => window.location.replace(path),
+});
 
 /**
  * Whether the server answers. The shell opens from the worker's copy even when it does not, so without this the
@@ -10,6 +19,7 @@ import { ConnectionService } from '@lab/server-connection';
 @Injectable({ providedIn: 'root' })
 export class ServerLinkService {
   private readonly conn = inject(ConnectionService);
+  private readonly goToObras = inject(OBRAS_NAVIGATE);
 
   /** True until a check fails; the first check runs at start. */
   readonly reachable = signal(true);
@@ -21,6 +31,8 @@ export class ServerLinkService {
     try {
       const res = await fetch(`${this.conn.server()}/api/health`, { cache: 'no-store' });
       this.reachable.set(res.ok);
+      // Only the VPS answers this exact way when the server at home is off; any other failure keeps the banner.
+      if (!res.ok && res.status === 503 && (await isOfflineAnswer(res))) this.goToObras(OBRAS_PATH);
     } catch {
       this.reachable.set(false);
     } finally {
@@ -38,5 +50,15 @@ export class ServerLinkService {
     });
     window.addEventListener('online', () => void this.check());
     window.addEventListener('offline', () => this.reachable.set(false));
+  }
+}
+
+/** True for the body `{"error":"offline"}` that the VPS's nginx gives when it cannot reach the server at home. */
+async function isOfflineAnswer(res: Response): Promise<boolean> {
+  try {
+    const body = (await res.json()) as { error?: unknown } | null;
+    return body?.error === 'offline';
+  } catch {
+    return false;
   }
 }

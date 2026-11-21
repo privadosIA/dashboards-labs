@@ -18,3 +18,12 @@ origin share server and token. A deployment can put a `config.json` next to the 
 saved anything, it is not saved on its own and it is ignored if it is missing or not JSON; a token there is as secret as the page. If the
 server is another origin, its `--cors-origin` has to include the dashboard's;
 to try it from the dev server (`npm run <dashboard>:serve`), it must list `http://localhost:4200`. The terminal never asks for the address or the token.
+
+### Behind a login proxy: no token, and "under works" when the server is off
+
+The build also works served by a reverse proxy that asks for a login (HTTP basic authentication) and forwards `/api/` to the server adding
+the server's token itself: the dashboard uses the page's own origin, asks for no token and never opens the Connection box on start. When
+that proxy cannot reach the server it answers `/api/` with `503` and the body `{"error":"offline"}`; the dashboard recognises exactly that
+answer (any other failure keeps the "cannot connect" banner) and goes to `/obras.html`, a static bilingual page of the build that asks
+`/api/health` every 15 seconds while it is visible, and returns to the app as soon as the server answers. A server that serves the
+dashboard itself never answers that way, so nothing changes there.

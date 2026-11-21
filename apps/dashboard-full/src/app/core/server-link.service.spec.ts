@@ -1,14 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ConnectionService } from '@lab/server-connection';
-import { ServerLinkService } from './server-link.service';
+import { OBRAS_NAVIGATE, ServerLinkService } from './server-link.service';
 
 describe('ServerLinkService', () => {
   afterEach(() => vi.unstubAllGlobals());
 
+  const navigate = vi.fn();
+
   function setup(): ServerLinkService {
+    navigate.mockClear();
     TestBed.configureTestingModule({
-      providers: [{ provide: ConnectionService, useValue: { server: () => 'http://srv:4666' } }],
+      providers: [
+        { provide: ConnectionService, useValue: { server: () => 'http://srv:4666' } },
+        { provide: OBRAS_NAVIGATE, useValue: navigate },
+      ],
     });
     return TestBed.inject(ServerLinkService);
   }
@@ -49,5 +55,41 @@ describe('ServerLinkService', () => {
     expect(svc.checking()).toBe(false);
     // Services created by other specs may still listen to the shared window, so "at least" this one asked.
     expect(fetchMock).toHaveBeenCalledWith('http://srv:4666/api/health', { cache: 'no-store' });
+  });
+
+  describe('the VPS says the server at home is off', () => {
+    const answer = (status: number, body: () => Promise<unknown>) => vi.fn().mockResolvedValue({ ok: false, status, json: body });
+
+    it('goes to /obras.html only for 503 {"error":"offline"}', async () => {
+      vi.stubGlobal('fetch', answer(503, () => Promise.resolve({ error: 'offline' })));
+      const svc = setup();
+      await svc.check();
+      expect(svc.reachable()).toBe(false);
+      expect(navigate).toHaveBeenCalledExactlyOnceWith('/obras.html');
+    });
+
+    it('stays on the page for a 503 with another body, a body that is not JSON, other errors and a failed request', async () => {
+      const svc = setup();
+      for (const f of [
+        answer(503, () => Promise.resolve({ error: 'maintenance' })),
+        answer(503, () => Promise.resolve(null)),
+        answer(503, () => Promise.reject(new SyntaxError('not json'))),
+        answer(500, () => Promise.resolve({ error: 'offline' })),
+        answer(502, () => Promise.resolve({ error: 'offline' })),
+        vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
+      ]) {
+        vi.stubGlobal('fetch', f);
+        await svc.check();
+        expect(svc.reachable()).toBe(false); // the banner still shows
+      }
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('does not go anywhere when the server answers', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200 }));
+      const svc = setup();
+      await svc.check();
+      expect(navigate).not.toHaveBeenCalled();
+    });
   });
 });

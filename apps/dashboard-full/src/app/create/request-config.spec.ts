@@ -1,6 +1,6 @@
 import { CatalogEntry, RequestPlan } from '../core/api.models';
 import { machineOf } from '../editor/auto-plan';
-import { SONG_LENGTHS, defaultLevel, scaleResolution, draftFromPlan, draftFromText, lengthFor, DEFAULT_STRENGTH, editResolution, ltxFramesFor, previewStarter, projectIdFor, sourceNameFor, speechSeconds, titleFromProjectId, trackFor, videoRequestPlan, musicConfig } from './request-config';
+import { SONG_LENGTHS, defaultLevel, scaleResolution, draftFromPlan, draftFromText, lengthFor, DEFAULT_STRENGTH, editResolution, ltxFramesFor, previewStarter, projectIdFor, sourceNameFor, speechLanguage, speechSeconds, narrationVoice, titleFromProjectId, trackFor, videoRequestPlan, musicConfig } from './request-config';
 
 describe('request-config', () => {
   it('names the project from the date and the title, in characters the server takes', () => {
@@ -240,9 +240,35 @@ describe('levels, animated graphics and one song', () => {
     expect(plan.config.defaults.animate).toBeUndefined();
   });
 
+  it('the narration voice speaks the language of the request: an installed voice of that language, else the project\'s own', () => {
+    const voices = [{ name: 'en_US-amy-medium.onnx', size: 1 }, { name: 'en_US-amy-medium.onnx.json', size: 1 }, { name: 'es_MX-claude-high.onnx', size: 1 }, { name: 'es_ES-davefx-medium.onnx', size: 1 }];
+    expect(narrationVoice('es', voices)).toBe('voices/es_ES-davefx-medium.onnx');
+    expect(narrationVoice('en', voices)).toBe('voices/en_US-amy-medium.onnx');
+    expect(narrationVoice('fr', voices)).toBeUndefined();
+    expect(narrationVoice(undefined, voices)).toBeUndefined();
+    const d = { ...draftFromText('título', 'video', 'T'), animation: 'graphic' as const, speech: 'hola a todos', language: 'es' };
+    expect(videoRequestPlan(previewStarter(), d, [], machine, voices)?.config.scenes[0].voice).toBe('voices/es_ES-davefx-medium.onnx');
+    expect(videoRequestPlan(previewStarter(), d, [], machine)?.config.scenes[0].voice).toBeUndefined();
+  });
+
+  it('the language of a line is read from its words, since the assistant echoes the interface language', () => {
+    expect(speechLanguage('Todo empieza con una idea')).toBe('es');
+    expect(speechLanguage('Hola, bienvenidos a mi estudio')).toBe('es');
+    expect(speechLanguage('¡Vamos!')).toBe('es');
+    expect(speechLanguage('Everything starts with an idea')).toBe('en');
+    expect(speechLanguage('Okay', 'es')).toBe('es');
+    expect(speechLanguage('Okay')).toBeUndefined();
+    const voices = [{ name: 'en_US-amy-medium.onnx', size: 1 }, { name: 'es_ES-davefx-medium.onnx', size: 1 }];
+    const d = { ...draftFromText('título', 'video', 'T'), animation: 'graphic' as const, speech: 'Todo empieza con una idea', language: 'en' };
+    expect(videoRequestPlan(previewStarter(), d, [], machine, voices)?.config.scenes[0].voice).toBe('voices/es_ES-davefx-medium.onnx');
+  });
+
   it('a graphic with speech is narrated', () => {
     const d = { ...draftFromText('título', 'video', 'T'), animation: 'graphic' as const, speech: 'hola a todos' };
-    expect(videoRequestPlan(previewStarter(), d, [], machine)?.speechBy).toBe('narration');
+    const plan = videoRequestPlan(previewStarter(), d, [], machine);
+    expect(plan?.speechBy).toBe('narration');
+    // A scene is either narrated or silent: the server rejects tts_text together with silence_seconds.
+    expect(plan?.config.scenes[0].silence_seconds).toBeUndefined();
   });
 
   it('a song is one version of each track', () => {
