@@ -1,0 +1,16 @@
+<div class="bar" role="img" [attr.aria-label]="ariaLabel() + '. ' + summary()" data-testid="ratio-bar">
+  @for (p of shares(); track p.label) {
+    @if (p.pct > 0) {
+      <span [class]="'part part--' + p.kind" [style.flex-grow]="p.pct" [attr.data-testid]="'part-' + p.kind"></span>
+    }
+  }
+</div>
+<ul class="legend" data-testid="ratio-legend">
+  @for (p of shares(); track p.label) {
+    <li>
+      <span [class]="'swatch swatch--' + p.kind" aria-hidden="true"></span>
+      {{ p.label }}: <span class="mo-data">{{ p.value }}</span>
+      (<span class="mo-data">{{ p.pct.toFixed(0) }} %</span>)
+    </li>
+  }
+</ul>

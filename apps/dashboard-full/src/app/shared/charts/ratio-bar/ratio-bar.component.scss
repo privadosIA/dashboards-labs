@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.bar {
+  display: flex;
+  height: 22px;
+  border: 1px solid var(--lab-line);
+  border-radius: calc(var(--lab-radius) / 2);
+  overflow: hidden;
+  background: var(--lab-surface-high);
+}
+
+.part {
+  flex-basis: 0;
+  min-width: 2px;
+
+  &--solid {
+    background: var(--lab-success);
+  }
+
+  &--hatch {
+    background: repeating-linear-gradient(45deg, var(--lab-accent) 0 3px, var(--lab-surface) 3px 7px);
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-1) var(--lab-space-4);
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 1px solid var(--lab-line);
+
+  &--solid {
+    background: var(--lab-success);
+  }
+
+  &--hatch {
+    background: repeating-linear-gradient(45deg, var(--lab-accent) 0 2px, var(--lab-surface) 2px 5px);
+  }
+}

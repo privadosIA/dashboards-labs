@@ -1,0 +1,120 @@
+@if (shown()) {
+  <mat-accordion>
+    <mat-expansion-panel class="panel" data-testid="motion-defaults" (opened)="store.loadSources()">
+      <mat-expansion-panel-header>
+        <mat-panel-title i18n="@@motionDefaults.title">Scenes drawn by a part of the catalog</mat-panel-title>
+        <mat-panel-description class="mo-data">{{ summary() }}</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <p class="note" i18n="@@motionDefaults.hint">What the scenes drawn by a part of the catalog share. Everything is optional: what you leave empty is decided by the server.</p>
+
+      @if (error(); as err) {
+        <p class="server-error" role="alert" data-testid="motion-defaults-error">
+          <mat-icon inline>error</mat-icon>
+          <span>{{ err }}</span>
+        </p>
+      }
+      @if (serverMessage(); as msg) {
+        <p class="server-error" role="alert" data-testid="motion-defaults-server-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ msg }}</span>
+        </p>
+      }
+
+      <div class="row">
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@motionDefaults.bpm">Tempo</mat-label>
+          <input matInput type="number" [attr.min]="minBpm" [attr.max]="maxBpm" class="mo-data" data-testid="motion-bpm" placeholder="120" [value]="motion()?.bpm ?? ''" (change)="setBpm($any($event.target).value)" />
+          <mat-hint i18n="@@motionDefaults.bpmHint">From 40 to 240. Without it, 120.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field class="song">
+          <mat-label i18n="@@motionDefaults.song">Song</mat-label>
+          <mat-select data-testid="motion-song" [value]="motion()?.song ?? ''" (selectionChange)="setSong($event.value)">
+            <mat-option value="" i18n="@@motionDefaults.songNone">None</mat-option>
+            @if (songMissing()) {
+              <mat-option [value]="motion()?.song ?? ''">
+                <span class="mo-data">{{ motion()?.song }}</span>
+                <span class="missing" i18n="@@motionDefaults.songNotOnDisk"> ⚠ not on disk</span>
+              </mat-option>
+            }
+            @for (s of store.audioSources(); track s.name) {
+              <mat-option [value]="s.name"><span class="mo-data">{{ s.name }}</span></mat-option>
+            }
+          </mat-select>
+          <mat-hint i18n="@@motionDefaults.songHint">An audio file of the project's sources.</mat-hint>
+        </mat-form-field>
+      </div>
+      @if (motion()?.song) {
+        <p class="note" data-testid="motion-song-note" i18n="@@motionDefaults.songNote">
+          The scenes follow the beats of this song and it is the soundtrack: use silent scenes, with no narration.
+        </p>
+      }
+
+      <h3 i18n="@@motionDefaults.design">Design</h3>
+      <div class="row">
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@motionDefaults.dark">Dark colour</mat-label>
+          <input matInput class="mo-data" data-testid="motion-dark" [value]="design().dark ?? ''" (change)="setColour('dark', $any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@motionDefaults.light">Light colour</mat-label>
+          <input matInput class="mo-data" data-testid="motion-light" [value]="design().light ?? ''" (change)="setColour('light', $any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@motionDefaults.accent">Accent colour</mat-label>
+          <input matInput class="mo-data" data-testid="motion-accent" [value]="design().accent ?? ''" (change)="setColour('accent', $any($event.target).value)" />
+        </mat-form-field>
+      </div>
+      <p class="note" i18n="@@motionDefaults.colourHint">Write the colours like #aabbcc.</p>
+      <div class="row">
+        <mat-form-field class="song">
+          <mat-label i18n="@@motionDefaults.display">Typeface for big words</mat-label>
+          <mat-select data-testid="motion-display" [value]="design().display ?? ''" (selectionChange)="setFont('display', $event.value)">
+            <mat-option value="" i18n="@@motionDefaults.byDefault">The server's</mat-option>
+            @for (f of catalog.fonts(); track f) {
+              <mat-option [value]="f">{{ f }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="song">
+          <mat-label i18n="@@motionDefaults.body">Typeface for the verse</mat-label>
+          <mat-select data-testid="motion-body" [value]="design().body ?? ''" (selectionChange)="setFont('body', $event.value)">
+            <mat-option value="" i18n="@@motionDefaults.byDefault2">The server's</mat-option>
+            @for (f of catalog.fonts(); track f) {
+              <mat-option [value]="f">{{ f }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-button-toggle-group class="mode" data-testid="motion-mode" [value]="design().default_mode ?? ''" (change)="setMode($event.value)" i18n-aria-label="@@motionDefaults.modeLabel" aria-label="Default mode">
+        <mat-button-toggle value="" i18n="@@motionDefaults.modeAuto">The server's mode</mat-button-toggle>
+        <mat-button-toggle value="dark" i18n="@@motionDefaults.modeDark">Dark</mat-button-toggle>
+        <mat-button-toggle value="light" i18n="@@motionDefaults.modeLight">Light</mat-button-toggle>
+      </mat-button-toggle-group>
+      <div class="row">
+        <mat-form-field class="song">
+          <mat-label i18n="@@motionDefaults.verseStyle">Verse style</mat-label>
+          <mat-select data-testid="motion-verse" [value]="design().verse_style ?? 'plain'" (selectionChange)="setVerse($event.value)">
+            @for (s of verseStyles; track s) {
+              <mat-option [value]="s">{{ styleLabel(s) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="song">
+          <mat-label i18n="@@motionDefaults.hitStyle">Word-hit style</mat-label>
+          <mat-select data-testid="motion-hit" [value]="design().hit_style ?? 'plain'" (selectionChange)="setHit($event.value)">
+            @for (s of hitStyles; track s) {
+              <mat-option [value]="s">{{ styleLabel(s) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-form-field class="wide">
+        <mat-label i18n="@@motionDefaults.concept">Concept</mat-label>
+        <textarea matInput rows="2" maxlength="200" data-testid="motion-concept" [value]="design().concept ?? ''" (change)="setConcept($any($event.target).value)"></textarea>
+        <mat-hint i18n="@@motionDefaults.conceptHint">The visual idea every scene comes back to.</mat-hint>
+      </mat-form-field>
+    </mat-expansion-panel>
+  </mat-accordion>
+}

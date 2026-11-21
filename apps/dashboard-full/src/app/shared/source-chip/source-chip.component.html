@@ -1,0 +1,13 @@
+<span class="chip" [attr.data-source]="source()">
+  @switch (source()) {
+    @case ('setting') {
+      <ng-container i18n="@@source.setting">saved here</ng-container>
+    }
+    @case ('env') {
+      <ng-container i18n="@@source.env">from the environment</ng-container>
+    }
+    @default {
+      <ng-container i18n="@@source.default">default</ng-container>
+    }
+  }
+</span>

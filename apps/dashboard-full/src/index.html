@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>mediaOrquestator</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1316" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <!-- The app's mark (a soft emerald square with a play glyph): SVG for modern browsers, .ico as the fallback. -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <!-- Fonts are self-hosted (Fontsource) and bundled via angular.json;
+         no CDN requests for a local tool. -->
+  </head>
+  <body>
+    <app-root></app-root>
+    <!-- If the app does not start (an old browser, a script that fails), say why instead of a blank page. -->
+    <script>
+      (function () {
+        var errors = [];
+        function note(e) {
+          var m = e && (e.message || (e.reason && (e.reason.stack || e.reason.message || String(e.reason))) || e.type);
+          errors.push(String(m));
+        }
+        window.addEventListener('error', note);
+        window.addEventListener('unhandledrejection', note);
+        setTimeout(function () {
+          var root = document.querySelector('app-root');
+          if (!root || root.childNodes.length > 0) return;
+          var pre = document.createElement('pre');
+          pre.style.cssText = 'position:fixed;inset:0;z-index:99999;margin:0;box-sizing:border-box;overflow:auto;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-word;padding:20px;font:20px/1.4 monospace;color:#b00020;background:#fff';
+          pre.textContent = 'mediaOrquestator did not start.\n\n' + (errors.join('\n\n') || 'No error was reported: the script may not have loaded.') + '\n\n' + navigator.userAgent;
+          document.body.appendChild(pre);
+        }, 6000);
+      })();
+    </script>
+  </body>
+</html>

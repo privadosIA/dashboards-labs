@@ -1,0 +1,151 @@
+:host {
+  display: block;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-3);
+}
+
+.toolbar {
+  margin-block: var(--lab-space-3);
+}
+
+.model {
+  width: 320px;
+}
+
+.gpu {
+  width: 220px;
+}
+
+.kind {
+  width: 260px;
+}
+
+.param {
+  width: 140px;
+
+  &.wide {
+    width: 420px;
+    max-width: 100%;
+  }
+}
+
+.full {
+  width: 100%;
+  max-width: 720px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.note,
+.dim {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.error {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.danger {
+  color: var(--lab-danger);
+}
+
+mo-panel + mo-panel {
+  margin-top: var(--lab-space-4);
+}
+
+.findings,
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.finding {
+  display: flex;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-3) 0;
+  border-bottom: 1px solid var(--lab-line);
+
+  &__frame {
+    width: 160px;
+    height: 160px;
+    flex: none;
+    object-fit: cover;
+    border: 1px solid var(--lab-line);
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--lab-space-2);
+  }
+
+  &__text {
+    margin: var(--lab-space-2) 0;
+  }
+}
+
+.fix {
+  align-items: center;
+}
+
+.chip {
+  padding: 0 var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  font-size: var(--lab-fs-meta);
+
+  &--done {
+    color: var(--lab-success);
+  }
+
+  &--failed {
+    color: var(--lab-danger);
+  }
+
+  &--running {
+    color: var(--lab-accent);
+  }
+}
+
+// Air between the textarea of the observation and its button.
+button[data-testid='obs-add'] {
+  margin-top: var(--lab-space-4);
+}
+
+.history__bar {
+  margin-bottom: var(--lab-space-4); // air between «Borrar todas» and the first review
+}
+
+.history__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-1) 0;
+  border-bottom: 1px solid var(--lab-line);
+
+  &.current {
+    background: var(--lab-surface-high);
+  }
+}
+
+@media (max-width: 720px) {
+  .finding {
+    flex-direction: column;
+  }
+}

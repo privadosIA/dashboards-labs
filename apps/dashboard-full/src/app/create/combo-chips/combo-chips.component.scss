@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.label {
+  margin: 0 0 var(--lab-space-1);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  font-weight: 600;
+}
+
+.combos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-3);
+}
+
+.combo {
+  min-height: 44px;
+}

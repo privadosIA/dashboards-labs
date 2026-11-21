@@ -1,0 +1,247 @@
+:host {
+  display: block;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+
+  // Fields grow downwards (hint, error); keep every top edge on one line and
+  // centre the controls that are not fields on the input row (40px).
+  > :not(mat-form-field):not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}
+
+.model {
+  width: 300px;
+}
+
+.narrow {
+  width: 140px;
+}
+
+.prefix {
+  width: 100%;
+  max-width: 640px;
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  a {
+    margin-left: var(--lab-space-2);
+    color: var(--lab-accent);
+  }
+}
+
+.gpu {
+  width: 220px;
+}
+
+.missing {
+  color: var(--lab-warn);
+}
+
+.panel {
+  background: var(--lab-surface);
+}
+
+// Standalone cards: the accordion's own spacing does not apply.
+mat-expansion-panel + mat-expansion-panel,
+mo-panel + mat-expansion-panel,
+mat-expansion-panel + mo-panel,
+.notice + mat-expansion-panel {
+  margin-top: var(--lab-space-3);
+}
+
+.track {
+  &.track--hidden {
+    display: none;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--lab-space-2);
+    margin-bottom: var(--lab-space-3);
+  }
+
+  &__pick {
+    margin-right: var(--lab-space-2);
+  }
+
+  &__fav {
+    margin-left: var(--lab-space-2);
+    color: var(--lab-warn);
+    vertical-align: middle;
+  }
+
+  &__alert {
+    margin-left: var(--lab-space-2);
+    color: var(--lab-danger);
+    vertical-align: middle;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+// Air around «Añadir pista», which sits between the song cards and «Mezclas».
+button[data-testid='add-track'] {
+  margin-block: var(--lab-space-4) var(--lab-space-5);
+}
+
+.run-state {
+  margin: 0 0 var(--lab-space-2);
+  color: var(--lab-ink-dim);
+}
+
+.notice,
+.warning,
+.server-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  font-size: var(--lab-fs-meta);
+  margin: var(--lab-space-2) 0;
+
+  a {
+    margin-left: var(--lab-space-2);
+    color: var(--lab-accent);
+  }
+}
+
+.notice {
+  color: var(--lab-ink-dim);
+}
+
+.warning {
+  color: var(--lab-warn);
+}
+
+.server-error {
+  color: var(--lab-danger);
+  border: 1px solid var(--lab-danger);
+  padding: var(--lab-space-2) var(--lab-space-3);
+}
+
+.pinned {
+  color: var(--lab-success);
+}
+
+mo-panel + mo-panel,
+mo-panel + .pinned,
+mo-panel + .track {
+  margin-top: var(--lab-space-4);
+}
+
+.mixes__intro {
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.mixrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) 0;
+  border-bottom: 1px solid var(--lab-line);
+
+  &__meta {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__error {
+    color: var(--lab-danger);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__outdated {
+    color: var(--lab-warn);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__rename {
+    min-width: 12rem;
+  }
+
+  &__remove {
+    color: var(--lab-danger);
+  }
+
+  &__player {
+    padding: var(--lab-space-2) 0 var(--lab-space-3);
+    border-bottom: 1px solid var(--lab-line);
+  }
+}
+
+button[data-testid='add-mix'] {
+  margin-top: var(--lab-space-3);
+}
+
+.pickbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  margin-block: var(--lab-space-4) var(--lab-space-3);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-panel);
+
+  &__count {
+    font-size: var(--lab-fs-meta);
+  }
+}
+
+.favbar {
+  display: flex;
+  margin-block: var(--lab-space-4) var(--lab-space-3); // air from the engine card above
+
+  &__on {
+    background: var(--lab-surface-high);
+    font-weight: 600;
+  }
+}
+
+.auto-card {
+  margin-bottom: var(--lab-space-3);
+
+  .note {
+    margin: 0 0 var(--lab-space-2);
+  }
+}
+
+.auto-budget {
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--lab-space-3); // air under the explanation: the label of the field floats up into it
+}
+
+.auto-lines {
+  margin: 0 0 var(--lab-space-3);
+  padding-left: 20px;
+}
+
+.auto-actions {
+  display: flex;
+  gap: var(--lab-space-3);
+  flex-wrap: wrap;
+  margin: var(--lab-space-2) 0;
+}

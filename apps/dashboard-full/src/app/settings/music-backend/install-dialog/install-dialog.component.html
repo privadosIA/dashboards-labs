@@ -1,0 +1,108 @@
+<h2 mat-dialog-title id="install-title" data-testid="install-title">
+  <ng-container i18n="@@mbi.title">Download what is missing</ng-container>
+  · {{ data.engine === 'heartmula' ? 'HeartMuLa' : 'DiffRhythm2' }}
+  ({{ data.backend === 'docker' ? 'Docker' : '.NET' }})
+</h2>
+<mat-dialog-content>
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Reading" i18n-aria-label="@@mbi.reading" />
+  }
+
+  @if (error(); as e) {
+    <p class="error" role="alert" data-testid="install-error">
+      <mat-icon inline>error</mat-icon>
+      <span class="mo-data">{{ e }}</span>
+    </p>
+  }
+
+  @if (job(); as j) {
+    <ul class="parts" data-testid="install-parts">
+      @for (p of j.parts; track p.part) {
+        <li class="part" [attr.data-testid]="'install-part-' + p.part" [attr.data-state]="p.state">
+          <mat-icon class="part__icon" [class.ok]="p.state === 'done' || p.state === 'skipped'" [class.bad]="p.state === 'failed'">{{ partIcon(p) }}</mat-icon>
+          <span class="part__name">{{ label(p.part) }}</span>
+          <span class="part__state">{{ partState(p) }}</span>
+        </li>
+      }
+    </ul>
+    @if (running()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Installing" i18n-aria-label="@@mbi.installing" />
+    }
+    @if (j.state === 'done') {
+      <p class="ok" role="status" data-testid="install-done">
+        <mat-icon inline>check_circle</mat-icon>
+        <span i18n="@@mbi.finished">Everything is installed.</span>
+      </p>
+    } @else if (j.state === 'cancelled') {
+      <p class="note" role="status" data-testid="install-cancelled" i18n="@@mbi.wasCancelled">The install was cancelled. What was already done stays.</p>
+    } @else if (j.state === 'failed') {
+      <p class="error" role="alert" data-testid="install-failed">
+        <mat-icon inline>error</mat-icon>
+        <span>
+          @if (failedPart(); as f) {
+            <strong>{{ label(f.part) }}:</strong>
+          }
+          <span class="mo-data">{{ j.error ?? failedPart()?.error }}</span>
+        </span>
+      </p>
+    }
+    @if (log().length) {
+      <pre class="log" data-testid="install-log" tabindex="0" role="textbox" aria-readonly="true" aria-multiline="true" aria-labelledby="install-title">{{ log().join('\n') }}</pre>
+    }
+  } @else if (plan(); as p) {
+    @if (!p.confirm_required) {
+      <p class="ok" data-testid="install-nothing">
+        <mat-icon inline>check_circle</mat-icon>
+        <span i18n="@@mbi.nothing">Nothing is missing for this way of running it.</span>
+      </p>
+    } @else {
+      <p class="note" i18n="@@mbi.intro">This is what the server would download or build. Nothing starts until you confirm.</p>
+      <ul class="parts" data-testid="install-plan">
+        @for (part of p.parts; track part.part) {
+          <li class="part" [attr.data-testid]="'plan-part-' + part.part">
+            <mat-icon class="part__icon">download</mat-icon>
+            <span class="part__name">{{ label(part.part) }}</span>
+            <span class="part__state mo-data">{{ bytes(part.need_bytes ?? 0) }}</span>
+          </li>
+        }
+      </ul>
+      <p class="total" data-testid="install-total">
+        <span i18n="@@mbi.total">Total:</span>
+        <span class="mo-data">{{ bytes(p.total_bytes) }}</span>
+      </p>
+      @for (d of p.disk; track d.path) {
+        <p class="disk" [class.bad]="!d.sufficient" data-testid="install-disk">
+          <mat-icon inline>{{ d.sufficient ? 'storage' : 'warning' }}</mat-icon>
+          <span>
+            <span class="mo-data">{{ d.path }}</span>:
+            <ng-container i18n="@@mbi.free">{{ bytes(d.free_bytes) }} free</ng-container>
+            @if (!d.sufficient) {
+              · <ng-container i18n="@@mbi.lacksDisk">{{ bytes(d.need_bytes - d.free_bytes) }} more are needed.</ng-container>
+            }
+          </span>
+        </p>
+      }
+      @if (licenses().length) {
+        <div class="licenses" data-testid="install-licenses">
+          <p class="note" i18n="@@mbi.licenses">By confirming you accept these licences:</p>
+          <ul>
+            @for (l of licenses(); track l) {
+              <li class="mo-data">{{ l }}</li>
+            }
+          </ul>
+          <mat-checkbox data-testid="install-accept" [checked]="accepted()" (change)="accepted.set($event.checked)" i18n="@@mbi.accept">I accept the licences</mat-checkbox>
+        </div>
+      }
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (running()) {
+    <button mat-stroked-button type="button" data-testid="install-cancel" [disabled]="cancelling()" (click)="cancel()" i18n="@@mbi.cancelInstall">Cancel the install</button>
+  } @else if (job()?.state === 'failed' || job()?.state === 'cancelled') {
+    <button mat-flat-button type="button" data-testid="install-repeat" (click)="loadPlan()" i18n="@@mbi.repeat">Try again</button>
+  } @else if (plan()?.confirm_required && !job()) {
+    <button mat-flat-button type="button" data-testid="install-confirm" [disabled]="!canStart()" (click)="confirm()" i18n="@@mbi.confirm">Download and install</button>
+  }
+  <button mat-button type="button" data-testid="install-close" [mat-dialog-close]="job()?.state === 'done'" i18n="@@mbi.close">Close</button>
+</mat-dialog-actions>

@@ -1,0 +1,26 @@
+@if (data.title) {
+  <h2 class="sheet__title" data-testid="sheet-title">{{ data.title }}</h2>
+}
+<mat-action-list class="sheet__list">
+  @for (a of data.actions; track a.label) {
+    <button
+      mat-list-item
+      type="button"
+      class="sheet__item"
+      [class.sheet__item--danger]="a.danger"
+      [disabled]="a.disabled"
+      [attr.aria-pressed]="a.selected === undefined ? null : a.selected"
+      data-testid="sheet-action"
+      [attr.data-option]="a.testId ?? null"
+      (click)="choose(a)"
+    >
+      @if (a.icon) {
+        <mat-icon matListItemIcon>{{ a.icon }}</mat-icon>
+      }
+      <span matListItemTitle>{{ a.label }}</span>
+      @if (a.selected) {
+        <mat-icon matListItemMeta aria-hidden="true">check</mat-icon>
+      }
+    </button>
+  }
+</mat-action-list>

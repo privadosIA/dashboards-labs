@@ -1,0 +1,136 @@
+// The look of a floating window's bar and resize grips (see floating-window.ts). Include it in the dialog's
+// own styles with the BEM block its template uses: @include fw.window($block: 'mix-dialog').
+@mixin window($block) {
+  .#{$block}__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--lab-space-3);
+    padding-right: var(--lab-space-3);
+    // The whole bar is the grip to move the window.
+    cursor: move;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .#{$block}__hint {
+    flex: 1;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  .#{$block}__close {
+    cursor: pointer;
+  }
+
+  // The grips to resize from any side or corner: thin strips on the window's border.
+  .#{$block}__edge {
+    position: absolute;
+    z-index: 5;
+    touch-action: none;
+
+    &--n,
+    &--s {
+      left: 12px;
+      right: 12px;
+      height: 6px;
+      cursor: ns-resize;
+    }
+
+    &--e,
+    &--w {
+      top: 12px;
+      bottom: 12px;
+      width: 6px;
+      cursor: ew-resize;
+    }
+
+    &--n {
+      top: 0;
+    }
+
+    &--s {
+      bottom: 0;
+    }
+
+    &--e {
+      right: 0;
+    }
+
+    &--w {
+      left: 0;
+    }
+
+    &--ne,
+    &--nw,
+    &--se,
+    &--sw {
+      width: 14px;
+      height: 14px;
+    }
+
+    &--ne,
+    &--sw {
+      cursor: nesw-resize;
+    }
+
+    &--nw,
+    &--se {
+      cursor: nwse-resize;
+    }
+
+    &--ne {
+      top: 0;
+      right: 0;
+    }
+
+    &--nw {
+      top: 0;
+      left: 0;
+    }
+
+    &--se {
+      right: 0;
+      bottom: 0;
+      // A visible cue that this corner resizes.
+      background: linear-gradient(135deg, transparent 55%, var(--lab-ink-dim) 55% 62%, transparent 62% 76%, var(--lab-ink-dim) 76% 83%, transparent 83%);
+    }
+
+    &--sw {
+      bottom: 0;
+      left: 0;
+    }
+  }
+
+  // A grip lights up under the pointer, so it is clear where a side can be dragged.
+  .#{$block}__edge:hover::after,
+  .#{$block}__edge:active::after {
+    content: '';
+    position: absolute;
+    background: var(--lab-accent);
+  }
+
+  .#{$block}__edge--n:hover::after,
+  .#{$block}__edge--s:hover::after,
+  .#{$block}__edge--n:active::after,
+  .#{$block}__edge--s:active::after {
+    inset: 2px 0;
+    height: 2px;
+  }
+
+  .#{$block}__edge--e:hover::after,
+  .#{$block}__edge--w:hover::after,
+  .#{$block}__edge--e:active::after,
+  .#{$block}__edge--w:active::after {
+    inset: 0 2px;
+    width: 2px;
+  }
+
+  .#{$block}__edge--ne:hover::after,
+  .#{$block}__edge--nw:hover::after,
+  .#{$block}__edge--se:hover::after,
+  .#{$block}__edge--sw:hover::after {
+    inset: 0;
+    border-radius: 3px;
+    opacity: 0.55;
+  }
+}

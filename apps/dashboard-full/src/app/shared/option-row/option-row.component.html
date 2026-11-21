@@ -1,0 +1,33 @@
+@if (phone()) {
+  <button type="button" class="line" [disabled]="disabled()" (click)="open()" [attr.data-testid]="testId()" [attr.aria-label]="label() + ': ' + (current()?.label ?? '')">
+    <span class="line__label">{{ label() }}</span>
+    <span class="line__value">
+      @if (current()?.icon; as icon) {
+        <mat-icon aria-hidden="true" inline>{{ icon }}</mat-icon>
+      }
+      {{ current()?.label }}
+    </span>
+    <mat-icon aria-hidden="true">expand_more</mat-icon>
+  </button>
+} @else {
+  <mat-button-toggle-group
+    class="group"
+    [class.group--fill]="fill()"
+    [class.group--wrap]="wrap()"
+    [value]="value()"
+    [disabled]="disabled()"
+    (change)="picked.emit($event.value)"
+    hideSingleSelectionIndicator
+    [attr.aria-label]="label()"
+    [attr.data-testid]="testId()"
+  >
+    @for (o of options(); track o.value) {
+      <mat-button-toggle [value]="o.value" [attr.data-testid]="o.testId">
+        @if (o.icon) {
+          <mat-icon>{{ o.icon }}</mat-icon>
+        }
+        <span>{{ o.label }}</span>
+      </mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+}

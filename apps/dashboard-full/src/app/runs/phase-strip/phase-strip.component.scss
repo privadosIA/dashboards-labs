@@ -1,0 +1,135 @@
+// The strip: DOM/CSS only, no canvas (design risk note). State is the
+// segment's material; color never carries meaning alone (title + label).
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.strip__head,
+.strip__row {
+  display: grid;
+  grid-template-columns: 120px repeat(auto-fit, minmax(90px, 1fr));
+  gap: 4px;
+  align-items: center;
+}
+
+.strip__phase {
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+  text-align: center;
+}
+
+.strip__scene {
+  font-size: var(--lab-fs-meta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strip__row--global {
+  border-top: 1px dashed var(--lab-line);
+  padding-top: 4px;
+}
+
+.seg {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: var(--lab-fs-meta);
+  border: 1px solid var(--lab-line);
+  color: var(--lab-ink);
+  transition: background-color 300ms, border-color 300ms;
+
+  &--pending {
+    background: transparent;
+    color: var(--lab-ink-dim);
+  }
+
+  &--running {
+    background: var(--lab-accent);
+    color: var(--lab-on-accent);
+    border-color: var(--lab-accent);
+    animation: seg-pulse 1.6s ease-in-out infinite;
+  }
+
+  &--done {
+    background: color-mix(in srgb, var(--lab-accent) 28%, var(--lab-surface));
+    border-color: color-mix(in srgb, var(--lab-accent) 45%, var(--lab-line));
+  }
+
+  &--cache {
+    // Hatched: reused from cache, not executed.
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      color-mix(in srgb, var(--lab-success) 35%, transparent) 4px,
+      color-mix(in srgb, var(--lab-success) 35%, transparent) 8px
+    );
+    border-color: var(--lab-success);
+    color: var(--lab-success);
+  }
+
+  &--failed {
+    background: var(--lab-danger);
+    border-color: var(--lab-danger);
+    color: var(--lab-on-accent);
+  }
+
+  &--stopped {
+    // Cancelled because ANOTHER scene failed: outlined, not filled like the
+    // scene that caused the failure.
+    background: transparent;
+    border: 1px dashed var(--lab-danger);
+    color: var(--lab-danger);
+  }
+
+  &--na {
+    border-style: dotted;
+    color: var(--lab-ink-dim);
+  }
+}
+
+// The one orchestrated moment: segments settle left→right on completion
+// (globally disabled under prefers-reduced-motion via styles.scss).
+.strip--settle .seg {
+  animation: seg-settle 600ms ease-out backwards;
+  animation-delay: calc(var(--settle-i, 0) * 80ms);
+}
+
+@keyframes seg-pulse {
+  50% {
+    filter: brightness(1.18);
+  }
+}
+
+@keyframes seg-settle {
+  from {
+    filter: brightness(1.4);
+  }
+}
+
+.strip__warn {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0 0;
+}
+
+.strip__error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  margin: 4px 0 0;
+}

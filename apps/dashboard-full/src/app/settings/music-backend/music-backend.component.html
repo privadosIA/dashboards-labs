@@ -1,0 +1,110 @@
+@if (settings().backend) {
+  <section class="backend" [attr.data-testid]="engine() + '-backend'">
+    <h3 class="backend__title" i18n="@@mb.title">How it runs</h3>
+    <p class="source" data-testid="backend-source">
+      <span i18n="@@mb.source">Choice:</span>
+      <app-source-chip [source]="settings().backend_source ?? 'default'" />
+      @if (!isDefault() && !external()) {
+        <button mat-button type="button" data-testid="backend-default" [disabled]="saving()" (click)="useDefault()" i18n="@@mb.useDefault">Use the default</button>
+      }
+    </p>
+
+    @if (external()) {
+      <p class="note" data-testid="backend-external">
+        <mat-icon inline>info</mat-icon>
+        <span i18n="@@mb.external">An address of another machine is saved below: the engine is an external service, so the choice of how it runs here does not apply.</span>
+      </p>
+    }
+
+    <mat-radio-group class="options" [value]="current()" [disabled]="external() || saving()" (change)="choose($event.value)" aria-label="How the generator runs" i18n-aria-label="@@mb.group">
+      @for (o of options(); track o.id) {
+        <div class="option" [attr.data-testid]="'backend-' + o.id" [class.option--on]="o.id === current()">
+          <mat-radio-button [value]="o.id" [disabled]="external() || saving() || o.blocked">{{ o.label }}</mat-radio-button>
+          @if (o.status) {
+            @if (o.status.available) {
+              <p class="status ok" data-testid="backend-status">
+                <mat-icon inline>check_circle</mat-icon>
+                <span i18n="@@mb.ready">Ready</span>
+              </p>
+            } @else if (o.blocked) {
+              <p class="status warn" data-testid="backend-status">
+                <mat-icon inline>block</mat-icon>
+                <span i18n="@@mb.noDocker">Docker cannot be used on this server. The address of another machine below still works.</span>
+              </p>
+            } @else {
+              <p class="status warn" data-testid="backend-status">
+                <mat-icon inline>warning</mat-icon>
+                <span><ng-container i18n="@@mb.lacks">Missing:</ng-container> {{ lacking(o) }}</span>
+              </p>
+            }
+          }
+          @if (o.installable && !external()) {
+            <button mat-stroked-button type="button" class="option__install" [attr.data-testid]="'backend-install-' + o.id" [disabled]="!!installing()" (click)="install(o.id)">
+              <mat-icon>download</mat-icon>
+              <ng-container i18n="@@mb.download">Download what is missing</ng-container>
+            </button>
+          }
+        </div>
+      }
+    </mat-radio-group>
+
+    @if (installing(); as job) {
+      <p class="note" role="status" data-testid="backend-installing">
+        <mat-icon inline>downloading</mat-icon>
+        <span i18n="@@mb.installing">An install is running.</span>
+        <button mat-button type="button" data-testid="backend-progress" (click)="showProgress()" i18n="@@mb.showProgress">Show progress</button>
+      </p>
+    }
+
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="backend-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+
+    @if (!external()) {
+      <div class="run" data-testid="backend-run">
+        <span class="run__state" data-testid="backend-container">
+          @switch (container()?.state) {
+            @case ('running') {
+              <mat-icon inline class="ok">check_circle</mat-icon>
+              <ng-container i18n="@@mb.running">Running</ng-container>
+              @if (container()?.port; as port) {
+                <span class="mo-data">:{{ port }}</span>
+              }
+              @if (container()?.gpu !== undefined) {
+                <ng-container i18n="@@mb.onGpu">on GPU {{ container()?.gpu }}</ng-container>
+              }
+            }
+            @case ('starting') {
+              <mat-icon inline>hourglass_top</mat-icon>
+              <ng-container i18n="@@mb.starting">Starting…</ng-container>
+            }
+            @default {
+              <mat-icon inline>radio_button_unchecked</mat-icon>
+              <ng-container i18n="@@mb.stopped">Stopped</ng-container>
+            }
+          }
+        </span>
+        @if (running()) {
+          <button mat-stroked-button type="button" data-testid="backend-stop" (click)="stop()">
+            <mat-icon>stop</mat-icon>
+            <ng-container i18n="@@mb.stop">Stop</ng-container>
+          </button>
+        } @else {
+          <button mat-flat-button type="button" data-testid="backend-start" [disabled]="!ready() || !!installing()" (click)="start()">
+            <mat-icon>play_arrow</mat-icon>
+            <ng-container i18n="@@mb.start">Start</ng-container>
+          </button>
+        }
+      </div>
+      @if (engines.callError(); as e) {
+        <p class="error" role="alert" data-testid="backend-call-error">
+          <mat-icon inline>error</mat-icon>
+          <span class="mo-data">{{ e }}</span>
+        </p>
+      }
+    }
+  </section>
+}

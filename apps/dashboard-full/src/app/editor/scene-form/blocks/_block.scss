@@ -1,0 +1,14 @@
+// What a block of the scene form shares: the rule above it and the spacing between its parts.
+@mixin section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+  border-top: 1px solid var(--lab-line);
+  padding-top: 8px;
+  margin-top: 8px;
+
+  p {
+    margin: 0;
+  }
+}

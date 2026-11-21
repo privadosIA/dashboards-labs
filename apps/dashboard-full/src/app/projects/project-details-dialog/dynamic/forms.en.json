@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "id": "project-details",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Name (letters, digits, . _ -)",
+      "placeholder": "my-video",
+      "props": { "attributes": { "data-testid": "details-name", "autocomplete": "off" } }
+    },
+    {
+      "key": "client",
+      "type": "text",
+      "label": "Client (who made it; empty for none)",
+      "placeholder": "dashboard-full",
+      "props": { "attributes": { "data-testid": "details-client", "autocomplete": "off" } }
+    },
+    {
+      "key": "adult",
+      "type": "select",
+      "label": "Content",
+      "defaultValue": "",
+      "options": [
+        { "value": "", "label": "Not reviewed" },
+        { "value": "false", "label": "Fine for everyone" },
+        { "value": "true", "label": "For people over 18" }
+      ],
+      "props": { "attributes": { "data-testid": "details-adult" } }
+    }
+  ]
+}

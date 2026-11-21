@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0;
+  max-width: 80ch;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+
+  mat-icon {
+    flex: none;
+  }
+
+  a {
+    color: var(--lab-accent);
+  }
+
+  code {
+    padding: 0 var(--lab-space-1);
+    border: 1px solid var(--lab-line);
+    border-radius: calc(var(--lab-radius-control) / 2);
+  }
+}

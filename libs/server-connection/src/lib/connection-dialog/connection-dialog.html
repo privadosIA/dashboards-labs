@@ -1,0 +1,43 @@
+<form class="connection" (submit)="$event.preventDefault(); save()">
+  <h2>{{ t.dialog.title }}</h2>
+
+  <label class="field">
+    <span>{{ t.dialog.server }}</span>
+    <input type="url" name="server" autocomplete="off" placeholder="http://192.0.2.10:4666" [value]="server()" (input)="typed('server', $event)" />
+    <small>{{ t.dialog.serverHint }}</small>
+  </label>
+
+  <label class="field">
+    <span>{{ t.dialog.token }}</span>
+    <input type="password" name="token" autocomplete="off" [value]="token()" (input)="typed('token', $event)" />
+    <small>{{ t.dialog.tokenHint }}</small>
+  </label>
+
+  <label class="remember">
+    <input type="checkbox" name="remember" [checked]="remember()" (change)="remember.set($any($event.target).checked)" />
+    <span>{{ t.dialog.remember }}</span>
+  </label>
+
+  <p class="probe" role="status" aria-live="polite" [attr.data-probe]="probe()">
+    @switch (probe()) {
+      @case ('testing') {
+        {{ t.probe.testing }}
+      }
+      @case ('ok') {
+        {{ t.probe.ok }}
+      }
+      @case ('unauthorized') {
+        {{ t.probe.unauthorized }}
+      }
+      @case ('unreachable') {
+        {{ t.probe.unreachable }}
+      }
+    }
+  </p>
+
+  <div class="actions">
+    <button type="button" class="test" (click)="test()">{{ t.dialog.test }}</button>
+    <button type="button" class="cancel" (click)="ref.close()">{{ t.dialog.cancel }}</button>
+    <button type="submit" class="save">{{ t.dialog.save }}</button>
+  </div>
+</form>

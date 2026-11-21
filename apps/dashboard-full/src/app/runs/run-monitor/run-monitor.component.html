@@ -1,0 +1,75 @@
+@if (gone()) {
+  <section class="gone" role="status" data-testid="run-gone">
+    <h2 i18n="@@monitor.goneTitle">This run is no longer in the history</h2>
+    <p class="dim" i18n="@@monitor.goneText">It was deleted from the history, so there is no state or events to show. The files it generated, if any, are still in the project.</p>
+    <a mat-flat-button routerLink="/runs" data-testid="back-to-runs">
+      <mat-icon>arrow_back</mat-icon>
+      <ng-container i18n="@@monitor.backToRuns">Back to runs</ng-container>
+    </a>
+  </section>
+} @else {
+<mo-page-header [title]="run()?.project ?? 'Run'" [description]="id()">
+  <span moActions [class]="'state state--' + state()" data-testid="run-state">{{ state() }}</span>
+  @if (elapsedMs() !== null) {
+    <span moActions class="elapsed mo-data">{{ elapsedMs() | moDuration }}</span>
+  }
+  @if (queuePosition(); as pos) {
+    <span moActions class="dim" i18n="@@monitor.queuePos">queued (position {{ pos }})</span>
+  }
+  @if (active()) {
+    <button data-cancel moActions mat-stroked-button class="danger" (click)="cancel()">
+      <mat-icon>stop_circle</mat-icon>
+      <ng-container i18n="@@monitor.cancelAction">Cancel run</ng-container>
+    </button>
+  }
+</mo-page-header>
+
+@if (!stream?.ended() && active()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<app-phase-strip [events]="stream?.events() ?? []" />
+
+@if (result(); as link) {
+  <section class="result">
+    <h3 i18n="@@monitor.result">Result</h3>
+    @if (link.kind === 'video') {
+      @if (finalArtifactUrl(); as url) {
+        <video class="player" [src]="url" controls preload="metadata"></video>
+        <a mat-stroked-button [href]="url" download>
+          <mat-icon>download</mat-icon>
+          <span class="mo-data">{{ model().finalArtifact ?? link.artifact }}</span>
+        </a>
+        <a mat-stroked-button [routerLink]="['/projects', run()?.project, 'review']" data-testid="open-review">
+          <mat-icon>fact_check</mat-icon>
+          <ng-container i18n="@@monitor.openReview">Review the clips</ng-container>
+        </a>
+      }
+    } @else if (link.kind === 'music') {
+      <a mat-flat-button [routerLink]="['/projects', link.project, 'music']" data-testid="open-music">
+        <mat-icon>library_music</mat-icon>
+        <ng-container i18n="@@monitor.openMusic">View the songs</ng-container>
+      </a>
+    } @else {
+      <a mat-flat-button routerLink="/gallery" [queryParams]="{ project: link.project }" data-testid="open-gallery">
+        <mat-icon>photo_library</mat-icon>
+        <ng-container i18n="@@monitor.openGallery">View in the gallery</ng-container>
+      </a>
+    }
+  </section>
+}
+
+<app-run-resources [runId]="id()" [state]="state()" />
+
+<mat-expansion-panel class="log-panel">
+  <mat-expansion-panel-header>
+    <mat-panel-title i18n="@@monitor.log">Event log</mat-panel-title>
+    <mat-panel-description class="mo-data">{{ stream?.lines()?.length ?? 0 }}</mat-panel-description>
+  </mat-expansion-panel-header>
+  <cdk-virtual-scroll-viewport itemSize="20" class="log">
+    <div *cdkVirtualFor="let line of stream?.lines() ?? []" class="log__line mo-data">
+      {{ line }}
+    </div>
+  </cdk-virtual-scroll-viewport>
+</mat-expansion-panel>
+}

@@ -1,0 +1,214 @@
+// Prints on a lightbox: the images are the brightest thing on screen;
+// the chrome stays two steps dimmer (darkroom discipline). No hover
+// lifts, no entry animations — actions live in a quiet menu.
+// Fields keep room below them for hints, so the controls are aligned by their top edge, and the button has the height of an input.
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+
+  > a[mat-stroked-button] {
+    height: 40px;
+  }
+}
+
+.mode-tag {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.pinned {
+  color: var(--lab-success);
+  font-size: var(--lab-fs-meta);
+}
+
+.empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--lab-ink-dim);
+  border: 1px dashed var(--lab-line);
+
+  p:first-child {
+    color: var(--lab-ink);
+    font-size: var(--lab-fs-section);
+  }
+}
+
+.scene-group {
+  margin-bottom: 24px;
+
+  h3 {
+    font-size: var(--lab-fs-body);
+    color: var(--lab-ink-dim);
+    border-bottom: 1px solid var(--lab-line);
+    padding-bottom: 4px;
+    margin: 0 0 8px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.print {
+  margin: 0;
+
+  &__frame {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--lab-line);
+    background: var(--lab-player-bg);
+    cursor: zoom-in;
+
+    img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+    }
+  }
+
+  figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+  }
+}
+
+// Songs of a music project: the same quiet layout as the studio's results.
+.studio-link {
+  margin-left: 12px;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--lab-ink);
+  }
+}
+
+.songs {
+  display: grid;
+  gap: 16px;
+}
+
+.song {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--lab-line);
+  background: var(--lab-surface);
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+  }
+
+  &__title {
+    color: var(--lab-ink);
+  }
+
+  &__meta,
+  &__task,
+  &__note {
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__caption {
+    margin: 0;
+    color: var(--lab-ink-dim);
+  }
+
+  &__missing {
+    margin: 0;
+    color: var(--lab-warn);
+  }
+
+  &__lyrics pre {
+    white-space: pre-wrap;
+    margin: 6px 0 0;
+  }
+
+  &__download {
+    justify-self: start;
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--lab-ink);
+    }
+  }
+}
+
+.final {
+  display: block;
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 16 / 9; // Firefox shows 300x150 until the file is known, then jumps
+  background: var(--lab-player-bg);
+}
+
+.clips {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.clip {
+  margin: 0;
+
+  video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--lab-player-bg);
+  }
+
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--lab-space-2);
+    padding-top: var(--lab-space-1);
+  }
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+}
+
+.hidden-modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+  color: var(--lab-ink-dim);
+}
+
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+// The space the page makes while it is pulled down to refresh.
+.pull {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--lab-ink-dim);
+
+  &--ready {
+    color: var(--lab-accent);
+  }
+}

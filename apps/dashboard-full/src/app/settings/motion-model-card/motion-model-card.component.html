@@ -1,0 +1,58 @@
+@if (model(); as m) {
+  <mo-panel heading="Model for motion graphics" i18n-heading="@@motionModel.title">
+    <p class="note" i18n="@@motionModel.intro">
+      Writing the page of a motion graphic or an overlay is writing code: a big model does it much better than a small one. Here you choose the model for this only; the prompt assistant does not change.
+    </p>
+    <p class="current" data-testid="motion-model-current">
+      <span i18n="@@motionModel.inUse">In use:</span>
+      <span class="mo-data">{{ m.saved || m.default }}</span>
+      @if (!m.saved) {
+        <span class="chip" i18n="@@motionModel.isAssistant">the default</span>
+      }
+    </p>
+    <mat-form-field class="wide">
+      <mat-label i18n="@@motionModel.label">Model</mat-label>
+      <input
+        matInput
+        list="motion-models"
+        data-testid="motion-model-input"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="qwen3-coder:30b"
+        i18n-placeholder="@@motionModel.placeholder"
+        [value]="input()"
+        (focus)="suggest()"
+        (input)="input.set($any($event.target).value)"
+      />
+      <datalist id="motion-models">
+        @for (n of installed(); track n) {
+          <option [value]="n"></option>
+        }
+      </datalist>
+      <mat-hint i18n="@@motionModel.hint">Empty: gemma4 if installed (26b, then 31b), otherwise the assistant's. Pick an installed one or type the name of one your provider offers.</mat-hint>
+    </mat-form-field>
+    @if (error(); as e) {
+      <p class="error" role="alert" data-testid="motion-model-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e }}</span>
+      </p>
+    }
+    <div class="actions">
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="motion-model-save"
+        [disabled]="saving() || input().trim() === m.saved"
+        (click)="save(input().trim())"
+        i18n="@@motionModel.save"
+      >
+        Save
+      </button>
+      @if (m.saved) {
+        <button mat-button type="button" data-testid="motion-model-reset" [disabled]="saving()" (click)="save('')" i18n="@@motionModel.reset">
+          Use the assistant's
+        </button>
+      }
+    </div>
+  </mo-panel>
+}

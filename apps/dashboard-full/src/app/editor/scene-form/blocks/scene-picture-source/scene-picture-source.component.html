@@ -1,0 +1,26 @@
+@if (mode() === 'motion') {
+  <app-motion-page [sceneId]="scene()?.id ?? ''" [overlay]="false" [described]="(scene()?.motion_graphic ?? '').trim() !== ''" />
+}
+@if (mode() === 'clip') {
+  <app-clip-picker
+    [value]="scene()?.clip ?? ''"
+    [error]="errors().clip"
+    [start]="scene()?.clip_start"
+    [end]="scene()?.clip_end"
+    [speed]="scene()?.clip_speed"
+    [trimError]="errors().clipTrim"
+    [speedError]="errors().clipSpeed"
+    (picked)="patch({ clip: $event, clip_start: undefined, clip_end: undefined, clip_speed: undefined })"
+    (trimmed)="patch($event)"
+  />
+}
+@if (mode() === 'own') {
+  <app-picture-picker
+    testId="picture"
+    [value]="scene()?.image ?? ''"
+    [error]="errors().image"
+    i18n-hint="@@scene.pictureHint"
+    hint="Fitted to the project resolution (cropping the excess)."
+    (picked)="patch({ image: $event })"
+  />
+}

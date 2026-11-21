@@ -1,0 +1,361 @@
+@if (track(); as t) {
+  <div class="form">
+    @for (e of serverRest(); track $index) {
+      <p class="server-error" role="alert">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ e.text }}</span>
+      </p>
+    }
+
+    <div class="row">
+      <mat-form-field class="id">
+        <mat-label i18n="@@music.id">Id</mat-label>
+        <input
+          matInput
+          class="mo-data"
+          data-testid="track-id"
+          [value]="t.id"
+          (change)="patch({ id: $any($event.target).value })"
+        />
+        @if (error('id'); as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        } @else {
+          <mat-hint i18n="@@music.idHint">File name: track.mp3</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="title">
+        <mat-label i18n="@@music.title">Title</mat-label>
+        <input
+          matInput
+          data-testid="track-title"
+          [value]="t.title ?? ''"
+          [placeholder]="titlePlaceholder()"
+          (change)="patch({ title: $any($event.target).value.trim() || undefined })"
+        />
+        <mat-hint i18n="@@music.titleHint">What the player shows (the id if you leave it empty)</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="language">
+        <mat-label i18n="@@music.cover">Cover</mat-label>
+        <mat-select data-testid="track-cover" [value]="t.cover ?? ''" (selectionChange)="patch({ cover: $event.value || undefined })">
+          <mat-option value="" i18n="@@music.coverProject">As the project</mat-option>
+          <mat-option value="off" i18n="@@music.coverOff">No cover</mat-option>
+          @for (p of pictures(); track p) {
+            <mat-option [value]="p"><span class="mo-data">{{ p }}</span></mat-option>
+          }
+        </mat-select>
+        <mat-hint i18n="@@music.coverHint">A picture of your own from the sources, or none</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="language">
+        <mat-label i18n="@@music.language">Voice language</mat-label>
+        <mat-select
+          data-testid="track-language"
+          [value]="t.vocal_language ?? ''"
+          [disabled]="t.instrumental === true"
+          (selectionChange)="patch({ vocal_language: $event.value })"
+        >
+          <mat-option value="" i18n="@@music.languageAuto">Automatic (from the lyrics; English if none)</mat-option>
+          @for (l of languageOptions(); track l.value) {
+            <mat-option [value]="l.value">{{ l.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (!dr2()) {
+      <mat-form-field class="language">
+        <mat-label i18n="@@music.vocals">Voice</mat-label>
+        <mat-select
+          data-testid="track-vocals"
+          [value]="t.vocals ?? ''"
+          [disabled]="t.instrumental === true"
+          (selectionChange)="patch({ vocals: $event.value })"
+        >
+          <mat-option value="" i18n="@@music.vocalsAuto">Automatic (the model picks it)</mat-option>
+          @for (v of vocalStyles; track v.value) {
+            <mat-option [value]="v.value">{{ v.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint i18n="@@music.vocalsHint">It's a hint to the model: it doesn't always follow it.</mat-hint>
+      </mat-form-field>
+      }
+
+      @if (!dr2() || t.instrumental) {
+      <mat-slide-toggle
+        class="instrumental"
+        data-testid="track-instrumental"
+        [checked]="t.instrumental === true"
+        (change)="patch({ instrumental: $event.checked })"
+        i18n="@@music.instrumental"
+        >Instrumental (no voice)</mat-slide-toggle
+      >
+      }
+    </div>
+
+    @if (dr2Cannot(); as why) {
+      <p class="server-error" role="alert" data-testid="track-dr2-cannot">
+        <mat-icon inline>error</mat-icon>
+        <span>{{ why }}</span>
+      </p>
+    }
+
+    @if (!service() || t.task || t.reference) {
+      @if (heart()) {
+        <p class="server-error" role="alert" data-testid="track-heart-reference">
+          <mat-icon inline>error</mat-icon>
+          <span i18n="@@music.heartReference">HeartMuLa does not take references or transform songs: remove it here or use ACE-Step.</span>
+        </p>
+      }
+      <app-track-task [index]="index()" />
+    }
+
+    @if (!t.task) {
+      <div class="extract" data-testid="track-extract-row">
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="track-extract"
+          [disabled]="!whisperReady() || store.running()"
+          (click)="openExtract()"
+        >
+          <mat-icon>movie_filter</mat-icon>
+          <ng-container i18n="@@music.extract">Take it from a video or audio</ng-container>
+        </button>
+        @if (!whisperReady()) {
+          <span class="extract__why" data-testid="track-extract-why">
+            @if (whisperMissing() === 'model') {
+              <ng-container i18n="@@music.extractNoModel">The Whisper model is missing: install it in Models (Music tab).</ng-container>
+            } @else {
+              <ng-container i18n="@@music.extractNoProgram">whisper-cli is missing: bash scripts/get-whisper.sh --build</ng-container>
+            }
+          </span>
+        }
+      </div>
+      <app-track-assist
+        [trackId]="t.id"
+        [instrumental]="t.instrumental === true"
+        [generator]="generatorName()"
+        (applied)="applyProposal($event)"
+      />
+    }
+
+    <mat-form-field class="wide">
+      <mat-label i18n="@@music.prompt">Style</mat-label>
+      <textarea
+        matInput
+        rows="3"
+        data-testid="track-prompt"
+        [value]="t.prompt"
+        (change)="patch({ prompt: $any($event.target).value })"
+        i18n-placeholder="@@music.promptPlaceholder"
+        placeholder="Pop ballad with piano and a warm male voice, slow tempo…"
+      ></textarea>
+      @if (error('prompt'); as err) {
+        <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+      } @else {
+        <mat-hint i18n="@@music.promptHint">Describe the genre, instruments and mood.</mat-hint>
+      }
+    </mat-form-field>
+
+    <app-style-templates
+      testId="track-templates"
+      [text]="t.prompt"
+      (changed)="patch({ prompt: $event })"
+    />
+
+    @if (service()) {
+      <mat-form-field class="wide">
+        <mat-label i18n="@@music.tags">Tags</mat-label>
+        <input
+          matInput
+          class="mo-data"
+          data-testid="track-tags"
+          [value]="t.tags ?? ''"
+          (change)="patch({ tags: $any($event.target).value })"
+          [placeholder]="tagsExample"
+        />
+        @if (error('tags'); as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        } @else if (tagsError()) {
+          <mat-hint class="error" role="alert">{{ tagsError() }}</mat-hint>
+        } @else {
+          <mat-hint i18n="@@music.tagsHint">English words separated by commas: genre, instruments, mood. This generator does not read the long style text, only these.</mat-hint>
+        }
+        <button
+          matSuffix
+          mat-icon-button
+          type="button"
+          data-testid="track-tags-derive"
+          [disabled]="tagsBusy() || !t.prompt.trim()"
+          (click)="deriveTags()"
+          i18n-aria-label="@@music.tagsDerive"
+          aria-label="Suggest tags from the style"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+        </button>
+      </mat-form-field>
+    }
+
+    <mat-form-field class="wide lyrics">
+      <mat-label i18n="@@music.lyrics">Lyrics</mat-label>
+      <textarea
+        matInput
+        rows="10"
+        data-testid="track-lyrics"
+        class="mo-data"
+        [value]="t.lyrics ?? ''"
+        [disabled]="t.instrumental === true"
+        (change)="patch({ lyrics: $any($event.target).value })"
+        i18n-placeholder="@@music.lyricsPlaceholder"
+        placeholder="[Verse]
+Camino por la calle bajo la lluvia
+
+[Chorus]
+Vuelvo a casa, vuelvo a ti"
+      ></textarea>
+      <mat-hint i18n="@@music.lyricsHint">
+        With section tags ([Verse], [Chorus]…). If you write them, they are sung as is; if you leave them empty, the model composes them.
+      </mat-hint>
+    </mat-form-field>
+
+    <div class="row meta">
+      @if (!t.task) {
+      <mat-form-field class="narrow">
+        <mat-label i18n="@@music.duration">Duration (s)</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          class="mo-data"
+          data-testid="track-duration"
+          [value]="t.duration_seconds ?? ''"
+          (change)="setNumber('duration_seconds', $any($event.target).value)"
+          i18n-placeholder="@@music.autoF"
+          placeholder="automatic"
+        />
+        @if (error('duration'); as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        }
+      </mat-form-field>
+      }
+
+      @if (!service()) {
+      <mat-form-field class="narrow">
+        <mat-label>bpm</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          class="mo-data"
+          data-testid="track-bpm"
+          [value]="t.bpm ?? ''"
+          (change)="setNumber('bpm', $any($event.target).value)"
+          i18n-placeholder="@@music.autoM"
+          placeholder="automatic"
+        />
+        @if (error('bpm'); as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="narrow">
+        <mat-label i18n="@@music.key">Key</mat-label>
+        <input
+          matInput
+          class="mo-data"
+          data-testid="track-key"
+          [value]="t.keyscale ?? ''"
+          (change)="patch({ keyscale: $any($event.target).value })"
+          placeholder="C minor"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="narrow">
+        <mat-label i18n="@@music.timeSignature">Time signature</mat-label>
+        <input
+          matInput
+          class="mo-data"
+          data-testid="track-timesignature"
+          [value]="t.timesignature ?? ''"
+          (change)="patch({ timesignature: $any($event.target).value })"
+          placeholder="4"
+        />
+      </mat-form-field>
+      }
+
+      <mat-form-field class="narrow">
+        <mat-label>seed</mat-label>
+        <input
+          matInput
+          type="number"
+          class="mo-data"
+          data-testid="track-seed"
+          [value]="t.seed ?? ''"
+          (change)="setNumber('seed', $any($event.target).value)"
+          i18n-placeholder="@@music.seedRandom"
+          placeholder="random"
+        />
+        <mat-hint i18n="@@music.seedHint">Empty = different on each run</mat-hint>
+      </mat-form-field>
+
+      @if (showAdapter() && !service()) {
+        <mat-form-field class="adapter">
+          <mat-label i18n="@@music.trackAdapter">Adapter (LoRA)</mat-label>
+          <mat-select
+            data-testid="track-adapter"
+            [value]="t.adapter ?? ''"
+            (selectionChange)="patch({ adapter: $event.value })"
+          >
+            <mat-option value="" i18n="@@music.trackAdapterProject">— the project's —</mat-option>
+            @for (o of adapterChoices(); track o.value) {
+              <mat-option [value]="o.value">
+                <span class="mo-data">{{ o.value }}</span>
+                @if (o.missing) {
+                  <span class="missing" i18n="@@music.notOnDisk"> ⚠ not on disk</span>
+                }
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="narrow">
+          <mat-label i18n="@@music.trackAdapterScale">Strength</mat-label>
+          <input
+            matInput
+            type="number"
+            min="0"
+            step="0.1"
+            class="mo-data"
+            data-testid="track-adapter-scale"
+            [value]="t.adapter_scale ?? ''"
+            (change)="setNumber('adapter_scale', $any($event.target).value)"
+            i18n-placeholder="@@music.trackAdapterScaleHint"
+            placeholder="the project's"
+          />
+          @if (error('adapter'); as err) {
+            <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+          } @else {
+            <mat-hint i18n="@@music.trackAdapterScaleNote">0 = no effect</mat-hint>
+          }
+        </mat-form-field>
+      }
+
+      <mat-form-field class="narrow">
+        <mat-label i18n="@@music.variants">Variants</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          class="mo-data"
+          data-testid="track-variants"
+          [value]="t.variants ?? 1"
+          (change)="setNumber('variants', $any($event.target).value)"
+        />
+        @if (error('variants'); as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        }
+      </mat-form-field>
+    </div>
+  </div>
+}

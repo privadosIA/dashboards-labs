@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  // The field can be taller than its box (a hint or an error under it): the button lines up with the box, not with the whole.
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+  margin-top: var(--lab-space-3);
+}
+
+.select {
+  width: 320px;
+  max-width: 100%;
+}
+
+.preview {
+  display: block;
+  max-width: min(100%, 480px);
+  max-height: 270px;
+  margin-top: var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+}
+
+.missing {
+  color: var(--lab-warn);
+}
+
+.error {
+  color: var(--lab-danger);
+}
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: var(--lab-space-2) 0 0;
+  color: var(--lab-danger);
+  border: 1px solid var(--lab-danger);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  font-size: var(--lab-fs-meta);
+}

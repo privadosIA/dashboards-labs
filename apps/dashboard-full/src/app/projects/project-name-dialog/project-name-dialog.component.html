@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <form (submit)="$event.preventDefault(); submit()">
+    <mat-form-field class="field">
+      <mat-label i18n="@@projectName.label">Project identifier</mat-label>
+      <input matInput [formControl]="name" cdkFocusInitial autocomplete="off" />
+      @if (name.hasError('pattern')) {
+        <mat-error i18n="@@projectName.pattern"
+          >Use letters, numbers and “._-”, starting with a letter or number (max. 64)</mat-error
+        >
+      } @else if (name.hasError('required')) {
+        <mat-error i18n="@@projectName.required">Enter an identifier</mat-error>
+      }
+    </mat-form-field>
+    @if (data.choice) {
+      <mat-checkbox class="auto" data-testid="new-auto" [checked]="auto()" (change)="setAuto($event.checked)" i18n="@@projectName.auto">
+        I'm lazy: choose the best for my machine (models, quality and animation)
+      </mat-checkbox>
+      <mat-form-field class="field">
+        <mat-label i18n="@@projectName.style">Style (optional)</mat-label>
+        <mat-select data-testid="new-style" [disabled]="auto()" [value]="data.choice.style ?? ''" (selectionChange)="setStyle($event.value)">
+          <mat-option value="" i18n="@@projectName.noChoice">— the usual one —</mat-option>
+          @for (s of styles(); track s.value) {
+            <mat-option [value]="s.value" [disabled]="!s.available">{{ s.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint data-testid="new-style-help">{{ currentStyleHelp() }}</mat-hint>
+      </mat-form-field>
+      @if (showEditEngine()) {
+        <app-edit-engine-select testId="new-edit-engine" [engines]="editEngines()" [value]="pickedEngine()" (picked)="setEditEngine($event)" />
+      }
+      <mat-form-field class="field">
+        <mat-label i18n="@@projectName.adult">Content (optional)</mat-label>
+        <mat-select data-testid="new-adult" [value]="adultValue()" (selectionChange)="setAdult($event.value)">
+          <mat-option value="" i18n="@@projectName.adultUnset">Not reviewed</mat-option>
+          <mat-option value="false" i18n="@@projectName.adultFine">Fine for everyone</mat-option>
+          @if (!env.hidesAdult()) {
+            <mat-option value="true" i18n="@@projectName.adultAdult">For people over 18</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field">
+        <mat-label i18n="@@projectName.tier">Quality (optional)</mat-label>
+        <mat-select data-testid="new-tier" [disabled]="auto()" [value]="data.choice.tier ?? ''" (selectionChange)="setTier($event.value)">
+          <mat-option value="" i18n="@@projectName.noChoice">— the usual one —</mat-option>
+          @for (t of tiers; track t.value) {
+            <mat-option [value]="t.value">{{ t.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-flat-button (click)="submit()">{{ data.confirmLabel }}</button>
+</mat-dialog-actions>

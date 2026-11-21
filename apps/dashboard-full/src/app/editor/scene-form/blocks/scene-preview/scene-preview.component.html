@@ -1,0 +1,10 @@
+<section class="preview" data-testid="scene-preview">
+  @if (stage() < 2) {
+    <video class="preview__video" controls loop preload="metadata" [src]="clipUrl()" (error)="failed()"></video>
+  } @else {
+    <p class="preview__none" data-testid="preview-none">
+      <ng-container i18n="@@scene.previewNone">There is no clip of this scene yet: it is made by running the project.</ng-container>
+      <button mat-button type="button" (click)="retry()" i18n="@@scene.previewRetry">Check again</button>
+    </p>
+  }
+</section>

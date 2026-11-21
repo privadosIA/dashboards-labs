@@ -1,0 +1,167 @@
+<mo-panel heading="Data" i18n-heading="@@data.title">
+  <p class="note" i18n="@@data.intro">
+    The server keeps its state in a database. Here you can see its engine and what it holds, import the state that used to be kept in files, take a backup and delete the old files once they are in the database.
+  </p>
+
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" data-testid="data-busy" />
+  }
+
+  @if (loadFailed()) {
+    <p class="error" role="alert" data-testid="data-load-error">
+      <mat-icon inline>error</mat-icon>
+      <span i18n="@@data.loadFailed">The state of the data could not be read.</span>
+      <button mat-button type="button" data-testid="data-retry" [disabled]="!!busy()" (click)="read()" i18n="@@data.retry">Try again</button>
+    </p>
+  }
+
+  @if (status(); as s) {
+    <section class="block" data-testid="data-state">
+      <p class="current">
+        <mat-icon inline>storage</mat-icon>
+        <span i18n="@@data.engine">Engine:</span>
+        <span class="mo-data" data-testid="data-engine">{{ s.engine }}</span>
+        <span class="sep">·</span>
+        <span class="mo-data" data-testid="data-migrations" i18n="@@data.migrationsApplied">{{ s.migrations.applied.length }} migrations applied</span>
+      </p>
+
+      @if (s.migrations.pending.length > 0) {
+        <div class="warning" role="status" data-testid="data-pending">
+          <p class="warning__head">
+            <mat-icon inline>warning</mat-icon>
+            <span i18n="@@data.pending">Pending migrations: they apply when the server starts.</span>
+          </p>
+          <ul class="plain">
+            @for (m of s.migrations.pending; track m) {
+              <li class="mo-data">{{ m }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <h4 class="sub" i18n="@@data.tables">Rows per table</h4>
+      <ul class="tables" appAutoAnimate data-testid="data-tables">
+        @for (t of s.tables; track t.name) {
+          <li class="table" [attr.data-testid]="'data-table-' + t.name">
+            <span class="mo-data">{{ t.name }}</span>
+            <span class="mo-data rows">{{ t.rows }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="block" data-testid="data-imports-block">
+    <h4 class="sub" i18n="@@data.imports">Import of the old state files</h4>
+    <ul class="records" appAutoAnimate data-testid="data-imports">
+      @for (r of imports(); track r.entity) {
+        <li class="record" [attr.data-testid]="'data-import-' + r.entity" [attr.data-state]="r.state">
+          <div class="record__head">
+            <span class="mo-data record__entity">{{ r.entity }}</span>
+            <span class="chip" [attr.data-state]="r.state">
+              @if (r.state === 'done') {
+                <ng-container i18n="@@data.stateDone">imported</ng-container>
+              } @else {
+                <ng-container i18n="@@data.stateFailed">failed</ng-container>
+              }
+            </span>
+            <button mat-button type="button" [attr.data-testid]="'data-import-again-' + r.entity" [disabled]="!!busy()" (click)="runImport(r.entity)" i18n="@@data.importAgain">Import again</button>
+          </div>
+          <p class="note" i18n="@@data.recordCounts">{{ r.created }} rows created · {{ r.existing }} were already there</p>
+          @if (r.error; as e) {
+            <p class="error" role="alert" [attr.data-testid]="'data-import-error-' + r.entity">
+              <mat-icon inline>error</mat-icon>
+              <span class="mo-data">{{ e }}</span>
+            </p>
+          }
+          @if (r.skipped.length > 0) {
+            <ul class="plain skipped" [attr.data-testid]="'data-import-skipped-' + r.entity">
+              @for (f of r.skipped; track f.path) {
+                <li><span class="mo-data">{{ f.path }}</span> <span class="note">{{ f.reason }}</span></li>
+              }
+            </ul>
+          }
+        </li>
+      }
+    </ul>
+    @if (imports().length === 0 && status()) {
+      <p class="note" data-testid="data-imports-empty" i18n="@@data.noImports">Nothing has been imported yet.</p>
+    }
+    <div class="actions">
+      <button mat-flat-button type="button" data-testid="data-import-all" [disabled]="!!busy()" (click)="runImport()">
+        <mat-icon>move_down</mat-icon>
+        <ng-container i18n="@@data.importNow">Import now</ng-container>
+      </button>
+      <button mat-stroked-button type="button" data-testid="data-refresh" [disabled]="!!busy()" (click)="read()">
+        <mat-icon>refresh</mat-icon>
+        <ng-container i18n="@@data.refresh">Read again</ng-container>
+      </button>
+    </div>
+  </section>
+
+  <section class="block" data-testid="data-export-block">
+    <h4 class="sub" i18n="@@data.export">Backup</h4>
+    <p class="note" i18n="@@data.exportNote">
+      A .zip with one file per table and a manifest. It holds no secret and no media. It is restored on the server with <code>orchestrator data restore</code>.
+    </p>
+    <div class="actions">
+      <button mat-stroked-button type="button" data-testid="data-export" [disabled]="!!busy()" (click)="downloadExport()">
+        <mat-icon>download</mat-icon>
+        <ng-container i18n="@@data.exportButton">Download export</ng-container>
+      </button>
+    </div>
+  </section>
+
+  <section class="block" data-testid="data-legacy-block">
+    <h4 class="sub" i18n="@@data.legacy">Old state files</h4>
+    @if (legacy().length > 0) {
+      <p class="note" i18n="@@data.legacyNote">Files the server used before the database. Delete them once their entity is imported: nothing is ever deleted without this button.</p>
+      <ul class="legacy" appAutoAnimate data-testid="data-legacy">
+        @for (l of legacy(); track l.entity) {
+          <li class="legacy__item">
+            <mat-checkbox [attr.data-testid]="'data-legacy-' + l.entity" [checked]="ticked().has(l.entity)" [disabled]="!!busy()" (change)="toggle(l.entity)">
+              <span class="mo-data">{{ l.entity }}</span>
+            </mat-checkbox>
+            <span class="note">{{ l.files }} · {{ l.bytes | moBytes }}</span>
+          </li>
+        }
+      </ul>
+      <div class="actions">
+        <button mat-stroked-button type="button" class="danger" data-testid="data-clean" [disabled]="!!busy() || pickedLegacy().length === 0" (click)="clean()">
+          <mat-icon>delete</mat-icon>
+          <ng-container i18n="@@data.cleanButton">Delete old state files</ng-container>
+        </button>
+      </div>
+    } @else if (status()) {
+      <p class="note" data-testid="data-legacy-empty" i18n="@@data.noLegacy">No old state files are left.</p>
+    }
+  </section>
+
+  <div class="results" appAutoAnimate aria-live="polite">
+    @if (problem(); as p) {
+      <div class="error" role="alert" data-testid="data-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ p.text }}</span>
+        @if (p.nothingDeleted) {
+          <span data-testid="data-nothing-deleted" i18n="@@data.nothingDeleted">Nothing was deleted.</span>
+        }
+      </div>
+    }
+    @if (cleaned(); as c) {
+      <div class="ok" data-testid="data-cleaned">
+        <p class="ok__head">
+          <mat-icon inline>check_circle</mat-icon>
+          <span i18n="@@data.cleaned">Deleted:</span>
+        </p>
+        <ul class="plain">
+          @for (d of c; track d.entity) {
+            <li>
+              <span class="mo-data">{{ d.entity }}</span>
+              <span class="note">{{ d.deleted }} · {{ d.bytes | moBytes }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+</mo-panel>

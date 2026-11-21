@@ -1,0 +1,63 @@
+<h2 mat-dialog-title id="history-title">
+  <ng-container i18n="@@projectHistory.title">Versions of</ng-container>
+  <span class="mo-data" data-testid="history-project">{{ data.projectId }}</span>
+</h2>
+<mat-dialog-content>
+  <p class="note" i18n="@@projectHistory.intro">Every change to the definition keeps the text it replaced. The server keeps the 20 newest. Choose one to read it, and restore it if you want to go back.</p>
+
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" data-testid="history-busy" />
+  }
+
+  @if (loadFailed()) {
+    <p class="problem" role="alert" data-testid="history-load-error">
+      <mat-icon inline>error</mat-icon>
+      <span i18n="@@projectHistory.loadFailed">The versions could not be read.</span>
+      <button mat-button type="button" data-testid="history-retry" (click)="retry()" i18n="@@projectHistory.retry">Try again</button>
+    </p>
+  } @else if (loaded() && versions().length === 0) {
+    <p class="note" data-testid="history-empty" i18n="@@projectHistory.empty">This project has no earlier versions yet.</p>
+  }
+
+  <ul class="versions" appAutoAnimate data-testid="versions">
+    @for (v of versions(); track v.version) {
+      <li class="version" [class.version--on]="chosen() === v.version">
+        <button type="button" class="version__pick" [attr.data-testid]="'version-' + v.version" [attr.aria-pressed]="chosen() === v.version" (click)="choose(v)">
+          <span class="version__n mo-data">#{{ v.version }}</span>
+          <span class="version__when">{{ when(v) }}</span>
+          <span class="chip" [attr.data-reason]="v.reason">{{ reason(v) }}</span>
+          <span class="version__size mo-data">{{ v.bytes | moBytes }}</span>
+        </button>
+        @if (chosen() === v.version) {
+          @if (text() !== null) {
+            <pre class="yaml mo-data" data-testid="version-text" tabindex="0" role="textbox" aria-readonly="true" aria-multiline="true" aria-labelledby="history-title">{{ text() }}</pre>
+          }
+          <div class="version__actions">
+            <button mat-flat-button type="button" [attr.data-testid]="'restore-' + v.version" [disabled]="busy() || text() === null" (click)="restore(v)">
+              <mat-icon>history</mat-icon>
+              <ng-container i18n="@@projectHistory.restore">Restore this version</ng-container>
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  <div class="results" appAutoAnimate aria-live="polite">
+    @if (problem(); as why) {
+      <p class="problem" role="alert" data-testid="history-problem">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ why }}</span>
+      </p>
+    }
+    @if (restored(); as n) {
+      <p class="ok" data-testid="history-restored">
+        <mat-icon inline>check_circle</mat-icon>
+        <span i18n="@@projectHistory.restored">Version {{ n }} restored.</span>
+      </p>
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="history-close" [mat-dialog-close]="undefined" i18n="@@projectHistory.close">Close</button>
+</mat-dialog-actions>

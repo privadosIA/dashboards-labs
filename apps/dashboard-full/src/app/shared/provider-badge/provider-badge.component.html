@@ -1,0 +1,7 @@
+@if (names().length) {
+  <span class="badge" data-testid="provider-badge" [attr.title]="title()">
+    <mat-icon inline>cloud</mat-icon>
+    <ng-container i18n="@@badge.external">external</ng-container>
+    · <span class="mo-data">{{ names().join(', ') }}</span>
+  </span>
+}

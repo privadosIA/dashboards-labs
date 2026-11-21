@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "id": "stats",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "type": "table",
+      "id": "stats-slowest",
+      "dataKey": "slowest",
+      "filter": true,
+      "filterLabel": "Search",
+      "searchKeys": [
+        "project"
+      ],
+      "pageSize": 10,
+      "pageSizeOptions": [
+        4,
+        10,
+        20,
+        50,
+        100
+      ],
+      "persistState": "session",
+      "columns": [
+        {
+          "key": "id",
+          "label": "Run",
+          "type": "link",
+          "href": "/runs/{runId}",
+          "sortable": true
+        },
+        {
+          "key": "project",
+          "label": "Project",
+          "sortable": true
+        },
+        {
+          "key": "modeLabel",
+          "label": "Type",
+          "sortable": true
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "sortable": true
+        },
+        {
+          "key": "seconds",
+          "label": "Duration",
+          "template": "seconds",
+          "sortable": true
+        }
+      ]
+    }
+  ]
+}

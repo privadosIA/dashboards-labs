@@ -1,0 +1,12 @@
+@if (choices().length > 1) {
+  <mat-button-toggle-group class="engine" [value]="current()" (change)="picked.emit($event.value)" hideSingleSelectionIndicator aria-label="Retouch engine" i18n-aria-label="@@editEngine.aria" [attr.data-testid]="testId()">
+    @for (e of choices(); track e) {
+      <mat-button-toggle [value]="e" [attr.data-testid]="testId() + '-' + e">{{ label(e) }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+  <p class="note" [attr.data-testid]="testId() + '-help'">{{ help(current()) }}</p>
+} @else if (choices().length === 1) {
+  <p class="note" [attr.data-testid]="testId() + '-single'">
+    <ng-container i18n="@@editEngine.used">Engine:</ng-container> {{ label(choices()[0]) }}. {{ help(choices()[0]) }}
+  </p>
+}

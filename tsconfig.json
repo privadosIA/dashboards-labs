@@ -1,0 +1,53 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@lab/api-client": [
+        "./libs/api-client/src/public-api.ts"
+      ],
+      "@lab/forms-kit": [
+        "./libs/forms-kit/src/public-api.ts"
+      ],
+      "@lab/motion-ui": [
+        "./libs/motion-ui/src/public-api.ts"
+      ],
+      "@lab/motion-parts": [
+        "./libs/motion-parts/src/public-api.ts"
+      ],
+      "@lab/paged-list": [
+        "./libs/paged-list/src/public-api.ts"
+      ],
+      "@lab/server-connection": [
+        "./libs/server-connection/src/public-api.ts"
+      ],
+      "@lab/theme-switch": [
+        "./libs/theme-switch/src/public-api.ts"
+      ]
+    }
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

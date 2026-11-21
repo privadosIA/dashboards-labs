@@ -1,0 +1,40 @@
+{
+  "name": "@dashboards-lab/mock-api",
+  "version": "0.1.0",
+  "description": "Servidor simulado de la API de mediaOrquestator, para desarrollar un dashboard sin el servidor Go",
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "bin": {
+    "mock-api": "server.mjs"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "files": [
+    "server.mjs",
+    "fixtures.mjs",
+    "generation.mjs",
+    "video-edit.mjs",
+    "music-motion.mjs",
+    "motion-scenes.mjs",
+    "listing.mjs",
+    "database.mjs",
+    "data.mjs",
+    "catalog.mjs",
+    "bulk.mjs",
+    "zip.mjs",
+    "assets",
+    "README.md"
+  ],
+  "dependencies": {
+    "js-yaml": "^5.4.3"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

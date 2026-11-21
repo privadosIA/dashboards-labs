@@ -1,0 +1,51 @@
+<figure class="frame" role="group" [attr.aria-labelledby]="titleId" [attr.aria-describedby]="descId">
+  <figcaption class="frame__head">
+    <h4 class="frame__title" [id]="titleId">{{ title() }}</h4>
+    @if (hasData()) {
+      <button
+        mat-button
+        type="button"
+        class="frame__toggle"
+        data-testid="chart-toggle"
+        [attr.aria-pressed]="showTable()"
+        (click)="toggle()"
+      >
+        <mat-icon>{{ showTable() ? 'bar_chart' : 'table_chart' }}</mat-icon>
+        @if (showTable()) {
+          <ng-container i18n="@@chart.showChart">Show chart</ng-container>
+        } @else {
+          <ng-container i18n="@@chart.showTable">Show as table</ng-container>
+        }
+      </button>
+    }
+  </figcaption>
+  <p class="frame__desc" [id]="descId">{{ description() }}</p>
+
+  @if (showTable()) {
+    <div class="frame__table" data-testid="chart-table">
+      <table>
+        <caption class="sr-only">{{ title() }}</caption>
+        <thead>
+          <tr>
+            @for (c of table().columns; track $index) {
+              <th scope="col">{{ c }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of table().rows; track $index) {
+            <tr>
+              @for (cell of row; track $index) {
+                <td class="mo-data">{{ cell }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="frame__body" data-testid="chart-body">
+      <ng-content />
+    </div>
+  }
+</figure>

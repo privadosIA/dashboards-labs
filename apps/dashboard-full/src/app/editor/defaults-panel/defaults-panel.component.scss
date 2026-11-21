@@ -1,0 +1,154 @@
+.panel {
+  background: var(--lab-surface);
+}
+
+// A regular 12-column grid: fields take a fixed share of the row (a third by
+// default, half for single wide fields), so no field is left alone in a row
+// that another could share. Auxiliary rows (notes, buttons) get their own space.
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0 var(--lab-space-4);
+  align-items: start;
+}
+
+.span-3 {
+  grid-column: span 3;
+}
+
+.span-4 {
+  grid-column: span 4;
+}
+
+.span-6 {
+  grid-column: span 6;
+}
+
+.span-8 {
+  grid-column: span 8;
+}
+
+.mode-row,
+.wide {
+  grid-column: 1 / -1;
+}
+
+.mode-row {
+  margin-bottom: var(--lab-space-4);
+}
+
+// The note and the recommended-settings button, beside cfg_scale.
+.aux {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  padding-top: var(--lab-space-1);
+  margin-bottom: var(--lab-space-4);
+
+  .note {
+    margin: 0;
+  }
+}
+
+@media (max-width: 1099px) {
+  .span-3,
+  .span-4 {
+    grid-column: span 6;
+  }
+
+  .span-8 {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 719px) {
+  .span-3,
+  .span-4,
+  .span-6,
+  .span-8 {
+    grid-column: 1 / -1;
+  }
+}
+
+.error {
+  color: var(--lab-danger);
+}
+
+.missing {
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+  vertical-align: middle;
+}
+
+.note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  line-height: var(--lab-lh-body);
+  margin: 0 0 var(--lab-space-3);
+  max-width: 80ch;
+}
+
+p.error {
+  margin: 0 0 8px;
+  font-size: var(--lab-fs-meta);
+}
+
+.preset {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.quality-group {
+  margin-bottom: var(--lab-space-4);
+
+  h4 {
+    margin: 0 0 var(--lab-space-2);
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+  }
+}
+
+.quality-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3);
+  margin-bottom: var(--lab-space-3);
+}
+
+.tier-name {
+  font-weight: 600;
+}
+
+.tune {
+  background: transparent;
+}
+
+.tune-row {
+  display: grid;
+  grid-template-columns: 5rem repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0 var(--lab-space-3);
+  align-items: center;
+}
+
+.auto-group {
+  background: var(--lab-surface);
+}
+
+.auto-budget {
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--lab-space-3); // air under the explanation: the label of the field floats up into it
+}
+
+.auto-lines {
+  margin: 0 0 var(--lab-space-3);
+  padding-left: 20px;
+}
+
+.quality-buttons button.active {
+  border-color: var(--lab-accent);
+  color: var(--lab-accent);
+  background: var(--lab-surface);
+}

@@ -1,0 +1,20 @@
+:host {
+  display: block;
+}
+
+.listen {
+  margin-bottom: var(--lab-space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  .hint {
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+  }
+
+  .error {
+    color: var(--lab-danger);
+  }
+}

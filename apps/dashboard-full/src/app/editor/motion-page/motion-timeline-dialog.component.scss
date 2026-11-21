@@ -1,0 +1,59 @@
+@use '../../shared/floating-window/floating-window' as fw;
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+@include fw.window('tl-dialog');
+
+// Fills what the window gives it and scrolls inside (the dialog's own 65vh limit would cut it short).
+.tl-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+}
+
+.tl-dialog__frame {
+  width: 100%;
+  max-width: 560px;
+  flex: none;
+  align-self: center;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+  background: repeating-conic-gradient(var(--lab-surface-high) 0% 25%, var(--lab-surface) 0% 50%) 50% / 16px 16px;
+}
+
+.tl-dialog__player {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+
+  mat-slider {
+    flex: 1;
+  }
+}
+
+.tl-dialog__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-4);
+}
+
+.tl-dialog__note {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+// In a window the panel uses the width it is given.
+:host ::ng-deep app-motion-timeline .timeline {
+  max-width: none;
+}

@@ -1,0 +1,48 @@
+// How what can be pressed answers to the pointer: a small lift on hover with a soft shadow, a press on activation, all with the app's own
+// easing (`--lab-ease`) and length (`--lab-dur`). It is global because Material's buttons are styled by Material and by this app's rules, which
+// utility classes (the lowest cascade layer) cannot out-rank; the cards that can be opened say so with `.lab-pressable`.
+//
+//   - Every ENABLED Material button answers; a disabled one (the `disabled` attribute, `aria-disabled`, Material's own class) does not.
+//   - Filled, tonal and outlined buttons lift with a shadow; text and icon buttons only lift, and icon buttons do not sink (they are small).
+//   - The focus ring is not touched here.
+//   - Nothing moves for a person who asked the system for reduced motion: all of it is inside `prefers-reduced-motion: no-preference`.
+//   - Only tokens: the shadow is `--lab-shadow`.
+$enabled: ':not([disabled]):not([aria-disabled="true"]):not(.mat-mdc-button-disabled)';
+$lift: translateY(-1px);
+$press: scale(0.98);
+
+@media (prefers-reduced-motion: no-preference) {
+  .mat-mdc-button-base#{$enabled},
+  .lab-pressable#{$enabled} {
+    transition:
+      transform var(--lab-dur) var(--lab-ease),
+      box-shadow var(--lab-dur) var(--lab-ease);
+  }
+
+  .lab-pressable {
+    cursor: pointer;
+  }
+
+  @media (hover: hover) {
+    .mat-mdc-button-base#{$enabled}:hover,
+    .lab-pressable#{$enabled}:hover {
+      transform: $lift;
+    }
+
+    .mat-mdc-unelevated-button#{$enabled}:hover,
+    .mat-mdc-raised-button#{$enabled}:hover,
+    .mat-mdc-outlined-button#{$enabled}:hover,
+    .lab-pressable#{$enabled}:hover {
+      box-shadow: var(--lab-elev-hover);
+    }
+  }
+
+  .mat-mdc-button-base#{$enabled}:active,
+  .lab-pressable#{$enabled}:active {
+    transform: $press;
+  }
+
+  .mat-mdc-icon-button#{$enabled}:active {
+    transform: $lift;
+  }
+}

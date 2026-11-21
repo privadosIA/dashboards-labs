@@ -1,0 +1,54 @@
+<section class="part" data-testid="scene-motion-part">
+  <h3 i18n="@@scene.part">Part of the catalog</h3>
+  <p class="note" i18n="@@scene.partHint">The scene is drawn by a part of the motion catalog. Choose one, or "the model chooses" and describe below what it has to show.</p>
+
+  <mat-form-field class="part__select">
+    <mat-label i18n="@@scene.partChoose">Part</mat-label>
+    <mat-select [value]="choice()" (selectionChange)="setPart($event.value)" data-testid="part-select">
+      @if (autoAllowed()) {
+        <mat-option value="auto" data-testid="part-auto" i18n="@@scene.partAuto">The model chooses</mat-option>
+      }
+      @for (p of catalog.parts(); track p.name) {
+        <mat-option [value]="p.name">{{ p.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (errors().part; as err) {
+    <p class="error" role="alert" data-testid="part-error">{{ err }}</p>
+  }
+
+  @if (chosen(); as c) {
+    <p class="note" data-testid="part-chosen">
+      <ng-container i18n="@@scene.partChosen">The model chose:</ng-container>
+      <strong class="mo-data">{{ c.part }}</strong>
+      @if (c.params) {
+        <span class="mo-data">({{ c.params }})</span>
+      }
+    </p>
+  }
+
+  @if (part(); as p) {
+    <lab-part-params [part]="p" [values]="scene()?.motion_params" level="advanced" (paramsChange)="setParams($event)" />
+    @if (errors().partParams; as err) {
+      <p class="error" role="alert" data-testid="part-params-error">{{ err }}</p>
+    }
+  }
+
+  @if (choice() !== '') {
+    <mat-form-field class="part__text">
+      <mat-label i18n="@@scene.partText">One line of text (optional)</mat-label>
+      <input matInput type="text" [attr.maxlength]="maxText" [value]="scene()?.motion_text ?? ''" (input)="setText($any($event.target).value)" data-testid="part-text" />
+    </mat-form-field>
+    @if (errors().partText; as err) {
+      <p class="error" role="alert" data-testid="part-text-error">{{ err }}</p>
+    }
+    <mat-form-field class="part__bpm">
+      <mat-label i18n="@@scene.partBpm">Tempo (optional)</mat-label>
+      <input matInput type="number" [attr.min]="minBpm" [attr.max]="maxBpm" [value]="scene()?.motion_bpm ?? ''" (input)="setBpm($any($event.target).value)" data-testid="part-bpm" />
+      <mat-hint i18n="@@scene.partBpmHint">From 40 to 240. Without it, the project's.</mat-hint>
+    </mat-form-field>
+    @if (errors().partBpm; as err) {
+      <p class="error" role="alert" data-testid="part-bpm-error">{{ err }}</p>
+    }
+  }
+</section>

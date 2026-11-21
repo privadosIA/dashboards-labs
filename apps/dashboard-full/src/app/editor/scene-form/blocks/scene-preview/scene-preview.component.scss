@@ -1,0 +1,26 @@
+@use '../block';
+
+:host {
+  display: block;
+}
+
+section {
+  @include block.section;
+}
+
+.preview {
+  margin-bottom: var(--lab-space-4);
+
+  &__video {
+    display: block;
+    width: 100%;
+    max-width: 640px;
+    background: var(--lab-player-bg);
+  }
+
+  &__none {
+    margin: 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+}

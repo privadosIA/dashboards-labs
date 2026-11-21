@@ -1,0 +1,36 @@
+{
+  "name": "beat-bars",
+  "description": "A row of bars that jump on every beat and fall back between beats, with an optional label under them",
+  "version": 1,
+  "levels": [
+    "simple",
+    "medium",
+    "advanced"
+  ],
+  "cost_ms": 40,
+  "params": [
+    {
+      "name": "bars",
+      "type": "int",
+      "description": "How many bars",
+      "default": 7,
+      "min": 3,
+      "max": 15
+    },
+    {
+      "name": "gain",
+      "type": "number",
+      "description": "How high the bars jump (1 is the usual)",
+      "default": 1,
+      "min": 0.2,
+      "max": 2
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "description": "Text under the bars",
+      "default": "",
+      "max_length": 24
+    }
+  ]
+}

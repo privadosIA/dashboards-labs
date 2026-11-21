@@ -1,0 +1,34 @@
+<mat-expansion-panel class="quality" data-testid="scene-quality" (opened)="store.loadCatalog()">
+  <mat-expansion-panel-header>
+    <mat-panel-title i18n="@@sceneQ.title">Quality of this scene</mat-panel-title>
+    <mat-panel-description class="mo-data" data-testid="scene-quality-summary">{{ qualitySummary() }}</mat-panel-description>
+  </mat-expansion-panel-header>
+
+  <p class="note" i18n="@@sceneQ.note">
+    This scene only: the rest use the project settings. The final video keeps the project resolution: a scene drawn at another size is scaled and cropped to it, without stretching.
+  </p>
+  <div class="quality__levels">
+    <button mat-stroked-button type="button" data-testid="scene-quality-clear" [class.active]="!ownQuality()" [attr.aria-pressed]="!ownQuality()" [disabled]="!ownQuality()" (click)="store.clearSceneQuality(index())">
+      <mat-icon>undo</mat-icon>
+      <ng-container i18n="@@sceneQ.clear">Same as project</ng-container>
+    </button>
+    @for (t of tiers(); track t.tier) {
+      <button mat-stroked-button type="button" [attr.data-testid]="'scene-tier-' + t.tier" [class.active]="activeTier() === t.tier" [attr.aria-pressed]="activeTier() === t.tier" [matTooltip]="t.text" [attr.aria-label]="t.label + ': ' + t.text" (click)="pickTier(t.tier)">
+        <span class="quality__name">{{ t.label }}</span>
+      </button>
+    }
+  </div>
+  @if (qualityNote(); as n) {
+    <p class="note" data-testid="scene-quality-applied">
+      <ng-container i18n="@@sceneQ.applied">Applied to this scene:</ng-container>{{ ' ' }}<span class="mo-data">{{ n.note.join(' · ') }}</span>
+      <button mat-button type="button" data-testid="scene-quality-undo" (click)="store.undoSceneTier()">
+        <ng-container i18n="@@defaults.presetUndo">Undo</ng-container>
+      </button>
+    </p>
+  }
+
+  <dynamic-form [schema]="schema()" [model]="model()" [context]="context()" [showDefaultActions]="false" [validateOnInit]="true" (valueChange)="formChange.emit($event)" (statusChange)="formStatus.emit()" />
+  @if (error(); as err) {
+    <p class="error" role="alert" data-testid="scene-quality-error">{{ err }}</p>
+  }
+</mat-expansion-panel>

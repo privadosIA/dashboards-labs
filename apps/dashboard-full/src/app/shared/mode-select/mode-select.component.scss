@@ -1,0 +1,25 @@
+// The two selectors sit side by side and wrap on a narrow screen. In a grid of fields (`fill`) they are the grid's
+// own cells and take its column width.
+:host {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-3, 12px);
+}
+
+:host(.fill) {
+  display: contents;
+}
+
+.modes {
+  width: 14rem;
+}
+
+.origins {
+  width: 11rem;
+}
+
+:host(.fill) .modes,
+:host(.fill) .origins {
+  width: 100%;
+}

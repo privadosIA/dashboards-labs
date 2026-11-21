@@ -1,0 +1,35 @@
+<section class="res" aria-labelledby="res-title" data-testid="run-resources">
+  <div class="res__head">
+    <h3 id="res-title" i18n="@@res.title">Resources</h3>
+    <button data-keep mat-button type="button" data-testid="res-refresh" [disabled]="loading()" (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      <ng-container i18n="@@res.refresh">Refresh</ng-container>
+    </button>
+  </div>
+
+  @if (failed()) {
+    <p class="note" role="alert" data-testid="res-error" i18n="@@res.failed">Could not load the resources for this run.</p>
+  } @else if (data() && !hasData()) {
+    <p class="note" data-testid="res-nodata" i18n="@@res.noData">
+      No resource data was recorded for this run (it predates sampling, or it never took a sample).
+    </p>
+  } @else if (data()) {
+    @if (data()?.truncated) {
+      <p class="note" data-testid="res-truncated" i18n="@@res.truncated">
+        The run was so long that sampling stopped when it reached the limit: the chart goes up to that point.
+      </p>
+    }
+    <div class="res__grid">
+      @for (g of gpuCharts(); track g.index) {
+        <mo-chart-frame [title]="g.title" [description]="g.description" [table]="g.table" [attr.data-testid]="'res-gpu-' + g.index">
+          <mo-line-chart [series]="g.series" [yMax]="100" [yFormat]="pct" [xFormat]="seconds" [ariaLabel]="g.title" />
+        </mo-chart-frame>
+      }
+      @if (ramChart(); as r) {
+        <mo-chart-frame title="RAM" [description]="r.description" [table]="r.table" data-testid="res-ram">
+          <mo-line-chart [series]="r.series" [yMax]="100" [yFormat]="pct" [xFormat]="seconds" ariaLabel="RAM" />
+        </mo-chart-frame>
+      }
+    </div>
+  }
+</section>

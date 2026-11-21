@@ -1,0 +1,50 @@
+<div class="header">
+  <h3 i18n="@@reel.title">Scenes</h3>
+  <button mat-stroked-button (click)="store.addScene()">
+    <mat-icon>add</mat-icon>
+    <ng-container i18n="@@reel.add">Add scene</ng-container>
+  </button>
+</div>
+
+<cdk-virtual-scroll-viewport itemSize="72" class="viewport">
+  <div cdkDropList (cdkDropListDropped)="onDrop($event)">
+    <div
+      *cdkVirtualFor="let s of scenes(); let i = index"
+      cdkDrag
+      class="scene"
+      [class.scene--active]="store.selected() === i"
+      (click)="store.selected.set(i)"
+      (keydown.enter)="store.selected.set(i)"
+      tabindex="0"
+      role="button"
+    >
+      <span class="scene__index mo-data">{{ i + 1 }}</span>
+      <img
+        class="scene__thumb"
+        [src]="thumbUrl(s.id)"
+        alt=""
+        loading="lazy"
+        (error)="$any($event.target).style.visibility = 'hidden'"
+      />
+      <span class="scene__body">
+        <span class="scene__id mo-data">{{ s.id }}</span>
+        <span class="scene__meta mo-data">{{ summary(i) }}</span>
+      </span>
+      @if (hasErrors(i)) {
+        <mat-icon class="scene__error" i18n-aria-label="@@reel.hasErrors" aria-label="Has errors"
+          >error</mat-icon
+        >
+      }
+      <button
+        mat-icon-button
+        class="scene__remove"
+        (click)="$event.stopPropagation(); store.removeScene(i)"
+        i18n-aria-label="@@reel.remove"
+        aria-label="Remove scene"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon cdkDragHandle class="scene__grip">drag_indicator</mat-icon>
+    </div>
+  </div>
+</cdk-virtual-scroll-viewport>

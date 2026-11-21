@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "id": "stats",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "type": "table",
+      "id": "stats-slowest",
+      "dataKey": "slowest",
+      "filter": true,
+      "filterLabel": "Buscar",
+      "searchKeys": [
+        "project"
+      ],
+      "pageSize": 10,
+      "pageSizeOptions": [
+        4,
+        10,
+        20,
+        50,
+        100
+      ],
+      "persistState": "session",
+      "columns": [
+        {
+          "key": "id",
+          "label": "Run",
+          "type": "link",
+          "href": "/runs/{runId}",
+          "sortable": true
+        },
+        {
+          "key": "project",
+          "label": "Proyecto",
+          "sortable": true
+        },
+        {
+          "key": "modeLabel",
+          "label": "Tipo",
+          "sortable": true
+        },
+        {
+          "key": "state",
+          "label": "Estado",
+          "sortable": true
+        },
+        {
+          "key": "seconds",
+          "label": "Duración",
+          "template": "seconds",
+          "sortable": true
+        }
+      ]
+    }
+  ]
+}

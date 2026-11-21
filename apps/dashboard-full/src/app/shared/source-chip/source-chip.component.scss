@@ -1,0 +1,18 @@
+:host {
+  display: inline-flex;
+}
+
+.chip {
+  padding: 1px var(--lab-space-2);
+  border: 1px solid var(--lab-line);
+  border-radius: 999px;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  white-space: nowrap;
+}
+
+// Saved here is the one that is the person's own: it carries the accent, the other two are what the server falls back to.
+.chip[data-source='setting'] {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+}

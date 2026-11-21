@@ -1,0 +1,8 @@
+@if (combos().length > 0) {
+  <p class="label" i18n="@@combos.label">Popular combinations</p>
+  <div class="combos" role="group" aria-label="Popular combinations" i18n-aria-label="@@combos.label">
+    @for (c of combos(); track c.id) {
+      <button mat-stroked-button type="button" class="combo" [attr.data-testid]="'combo-' + c.id" [title]="c.tags.join(', ')" (click)="picked.emit(c)">{{ c.name }}</button>
+    }
+  </div>
+}

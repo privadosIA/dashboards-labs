@@ -1,0 +1,21 @@
+<svg class="chart" [attr.viewBox]="'0 0 ' + W + ' ' + height()" role="group" [attr.aria-label]="ariaLabel()" data-testid="bar-chart">
+  @for (b of bars(); track b.label; let i = $index) {
+    <g
+      class="row"
+      tabindex="0"
+      role="img"
+      [attr.aria-label]="ariaOf(b)"
+      [attr.data-testid]="'bar-' + i"
+      (mouseenter)="active.set(i)"
+      (mouseleave)="active.set(null)"
+      (focus)="active.set(i)"
+      (blur)="active.set(null)"
+    >
+      <rect class="hit" x="0" [attr.y]="b.y" [attr.width]="W" [attr.height]="ROW - 2" />
+      <text class="label" [attr.x]="LEFT - 8" [attr.y]="b.y + 14" text-anchor="end">{{ b.label }}</text>
+      <rect class="bar" [attr.x]="LEFT" [attr.y]="b.y + 3" [attr.width]="b.w" height="14" rx="2" />
+      <text class="value" [attr.x]="LEFT + b.w + 6" [attr.y]="b.y + 14">{{ b.text }}</text>
+    </g>
+  }
+</svg>
+<p class="readout mo-data" role="status" aria-live="polite" data-testid="chart-readout">{{ readout() }}</p>

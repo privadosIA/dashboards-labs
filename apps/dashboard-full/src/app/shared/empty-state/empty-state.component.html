@@ -1,0 +1,8 @@
+<div class="empty" role="status" data-testid="empty-state">
+  <mat-icon class="empty__icon" aria-hidden="true">{{ icon() }}</mat-icon>
+  <p class="empty__message" data-testid="empty-message">{{ message() }}</p>
+  @if (hint(); as h) {
+    <p class="empty__hint" data-testid="empty-hint">{{ h }}</p>
+  }
+  <div class="empty__actions" data-testid="empty-actions"><ng-content /></div>
+</div>

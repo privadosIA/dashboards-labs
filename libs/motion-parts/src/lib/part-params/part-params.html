@@ -1,0 +1,11 @@
+<div class="params" [attr.data-testid]="'params-' + part().name">
+  <p class="what">
+    <strong>{{ part().name }}</strong> — {{ part().description }}
+    <span class="levels" [class.above]="above()" data-testid="levels">{{ t.levels }}: {{ levels() }}@if (above()) { {{ t.aboveLevel }} }</span>
+  </p>
+  @if (part().params.length) {
+    <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" (valueChange)="changed($event)" />
+  } @else {
+    <p class="none" data-testid="no-params">{{ t.noParams }}</p>
+  }
+</div>

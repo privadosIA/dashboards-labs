@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>
+  <ng-container i18n="@@storage.title">Storage of</ng-container>
+  <span class="mo-data">{{ data.projectId }}</span>
+</h2>
+<mat-dialog-content>
+  @if (storage(); as s) {
+    <p class="summary" data-testid="storage-summary">
+      <ng-container i18n="@@storage.total">Project total:</ng-container>
+      <strong class="mo-data">{{ s.total_bytes | moBytes }}</strong>
+      @if (data.freeBytes) {
+        <span class="dim"> · <ng-container i18n="@@storage.free">free on the disk:</ng-container> <span class="mo-data">{{ data.freeBytes | moBytes }}</span></span>
+      }
+      @if (data.mediaDir) {
+        <span class="dim" data-testid="storage-media-dir"> · <ng-container i18n="@@storage.mediaDir">media folder:</ng-container> <span class="mo-data">{{ data.mediaDir }}</span></span>
+      }
+    </p>
+    <ul class="parts">
+      @for (p of parts(); track p.id) {
+        <li class="part" [attr.data-testid]="'storage-part-' + p.id">
+          <div class="part__text">
+            <span class="part__name">{{ text[p.id].name }}</span>
+            <span class="part__what">{{ text[p.id].what }}</span>
+          </div>
+          <span class="part__size mo-data">{{ p.bytes | moBytes }}</span>
+          <button
+            mat-stroked-button
+            type="button"
+            class="part__clean"
+            [attr.data-testid]="'storage-clean-' + p.id"
+            [disabled]="busy() || !p.cleanable || p.bytes === 0"
+            (click)="clean(p)"
+          >
+            <mat-icon>delete_sweep</mat-icon>
+            <ng-container i18n="@@storage.cleanButton">Clean</ng-container>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close i18n="@@storage.close">Close</button>
+</mat-dialog-actions>

@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  margin-top: var(--lab-space-4);
+}
+
+.note {
+  margin: 0 0 var(--lab-space-3);
+  max-width: 80ch;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-success);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.wide {
+  width: 100%;
+  max-width: 560px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lab-space-2);
+}
+
+.current {
+  color: var(--lab-ink);
+}
+
+.chip {
+  padding: 0 var(--lab-space-2);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-control);
+}

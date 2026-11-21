@@ -1,0 +1,21 @@
+button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--lab-space-2);
+  max-width: 16rem;
+  padding: var(--lab-space-1) var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: transparent;
+  color: var(--lab-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.where {
+  overflow: hidden;
+  color: var(--lab-ink-dim);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

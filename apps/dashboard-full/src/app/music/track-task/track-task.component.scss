@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+.task {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+  margin-bottom: var(--lab-space-3);
+}
+
+.kind {
+  width: 340px;
+  max-width: 100%;
+}
+
+.source,
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--lab-space-4);
+
+  // Fields grow downwards (hint, error): keep every top edge on one line and
+  // centre the controls that are not fields on the input row (40px).
+  > :not(mat-form-field):not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+}
+
+.file {
+  width: 300px;
+  max-width: 100%;
+}
+
+.narrow {
+  width: 200px;
+}
+
+.missing {
+  color: var(--lab-warn);
+}
+
+.error {
+  color: var(--lab-danger);
+}
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-danger);
+  border: 1px solid var(--lab-danger);
+  padding: var(--lab-space-2) var(--lab-space-3);
+  font-size: var(--lab-fs-meta);
+}
+
+.separate {
+  align-self: flex-start;
+  margin: var(--lab-space-2) 0;
+}

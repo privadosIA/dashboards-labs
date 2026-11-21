@@ -1,0 +1,11 @@
+<header class="page-header">
+  <div class="page-header__text">
+    <h1 class="page-header__title" data-testid="page-title">{{ title() }}</h1>
+    @if (description(); as d) {
+      <p class="page-header__desc" data-testid="page-desc">{{ d }}</p>
+    }
+  </div>
+  <div class="page-header__actions" data-testid="page-actions">
+    <ng-content select="[moActions]" />
+  </div>
+</header>

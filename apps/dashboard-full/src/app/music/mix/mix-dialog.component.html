@@ -1,0 +1,39 @@
+<div
+  class="mix-dialog__bar"
+  data-testid="mixer-handle"
+  (pointerdown)="startMove($event)"
+  (dblclick)="toggleMaximize()"
+>
+  <h2 mat-dialog-title class="mix-dialog__title" i18n="@@mix.dialogTitle">Mixer</h2>
+  <span class="mix-dialog__hint" i18n="@@mix.dialogHint">Drag this bar to move it and any edge or corner to resize; the full-screen button maximizes it.</span>
+  <button
+    mat-icon-button
+    type="button"
+    class="mix-dialog__close"
+    data-testid="maximize-mixer"
+    [attr.aria-pressed]="maximized()"
+    [attr.aria-label]="maximized() ? restoreLabel : maximizeLabel"
+    (click)="toggleMaximize()"
+  >
+    <mat-icon>{{ maximized() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    type="button"
+    class="mix-dialog__close"
+    data-testid="close-mixer"
+    mat-dialog-close
+    i18n-aria-label="@@mix.dialogClose"
+    aria-label="Close"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content class="mix-dialog__body">
+  <app-mix-editor [index]="data.index" />
+</mat-dialog-content>
+@if (!maximized()) {
+  @for (e of edges; track e) {
+    <div class="mix-dialog__edge" [class]="'mix-dialog__edge mix-dialog__edge--' + e" [attr.data-edge]="e" (pointerdown)="startResize($event, e)"></div>
+  }
+}

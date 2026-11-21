@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "id": "project-details",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nombre (letras, dígitos, . _ -)",
+      "placeholder": "mi-video",
+      "props": { "attributes": { "data-testid": "details-name", "autocomplete": "off" } }
+    },
+    {
+      "key": "client",
+      "type": "text",
+      "label": "Cliente (quién lo hizo; vacío si ninguno)",
+      "placeholder": "dashboard-full",
+      "props": { "attributes": { "data-testid": "details-client", "autocomplete": "off" } }
+    },
+    {
+      "key": "adult",
+      "type": "select",
+      "label": "Contenido",
+      "defaultValue": "",
+      "options": [
+        { "value": "", "label": "Sin revisar" },
+        { "value": "false", "label": "Apto para todos" },
+        { "value": "true", "label": "Para mayores de 18" }
+      ],
+      "props": { "attributes": { "data-testid": "details-adult" } }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+.separate__song {
+  margin: 0 0 var(--lab-space-2, 8px);
+  color: var(--lab-ink-dim);
+}
+
+.separate__stems {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+}
+
+.separate__note,
+.separate__missing {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2, 8px);
+  color: var(--lab-ink-dim);
+}
+
+.separate__error {
+  color: var(--lab-danger, var(--lab-ink));
+}
+
+.separate__switch {
+  display: block;
+}
+
+.separate__hint {
+  margin: 0 0 var(--lab-space-2, 8px);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}

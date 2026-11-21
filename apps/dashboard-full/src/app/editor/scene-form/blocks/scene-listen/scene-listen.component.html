@@ -1,0 +1,28 @@
+<div class="listen">
+  <button
+    mat-stroked-button
+    type="button"
+    data-testid="scene-listen"
+    [disabled]="!text().trim() || !voice()"
+    (click)="toggle()"
+  >
+    <mat-icon>{{ listen().state === 'idle' ? 'play_arrow' : 'stop' }}</mat-icon>
+    @switch (listen().state) {
+      @case ('loading') {
+        <span i18n="@@scene.listenLoading">Preparing…</span>
+      }
+      @case ('playing') {
+        <span i18n="@@scene.listenStop">Stop</span>
+      }
+      @default {
+        <span i18n="@@scene.listen">Listen</span>
+      }
+    }
+  </button>
+  @if (!voice()) {
+    <span class="hint" i18n="@@scene.listenNoVoice">Pick a voice (here or in Defaults) to hear it.</span>
+  }
+  @if (listen().error; as err) {
+    <span class="hint error" data-testid="scene-listen-error">{{ err }}</span>
+  }
+</div>

@@ -1,0 +1,15 @@
+<h2 mat-dialog-title i18n="@@projectDetails.title">Project details</h2>
+<mat-dialog-content>
+  <p class="id mo-data" data-testid="details-id">{{ data.project.id }}</p>
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="details-problem">{{ why }}</p>
+  }
+</mat-dialog-content>
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="details-cancel" [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-flat-button type="button" data-testid="details-save" [disabled]="saving()" (click)="save()" i18n="@@projectDetails.save">Save</button>
+</mat-dialog-actions>

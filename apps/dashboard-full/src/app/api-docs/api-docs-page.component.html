@@ -1,0 +1,27 @@
+<mo-page-header
+  title="API"
+  i18n-title="@@api.title"
+  description="The server endpoints, with their parameters and responses. You can try them out from here."
+  i18n-description="@@api.desc"
+/>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (error(); as e) {
+  <p class="state" role="alert" data-testid="api-error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ e }}</span>
+  </p>
+}
+
+@if (spec(); as s) {
+  <p class="notice" data-testid="api-notice">
+    <mat-icon>info</mat-icon>
+    <span i18n="@@api.notice">
+      “Try it out” acts on the real server, with your token: whatever you create or delete from here is done for good.
+    </span>
+  </p>
+  <app-swagger-host [spec]="s" />
+}

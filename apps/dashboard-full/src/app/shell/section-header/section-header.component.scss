@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+// A slim bar over the section: the way back, the section's name and the controls that the side navigation keeps at its foot.
+.bar {
+  box-sizing: border-box;
+  // The window reserves this much height for the header (`--section-header-h`), so a studio that fills the window can leave room for it.
+  min-height: var(--section-header-h, 3.75rem);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3) var(--lab-space-4);
+  padding: var(--lab-space-2) var(--lab-space-5);
+  background: var(--lab-bg);
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lab-space-3);
+  color: var(--lab-ink);
+  text-decoration: none;
+  border-radius: var(--lab-radius-control);
+}
+
+// The application's mark, as in the side navigation: a rounded square in the accent colour with a play glyph.
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--lab-radius-control);
+  background: var(--lab-accent);
+  color: var(--lab-on-accent);
+}
+
+.name {
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-fs-section);
+  font-weight: 700;
+  letter-spacing: var(--lab-tracking-tight);
+}
+
+// The name of the section, set apart from the brand by a line so that it reads as where the person is.
+.title {
+  padding-left: var(--lab-space-4);
+  border-left: 1px solid var(--lab-line);
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-fs-section);
+  font-weight: 700;
+  letter-spacing: var(--lab-tracking-tight);
+  color: var(--lab-ink);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lab-space-3);
+  margin-left: auto;
+}
+
+.server {
+  max-width: 220px;
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme {
+  font-size: var(--lab-fs-meta);
+}
+
+// Below this width the brand's name and the server go, so that the header stays one row.
+@media (max-width: 899px) {
+  .name,
+  .server {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .bar {
+    padding: var(--lab-space-2) var(--lab-space-4);
+  }
+
+  .controls {
+    margin-left: 0;
+    width: 100%;
+  }
+}

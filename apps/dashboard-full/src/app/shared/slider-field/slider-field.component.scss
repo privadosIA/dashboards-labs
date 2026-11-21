@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+
+  label {
+    font-size: var(--lab-fs-meta);
+    color: var(--lab-ink-dim);
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "id": "connection",
+  "title": "Connect to the server",
+  "layout": { "columns": 1 },
+  "fields": [
+    { "key": "baseUrl", "type": "text", "label": "Server address", "placeholder": "http://127.0.0.1:4666", "validation": { "required": true } },
+    { "key": "token", "type": "text", "label": "Token", "description": "Only if the server asks for one." }
+  ]
+}

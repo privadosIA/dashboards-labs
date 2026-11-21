@@ -1,0 +1,57 @@
+@if (entry(); as e) {
+  <mo-panel heading="LAION-CLAP" i18n-heading="@@clap.title">
+    <p class="note" i18n="@@clap.intro">
+      LAION-CLAP does not make music: it hears the sound of an audio (genre, mood, instruments) so that a song can be described and compared. It is optional.
+    </p>
+    <p class="only" data-testid="clap-only-dotnet">
+      <mat-icon inline>info</mat-icon>
+      <span i18n="@@clap.onlyDotnet">It runs only as a .NET service on this machine: there is no Python container (Docker) option for it.</span>
+    </p>
+
+    <div class="run" data-testid="clap-run">
+      <span class="run__state" data-testid="clap-state">
+        @switch (state()) {
+          @case ('running') {
+            <mat-icon inline class="ok">check_circle</mat-icon>
+            <ng-container i18n="@@clap.running">Running</ng-container>
+            @if (e.container?.port; as port) {
+              <span class="mo-data">:{{ port }}</span>
+            }
+          }
+          @case ('starting') {
+            <mat-icon inline>hourglass_top</mat-icon>
+            <ng-container i18n="@@clap.starting">Starting…</ng-container>
+          }
+          @default {
+            <mat-icon inline>radio_button_unchecked</mat-icon>
+            <ng-container i18n="@@clap.stopped">Stopped</ng-container>
+          }
+        }
+      </span>
+      @if (running()) {
+        <button mat-stroked-button type="button" data-testid="clap-stop" (click)="stop()">
+          <mat-icon>stop</mat-icon>
+          <ng-container i18n="@@clap.stop">Stop</ng-container>
+        </button>
+      } @else {
+        <button mat-flat-button type="button" data-testid="clap-start" [disabled]="!canStart()" (click)="start()">
+          <mat-icon>play_arrow</mat-icon>
+          <ng-container i18n="@@clap.start">Start</ng-container>
+        </button>
+      }
+    </div>
+
+    @if (blocked(); as b) {
+      <p class="warn" data-testid="clap-blocked">
+        <mat-icon inline>warning</mat-icon>
+        <span>{{ reasonText(b.reason!, b.detail) }}</span>
+      </p>
+    }
+    @if (engines.callError(); as err) {
+      <p class="error" role="alert" data-testid="clap-call-error">
+        <mat-icon inline>error</mat-icon>
+        <span class="mo-data">{{ err }}</span>
+      </p>
+    }
+  </mo-panel>
+}

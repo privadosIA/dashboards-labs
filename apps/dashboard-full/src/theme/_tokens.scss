@@ -1,0 +1,185 @@
+// The design tokens of this dashboard. Every stylesheet reads these `--lab-*` properties and nothing else for colour,
+// type, spacing and shape: restyling the dashboard means editing this file. A colour token needs a value in both
+// blocks (npm run theme:check).
+//
+// The look is deep ink with a soft emerald (the owner's choice among three candidates, 2026-11-12): tinted slate for surfaces and text, one
+// accent for the primary action, the current element and focus, and no default blue. Each dashboard owns its tokens (this file may drift from the
+// others'). The type is Geist for text and Plus Jakarta Sans for headings, a scale with more contrast between levels (body 14 and meta 12 stay
+// the floor).
+//
+// Dark is the default (`data-theme="dark"` on <html>, set by index.html and ThemeService); the light theme is the
+// "paper" derivation. Without ThemeService the system preference decides. The two [data-theme] blocks at the end pin a
+// choice over the system preference and repeat the values on purpose, so the check can read every colour literally.
+:root {
+  color-scheme: light dark;
+
+  // The page background.
+  --lab-bg: #f3f6f6;
+  // Panels, editors, table rows.
+  --lab-surface: #ffffff;
+  // Raised surface step (menus, hovered rows, overlays).
+  --lab-surface-high: #e6eded;
+  // Primary text.
+  --lab-ink: #0f1c1f;
+  --lab-focus: #0f1c1f;
+  // Secondary text and metadata.
+  --lab-ink-dim: #4a6268;
+  // Hairlines and dividers.
+  --lab-line: #d0dcde;
+  // The working colour: active phase, primary actions, focus.
+  --lab-accent: #246655;
+  // Ink over an accent fill.
+  --lab-on-accent: #ffffff;
+  // Success, cache hits, reused states.
+  --lab-success: #265e30;
+  // Warnings and notices (a role of its own, apart from the accent).
+  --lab-warn: #8a5a1a;
+  // Errors, cancellation, destructive confirms.
+  --lab-danger: #b42318;
+  // Outline of interactive controls, at least 3:1 against every surface.
+  --lab-control-line: #62797e;
+  // Letterbox behind video and image artwork (fixed in both themes).
+  --lab-player-bg: #000000;
+  // Text over it (fixed in both themes).
+  --lab-player-fg: #f2efe6;
+  // The same text, dimmed (disabled controls over artwork).
+  --lab-player-fg-dim: rgb(242 239 230 / 0.35);
+  // Veil over artwork and behind overlays (fixed in both themes).
+  --lab-scrim: rgb(0 0 0 / 0.6);
+  // A darker veil (modal backdrops, captions over artwork).
+  --lab-scrim-strong: rgb(0 0 0 / 0.75);
+  // Shadow of raised elements: soft, and lighter in the light theme.
+  --lab-shadow: rgb(15 28 31 / 0.16);
+
+  // Text and controls: Geist. Headings: Plus Jakarta Sans. Both are self-hosted (@fontsource-variable, listed in angular.json) with the system's
+  // sans behind them. Data: the system's monospace, where a value is measured, compared or copied.
+  --lab-font: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lab-font-display: 'Plus Jakarta Sans Variable', 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lab-font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --lab-fs-meta: 12px;
+  --lab-fs-body: 14px;
+  --lab-fs-section: 15px;
+  --lab-fs-title: 24px;
+  --lab-fs-page: 36px;
+  --lab-fs-hero: 44px;
+  --lab-lh-body: 1.45;
+  // The letter spacing of headings (tailwind's tracking-tight).
+  --lab-tracking-tight: -0.02em;
+  // The owner's easing and the length of an answer to the pointer: what `_interaction.scss` and the motion of the app read (the same curve as `ease-lab`).
+  --lab-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lab-dur: 200ms;
+  --lab-dur-slow: 380ms;
+  // What the restyle adds: elevation, gradient, hover and press, table rows and the glow, each behind its own token so that one file says how the look feels.
+  // Elevation: a resting surface, a floating one and a button on hover (the shadow colour is the theme's own).
+  --lab-elev-1: 0 1px 2px color-mix(in srgb, var(--lab-shadow) 55%, transparent), 0 0.25rem 1rem color-mix(in srgb, var(--lab-shadow) 35%, transparent);
+  --lab-elev-2: 0 0.5rem 1.5rem var(--lab-shadow), 0 0.125rem 0.375rem color-mix(in srgb, var(--lab-shadow) 60%, transparent);
+  --lab-elev-hover: 0 0.25rem 1rem var(--lab-shadow);
+  // A very subtle top-to-bottom gradient over the surface colour for panels and cards.
+  --lab-surface-grad: linear-gradient(180deg, color-mix(in srgb, var(--lab-ink) 3%, var(--lab-surface)), var(--lab-surface));
+  // The fine border of a surface that floats, and the outline of a tonal button.
+  --lab-float-border: 1px solid var(--lab-line);
+  --lab-tonal-line: var(--lab-line);
+  // How a button answers the pointer: how far it lifts and how much it sinks.
+  --lab-lift: -1px;
+  --lab-press: 0.98;
+  // A row of a table under the pointer, the capitals and spacing of table headers, and the glow at the top of the content area.
+  --lab-row-hover: color-mix(in srgb, var(--lab-accent) 8%, transparent);
+  --lab-caps: uppercase;
+  --lab-caps-tracking: 0.06em;
+  --lab-glow: radial-gradient(60rem 18rem at 55% -5rem, color-mix(in srgb, var(--lab-accent) 9%, transparent), transparent);
+  // 400 for text, 500 for controls and labels, 700 for titles (Plus Jakarta Sans carries it well).
+  --lab-fw-control: 500;
+  --lab-fw-title: 700;
+
+  // One spacing scale for gaps and padding.
+  --lab-space-1: 4px;
+  --lab-space-2: 8px;
+  --lab-space-3: 12px;
+  --lab-space-4: 16px;
+  --lab-space-5: 24px;
+  --lab-space-6: 32px;
+  --lab-space-7: 48px;
+  // The space between two form fields, one under the other or side by side: never less than --lab-space-3 (npm run theme:check).
+  --lab-field-gap: var(--lab-space-4);
+  --lab-radius: 12px;
+  --lab-radius-panel: 20px;
+  --lab-radius-pill: 999px;
+  --lab-radius-control: 12px;
+  --lab-radius-button: 10px;
+  --lab-control-h: 40px;
+  --lab-control-h-lg: 48px;
+  --lab-control-h-compact: 32px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lab-bg: #0b1316;
+    --lab-surface: #111c20;
+    --lab-surface-high: #19272c;
+    --lab-ink: #e7eff0;
+    --lab-focus: #e7eff0;
+    --lab-ink-dim: #9db3b7;
+    --lab-line: #24373d;
+    --lab-accent: #6ec4a4;
+    --lab-on-accent: #0a241d;
+    --lab-success: #90c987;
+    --lab-warn: #f0c05a;
+    --lab-danger: #ff8a80;
+    --lab-control-line: #668086;
+    --lab-player-bg: #000000;
+    --lab-player-fg: #f2efe6;
+    --lab-player-fg-dim: rgb(242 239 230 / 0.35);
+    --lab-scrim: rgb(0 0 0 / 0.6);
+    --lab-scrim-strong: rgb(0 0 0 / 0.75);
+    --lab-shadow: rgb(2 10 12 / 0.6);
+    --lab-row-hover: color-mix(in srgb, var(--lab-accent) 8%, transparent);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --lab-bg: #0b1316;
+  --lab-surface: #111c20;
+  --lab-surface-high: #19272c;
+  --lab-ink: #e7eff0;
+  --lab-focus: #e7eff0;
+  --lab-ink-dim: #9db3b7;
+  --lab-line: #24373d;
+  --lab-accent: #6ec4a4;
+  --lab-on-accent: #0a241d;
+  --lab-success: #90c987;
+  --lab-warn: #f0c05a;
+  --lab-danger: #ff8a80;
+  --lab-control-line: #668086;
+  --lab-player-bg: #000000;
+  --lab-player-fg: #f2efe6;
+  --lab-player-fg-dim: rgb(242 239 230 / 0.35);
+  --lab-scrim: rgb(0 0 0 / 0.6);
+  --lab-scrim-strong: rgb(0 0 0 / 0.75);
+  --lab-shadow: rgb(2 10 12 / 0.6);
+  --lab-row-hover: color-mix(in srgb, var(--lab-accent) 8%, transparent);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --lab-bg: #f3f6f6;
+  --lab-surface: #ffffff;
+  --lab-surface-high: #e6eded;
+  --lab-ink: #0f1c1f;
+  --lab-focus: #0f1c1f;
+  --lab-ink-dim: #4a6268;
+  --lab-line: #d0dcde;
+  --lab-accent: #246655;
+  --lab-on-accent: #ffffff;
+  --lab-success: #265e30;
+  --lab-warn: #8a5a1a;
+  --lab-danger: #b42318;
+  --lab-control-line: #62797e;
+  --lab-player-bg: #000000;
+  --lab-player-fg: #f2efe6;
+  --lab-player-fg-dim: rgb(242 239 230 / 0.35);
+  --lab-scrim: rgb(0 0 0 / 0.6);
+  --lab-scrim-strong: rgb(0 0 0 / 0.75);
+  --lab-shadow: rgb(15 28 31 / 0.16);
+  --lab-row-hover: color-mix(in srgb, var(--lab-accent) 8%, transparent);
+}

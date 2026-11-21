@@ -1,0 +1,141 @@
+// A checklist, not a dashboard: plain two-column lists, zero cards
+// (design plan second pass).
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--lab-space-4);
+  // The panels of a row have the same height, so the rows read as aligned.
+  align-items: stretch;
+  margin-bottom: var(--lab-space-4);
+
+  // Wide screens: four panels a row. The big ones (programs, voices, models, music) come first and the small
+  // ones (retouch models, LoRAs, GPUs, disk and memory) last; with the retouch panel there are nine panels, so disk
+  // and memory share a cell and the rows stay four and four, with no panel left alone.
+  @media (min-width: 1500px) {
+    &--4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+}
+
+// Disk and memory: two cells of the grid, or one cell with both when the retouch panel makes nine panels.
+.stack {
+  display: contents;
+
+  &--on {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lab-space-4);
+    min-width: 0;
+  }
+}
+
+.columns mo-panel {
+  height: 100%;
+}
+
+.stack--on mo-panel {
+  height: auto;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--lab-warn);
+  border-radius: 999px;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  flex-wrap: wrap;
+
+  &__state {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    align-self: center;
+    color: var(--lab-ink-dim);
+
+    &.ok {
+      color: var(--lab-success);
+    }
+
+    &.missing {
+      color: var(--lab-danger);
+    }
+  }
+
+  // A long file name wraps inside the panel (it has no spaces to break at)
+  // instead of running past the edge and hiding the size.
+  &__name {
+    min-width: 90px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  &__detail {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__fix {
+    width: 100%;
+    font-size: var(--lab-fs-meta);
+    padding-left: 24px;
+  }
+}
+
+.missing {
+  color: var(--lab-danger);
+}
+
+.dim {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.warn mat-icon {
+  flex: none;
+}
+
+.columns > * {
+  min-width: 0; // a card narrower than its longest unbroken text still fits the column
+}
+
+.warn {
+  overflow-wrap: anywhere;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+  width: 100%;
+  margin: 2px 0 0;
+  max-width: 60ch;
+}
+
+.content-mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+}

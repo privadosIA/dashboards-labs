@@ -1,0 +1,9 @@
+{
+  "source": "../mediaOrquestator/internal/server/openapi.yaml",
+  "fetchedAt": "2026-11-19T17:29:28.865Z",
+  "sha256": "7ff52b017830c195cf27d07f968edc6208c097eef6b469bb447e430aca534150",
+  "openapi": "3.0.3",
+  "title": "mediaOrquestator API",
+  "version": "1",
+  "operations": 234
+}

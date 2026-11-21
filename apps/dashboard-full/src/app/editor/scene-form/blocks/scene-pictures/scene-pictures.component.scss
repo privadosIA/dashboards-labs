@@ -1,0 +1,54 @@
+@use '../block';
+
+:host {
+  display: block;
+}
+
+section {
+  @include block.section;
+}
+
+.pictures {
+  &__none {
+    margin: 0;
+    color: var(--lab-ink-dim);
+    font-size: var(--lab-fs-meta);
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__thumb {
+    position: relative;
+    padding: 0;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: var(--lab-radius-control);
+    overflow: hidden;
+    background: var(--mat-sys-surface-container);
+    cursor: pointer;
+
+    img {
+      display: block;
+      width: 160px;
+      height: 100px;
+      object-fit: cover;
+    }
+  }
+
+  &__variant {
+    position: absolute;
+    inset-inline-end: 4px;
+    inset-block-end: 4px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    font-size: 0.75rem;
+  }
+}

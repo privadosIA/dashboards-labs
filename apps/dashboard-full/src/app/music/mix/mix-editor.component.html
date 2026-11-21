@@ -1,0 +1,136 @@
+@if (mix(); as m) {
+  <section class="mix" [attr.data-testid]="'mix-' + index()" [attr.aria-label]="m.id">
+    <header class="mix__head">
+      <mat-form-field class="mix__id">
+        <mat-label i18n="@@mix.id">Mix</mat-label>
+        <input matInput class="mo-data" data-testid="mix-id" [value]="m.id" (change)="rename($any($event.target).value)" />
+        @if (errors()?.id; as err) {
+          <mat-hint class="error" role="alert">{{ err }}</mat-hint>
+        }
+      </mat-form-field>
+
+
+      <span class="spacer"></span>
+
+      <button mat-icon-button type="button" data-testid="mix-undo" [disabled]="!store.canUndo()" (click)="store.undo()" i18n-aria-label="@@mix.undo" aria-label="Undo (Ctrl+Z)" [matTooltip]="undoTip">
+        <mat-icon>undo</mat-icon>
+      </button>
+      <button mat-icon-button type="button" data-testid="mix-redo" [disabled]="!store.canRedo()" (click)="store.redo()" i18n-aria-label="@@mix.redo" aria-label="Redo (Ctrl+Shift+Z)" [matTooltip]="redoTip">
+        <mat-icon>redo</mat-icon>
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        data-testid="live-play"
+        [disabled]="!canPreview()"
+        [attr.aria-pressed]="live.playing()"
+        [matTooltip]="liveTip"
+        (click)="togglePreview()"
+      >
+        <mat-icon>{{ live.playing() ? 'pause' : 'play_arrow' }}</mat-icon>
+        @if (live.playing()) {
+          <ng-container i18n="@@mix.livePause">Pause</ng-container>
+        } @else {
+          <ng-container i18n="@@mix.livePlay">Listen without mixing</ng-container>
+        }
+      </button>
+      @if (live.position() !== null) {
+        <button mat-icon-button type="button" data-testid="live-stop" i18n-aria-label="@@mix.liveStop" aria-label="Stop and go back to the start" (click)="live.stop()">
+          <mat-icon>stop</mat-icon>
+        </button>
+      }
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="mix-now"
+        [disabled]="!canMix()"
+        (click)="mixNow()"
+      >
+        <mat-icon>blender</mat-icon>
+        <ng-container i18n="@@mix.mixNow">Mix</ng-container>
+      </button>
+      <button mat-icon-button type="button" class="danger" data-testid="remove-mix" (click)="remove()" i18n-aria-label="@@mix.removeMix" aria-label="Remove mix">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </header>
+
+    @if (errors()?.clips; as err) {
+      <p class="mix__error" role="alert">{{ err }}</p>
+    }
+    @for (issue of serverIssues(); track issue.text) {
+      <p class="mix__error" role="alert" data-testid="mix-server-error">{{ issue.text }}</p>
+    }
+    @if (missingSongs().length > 0) {
+      <p class="mix__note" role="status" data-testid="mix-missing">
+        <mat-icon inline>info</mat-icon>
+        <ng-container i18n="@@mix.missingSongs">These tracks must be created before mixing:</ng-container>
+        <span class="mo-data">{{ missingSongs().join(', ') }}</span>
+      </p>
+    }
+
+    <div class="mix__master" data-testid="mix-master">
+      <mat-form-field class="mix__gain">
+        <mat-label i18n="@@mix.masterGain">Master volume</mat-label>
+        <input matInput type="number" step="0.05" min="0" [max]="maxGain" class="mo-data" data-testid="mix-gain" [value]="m.gain ?? 1" (change)="setMasterGain($any($event.target).value)" />
+        @if (errors()?.gain; as err) {<mat-hint class="error" role="alert">{{ err }}</mat-hint>}
+      </mat-form-field>
+      <mat-checkbox data-testid="mix-normalize" [checked]="m.normalize === true" (change)="store.updateMix(index(), { normalize: $event.checked })" [matTooltip]="normalizeTip">
+        <ng-container i18n="@@mix.normalize">Normalize volume (−14 LUFS)</ng-container>
+      </mat-checkbox>
+    </div>
+
+    <div class="mix__tracks">
+    <button mat-stroked-button type="button" data-testid="add-clip" [matMenuTriggerFor]="addMenu">
+      <mat-icon>add</mat-icon>
+      <ng-container i18n="@@mix.addClip">Add track</ng-container>
+    </button>
+    <mat-menu #addMenu="matMenu">
+      @if (songChoices().length === 0 && sourceChoices().length === 0) {
+        <span class="mix__empty" i18n="@@mix.nothingToAdd">Create a track or upload audio to have something to mix.</span>
+      }
+      @for (c of songChoices(); track c.label) {
+        <button mat-menu-item type="button" (click)="add(c)">
+          <mat-icon [class.mix__fav]="c.favorite">{{ c.favorite ? 'star' : 'library_music' }}</mat-icon>
+          <span class="mo-data">{{ c.label }}</span>
+        </button>
+      }
+      @for (c of sourceChoices(); track c.label) {
+        <button mat-menu-item type="button" (click)="add(c)">
+          <mat-icon>audio_file</mat-icon>
+          <span class="mo-data">{{ c.label }}</span>
+        </button>
+      }
+    </mat-menu>
+      <span class="mix__count mo-data" data-testid="track-count">{{ tracksLabel(m.clips.length) }}</span>
+    </div>
+
+    @if (m.clips.length > 0) {
+      <app-mix-timeline [mix]="m" [mixIndex]="index()" [playhead]="playhead()" (seek)="seekMix($event)" [(selected)]="selected" />
+      @if (selected() !== null && m.clips[selected()!]) {
+        <app-clip-panel [mixIndex]="index()" [clipIndex]="selected()!" />
+      }
+    }
+
+    @if (mixing()) {
+      <p class="mix__note" role="status" data-testid="mix-working">
+        <mat-icon inline>hourglass_top</mat-icon>
+        <ng-container i18n="@@mix.working">Mixing…</ng-container>
+      </p>
+    } @else if (result(); as r) {
+      @if (current()) {
+        <mo-audio-player [src]="resultUrl()" [label]="m.id" (failed)="markMissing()" (position)="mixTime.set($event)" />
+        <p class="mix__meta mo-data" data-testid="mix-result">{{ r.file }} · {{ r.audio_seconds | number: '1.0-1' }} s@if (r.lufs !== undefined) { · {{ r.lufs | number: '1.1-1' }} LUFS}</p>
+      } @else {
+        <p class="mix__note" role="status" data-testid="mix-stale">
+          <mat-icon inline>info</mat-icon>
+          @if (outdated()) {
+            <ng-container i18n="@@mix.outdated">One of its tracks has been recreated since the last mix: click Mix to bring it up to date.</ng-container>
+          } @else {
+            <ng-container i18n="@@mix.stale">There are changes since the last mix: click Mix to hear them.</ng-container>
+          }
+        </p>
+      }
+    }
+  </section>
+}
