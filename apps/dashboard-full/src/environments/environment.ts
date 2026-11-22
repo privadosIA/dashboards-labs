@@ -9,4 +9,5 @@ export const environment: Environment = {
     flow: true,
     dataset: true,
   },
+  demoNotice: false,
 };

@@ -2131,6 +2131,7 @@
   "tasks.errorGeneric": "No se pudo completar la operación.",
   "chart.showChart": "Ver gráfica",
   "chart.showTable": "Ver como tabla",
+  "demo.notice": "{$START_TAG_STRONG}Demo con datos simulados:{$CLOSE_TAG_STRONG} nada de lo que ves aquí es real. Lo que crees se comparte con otros visitantes y se borra cada pocas horas.",
   "editEngine.aria": "Motor del retoque",
   "editEngine.used": "Motor:",
   "gpu.ollama": "Ollama retiene {$INTERPOLATION} MB de la VRAM con un modelo cargado (lo suelta unos minutos después de usarlo) y puede dejar sin memoria al render.",

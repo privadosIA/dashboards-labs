@@ -198,6 +198,30 @@
                   "with": "apps/dashboard-full/src/environments/environment.tutorial.ts"
                 }
               ]
+            },
+            "demo": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
+                }
+              ],
+              "outputHashing": "all",
+              "serviceWorker": "apps/dashboard-full/ngsw-config.json",
+              "extractLicenses": true,
+              "outputPath": "dist/dashboard-full-demo",
+              "fileReplacements": [
+                {
+                  "replace": "apps/dashboard-full/src/environments/environment.ts",
+                  "with": "apps/dashboard-full/src/environments/environment.demo.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

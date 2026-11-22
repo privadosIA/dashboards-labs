@@ -1,3 +1,6 @@
+@if (demo) {
+  <app-demo-notice />
+}
 <mat-sidenav-container class="shell" [class.shell--rail]="!phone() && !mobileShell() && !section()" [class.shell--rail-collapsed]="collapsed()" [class.shell--tabs]="mobileShell()" [class.shell--window]="!!section()">
   @if (!mobileShell() && !section()) {
     <mat-sidenav

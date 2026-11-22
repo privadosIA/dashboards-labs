@@ -55,7 +55,7 @@
         <source>Sections</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shell/tab-bar/tab-bar.component.html</context>
@@ -66,15 +66,15 @@
         <source>Connection</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">36,39</context>
+          <context context-type="linenumber">39,42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">150</context>
+          <context context-type="linenumber">156</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shell/section-header/section-header.component.html</context>
@@ -85,7 +85,7 @@
         <source>Language</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">47,51</context>
+          <context context-type="linenumber">50,54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shell/section-header/section-header.component.html</context>
@@ -96,22 +96,22 @@
         <source>Advanced version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">60,64</context>
+          <context context-type="linenumber">63,67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">164</context>
         </context-group>
       </trans-unit>
       <trans-unit id="shell.lightTheme" datatype="html">
         <source>Light theme</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">69,74</context>
+          <context context-type="linenumber">72,77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">161</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shell/section-header/section-header.component.html</context>
@@ -122,110 +122,110 @@
         <source>Hide navigation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">76,80</context>
+          <context context-type="linenumber">79,83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="shell.openNav" datatype="html">
         <source>Open navigation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">86,89</context>
+          <context context-type="linenumber">89,92</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">91,94</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.html</context>
-          <context context-type="linenumber">110,115</context>
+          <context context-type="linenumber">113,118</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.create" datatype="html">
         <source>Create</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.projects" datatype="html">
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">196</context>
+          <context context-type="linenumber">202</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.runs" datatype="html">
         <source>Runs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.stats" datatype="html">
         <source>Statistics</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.gallery" datatype="html">
         <source>Gallery</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.library" datatype="html">
         <source>Library</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.models" datatype="html">
         <source>Models</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.environment" datatype="html">
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.api" datatype="html">
         <source>API</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.settings" datatype="html">
         <source>Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">99</context>
         </context-group>
       </trans-unit>
       <trans-unit id="shell.more" datatype="html">
         <source>More</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">149</context>
         </context-group>
       </trans-unit>
       <trans-unit id="shell.darkTheme" datatype="html">
         <source>Dark theme</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/app.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">161</context>
         </context-group>
       </trans-unit>
       <trans-unit id="activity.wait" datatype="html">
@@ -15856,6 +15856,13 @@ Vuelvo a casa, vuelvo a ti</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shared/charts/chart-frame/chart-frame.component.html</context>
           <context context-type="linenumber">17,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="demo.notice" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Demo with simulated data:<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> nothing here is real. What you create is shared with other visitors and is erased every few hours.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/demo-notice/demo-notice.component.html</context>
+          <context context-type="linenumber">3,5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="editEngine.aria" datatype="html">

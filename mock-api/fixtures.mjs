@@ -49,7 +49,7 @@ const asset = (name, size) => ({ name, size: Math.round(size) });
 
 // A server with a models directory: where the models are installed and what is left on that disk.
 const modelsDir = () => ({
-  dir: '/mnt/backups/models',
+  dir: '/srv/demo/models',
   available: true,
   linked: true,
   disk: { free_bytes: 310 * GB, total_bytes: 954 * GB, warn_below_bytes: 20 * GB, low: false },
@@ -155,9 +155,9 @@ export const storage = (projects, clientOf = () => 'embedded') => ({
   disk: environment().disk,
   // A server with a media directory: where the projects live and what is left on that disk.
   media: {
-    dir: '/mnt/backups/media',
+    dir: '/srv/demo/media',
     disk: { free_bytes: 620 * GB, total_bytes: 954 * GB, warn_below_bytes: 20 * GB, low: false },
-    projects: projects.map((id) => ({ id, folder: `/mnt/backups/media/${id}` })),
+    projects: projects.map((id) => ({ id, folder: `/srv/demo/media/${id}` })),
   },
   models: modelsDir(),
 });

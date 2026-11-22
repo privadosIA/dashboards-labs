@@ -13,6 +13,7 @@ import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ConnectionDialogService, ConnectionService } from '@lab/server-connection';
 
+import { environment } from '../environments/environment';
 import { ActivityService } from './core/activity.service';
 import { AppUpdateService } from './core/app-update.service';
 import { AvailabilityStore } from './core/availability.store';
@@ -25,6 +26,7 @@ import { ThemeService } from './core/theme.service';
 import { AssistantStore } from './editor/assistant.store';
 import { DescribeStore } from './editor/describe-reference/describe.store';
 import { MusicAssistStore } from './music/music-assist.store';
+import { DemoNoticeComponent } from './shared/demo-notice/demo-notice.component';
 import { ActionSheetService } from './shared/action-sheet/action-sheet.service';
 import { NavItem, navItemActive } from './shell/nav-item';
 import { SectionHeaderComponent } from './shell/section-header/section-header.component';
@@ -64,12 +66,16 @@ function readRailOpen(): boolean {
     MatSlideToggleModule,
     SectionHeaderComponent,
     StatusBannerComponent,
+    DemoNoticeComponent,
     TabBarComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  host: { '[class.demo]': 'demo' },
 })
 export class App implements OnInit {
+  /** The public demo build keeps a notice above everything that says the data is simulated. */
+  protected readonly demo = environment.demoNotice;
   protected readonly lang: Lang = activeLang();
   protected readonly theme = inject(ThemeService);
   protected readonly simpleMode = inject(SimpleModeStore);

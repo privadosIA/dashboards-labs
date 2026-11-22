@@ -1,0 +1,22 @@
+.demo-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-4);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  border-bottom: 2px solid var(--lab-warn);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-align: center;
+
+  mat-icon {
+    flex: none;
+    color: var(--lab-warn);
+  }
+
+  &__text {
+    min-width: 0;
+  }
+}

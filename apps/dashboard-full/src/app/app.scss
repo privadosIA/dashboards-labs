@@ -5,6 +5,19 @@
   background: var(--lab-bg);
 }
 
+// The public demo keeps a notice above the shell: the host becomes a column and the shell takes what is left of the viewport.
+:host(.demo) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+
+  .shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+}
+
 // The page's scrollbar appears and goes as the content grows and shrinks (a chart, a table); without a reserved
 // place it narrows the page and the rows of buttons above re-wrap and jump (seen in Firefox).
 mat-sidenav-content {
