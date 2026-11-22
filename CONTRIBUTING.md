@@ -30,3 +30,7 @@ This repository contains no server code. The server is [`mediaOrquestator`](http
 ## Security
 
 Do not report a vulnerability in a public issue: see [SECURITY.md](SECURITY.md).
+
+## Conduct
+
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
