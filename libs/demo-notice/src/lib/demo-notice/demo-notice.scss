@@ -1,0 +1,28 @@
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lab-space-3);
+  padding: var(--lab-space-2) var(--lab-space-4);
+  background: var(--lab-surface-high);
+  color: var(--lab-ink);
+  border-bottom: 2px solid var(--lab-warn);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-align: center;
+
+  &__icon {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: var(--lab-warn);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &__text {
+    min-width: 0;
+  }
+}

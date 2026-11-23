@@ -34,6 +34,9 @@
       "@lab/server-connection": [
         "./libs/server-connection/src/public-api.ts"
       ],
+      "@lab/demo-notice": [
+        "./libs/demo-notice/src/public-api.ts"
+      ],
       "@lab/theme-switch": [
         "./libs/theme-switch/src/public-api.ts"
       ]

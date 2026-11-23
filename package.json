@@ -28,6 +28,7 @@
     "dashboard-full:serve:tutorial": "ng serve dashboard-full --configuration tutorial",
     "dashboard-full:build": "ng build dashboard-full",
     "dashboard-full:build:demo": "ng build dashboard-full --configuration demo",
+    "examples:build": "node scripts/build-examples.mjs",
     "dashboard-full:e2e": "bash apps/dashboard-full/e2e/run-e2e.sh --project=desktop",
     "a11y:audit": "node scripts/a11y-audit.mjs",
     "forms:audit": "node scripts/form-gap-audit.mjs",

@@ -355,6 +355,35 @@
           }
         }
       }
+    },
+    "demo-notice": {
+      "projectType": "library",
+      "root": "libs/demo-notice",
+      "sourceRoot": "libs/demo-notice/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
     }
   }
 }

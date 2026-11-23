@@ -1,3 +1,4 @@
+import { environment as demo } from '../../environments/environment.demo';
 import { environment as tutorial } from '../../environments/environment.tutorial';
 import { environment } from '../../environments/environment';
 import { SectionLinksService } from './section-links.service';
@@ -17,6 +18,12 @@ describe('SectionLinksService', () => {
   it('the tutorial environment has the same buttons, every one hidden', () => {
     expect(Object.keys(tutorial.sectionLinks).sort()).toEqual(Object.keys(environment.sectionLinks).sort());
     expect(Object.values(tutorial.sectionLinks).every((shown) => shown === false)).toBe(true);
+  });
+
+  it('the demo environment has the same buttons, every one hidden: its sections have their own dashboards', () => {
+    expect(Object.keys(demo.sectionLinks).sort()).toEqual(Object.keys(environment.sectionLinks).sort());
+    expect(Object.values(demo.sectionLinks).every((shown) => shown === false)).toBe(true);
+    expect(demo.demoNotice).toBe(true);
   });
 
   it('lets the sections of config.json overrule the environment button by button', async () => {
