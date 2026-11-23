@@ -21,6 +21,8 @@ import * as yaml from 'js-yaml';
 import * as fx from './fixtures.mjs';
 import { generationHandlers } from './generation.mjs';
 import { videoEditHandlers } from './video-edit.mjs';
+import { motionPageHandlers } from './motion-pages.mjs';
+import { blenderDescriptionHandlers } from './blender-descriptions.mjs';
 import { musicMotionHandlers, PARTS, SAMPLE_VIDEO_FILE, isSampleVideo, seedSample } from './music-motion.mjs';
 import { motionChoice, motionConfigProblem } from './motion-scenes.mjs';
 import { pager, isPaged } from './listing.mjs';
@@ -395,6 +397,8 @@ const handlers = {
   ...catalogHandlers({ db, save, ts }).handlers,
   ...generationHandlers({ db, save, ts, speed: SPEED }),
   ...videoEditHandlers({ db, save, ts, speed: SPEED }),
+  ...motionPageHandlers({ db }),
+  ...blenderDescriptionHandlers({ db }),
   ...musicMotionHandlers({ db, save, ts, speed: SPEED }),
 };
 

@@ -107,6 +107,9 @@
         <span class="note" role="status" i18n="@@motion.writing">The model is writing and checking the page…</span>
       }
     </div>
+    @if (page()?.exists && hasBlock() && modelAvailable()) {
+      <app-motion-revise [busy]="busy() !== ''" [waiting]="busy() === 'revising'" [problem]="reviseError()" (revise)="revise($event)" />
+    }
     @if (timelineDirty()) {
       <p class="note" data-testid="timeline-unsaved" i18n="@@timeline.unsaved">There are unsaved changes: you see them here, but the video uses the saved page.</p>
     }

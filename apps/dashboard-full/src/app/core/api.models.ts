@@ -118,6 +118,8 @@ export interface Scene {
   variants?: number;
   lora: string;
   silence_seconds?: number;
+  /** A 3D scene built in Blender from a description in `sources/` (`build` is that file's plain name). */
+  blender?: { build: string; samples?: number };
   motion?: Motion;
   look?: Look;
   /** Opt in to the animate phase (Wan); needs defaults.animate. */
@@ -192,6 +194,25 @@ export interface MotionPage {
   summary?: string;
   model?: string;
   browser?: string;
+}
+
+/** A 3D scene description as the server stores it: `description` as written, `resolved` with every key in seconds and every colour `#rrggbb`. */
+export interface BlenderDescription {
+  name: string;
+  description: Record<string, unknown>;
+  resolved?: Record<string, unknown>;
+}
+
+/** The answer of writing or changing a description: who wrote it and in how many attempts. */
+export interface BlenderWritten extends BlenderDescription {
+  provider: string;
+  model: string;
+  attempts: number;
+}
+
+/** The answer of `POST .../motion/revise`: the revised page and who retimed it. */
+export interface MotionRevision extends MotionPage {
+  revised: { provider: string; model: string };
 }
 
 /** Each field is optional: absent means the project's value. */

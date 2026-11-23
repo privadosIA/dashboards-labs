@@ -3235,6 +3235,324 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/{id}/scenes/{scene}/motion/revise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Changes the motion of a stored page from a request in words
+         * @description Changes how the stored page of a motion graphic or an overlay moves without asking for a new page. The model of the `motion_graphics` task is shown the page (through the compression service when Settings has one on, which leaves the paint out and keeps the timeline; the page itself otherwise) and the request, and answers with the content of the page's `motion-timeline` block only. That block is checked (properties and ranges, curves, ids, selectors that match, nothing ending after the clip), written into the stored page with every other byte as it was, and the result goes through the same check in the browser as a new page. A timeline that fails is asked for again with the problem, up to 3 attempts. Body `{instruction, overlay?, provider?}`: `instruction` is the request in words ("slower entrances", "a bounce on the title"), up to 1000 characters. Only a page that declares its animation as a timeline can be revised; a page that animates with its own script has to be generated again. The page keeps its details: one the model wrote reads as `edited` afterwards, one saved by hand stays `supplied`. The stored page is replaced only if the revision works.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                    /** @description Scene identifier. */
+                    scene: components["parameters"]["SceneId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description How the motion should change, in words. */
+                        instruction: string;
+                        /** @description Revise the overlay's page instead of the graphic's. */
+                        overlay?: boolean;
+                        /** @description A provider of the routing, for this call only. */
+                        provider?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description The revised page, as in the GET of `/motion`, plus `revised: {provider, model}` (who retimed it). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                /** @description The project or the scene does not exist */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description A run is in progress and the model loads on this machine. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The page has no timeline block, or the model did not write a timeline that works after 3 attempts (the message carries the last problem). */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The browser or the model is missing. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}/blender/descriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A model writes the description of a 3D scene from an idea
+         * @description Asks the model of the `motion_graphics` task for the description of a 3D scene (contract version 1 of the Blender engine, see `docs/SCENES_YAML.md`) of a scene `seconds` long, and stores it as `sources/<name>` only if it passes the checks of a hand-written one. The model is told what this project has (the length and the shape of the frame, the colours behind `bg`, `fg` and `accent`, the fonts `display` and `body` only when the design has them in the server's font pack, the tempo and the number of beats, or that keys are in seconds when there is no `defaults.motion.bpm`) and what the contract accepts. A description that breaks a rule, is not JSON, has no object or in which nothing moves is asked for again with the problems (each naming its place in the JSON), up to 3 attempts; then the answer is `422` with the last problems and the stored file is as it was. With `revise: true` the stored description is shown to the model and `idea` says how to change it (`404` if there is none). Body `{name, idea, seconds, revise?, provider?}`: `name` is a plain file name ending in `.scene.json`, `idea` up to 2000 characters, `seconds` from 0.5 to 600. The idea is data: whatever it says, only a description that passes the checks is stored. Answers `{name, description, resolved, provider, model, attempts}`: `description` is the file as the model wrote it (what a person edits), `resolved` the same with every key in seconds and every colour `#rrggbb`. `409` while a run is active and the model loads on this machine, `503` without a model, and the routing errors of the other model calls.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description A plain file name ending in .scene.json. */
+                        name: string;
+                        /** @description What the scene shows (or, with revise, how to change it). */
+                        idea: string;
+                        /** @description The length of the scene the description is made for. */
+                        seconds: number;
+                        /** @description Change the stored description instead of writing a new one. */
+                        revise?: boolean;
+                        /** @description A provider of the routing, for this call only. */
+                        provider?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description `{name, description, resolved, provider, model, attempts}`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                /** @description The project does not exist, or `revise` is true and there is no such description. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description A run is in progress and the model loads on this machine. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No attempt gave a description that passes the checks; the message carries the last problems. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description There is no model. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}/blender/descriptions/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reads a stored description of a 3D scene
+         * @description Returns `{name, description, resolved}`: the file as it is stored and the same resolved with the project's tempo and design (every key in seconds, every colour `#rrggbb`; absent when the file does not parse as a description). It is not checked: a file edited by hand may be wrong and is shown anyway. The file is also listed in `GET /sources` with `kind: scene`. `404` if there is none.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description `{name, description, resolved}`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description The stored file is not valid JSON. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /**
+         * Saves by hand the description of a 3D scene
+         * @description Stores a description written by hand after the same checks as the writer's (but not the quality floor it asks of a model: a still scene is allowed), against a scene `seconds` long. The length is not stored; a run checks the description again against the real length of the scene. A description that does not pass is refused with `400` naming each fault by its place in the JSON (`objects[3].keys[2].t: 9 is outside the scene`), and the stored file is as it was. Body `{description, seconds}`; returns the same as the GET. Once stored, a scene of the project may name it with `blender: {build: <name>}`.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description The description (contract version 1). */
+                        description: Record<string, never>;
+                        seconds: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description `{name, description, resolved}`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}/blender/descriptions/{name}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * One frame of a stored description of a 3D scene
+         * @description Draws the frame at second `t` of the stored description, as a scene `seconds` long would have it: small (`width` up to 960 pixels, 480 by default, the project's aspect), with few samples, **on the CPU** so that it never takes a card from a run (about a second). Answers the PNG and stores nothing. `400` when `t` is outside the scene, `width` is too big or the description does not pass the checks (the message names the faults), `404` when there is none, and `503` when Blender is not installed, with how to install it. Writing and revising descriptions need no Blender.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description The second to draw. */
+                        t: number;
+                        /** @description The length of the scene. */
+                        seconds: number;
+                        width?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description The frame. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/png": string;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description Blender is not installed. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{id}/videoclip/plan": {
         parameters: {
             query?: never;

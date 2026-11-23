@@ -200,4 +200,33 @@ describe('scene model adapter: what is only shown', () => {
       expect('motion_graphic' in motion).toBe(false);
     });
   });
+  describe('the 3D scene way', () => {
+    it('a scene with blender.build is in that way, before any other', () => {
+      expect(pictureModeOf(scene({ blender: { build: 'a.scene.json' } }))).toBe('blender');
+      expect(pictureModeOf(scene({ blender: { build: 'a.scene.json' }, image: 'x.png' }))).toBe('blender');
+    });
+
+    it('choosing it names the file after the scene and clears what the server refuses with it', () => {
+      const s = scene({ id: 'titulo', image: 'a.png', clip: 'c.mp4', clip_start: 1, animate: true, motion_prompt: 'x', init_image: 'b.png', strength: 0.5, render: { steps: 5 }, animation: { frames: 33 }, motion_graphic: 'g' });
+      const patch = pictureModePatch(s, 'blender');
+      expect(patch).toMatchObject({ blender: { build: 'titulo.scene.json' }, image: undefined, clip: undefined, clip_start: undefined, animate: undefined, motion_prompt: undefined, init_image: undefined, strength: undefined, render: undefined, animation: undefined, motion_graphic: undefined });
+    });
+
+    it('a scene that already has a file keeps it, and the samples with it', () => {
+      const s = scene({ blender: { build: 'mine.scene.json', samples: 8 } });
+      expect(fromFormModel(s, toFormModel(s)).blender).toEqual({ build: 'mine.scene.json', samples: 8 });
+      expect(toScenePatch(s, toFormModel(s))).toEqual({});
+    });
+
+    it('leaving it removes blender', () => {
+      const s = scene({ blender: { build: 'a.scene.json' } });
+      expect(pictureModePatch(s, 'motion')).toMatchObject({ blender: undefined, motion_graphic: '' });
+      expect(pictureModePatch(s, 'ai')).toMatchObject({ blender: undefined });
+      expect(pictureModePatch(s, 'part')).toMatchObject({ blender: undefined, motion_part: '' });
+    });
+
+    it('choosing another way from a scene that has none leaves blender out', () => {
+      expect('blender' in pictureModePatch(scene(), 'motion')).toBe(false);
+    });
+  });
 });

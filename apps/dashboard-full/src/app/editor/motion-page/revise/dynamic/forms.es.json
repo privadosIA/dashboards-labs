@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "id": "motion-revise",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "instruction",
+      "type": "text",
+      "label": "Cambiar el movimiento",
+      "description": "Solo cambia el movimiento: el texto, los estilos y los scripts de la página se quedan como están.",
+      "placeholder": "Dilo con tus palabras, por ejemplo «entradas más lentas»",
+      "validation": { "maxLength": 1000 },
+      "props": { "attributes": { "data-testid": "revise-instruction", "autocomplete": "off" } }
+    }
+  ]
+}

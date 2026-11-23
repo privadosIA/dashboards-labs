@@ -22,11 +22,17 @@
     </ng-template>
 
     <ng-template moSlot="picture">
-      <app-scene-picture-mode [mode]="pictureMode()" [motionAllowed]="motionAvailable() || motionScene()" [partAllowed]="partAllowed()" (modeChange)="setPictureMode($event)" />
+      <app-scene-picture-mode [mode]="pictureMode()" [motionAllowed]="motionAvailable() || motionScene()" [partAllowed]="partAllowed()" [blenderAllowed]="videoMode()" (modeChange)="setPictureMode($event)" />
     </ng-template>
 
     <ng-template moSlot="motionPart">
       <app-scene-motion-part [errors]="errors()" />
+    </ng-template>
+
+    <ng-template moSlot="blender">
+      @if (s.blender; as blender) {
+        <app-scene-blender [sceneId]="s.id" [build]="blender.build" [sceneSeconds]="s.silence_seconds" />
+      }
     </ng-template>
 
     <ng-template moSlot="pictureSource">

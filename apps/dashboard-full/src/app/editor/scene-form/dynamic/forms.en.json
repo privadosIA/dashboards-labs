@@ -108,6 +108,31 @@
       }
     },
     {
+      "key": "slots.blender",
+      "type": "slot",
+      "props": {
+        "slot": "blender"
+      },
+      "layout": {
+        "col": 12
+      },
+      "logic": {
+        "showWhen": {
+          "all": [
+            {
+              "field": "ctx.video",
+              "operator": "truthy"
+            },
+            {
+              "field": "pictureMode",
+              "operator": "eq",
+              "value": "blender"
+            }
+          ]
+        }
+      }
+    },
+    {
       "key": "motion_graphic",
       "type": "textarea",
       "label": "What the graphic shows",

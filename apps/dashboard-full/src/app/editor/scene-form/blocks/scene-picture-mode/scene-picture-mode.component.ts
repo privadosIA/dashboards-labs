@@ -3,7 +3,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { PictureMode } from '../../dynamic/scene-model.adapter';
 
-/** How the scene's picture is made: generated, its own picture, its own clip, an animated graphic or a part of the catalog. */
+/** How the scene's picture is made: generated, its own picture, its own clip, an animated graphic, a part of the catalog or a 3D scene. */
 @Component({
   selector: 'app-scene-picture-mode',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,6 +17,8 @@ export class ScenePictureModeComponent {
   readonly motionAllowed = input(false);
   /** A part of the catalog is offered when the server has the catalog (or the scene already is drawn by one). */
   readonly partAllowed = input(false);
+  /** A 3D scene built in Blender is offered in video projects. */
+  readonly blenderAllowed = input(false);
 
   readonly modeChange = output<PictureMode>();
 }

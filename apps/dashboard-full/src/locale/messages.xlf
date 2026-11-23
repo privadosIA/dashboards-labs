@@ -4242,7 +4242,7 @@
         <source>There are unsaved changes: you see them here, but the video uses the saved page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.html</context>
-          <context context-type="linenumber">111,114</context>
+          <context context-type="linenumber">114,117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-timeline-dialog.component.html</context>
@@ -4253,28 +4253,49 @@
         <source>Chrome or Chromium is needed to draw this page. <x id="fix" equiv-text="browser.fix ?? &apos;&apos;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.noDescription" datatype="html">
         <source>Write the description first.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.saveFirst" datatype="html">
         <source>Save the project so the current description is used.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.saveTitle" datatype="html">
+        <source>Save your changes first</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.saveMessage" datatype="html">
+        <source>The motion is changed on the saved page, and you have timeline changes not saved yet. Save them and then change the motion?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
+          <context context-type="linenumber">164</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.saveConfirm" datatype="html">
+        <source>Save and change the motion</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
+          <context context-type="linenumber">165</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.failed" datatype="html">
         <source>The operation could not be completed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-page.component.ts</context>
-          <context context-type="linenumber">257</context>
+          <context context-type="linenumber">295</context>
         </context-group>
       </trans-unit>
       <trans-unit id="timeline.windowTitle" datatype="html">
@@ -4441,6 +4462,90 @@
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/motion-timeline-panel.component.html</context>
           <context context-type="linenumber">116,117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.noPage" datatype="html">
+        <source>There is no page yet: write the page first.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise-problem.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.noTimeline" datatype="html">
+        <source>No timeline that works came out.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise-problem.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.tryAgain" datatype="html">
+        <source>Try again or say it differently.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise-problem.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.ownScript" datatype="html">
+        <source>This page moves with its own script: write another page instead.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise-problem.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.failed" datatype="html">
+        <source>The motion could not be changed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise-problem.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.suggestions" datatype="html">
+        <source>Suggestions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.send" datatype="html">
+        <source>Change the motion</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.html</context>
+          <context context-type="linenumber">13,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.wait" datatype="html">
+        <source>The model is retiming the page and checking it…</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.html</context>
+          <context context-type="linenumber">16,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.chipSlower" datatype="html">
+        <source>slower entrances</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.chipFaster" datatype="html">
+        <source>faster, snappier</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.chipBounce" datatype="html">
+        <source>a bounce on the title</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="motion.revise.chipStagger" datatype="html">
+        <source>stagger the lines</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/motion-page/revise/revise.component.ts</context>
+          <context context-type="linenumber">41</context>
         </context-group>
       </trans-unit>
       <trans-unit id="picture.uploadClip" datatype="html">
@@ -4616,6 +4721,181 @@
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/quality-tiers.ts</context>
           <context context-type="linenumber">613</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.noScene" datatype="html">
+        <source>There is no description yet: write the scene first.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.noValid" datatype="html">
+        <source>No description that passes the checks came out.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.tryAgain" datatype="html">
+        <source>Try again or say it differently.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.noBlender" datatype="html">
+        <source>Blender is needed to draw the preview.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.noModel" datatype="html">
+        <source>There is no model to write the scene.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.failed" datatype="html">
+        <source>The operation could not be completed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.badJsonAt" datatype="html">
+        <source>The text is not valid JSON: it breaks at line <x id="line" equiv-text="line"/>, column <x id="column" equiv-text="column"/>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.badJson" datatype="html">
+        <source>The text is not valid JSON.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.notObject" datatype="html">
+        <source>The description must be a JSON object.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/blender-problem.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.title" datatype="html">
+        <source>3D scene</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">2,3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.intro" datatype="html">
+        <source>A model writes the description of a scene that Blender builds and renders. It is saved in the project as a file, and you can edit it by hand.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">3,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.needFile" datatype="html">
+        <source>The scene names a file that does not exist yet: write the description before saving the project.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">6,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.write" datatype="html">
+        <source>Write</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">14,17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.change" datatype="html">
+        <source>Change it</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">19,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.wait" datatype="html">
+        <source>The model is writing and checking the scene…</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">23,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.unsaved" datatype="html">
+        <source>The description has changes not saved: «Change it» works on the saved one.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">27,30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.written" datatype="html">
+        <source>Written by <x id="INTERPOLATION" equiv-text="{{ w.model }}"/> in <x id="INTERPOLATION_1" equiv-text="{{ w.attempts }}"/> attempt(s).</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">33,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.descriptionLabel" datatype="html">
+        <source>Description (JSON)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">37,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.save" datatype="html">
+        <source>Save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">50,53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.undo" datatype="html">
+        <source>Put back the previous one</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">55,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.saving" datatype="html">
+        <source>Saving and checking…</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">59,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.frameAlt" datatype="html">
+        <source>A frame of the 3D scene</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">68,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.timeLabel" datatype="html">
+        <source>Second to draw</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">72,73</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.refresh" datatype="html">
+        <source>Refresh</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">77,80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="blender.previewNote" datatype="html">
+        <source>A quick preview: noisy, with lights unlike the final render; the framing and the timing are exact.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-blender/scene-blender.component.html</context>
+          <context context-type="linenumber">80,82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.init" datatype="html">
@@ -4836,7 +5116,14 @@
         <source>Part of the catalog</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-picture-mode/scene-picture-mode.component.html</context>
-          <context context-type="linenumber">16,20</context>
+          <context context-type="linenumber">16,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="scene.pictureBlender" datatype="html">
+        <source>3D scene</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/blocks/scene-picture-mode/scene-picture-mode.component.html</context>
+          <context context-type="linenumber">19,23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.pictureHint" datatype="html">
@@ -5265,112 +5552,112 @@
         <source>Narration</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">63,66</context>
+          <context context-type="linenumber">69,72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.narrationLabel" datatype="html">
         <source>Narration type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">68,70</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.narrationTts" datatype="html">
         <source>Narrated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">70,71</context>
+          <context context-type="linenumber">76,77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.narrationSilence" datatype="html">
         <source>Silent</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">72,76</context>
+          <context context-type="linenumber">78,82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.motion" datatype="html">
         <source>Camera motion</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">83,87</context>
+          <context context-type="linenumber">89,93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.intensity" datatype="html">
         <source>intensity</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">94,97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.animate" datatype="html">
         <source>Animation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">97,102</context>
+          <context context-type="linenumber">103,108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.animTrim" datatype="html">
         <source>Part of the animation that is used (seconds, only the first half: the forward part)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">111,114</context>
+          <context context-type="linenumber">117,120</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.animateMotionNote" datatype="html">
         <source> Camera motion is ignored in an animated scene: the video already moves. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">127,132</context>
+          <context context-type="linenumber">133,138</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.overlay" datatype="html">
         <source>Overlay on the scene</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">139,144</context>
+          <context context-type="linenumber">145,150</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.overlayRemove" datatype="html">
         <source>Remove the overlay</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">145,149</context>
+          <context context-type="linenumber">151,155</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.overlayAdd" datatype="html">
         <source>Add an overlay</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">153,156</context>
+          <context context-type="linenumber">159,162</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.transition" datatype="html">
         <source>Fade in</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">162,167</context>
+          <context context-type="linenumber">168,173</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.look" datatype="html">
         <source>Finish</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">168,173</context>
+          <context context-type="linenumber">174,179</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.grain" datatype="html">
         <source>grain</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">179</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.animateImagesNote" datatype="html">
         <source> This scene has animation enabled, but it is not used in images mode. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/scene-form/scene-form.component.html</context>
-          <context context-type="linenumber">178,184</context>
+          <context context-type="linenumber">184,190</context>
         </context-group>
       </trans-unit>
       <trans-unit id="reel.title" datatype="html">

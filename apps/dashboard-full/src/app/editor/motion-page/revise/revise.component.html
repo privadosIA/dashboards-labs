@@ -1,0 +1,25 @@
+<section class="revise" data-testid="motion-revise" appAutoAnimate>
+  <div class="field" (keydown.enter)="send()">
+    <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+  </div>
+  <div class="chips" role="group" i18n-aria-label="@@motion.revise.suggestions" aria-label="Suggestions">
+    @for (chip of chips; track chip) {
+      <button mat-stroked-button type="button" class="chip" data-testid="revise-chip" [disabled]="busy()" (click)="useChip(chip)">{{ chip }}</button>
+    }
+  </div>
+  <div class="row">
+    <button mat-stroked-button type="button" data-testid="revise-send" [disabled]="!canSend()" (click)="send()">
+      <mat-icon>motion_photos_on</mat-icon>
+      <ng-container i18n="@@motion.revise.send">Change the motion</ng-container>
+    </button>
+    @if (waiting()) {
+      <span class="note" role="status" data-testid="revise-wait" i18n="@@motion.revise.wait">The model is retiming the page and checking it…</span>
+    }
+  </div>
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="revise-error">
+      <mat-icon inline>error</mat-icon>
+      <span class="mo-data">{{ why }}</span>
+    </p>
+  }
+</section>

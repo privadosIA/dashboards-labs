@@ -3,9 +3,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 
 import { AvailabilityResponse, EnvironmentReport, MotionPage, ProjectConfig } from '../../core/api.models';
 import { ALL_AVAILABLE, missing } from '../../core/availability.fake';
+import { provideAppDynamicForms } from '../../shared/dynamic/dynamic-forms.providers';
 import { EditorStore } from '../editor.store';
 import { MotionPageComponent } from './motion-page.component';
 import { MotionTimelineDialogComponent, TimelineSession } from './motion-timeline-dialog.component';
@@ -53,7 +55,7 @@ describe('MotionPageComponent', () => {
 
   /** Opens the component, answers what it asks for and settles. */
   async function open(opts: { page?: MotionPage | null; chrome?: boolean; avail?: AvailabilityResponse; described?: boolean; overlay?: boolean } = {}): Promise<void> {
-    TestBed.configureTestingModule({ imports: [MotionPageComponent], providers: [EditorStore, provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
+    TestBed.configureTestingModule({ imports: [MotionPageComponent], providers: [EditorStore, provideHttpClient(), provideHttpClientTesting(), provideRouter([]), provideAppDynamicForms()] });
     http = TestBed.inject(HttpTestingController);
     store = TestBed.inject(EditorStore);
     const loading = store.load('demo');
@@ -66,7 +68,7 @@ describe('MotionPageComponent', () => {
     fixture.detectChanges();
     http.match((r) => r.url.startsWith('/api/environment')).forEach((r) => r.flush(report(opts.chrome ?? true)));
     http.match((r) => r.url === '/api/models/availability').forEach((r) => r.flush(opts.avail ?? ALL_AVAILABLE));
-    const get = http.expectOne((r) => r.method === 'GET' && r.url === '/api/projects/demo/scenes/gfx/motion');
+    const get = http.expectOne((r) => r.method === 'GET' && r.url.split('?')[0] === '/api/projects/demo/scenes/gfx/motion');
     if (opts.page === null) get.flush({ error: { message: 'x' } }, { status: 404, statusText: 'Not Found' });
     else get.flush(opts.page ?? PAGE);
     await settle();
@@ -278,6 +280,185 @@ describe('MotionPageComponent', () => {
     expect(asked.request.method).toBe('GET');
     asked.flush({ ...PAGE, overlay: true });
     await settle();
+  });
+
+  describe('change the motion by words', () => {
+    const BLOCK = '{"version":1,"tracks":[{"id":"title","target":"h1","start":0.5,"duration":1,"ease":"out","from":{"opacity":0},"to":{"opacity":1}}]}';
+    const WITH = `<html><body><h1>x</h1><script type="application/json" id="motion-timeline">${BLOCK}</script></body></html>`;
+    const withTimeline: MotionPage = { ...PAGE, html: WITH, preview: '<html><head></head><body><h1>x</h1></body></html>', duration: 3 };
+    const URL = '/api/projects/demo/scenes/gfx/motion/revise';
+    const field = () => {
+      const el = q('[data-testid=revise-instruction]')!;
+      return (el.matches('input') ? el : el.querySelector('input')) as HTMLInputElement;
+    };
+    const type = async (value: string) => {
+      field().value = value;
+      field().dispatchEvent(new Event('input'));
+      await settle();
+    };
+    const send = () => (q('[data-testid=revise-send]') as HTMLButtonElement);
+    const refuse = async (status: number, message: string) => {
+      http.expectOne(URL).flush({ error: { code: 'x', message } }, { status, statusText: 'x' });
+      await settle();
+    };
+
+    it('shows the field, the button and four suggestions when the page has a timeline and the model can run', async () => {
+      await open({ page: withTimeline });
+      expect(q('[data-testid=motion-revise]')).toBeTruthy();
+      expect(field()).toBeTruthy();
+      expect((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid=revise-chip]')).toHaveLength(4);
+      expect(send().disabled).toBe(true); // nothing asked yet
+    });
+
+    it('is not shown for a page without a timeline block', async () => {
+      await open();
+      expect(q('[data-testid=motion-revise]')).toBeNull();
+    });
+
+    it('is not shown without the model', async () => {
+      await open({ page: withTimeline, avail: missing('motion_graphics', 'no_models') });
+      expect(q('[data-testid=motion-revise]')).toBeNull();
+    });
+
+    it('is not shown while there is no page', async () => {
+      await open({ page: { ...PAGE, exists: false, html: '', preview: undefined } });
+      expect(q('[data-testid=motion-revise]')).toBeNull();
+    });
+
+    it('a suggestion fills the field and enables the button', async () => {
+      await open({ page: withTimeline });
+      (q('[data-testid=revise-chip]') as HTMLButtonElement).click();
+      await settle();
+      expect(field().value).toBe('entradas más lentas');
+      expect(send().disabled).toBe(false);
+    });
+
+    it('sends the instruction, waits, replaces the page and empties the field', async () => {
+      await open({ page: withTimeline });
+      await type('slower entrances');
+      send().click();
+      await settle();
+      expect(q('[data-testid=revise-wait]')).toBeTruthy();
+      expect(send().disabled).toBe(true);
+      const req = http.expectOne(URL);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ instruction: 'slower entrances', overlay: false });
+      req.flush({ ...withTimeline, origin: 'edited', summary: 'motion graphic · retimed by other:1b', revised: { provider: 'ollama', model: 'other:1b' } });
+      await settle();
+      expect(q('[data-testid=motion-summary]')?.textContent).toContain('retimed by other:1b');
+      expect(q('[data-testid=revise-wait]')).toBeNull();
+      expect(field().value).toBe('');
+      expect(q('[data-testid=revise-error]')).toBeNull();
+    });
+
+    it('the overlay revises its own page', async () => {
+      await open({ page: { ...withTimeline, overlay: true }, overlay: true });
+      await type('faster, snappier');
+      send().click();
+      await settle();
+      expect(http.expectOne(URL).request.body).toEqual({ instruction: 'faster, snappier', overlay: true });
+    });
+
+    it('with timeline changes not saved it asks, saves them and then revises', async () => {
+      await open({ page: withTimeline });
+      const dialog = TestBed.inject(MatDialog);
+      const ask = vi.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(true) } as never);
+      const tl = structuredClone((fixture.componentInstance as unknown as { timeline(): { tracks: { start: number }[] } }).timeline());
+      tl.tracks[0].start = 2;
+      (fixture.componentInstance as unknown as { timelineChanged(t: unknown): void }).timelineChanged(tl);
+      await settle();
+      await type('a bounce on the title');
+      send().click();
+      await settle();
+      expect(ask).toHaveBeenCalledTimes(1);
+      const save = http.expectOne('/api/projects/demo/scenes/gfx/motion');
+      expect(save.request.method).toBe('PUT');
+      expect((save.request.body as { html: string }).html).toContain('"start":2');
+      http.expectNone(URL); // not before the save is stored
+      save.flush({ ...withTimeline, html: (save.request.body as { html: string }).html });
+      await settle();
+      expect(http.expectOne(URL).request.body).toEqual({ instruction: 'a bounce on the title', overlay: false });
+    });
+
+    it('does not revise when the save of the changes fails', async () => {
+      await open({ page: withTimeline });
+      vi.spyOn(TestBed.inject(MatDialog), 'open').mockReturnValue({ afterClosed: () => of(true) } as never);
+      const tl = structuredClone((fixture.componentInstance as unknown as { timeline(): { tracks: { start: number }[] } }).timeline());
+      tl.tracks[0].start = 2;
+      (fixture.componentInstance as unknown as { timelineChanged(t: unknown): void }).timelineChanged(tl);
+      await type('slower');
+      send().click();
+      await settle();
+      http.expectOne('/api/projects/demo/scenes/gfx/motion').flush({ error: { message: 'disk full' } }, { status: 500, statusText: 'x' });
+      await settle();
+      http.expectNone(URL);
+      expect(q('[data-testid=motion-error]')?.textContent).toContain('disk full');
+    });
+
+    it('declining the question sends nothing and keeps the changes', async () => {
+      await open({ page: withTimeline });
+      vi.spyOn(TestBed.inject(MatDialog), 'open').mockReturnValue({ afterClosed: () => of(false) } as never);
+      const tl = structuredClone((fixture.componentInstance as unknown as { timeline(): { tracks: { start: number }[] } }).timeline());
+      tl.tracks[0].start = 2;
+      (fixture.componentInstance as unknown as { timelineChanged(t: unknown): void }).timelineChanged(tl);
+      await type('slower');
+      send().click();
+      await settle();
+      http.expectNone('/api/projects/demo/scenes/gfx/motion');
+      http.expectNone(URL);
+      expect(q('[data-testid=timeline-save]')).toBeTruthy(); // the changes are still there
+      expect(field().value).toBe('slower');
+    });
+
+    describe('what a refusal says', () => {
+      async function ask(): Promise<void> {
+        await open({ page: withTimeline });
+        await type('slower entrances');
+        send().click();
+        await settle();
+      }
+      const shown = () => q('[data-testid=revise-error]')?.textContent ?? '';
+
+      it('400: the words of the server, next to the field, and the field keeps what was typed', async () => {
+        await ask();
+        await refuse(400, 'instruction: at most 1000 characters');
+        expect(shown()).toContain('at most 1000 characters');
+        expect(field().value).toBe('slower entrances');
+      });
+
+      it('404: write the page first', async () => {
+        await ask();
+        await refuse(404, 'no page');
+        expect(shown()).toContain('escribe primero la página');
+      });
+
+      it('409 and 503: the words of the server, as the generate button shows them', async () => {
+        await ask();
+        await refuse(409, 'a run is in progress and the model loads on this machine');
+        expect(shown()).toContain('a run is in progress');
+        send().click();
+        await settle();
+        await refuse(503, 'no Chrome or Chromium');
+        expect(shown()).toContain('no Chrome or Chromium');
+      });
+
+      it('422 with a timeline on the page: the last problem and to try again', async () => {
+        await ask();
+        await refuse(422, 'track "title" ends after the clip');
+        expect(shown()).toContain('track "title" ends after the clip');
+        expect(shown()).toContain('Inténtalo de nuevo');
+        expect(q('[data-testid=motion-summary]')?.textContent).toContain('writer:7b'); // the page did not change
+      });
+
+      it('the next request clears the problem', async () => {
+        await ask();
+        await refuse(422, 'bad');
+        send().click();
+        await settle();
+        expect(q('[data-testid=revise-error]')).toBeNull();
+        http.expectOne(URL);
+      });
+    });
   });
 
   describe('the controls are disabled with the reason', () => {

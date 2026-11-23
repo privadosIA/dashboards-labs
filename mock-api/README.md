@@ -31,6 +31,18 @@ Options: `--spec <fichero o URL>` (by default, `contract/openapi.yaml` of this r
   (setting out of limits, not a video, missing or surplus image, video and motion at the same time). The state comes from the clock;
   `[fail]` in the prompt of `extend`/`motion-control` or in the title of a motion ends up failing, and a video file
   with `long` or `empty` in its name is rejected when added as a motion. They still do not exist on the real server.
+- **Stored motion pages** (`motion-pages.mjs`): `GET`, `PUT` and `POST .../generate` of `/api/projects/{id}/scenes/{scene}/motion`
+  (a page per scene and overlay, kept in memory; generate writes a sample page with a timeline block) and
+  `POST .../motion/revise`, which changes only that block from a request in words (slower, faster, a bounce on the title, stagger;
+  anything else delays the entrances a little) and answers the page with `revised`. Refusals as the contract: `400` for an empty or
+  over 1000 characters instruction, `404` for a missing project or page, `422` for a page without a block and for `[fail]` in the
+  instruction; the stored page is untouched on a refusal.
+- **3D scene descriptions** (`blender-descriptions.mjs`): `POST /api/projects/{id}/blender/descriptions` (the "model" writes the example
+  description of the server's tests, kept as `assets/titulo.scene.json`; with `revise` it adjusts the camera's lens by what the request says),
+  `GET` and `PUT .../descriptions/{name}` (a save names each fault by its place in the JSON, for example `objects[1].keys[1].t: 7 is outside
+  the scene (0 to 5 s)`) and `POST .../preview` (a placeholder PNG). Refusals as the contract: `400` for a bad name, an empty or over 2000
+  characters idea, seconds outside 0.5 to 600 or a description that does not pass, `404` for a missing project or description, `422` for
+  `[fail]` in the idea; a refused request leaves the stored description untouched. Kept in memory per project.
 - **Realistic sample data** in `fixtures.mjs` for what a dashboard reads field by field and the contract does not detail:
   environment, settings, models and catalog, statistics, music engines, model paths, storage and resources
   of a run. If a screen comes out empty or broken, this is the place to add data.

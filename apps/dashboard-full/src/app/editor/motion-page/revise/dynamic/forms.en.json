@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "id": "motion-revise",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "instruction",
+      "type": "text",
+      "label": "Change the motion",
+      "description": "Only the motion changes: the text, styles and scripts of the page stay as they are.",
+      "placeholder": "Say it in your own words, for example “slower entrances”",
+      "validation": { "maxLength": 1000 },
+      "props": { "attributes": { "data-testid": "revise-instruction", "autocomplete": "off" } }
+    }
+  ]
+}

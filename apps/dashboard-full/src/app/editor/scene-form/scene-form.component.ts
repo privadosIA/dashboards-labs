@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../core/api.service';
 import { EnvironmentStore } from '../../core/environment.store';
 import { MotionCatalogStore } from '../../core/motion-catalog.store';
+import { SceneBlenderComponent } from './blocks/scene-blender/scene-blender.component';
 import { SceneMotionPartComponent } from './blocks/scene-motion-part/scene-motion-part.component';
 import { ScenePictureModeComponent } from './blocks/scene-picture-mode/scene-picture-mode.component';
 import { ScenePictureSourceComponent } from './blocks/scene-picture-source/scene-picture-source.component';
@@ -75,6 +76,7 @@ import { SCENE_VALIDATORS, sceneRuleState } from './dynamic/validations';
     SceneInitComponent,
     ScenePictureModeComponent,
     SceneMotionPartComponent,
+    SceneBlenderComponent,
     ScenePictureSourceComponent,
     ScenePicturesComponent,
     SceneListenComponent,
@@ -184,8 +186,10 @@ export class SceneFormComponent implements OnInit {
   protected readonly partScene = computed(() => this.videoMode() && this.scene()?.motion_part !== undefined);
   /** The way is offered when the server has the catalog (or the scene already is drawn by a part). */
   protected readonly partAllowed = computed(() => this.motionCatalog.available() || this.partScene());
-  /** The scene's picture is drawn from a prompt (neither its own picture, its own clip, a motion graphic nor a part). */
-  protected readonly generated = computed(() => !this.ownImage() && !this.ownClip() && !this.motionScene() && !this.partScene());
+  /** The scene is built in Blender from a description (a 3D scene); only video projects have them. */
+  protected readonly blenderScene = computed(() => this.videoMode() && this.scene()?.blender !== undefined);
+  /** The scene's picture is drawn from a prompt (neither its own picture, its own clip, a motion graphic, a part nor a 3D scene). */
+  protected readonly generated = computed(() => !this.ownImage() && !this.ownClip() && !this.motionScene() && !this.partScene() && !this.blenderScene());
   // --- the schema form ---------------------------------------------------------
 
   /** The schema of the language the page runs in, with what the project gives as placeholders. */
@@ -223,8 +227,8 @@ export class SceneFormComponent implements OnInit {
     images: !this.videoMode(),
     generated: this.generated(),
     autoPart: this.partScene() && this.scene()?.motion_part === 'auto',
-    qualityOn: !this.ownClip() && !this.motionScene() && !this.partScene(),
-    cameraOn: this.videoMode() && !this.ownClip() && !this.motionScene() && !this.partScene(),
+    qualityOn: !this.ownClip() && !this.motionScene() && !this.partScene() && !this.blenderScene(),
+    cameraOn: this.videoMode() && !this.ownClip() && !this.motionScene() && !this.partScene() && !this.blenderScene(),
     overlayBlock: this.videoMode() && (!!this.scene()?.overlay || this.motionAvailable() || this.motionMissing()),
     animateImagesNote: !this.videoMode() && !!this.scene()?.animate,
     animates: this.animates(),
@@ -252,7 +256,7 @@ export class SceneFormComponent implements OnInit {
   }
 
   protected readonly pictureMode = computed<PictureMode>(() =>
-    this.partScene() ? 'part' : this.motionScene() ? 'motion' : this.ownClip() ? 'clip' : this.ownImage() ? 'own' : 'ai',
+    this.blenderScene() ? 'blender' : this.partScene() ? 'part' : this.motionScene() ? 'motion' : this.ownClip() ? 'clip' : this.ownImage() ? 'own' : 'ai',
   );
 
   /** Choosing how the scene's picture is made clears what the other modes would hold. */

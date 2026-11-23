@@ -1,7 +1,7 @@
 import { Scene, SceneOverlay } from '../../../core/api.models';
 
 /** How the scene's picture is made; the five modes exclude each other. */
-export type PictureMode = 'ai' | 'own' | 'clip' | 'motion' | 'part';
+export type PictureMode = 'ai' | 'own' | 'clip' | 'motion' | 'part' | 'blender';
 
 /**
  * Facts about the scene and the project that decide which blocks of the form
@@ -88,6 +88,8 @@ function text(value: unknown): string | undefined {
 }
 
 export function pictureModeOf(scene: Scene): PictureMode {
+  // A scene built in Blender cannot have any of the other pictures, so this goes first.
+  if (scene.blender !== undefined) return 'blender';
   // A part named `auto` also has the description the model chooses from, so this goes first.
   if (scene.motion_part !== undefined) return 'part';
   if (scene.motion_graphic !== undefined) return 'motion';
@@ -299,11 +301,22 @@ function compact<T extends object>(block: T): T | undefined {
 /** The fields of a scene that a part of the catalog draws. */
 const PART_KEYS = ['motion_part', 'motion_params', 'motion_text', 'motion_bpm'] as const;
 
+/** The file in `sources/` that holds the description of a 3D scene of this id. */
+export function blenderFileName(sceneId: string): string {
+  return `${sceneId}.scene.json`;
+}
+
 /** What switching the picture mode clears (the exclusions the editor always applied). */
 function applyPictureMode(next: Scene, scene: Scene, mode: PictureMode): void {
   next.motion_graphic = undefined;
+  next.blender = undefined;
   for (const k of PART_KEYS) next[k] = undefined;
-  if (mode === 'part') {
+  if (mode === 'blender') {
+    // The description is stored under the scene's name; what the server refuses with a Blender scene is cleared.
+    next.blender = scene.blender ?? { build: blenderFileName(next.id) };
+    Object.assign(next, { image: undefined, clip: undefined, clip_start: undefined, clip_end: undefined, clip_speed: undefined });
+    Object.assign(next, { init_image: undefined, strength: undefined, animate: undefined, motion_prompt: undefined, animation: undefined, render: undefined });
+  } else if (mode === 'part') {
     // Choosing the part way keeps what the scene already said of one ('' = chosen, not picked yet); the exclusions are the animated graphic's.
     next.motion_part = scene.motion_part ?? '';
     next.motion_params = scene.motion_params;

@@ -15,5 +15,8 @@
     @if (partAllowed()) {
       <mat-button-toggle value="part" i18n="@@scene.picturePart" data-testid="picture-mode-part">Part of the catalog</mat-button-toggle>
     }
+    @if (blenderAllowed()) {
+      <mat-button-toggle value="blender" i18n="@@scene.pictureBlender" data-testid="picture-mode-blender">3D scene</mat-button-toggle>
+    }
   </mat-button-toggle-group>
 </section>

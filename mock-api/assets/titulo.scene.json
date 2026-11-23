@@ -1,0 +1,252 @@
+{
+ "version": 1,
+ "world": {
+  "color": "bg",
+  "strength": 1.0
+ },
+ "camera": {
+  "lens": 50,
+  "keys": [
+   {
+    "beat": 0,
+    "location": [
+     0,
+     -9,
+     1.2
+    ],
+    "target": [
+     0,
+     0,
+     0.6
+    ]
+   },
+   {
+    "beat": 10,
+    "location": [
+     0,
+     -7,
+     1.0
+    ],
+    "target": [
+     0,
+     0,
+     0.6
+    ],
+    "ease": "inout"
+   }
+  ]
+ },
+ "lights": [
+  {
+   "type": "area",
+   "location": [
+    3,
+    -4,
+    5
+   ],
+   "target": [
+    0,
+    0,
+    0
+   ],
+   "power": 600,
+   "size": 3,
+   "color": "#ffffff"
+  },
+  {
+   "type": "sun",
+   "rotation": [
+    50,
+    0,
+    30
+   ],
+   "power": 2
+  }
+ ],
+ "materials": {
+  "title": {
+   "color": "fg",
+   "roughness": 0.35
+  },
+  "pulse": {
+   "color": "accent",
+   "roughness": 0.4,
+   "emission": 0
+  },
+  "ground": {
+   "color": "bg",
+   "roughness": 0.9
+  }
+ },
+ "objects": [
+  {
+   "id": "stage",
+   "type": "backdrop",
+   "size": 40,
+   "curve": 4,
+   "material": "ground"
+  },
+  {
+   "id": "title",
+   "type": "text",
+   "text": "Hola",
+   "font": "display",
+   "size": 1.2,
+   "extrude": 0.12,
+   "bevel": 0.015,
+   "align": "center",
+   "material": "title",
+   "keys": [
+    {
+     "beat": 0,
+     "location": [
+      0,
+      0,
+      -2.0
+     ],
+     "rotation": [
+      90,
+      0,
+      0
+     ],
+     "scale": 1
+    },
+    {
+     "beat": 1.2,
+     "location": [
+      0,
+      0,
+      0.4
+     ],
+     "ease": "back"
+    }
+   ]
+  },
+  {
+   "id": "pulse",
+   "type": "sphere",
+   "size": 0.7,
+   "material": "pulse",
+   "keys": [
+    {
+     "beat": 0,
+     "location": [
+      1.8,
+      0.5,
+      0.35
+     ],
+     "scale": 1,
+     "emission": 0
+    },
+    {
+     "beat": 1,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 1.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 2,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 2.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 3,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 3.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 4,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 4.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 5,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 5.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 6,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 6.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 7,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 7.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 8,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 8.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    },
+    {
+     "beat": 9,
+     "scale": 1.15,
+     "emission": 4,
+     "ease": "step"
+    },
+    {
+     "beat": 9.5,
+     "scale": 1,
+     "emission": 0,
+     "ease": "out"
+    }
+   ]
+  }
+ ]
+}

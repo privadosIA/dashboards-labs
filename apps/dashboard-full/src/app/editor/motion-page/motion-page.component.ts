@@ -11,12 +11,15 @@ import { MotionPage } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
 import { AvailabilityStore } from '../../core/availability.store';
 import { EnvironmentStore } from '../../core/environment.store';
+import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ModelNoticeComponent } from '../../shared/model-notice/model-notice.component';
 import { EditorStore } from '../editor.store';
 import { windowOptions } from '../../shared/floating-window/floating-window';
 import { Timeline, hasTimelineBlock, parseTimeline, writeTimeline } from './motion-timeline';
 import { MotionTimelineDialogComponent, TimelineSession } from './motion-timeline-dialog.component';
 import { MotionTimelinePanelComponent } from './motion-timeline-panel.component';
+import { MotionReviseComponent } from './revise/revise.component';
+import { reviseProblem } from './revise/revise-problem';
 
 /** Clips longer than this many seconds edit their timeline in a window. */
 export const LONG_CLIP_SECONDS = 4;
@@ -30,7 +33,7 @@ export const LONG_CLIP_SECONDS = 4;
 @Component({
   selector: 'app-motion-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButtonModule, MatIconModule, MatSliderModule, ModelNoticeComponent, MotionTimelinePanelComponent],
+  imports: [MatButtonModule, MatIconModule, MatSliderModule, ModelNoticeComponent, MotionTimelinePanelComponent, MotionReviseComponent],
   templateUrl: './motion-page.component.html',
   styleUrl: './motion-page.component.scss',
 })
@@ -49,8 +52,11 @@ export class MotionPageComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly page = signal<MotionPage | null>(null);
-  protected readonly busy = signal<'' | 'loading' | 'generating' | 'saving'>('');
+  protected readonly busy = signal<'' | 'loading' | 'generating' | 'saving' | 'revising'>('');
   protected readonly error = signal('');
+  /** What the last «Change the motion» request failed with, for the control that sent it. */
+  protected readonly reviseError = signal('');
+  private readonly reviseControl = viewChild(MotionReviseComponent);
   protected readonly editing = signal(false);
   protected readonly draft = signal('');
   /** The page's HTML with the timeline edits not saved yet; null while there are none. */
@@ -100,6 +106,7 @@ export class MotionPageComponent implements OnInit {
         this.time.set(0);
         this.editing.set(false);
         this.error.set('');
+        this.reviseError.set('');
         void this.load(id, overlay);
       });
     });
@@ -139,6 +146,37 @@ export class MotionPageComponent implements OnInit {
       this.time.set(0);
     } catch (e) {
       this.error.set(messageOf(e));
+    } finally {
+      this.busy.set('');
+    }
+  }
+
+  /**
+   * Changes only the motion of the stored page from a request in words. The server revises the stored page, so timeline edits not
+   * saved yet are saved first (after asking); the answer replaces the page like «Write another page» does.
+   */
+  protected async revise(instruction: string): Promise<void> {
+    this.reviseError.set('');
+    if (this.timelineDirty()) {
+      const saveFirst = await firstValueFrom(
+        openConfirm(this.dialog, {
+          title: $localize`:@@motion.revise.saveTitle:Save your changes first`,
+          message: $localize`:@@motion.revise.saveMessage:The motion is changed on the saved page, and you have timeline changes not saved yet. Save them and then change the motion?`,
+          confirmLabel: $localize`:@@motion.revise.saveConfirm:Save and change the motion`,
+        }),
+      );
+      if (!saveFirst) return;
+      await this.saveTimeline();
+      if (this.error() !== '') return;
+    }
+    this.busy.set('revising');
+    try {
+      this.page.set(await firstValueFrom(this.api.reviseMotionPage(this.store.projectId(), this.sceneId(), instruction, this.overlay())));
+      this.editing.set(false);
+      this.time.set(0);
+      this.reviseControl()?.clear();
+    } catch (e) {
+      this.reviseError.set(reviseProblem(e, this.hasBlock()));
     } finally {
       this.busy.set('');
     }

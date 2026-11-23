@@ -48,9 +48,12 @@ import {
   LibrarySongsQuery,
   RescanResult,
   ImportMode,
+  BlenderDescription,
+  BlenderWritten,
   ImportPreview,
   KeptClip,
   MotionPage,
+  MotionRevision,
   LaunchResponse,
   MusicAssistRequest,
   MusicAssistResponse,
@@ -323,6 +326,42 @@ export class ApiService {
   /** Asks the model for a new page from the scene's saved description. */
   generateMotionPage(projectId: string, scene: string, overlay: boolean): Observable<MotionPage> {
     return this.http.post<MotionPage>(`${this.base}/projects/${projectId}/scenes/${encodeURIComponent(scene)}/motion/generate`, { overlay }, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
+  }
+
+  /** Changes only the motion (the timeline block) of the stored page from a request in words; the answer replaces the page. */
+  reviseMotionPage(projectId: string, scene: string, instruction: string, overlay: boolean): Observable<MotionRevision> {
+    return this.http.post<MotionRevision>(`${this.base}/projects/${projectId}/scenes/${encodeURIComponent(scene)}/motion/revise`, { instruction, overlay }, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
+  }
+
+  /** A model writes the description of a 3D scene from an idea (`revise`: changes the stored one). The caller explains each refusal. */
+  writeBlenderDescription(projectId: string, name: string, idea: string, seconds: number, revise: boolean): Observable<BlenderWritten> {
+    return this.http.post<BlenderWritten>(`${this.base}/projects/${projectId}/blender/descriptions`, { name, idea, seconds, revise }, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
+  }
+
+  /** The stored description of a 3D scene. */
+  getBlenderDescription(projectId: string, name: string): Observable<BlenderDescription> {
+    return this.http.get<BlenderDescription>(`${this.base}/projects/${projectId}/blender/descriptions/${encodeURIComponent(name)}`, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
+  }
+
+  /** Saves a description written by hand, checked against a scene `seconds` long (a 400 names each fault by its place in the JSON). */
+  saveBlenderDescription(projectId: string, name: string, description: Record<string, unknown>, seconds: number): Observable<BlenderDescription> {
+    return this.http.put<BlenderDescription>(`${this.base}/projects/${projectId}/blender/descriptions/${encodeURIComponent(name)}`, { description, seconds }, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
+  }
+
+  /** One frame (PNG) of the stored description at second `t`, drawn on the server's CPU. */
+  previewBlenderDescription(projectId: string, name: string, t: number, seconds: number, width?: number): Observable<Blob> {
+    return this.http.post(`${this.base}/projects/${projectId}/blender/descriptions/${encodeURIComponent(name)}/preview`, { t, seconds, ...(width ? { width } : {}) }, {
+      responseType: 'blob',
       context: new HttpContext().set(SKIP_ERROR_TOAST, true),
     });
   }
