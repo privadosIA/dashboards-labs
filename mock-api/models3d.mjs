@@ -431,5 +431,13 @@ export function models3dHandlers({ db, save, speed = 1, fallback, hasActiveRun }
     return [200, file, 'model/gltf-binary', headers];
   }
 
+  // `MOCK_PRELOADED_LIBRARY=1` (the public demo) starts with two packs installed and three models an engine made, so the 3D library is full when it opens.
+  if (process.env.MOCK_PRELOADED_LIBRARY === '1' && Object.keys(lib.packs).length === 0 && lib.generated.length === 0) {
+    for (const id of ['kenney-furniture-kit', 'kenney-mini-characters']) lib.packs[id] = { state: 'installed', finishedAt: Date.now() };
+    for (const [name, prompt] of [['wooden-chest', 'a wooden treasure chest with iron bands'], ['red-sailboat', 'a small red sailboat'], ['potted-cactus', 'a cartoon cactus in a clay pot']]) {
+      addGenerated({ name, prompt, engine: 'triposr', engine_version: 'TripoSR 0.1', detail: 'normal', project: `demo-${name}`, entry: name });
+    }
+  }
+
   return { handlers, modelFile, copyInto, projectFiles, view, addGenerated, dropGenerated, engineProblem: generation.engineProblem, settingsBlock: generation.settingsBlock, checkSettings: generation.checkSettings, afterSettings: generation.afterSettings };
 }

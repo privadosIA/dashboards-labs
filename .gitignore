@@ -7,3 +7,7 @@ coverage/
 .idea/
 test-results/
 playwright-report/
+
+# Salida de compilación de Tauri/Rust: nunca se sigue
+apps/dashboard-full/src-tauri/target/
+apps/dashboard-full/src-tauri/gen/

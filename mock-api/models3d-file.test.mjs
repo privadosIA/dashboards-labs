@@ -115,3 +115,23 @@ test('the route is in the contract the mock is built from, with the ticket as it
   assert.deepEqual(op.security, [{ bearer: [] }, { ticket: [] }]);
   assert.deepEqual(Object.keys(op.responses).sort(), ['200', '206', '304', '401', '404']);
 });
+
+test('MOCK_PRELOADED_LIBRARY=1 starts with two packs installed and three generated models; without it the library is empty', async () => {
+  const full = await startMock({ env: { MOCK_PRELOADED_LIBRARY: '1' } });
+  try {
+    const packs = (await full.json('GET', P)).body;
+    const installed = packs.packs.filter((p) => p.state === 'installed').map((p) => p.id).sort();
+    assert.deepEqual(installed, ['generated', 'kenney-furniture-kit', 'kenney-mini-characters']);
+    const chest = await file(full, 'generated/wooden-chest');
+    assert.equal(chest.status, 200);
+  } finally {
+    await full.stop();
+  }
+  const empty = await startMock();
+  try {
+    const packs = (await empty.json('GET', P)).body;
+    assert.equal(packs.packs.filter((p) => p.state === 'installed').length, 0);
+  } finally {
+    await empty.stop();
+  }
+});

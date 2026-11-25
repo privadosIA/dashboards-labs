@@ -11,4 +11,5 @@ export const environment: Environment = {
     models3d: true,
   },
   demoNotice: false,
+  lightByDefault: true,
 };

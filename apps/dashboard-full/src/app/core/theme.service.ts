@@ -1,5 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
+import { environment } from '../../environments/environment';
+
 const STORAGE_KEY = 'mo-theme';
 
 /**
@@ -21,7 +23,8 @@ export class ThemeService {
   constructor() {
     document.documentElement.dataset['theme'] ??= 'dark';
     try {
-      if (sessionStorage.getItem(STORAGE_KEY) === 'light') {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored === 'light' || (stored !== 'dark' && environment.lightByDefault)) {
         this.set(true);
       }
     } catch {

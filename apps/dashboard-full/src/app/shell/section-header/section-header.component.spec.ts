@@ -113,10 +113,10 @@ describe('SectionHeaderComponent', () => {
   it('switches the theme', () => {
     const { fixture, el } = create();
     const theme = TestBed.inject(ThemeService);
-    expect(theme.light()).toBe(false);
+    expect(theme.light()).toBe(true);
     el.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"] button[role="switch"]')!.click();
     fixture.detectChanges();
-    expect(theme.light()).toBe(true);
+    expect(theme.light()).toBe(false);
   });
 
   it('has no side navigation and no menu of the dashboard of its own', () => {

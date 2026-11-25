@@ -17,6 +17,8 @@ describe('DemoNoticeComponent', () => {
   it('is asked for only by the demo build', () => {
     expect(demo.demoNotice).toBe(true);
     expect(environment.demoNotice).toBe(false);
+    expect(demo.lightByDefault).toBe(true);
+    expect(environment.lightByDefault).toBe(true);
     expect(tutorial.demoNotice).toBe(false);
   });
 });

@@ -125,4 +125,33 @@ describe('ThemeService', () => {
     const theme = create();
     expect(theme.theme()).toBe('light');
   });
+
+  describe('a dashboard that starts light', () => {
+    const light = () => {
+      TestBed.configureTestingModule({ providers: [provideThemeSwitch({ client: 'dashboard-full', lang: 'en', startsLight: true })] });
+      return TestBed.inject(ThemeService);
+    };
+
+    it('is light on a dark system and pins it', () => {
+      stubStorage();
+      stubSystem(true);
+      expect(light().theme()).toBe('light');
+      expect(document.documentElement.dataset['theme']).toBe('light');
+    });
+
+    it('stays light when the system turns dark while the page is open', () => {
+      stubStorage();
+      const change = stubSystem(false);
+      const svc = light();
+      change(true);
+      expect(svc.theme()).toBe('light');
+    });
+
+    it('lets a remembered dark choice win', () => {
+      stubStorage({ [THEME_STORAGE_PREFIX + 'dashboard-full']: 'dark' });
+      stubSystem(false);
+      expect(light().theme()).toBe('dark');
+      expect(document.documentElement.dataset['theme']).toBe('dark');
+    });
+  });
 });

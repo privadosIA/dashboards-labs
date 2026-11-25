@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { THEME_CLIENT } from './provide-theme-switch';
+import { THEME_CLIENT, THEME_STARTS_LIGHT } from './provide-theme-switch';
 
 export type ThemeChoice = 'light' | 'dark';
 
@@ -10,18 +10,19 @@ export const THEME_STORAGE_PREFIX = 'lab.theme.';
 /**
  * The theme of a dashboard. Until the person chooses, `<html>` has no `data-theme` and the system's `prefers-color-scheme` decides, also
  * while the page is open. A choice is pinned as `data-theme` (which the dashboard's tokens answer to), remembered in the browser, and
- * kept for the session when the browser refuses to store it.
+ * kept for the session when the browser refuses to store it. A dashboard that starts light (`startsLight`) is light, pinned, until the person chooses.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly key = THEME_STORAGE_PREFIX + (inject(THEME_CLIENT, { optional: true }) ?? 'dashboard');
+  private readonly startsLight = inject(THEME_STARTS_LIGHT, { optional: true }) ?? false;
   private readonly media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
   private readonly systemDark = signal(this.media?.matches ?? false);
 
   /** What the person chose, `null` until they do. */
   readonly choice = signal<ThemeChoice | null>(this.read());
   /** The theme that is shown now. */
-  readonly theme = computed<ThemeChoice>(() => this.choice() ?? (this.systemDark() ? 'dark' : 'light'));
+  readonly theme = computed<ThemeChoice>(() => this.choice() ?? (!this.startsLight && this.systemDark() ? 'dark' : 'light'));
 
   constructor() {
     this.media?.addEventListener?.('change', (e) => this.systemDark.set(e.matches));
@@ -47,6 +48,7 @@ export class ThemeService {
     const root = document.documentElement;
     const choice = this.choice();
     if (choice) root.dataset['theme'] = choice;
+    else if (this.startsLight) root.dataset['theme'] = 'light';
     else delete root.dataset['theme'];
   }
 

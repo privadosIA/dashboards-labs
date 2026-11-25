@@ -55,6 +55,7 @@ Options: `--spec <fichero o URL>` (by default, `contract/openapi.yaml` of this r
   service, `MOCK_INSTALL_FAIL=<part>` makes that part fail once, `MOCK_MODEL3D_SF3D=ready` makes sf3d usable, `MOCK_NO_IMAGE_MODEL=1` is a machine with no image model and `MOCK_ADULT=1` a server that
   keeps adult content.
 - **A machine without Blender:** `MOCK_BLENDER=missing npm run mock` reports `blender` as missing in `GET /api/environment` (the default is present, version 4.2.3), so the dashboards show nothing 3D.
+- **A library that starts full:** `MOCK_PRELOADED_LIBRARY=1 npm run mock` starts with the packs `kenney-furniture-kit` and `kenney-mini-characters` installed and three models an engine made (`wooden-chest`, `red-sailboat`, `potted-cactus`); the public demo runs this way. Without it the library starts empty.
 - **A server that does not serve model files:** `MOCK_MODEL_FILE=missing npm run mock` answers `404` for `GET /api/models3d/models/{pack}/{name}/file` (the default serves a sample `.glb` with the model's clips and about its triangles, with `ETag`, `304` and `Range`).
 - **Projects of the mode `models3d`** (`models3d-project.mjs`): `output.mode: models3d` with `models:` and `defaults.models3d` is accepted and refused with the server's words (plain unique id, a prompt or an
   image and not both, 1000 characters, engine, detail, variants 1 to 4, scenes or tracks, the keys in another mode); a run goes through the entries (the phases `render` and `model3d`, `skipped` when not needed),
