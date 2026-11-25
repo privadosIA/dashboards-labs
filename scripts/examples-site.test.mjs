@@ -93,7 +93,7 @@ test('nginx has a location with its own fallback for every section, the same moc
 
 test('the name is in the site list and every script that names the sites knows it', { skip: !present }, () => {
   assert.match(readFileSync(join(root, 'deploy/vps/lib.sh'), 'utf8'), /SITES=\(.*examples\.xuxo\.net.*\)/);
-  assert.match(readFileSync(join(root, 'deploy/vps/publish-web.sh'), 'utf8'), /orquestator\|live-media\|demo\|examples/);
+  assert.match(readFileSync(join(root, 'deploy/vps/publish-web.sh'), 'utf8'), /veritmo\|live-media\|demo\|examples/);
   const deploy = readFileSync(join(root, 'deploy/vps/deploy.sh'), 'utf8');
   assert.match(deploy, /sites\/examples/);
   assert.equal((deploy.match(/examples\.\*\.conf/g) ?? []).length, 2); // removed and put back on a rollback
@@ -102,7 +102,7 @@ test('the name is in the site list and every script that names the sites knows i
 
 test('the sections still being tried carry the "in testing" tag on the index and on the landing, and only those', { skip: !present }, () => {
   const html = read('index.html');
-  const landing = readFileSync(join(root, 'deploy/web/orquestator/index.html'), 'utf8');
+  const landing = readFileSync(join(root, 'deploy/web/veritmo/index.html'), 'utf8');
   for (const s of readSections(registry)) {
     const card = html.slice(html.indexOf(`href="${s.path}/"`) - 700, html.indexOf(`href="${s.path}/"`));
     const tagged = card.slice(card.lastIndexOf('<li class="card">')).includes('en pruebas');
