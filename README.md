@@ -43,19 +43,21 @@ npm test                # los tests de los scripts, del simulado y de las librer
 
 ## Related repositories
 
-Depends on `mediaOrquestator` (the contract in `contract/openapi.yaml` and the server it talks to) and on `forms-lib` (vendored in `vendor/`). Nothing depends on it.
+Depends on `veritmo` (the contract in `contract/openapi.yaml` and the server it talks to) and on `forms-lib` (vendored in `vendor/`). Nothing depends on it.
 
 | Repository | What it is |
 |---|---|
-| [`mediaOrquestator`](https://github.com/privadosIA/mediaOrquestator) | The server: the HTTP API and its contract, the pipelines (video, images, music), the run history and the music services it starts. |
+| [`veritmo`](https://github.com/privadosIA/veritmo) | The server: the HTTP API and its contract, the pipelines (video, images, music), the run history and the music services it starts. |
 | [`dashboards-labs`](https://github.com/privadosIA/dashboards-labs) (this repository) | The dashboards (Angular) that talk to the server through its OpenAPI contract. |
 | [`heartmula`](https://github.com/privadosIA/heartmula) | C# (.NET 8 + TorchSharp) port of [heartlib](https://github.com/HeartMuLa/heartlib): the HeartMuLa song generator, run by the server as a service. |
 | [`DiffRhythm2`](https://github.com/privadosIA/DiffRhythm2) | C# port of [DiffRhythm2](https://github.com/ASLP-lab/DiffRhythm2): a diffusion model that writes a whole song. |
 | [`lion-clap`](https://github.com/privadosIA/lion-clap) | C# port of [LAION-CLAP](https://github.com/LAION-AI/CLAP): audio and text embeddings, used to recognise songs. |
-| [`musicgen-core`](https://github.com/privadosIA/musicgen-core) | The TorchSharp building blocks shared by the three ports. |
-| [`forms-lib`](https://github.com/privadosIA/forms-lib) | `@core/dynamic-forms`, the Angular library that draws forms and tables from JSON (vendored in `dashboards-labs`). |
+| [`musicgen-core`](https://github.com/privadosIA/musicgen-core) | The TorchSharp building blocks shared by the five ports. |
+| [`triposr`](https://github.com/privadosIA/triposr) | C# port of [TripoSR](https://github.com/VAST-AI-Research/TripoSR): one picture in, one 3D model (`.glb`) out; makes the models of the *models3d* category (MIT original). |
+| [`stable-fast-3d`](https://github.com/privadosIA/stable-fast-3d) | C# port of [Stable Fast 3D](https://github.com/Stability-AI/stable-fast-3d): one picture in, one textured 3D model (`.glb`) out. **Under the Stability AI Community License, not Apache-2.0** (free for research and non-commercial use, and for commercial use under US$1M of yearly revenue). |
+| [`forms-lib`](https://github.com/privadosIA/forms-lib) | `@core/dynamic-forms`, the Angular library that draws forms and tables from JSON. |
 
-The links are to the public copies of these repositories. The third-party tools, models and libraries they build on, with their licenses, are listed in [THIRD_PARTY.md](https://github.com/privadosIA/mediaOrquestator/blob/main/THIRD_PARTY.md).
+The links are to the public copies of these repositories. The third-party tools, models and libraries they build on, with their licenses, are listed in [THIRD_PARTY.md](https://github.com/privadosIA/veritmo/blob/main/THIRD_PARTY.md).
 
 ## License
 
