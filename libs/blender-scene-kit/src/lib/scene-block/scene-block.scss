@@ -1,0 +1,83 @@
+.blender {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  max-width: 720px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-4);
+}
+
+.label {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.source {
+  width: 100%;
+  min-height: 14rem;
+  resize: vertical;
+  padding: var(--lab-space-2);
+  color: var(--lab-ink);
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-2);
+}
+
+.frame {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+}
+
+.player {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+  max-width: 640px;
+
+  mat-slider {
+    flex: 1;
+    min-width: 8rem;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+// Mono is a data signal: durations, the description's JSON, the server's words about it.
+.data {
+  font-family: var(--lab-font-mono);
+  font-variant-numeric: tabular-nums;
+}

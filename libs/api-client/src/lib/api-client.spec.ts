@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom, toArray } from 'rxjs';
 
 import { ApiClient } from './api-client';
 import { ERROR_EXPLAINED_BY_SCREEN } from './context';
@@ -164,11 +164,64 @@ describe('ApiClient', () => {
       expect([got.contentType, got.body.size]).toEqual(['image/png', 3]);
     });
 
+    it('downloads a file saying how far it has got, with the token, and ends with the body', async () => {
+      const { api, http } = setup({ baseUrl: 'http://server:4666', token: 't' });
+      const done = lastValueFrom(api.downloadAt('/api/models3d/models/a/b/file').pipe(toArray()));
+      const req = http.expectOne('http://server:4666/api/models3d/models/a/b/file');
+      expect(req.request.reportProgress).toBe(true);
+      expect(req.request.headers.get('Authorization')).toBe('Bearer t');
+      req.event({ type: 3 /* DownloadProgress */, loaded: 2, total: 4 });
+      req.event({ type: 3, loaded: 3 });
+      req.flush(new Blob(['abcd']));
+      const steps = await done;
+      expect(steps.map((s) => [s.loaded, s.total, s.body?.size])).toEqual([[2, 4, undefined], [3, null, undefined], [4, 4, 4]]);
+    });
+
+    it('fails a download that is a 404 as an ApiError', async () => {
+      const { api, http } = setup();
+      const done = lastValueFrom(api.downloadAt('/api/models3d/models/a/b/file')).catch((e) => e);
+      http.expectOne('/api/models3d/models/a/b/file').flush(new Blob([]), { status: 404, statusText: 'Not Found' });
+      const error = await done;
+      expect([error instanceof ApiError, error.status]).toEqual([true, 404]);
+    });
+
     it('fails a file that cannot be read as an ApiError', async () => {
       const { api, http } = setup();
       const done = firstValueFrom(api.getBlobAt('/api/projects/x/artifacts/out/x.mp4')).catch((e) => e);
       http.expectOne('/api/projects/x/artifacts/out/x.mp4').flush(new Blob([]), { status: 404, statusText: 'Not Found' });
       expect(await done).toBeInstanceOf(ApiError);
+    });
+
+    it('posts a body and reads the picture that answers, with the token', async () => {
+      const { api, http } = setup({ baseUrl: 'http://server:4666', token: 't' });
+      const done = firstValueFrom(api.postBlob('/api/blender/preview', { body: { description: { version: 1 }, t: 1, seconds: 5 } }));
+      const req = http.expectOne('http://server:4666/api/blender/preview');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.responseType).toBe('blob');
+      expect(req.request.body).toEqual({ description: { version: 1 }, t: 1, seconds: 5 });
+      expect(req.request.headers.get('Authorization')).toBe('Bearer t');
+      req.flush(new Blob(['png'], { type: 'image/png' }), { headers: { 'Content-Type': 'image/png' } });
+      const got = await done;
+      expect([got.contentType, got.body.size]).toEqual(['image/png', 3]);
+    });
+
+    it('reads the JSON error that arrives where the picture would have been', async () => {
+      const { api, http } = setup();
+      const done = firstValueFrom(api.postBlob('/api/blender/preview', { body: { description: {}, t: 1, seconds: 5 } })).catch((e) => e);
+      const error = new Blob([JSON.stringify({ error: { code: 'invalid_request', message: 'version: must be 1' } })], { type: 'application/json' });
+      http.expectOne('/api/blender/preview').flush(error, { status: 400, statusText: 'Bad Request' });
+      const e = await done;
+      expect(e).toBeInstanceOf(ApiError);
+      expect([e.status, e.message]).toEqual([400, 'version: must be 1']);
+    });
+
+    it('fails a picture that is refused with no readable body as an ApiError', async () => {
+      const { api, http } = setup();
+      const done = firstValueFrom(api.postBlob('/api/blender/preview', { body: { description: {}, t: 1, seconds: 5 } })).catch((e) => e);
+      http.expectOne('/api/blender/preview').flush(new Blob(['not json']), { status: 503, statusText: 'Unavailable' });
+      const e = await done;
+      expect(e).toBeInstanceOf(ApiError);
+      expect(e.status).toBe(503);
     });
 
     it('builds the full URL of an address from the base, with or without a trailing slash', () => {

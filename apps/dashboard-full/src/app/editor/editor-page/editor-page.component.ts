@@ -63,6 +63,10 @@ export class EditorPageComponent implements OnInit {
     if (this.store.config()?.output.mode === 'music') {
       await this.router.navigate(['/projects', this.id(), 'music'], { replaceUrl: true });
     }
+    // A 3D models project declares models, not scenes: its page is the 3D models one.
+    if (this.store.config()?.output.mode === 'models3d') {
+      await this.router.navigate(['/projects', this.id(), 'models3d'], { replaceUrl: true });
+    }
   }
 
   protected async save(): Promise<void> {

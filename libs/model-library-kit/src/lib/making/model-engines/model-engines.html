@@ -1,0 +1,112 @@
+<section class="engines" data-testid="making-engines">
+  <h4>{{ t.engines.title }}</h4>
+  @if (store.gaveUp()) {
+    <p class="problem" role="alert" data-testid="engines-gave-up"><mat-icon inline>error</mat-icon>{{ t.engines.gaveUp }}</p>
+  }
+  <ul class="list" appAutoAnimate>
+    @for (row of rows(); track row.id) {
+      <li class="engine" [attr.data-testid]="'engine-' + row.id" [attr.data-ready]="row.status.available">
+        <div class="what">
+          <strong class="name">{{ row.label }}</strong>
+          @if (row.status.available) {
+            <span class="badge ok" data-testid="engine-ready"><mat-icon inline>check_circle</mat-icon>{{ t.engines.ready }}</span>
+          }
+          <span class="meta">
+            <span>{{ row.external ? t.engines.external : t.engines.local }}</span>
+            @if (row.status.container) {
+              <span data-testid="engine-container" [attr.data-state]="row.container">{{ t.engines.container[row.container] }}</span>
+            }
+            @if (row.status.version) {
+              <span class="data">{{ t.engines.version(row.status.version) }}</span>
+            }
+          </span>
+          @if (row.reason) {
+            <p class="note" data-testid="engine-reason">{{ row.reason }}</p>
+          }
+          @if (row.external) {
+            <p class="note" data-testid="engine-external">{{ t.engines.externalNote }}</p>
+          }
+        </div>
+        @if (row.backends.length) {
+          <div class="backends" data-testid="engine-backends">
+            <p class="label">{{ t.backends.choose }}</p>
+            <ul class="backend-list" appAutoAnimate>
+              @for (b of row.backends; track b.id) {
+                <li class="backend" [attr.data-testid]="'backend-' + b.id" [attr.data-in-use]="b.used" [attr.data-ready]="b.ready">
+                  <span class="backend-name">
+                    <strong>{{ b.label }}</strong>
+                    @if (b.used) {
+                      <span class="badge ok" data-testid="backend-in-use"><mat-icon inline>check_circle</mat-icon>{{ t.backends.inUse }}</span>
+                      @if (b.source) {
+                        <span class="meta" data-testid="backend-source">{{ b.source }}</span>
+                      }
+                    }
+                  </span>
+                  <span class="note" data-testid="backend-state">{{ b.text }}</span>
+                  <span class="backend-actions">
+                    @if (b.canUse) {
+                      <button mat-stroked-button type="button" data-testid="backend-use" [disabled]="row.busy || store.busy().has('backend')" (click)="use(b.id)">{{ t.backends.use }}</button>
+                    }
+                    @if (b.canInstall) {
+                      <button mat-button type="button" data-testid="backend-install" [disabled]="row.busy" (click)="install(row.id, b.id)">
+                        <mat-icon>download</mat-icon>{{ t.engines.installFor }}
+                      </button>
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+            @if (row.canUseDefault) {
+              <button mat-button type="button" data-testid="backend-default" [disabled]="store.busy().has('backend')" (click)="useDefault()">{{ t.backends.useDefault }}</button>
+            }
+            @if (store.problems()['backend']; as why) {
+              <p class="problem" role="alert" data-testid="backend-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+            }
+          </div>
+        }
+        <div class="actions">
+          @if (row.canStart) {
+            <button mat-stroked-button type="button" data-testid="engine-start" [disabled]="row.busy" (click)="start(row.id)">
+              <mat-icon>play_arrow</mat-icon>{{ t.engines.start }}
+            </button>
+          }
+          @if (row.canStop) {
+            <button mat-button type="button" data-testid="engine-stop" [disabled]="row.busy" (click)="stop(row.id)">
+              <mat-icon>stop</mat-icon>{{ t.engines.stop }}
+            </button>
+          }
+          @if (row.canInstall) {
+            <button mat-stroked-button type="button" data-testid="engine-install" [disabled]="row.busy" (click)="install(row.id)">
+              <mat-icon>download</mat-icon>{{ t.engines.install }}
+            </button>
+          }
+        </div>
+        @if (row.job; as job) {
+          <div class="job" data-testid="engine-job" [attr.data-state]="job.state">
+            <p class="meta">
+              <strong>{{ t.job.title(row.label) }}</strong><span>{{ t.job.state[job.state] }}</span>
+              @if (job.state === 'running' && job.part) {
+                <span data-testid="engine-job-part">{{ t.job.now(t.plan.part[job.part] ?? job.part) }}</span>
+              }
+            </p>
+            @if (job.state === 'running') {
+              <mat-progress-bar mode="indeterminate" [attr.aria-label]="t.job.state.running" />
+            }
+            @if (job.log.length) {
+              <pre class="log data" data-testid="engine-log">{{ job.log.join('\n') }}</pre>
+            }
+            @if (job.state === 'failed' && job.error) {
+              <p class="problem" role="alert" data-testid="engine-job-error"><mat-icon inline>error</mat-icon><span><strong>{{ t.job.failedWhy }}:</strong> <span class="data">{{ job.error }}</span></span></p>
+            }
+            @if (job.state === 'running') {
+              <button mat-button type="button" data-testid="engine-job-cancel" [disabled]="row.busy" (click)="cancelInstall(row.id)">{{ t.job.cancel }}</button>
+            }
+          </div>
+        }
+        @if (row.problem) {
+          <p class="problem" role="alert" data-testid="engine-problem"><mat-icon inline>error</mat-icon><span class="data">{{ row.problem }}</span></p>
+        }
+      </li>
+    }
+  </ul>
+</section>

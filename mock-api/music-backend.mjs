@@ -163,7 +163,7 @@ export function musicBackendHandlers({ db, save, ts, speed = 1 }) {
     const parts = lacking.map((part) => ({ part, need_bytes: Math.round(SIZE[engine][part]), ...(part === 'weights' && LICENSES[engine] ? { licenses: LICENSES[engine] } : {}) }));
     const total = parts.reduce((s, p) => s + p.need_bytes, 0);
     const free = freeBytes();
-    const disk = parts.length ? [{ path: '/var/lib/mediaorquestator', parts: parts.map((p) => p.part), need_bytes: total, free_bytes: Math.round(free), sufficient: free >= total }] : [];
+    const disk = parts.length ? [{ path: '/var/lib/veritmo', parts: parts.map((p) => p.part), need_bytes: total, free_bytes: Math.round(free), sufficient: free >= total }] : [];
     return { backend, value: { engine, backend, parts, total_bytes: total, disk, confirm_required: parts.length > 0 } };
   }
 

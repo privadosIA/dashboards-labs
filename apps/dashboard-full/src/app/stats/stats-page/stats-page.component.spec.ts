@@ -4,7 +4,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAppDynamicForms } from '../../shared/dynamic/dynamic-forms.providers';
 
-import { StatsResult } from '../../core/api.models';
+import { EnvironmentReport, StatsResult } from '../../core/api.models';
+import { EnvironmentStore } from '../../core/environment.store';
 import { StatsPageComponent } from './stats-page.component';
 
 const STATS: StatsResult = {
@@ -115,6 +116,14 @@ describe('StatsPageComponent', () => {
     await settle();
     expect(q('[data-testid=stats-mode-animation]')?.getAttribute('title')).toBeNull();
     expect(el().textContent).toMatch(/Animación/);
+  });
+
+  it('offers the 3D models kind only on a machine with Blender', async () => {
+    await open();
+    expect(q('[data-testid=stats-mode-models3d]')).toBeNull();
+    TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present: true }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
+    fixture.detectChanges();
+    expect(q('[data-testid=stats-mode-models3d]')).not.toBeNull();
   });
 
   it('offers the server filter only when the history has more than one, and asks the server for it', async () => {

@@ -6,7 +6,7 @@ import { By } from '@angular/platform-browser';
 import { load } from 'js-yaml';
 import { of } from 'rxjs';
 
-import { ProjectConfig } from '../../core/api.models';
+import { EnvironmentReport, ProjectConfig } from '../../core/api.models';
 import { EnvironmentStore } from '../../core/environment.store';
 import { EditorStore } from '../editor.store';
 import { toYaml } from '../../shared/project-yaml';
@@ -357,7 +357,7 @@ describe('SceneFormComponent: the scene\'s own picture', () => {
   let cmp: FormApi;
   const q = (sel: string) => (fixture.nativeElement as HTMLElement).querySelector(sel);
 
-  async function open(image?: string) {
+  async function open(image?: string, extra: Record<string, unknown> = {}) {
     TestBed.configureTestingModule({
       imports: [SceneFormComponent],
       providers: [EditorStore, provideHttpClient(), provideHttpClientTesting(), ...SCENE_FORM_TEST_PROVIDERS],
@@ -367,6 +367,7 @@ describe('SceneFormComponent: the scene\'s own picture', () => {
     http = TestBed.inject(HttpTestingController);
     const cfg = structuredClone(CONFIG);
     if (image !== undefined) cfg.scenes[0].image = image;
+    Object.assign(cfg.scenes[0], extra);
     const loading = store.load('demo');
     http.expectOne('/api/projects/demo/config').flush({ yaml: '', parsed: cfg, valid: true });
     await loading;
@@ -385,6 +386,33 @@ describe('SceneFormComponent: the scene\'s own picture', () => {
     // a scene that starts from a picture reads the catalog to offer editing it
     http.match('/api/assets/catalog').forEach((r) => r.flush({ entries: [] }));
     http.verify();
+  });
+
+  describe('the 3D scene way needs Blender on the machine', () => {
+    const report = (present: boolean) => TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
+
+    it('is not offered without Blender', async () => {
+      await open();
+      report(false);
+      fixture.detectChanges();
+      expect(q('[data-testid=picture-mode-blender]')).toBeNull();
+    });
+
+    it('is offered with Blender', async () => {
+      await open();
+      report(true);
+      fixture.detectChanges();
+      expect(q('[data-testid=picture-mode-blender]')).not.toBeNull();
+    });
+
+    it('a scene that already is 3D stays, read-only with a note, when Blender is missing', async () => {
+      await open(undefined, { blender: { build: 'sala.scene.json' } });
+      report(false);
+      fixture.detectChanges();
+      expect(q('[data-testid=scene-needs-blender]')?.textContent).toContain('Necesita Blender');
+      expect(q('[data-testid=scene-needs-blender]')?.textContent).toContain('sala.scene.json');
+      expect(q('lab-blender-scene')).toBeNull();
+    });
   });
 
   it('generating is the default: prompt shown, no picture picker', async () => {

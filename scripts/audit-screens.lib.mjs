@@ -34,6 +34,12 @@ export const FORM_PLAN = {
     screens: [
       // the Details dialog of a project: three fields one under the other
       { name: 'project-details', path: '/projects', steps: [{ click: '[data-testid="details-demo"]' }, { wait: 700 }] },
+      // the form that imports a zip of 3D models as a pack: id, name, author, licence and where it comes from
+      { name: 'import-pack', path: '/models/3d', steps: [{ click: '[data-testid="packs-import"]' }, { wait: 700 }] },
+      // the form that makes a 3D model from a text: the text, the engine, the detail, the name and the adult mark
+      { name: 'generate-model', path: '/models/3d', steps: [{ click: '[data-testid="making-open"]' }, { wait: 700 }] },
+      // the entries of a project of 3D models: id, text, engine, detail, variants, seed and the adult mark
+      { name: 'model-entry', path: '/projects/demo-modelos/models3d', steps: [{ wait: 900 }] },
     ],
   },
 };
@@ -47,11 +53,16 @@ const freePort = () =>
   });
 
 export async function up(url, timeout = 150) {
+  // A dev server may listen only on the IPv6 loopback (`ng serve` does on some machines): the browser reaches it through `localhost`, but Node's
+  // `fetch` may try only the IPv4 one and be refused. So `localhost` is tried as itself and as `[::1]`.
+  const candidates = url.includes('//localhost') ? [url, url.replace('//localhost', '//[::1]')] : [url];
   for (let i = 0; i < timeout; i++) {
-    try {
-      if ((await fetch(url)).ok) return true;
-    } catch {
-      /* not up yet */
+    for (const candidate of candidates) {
+      try {
+        if ((await fetch(candidate)).ok) return true;
+      } catch {
+        /* not up yet */
+      }
     }
     await new Promise((r) => setTimeout(r, 1000));
   }

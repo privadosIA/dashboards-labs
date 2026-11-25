@@ -21,7 +21,7 @@ function startMock() {
   return new Promise((resolveStarted, reject) => {
     child.stdout.on('data', (chunk) => {
       process.stdout.write(chunk);
-      if (String(chunk).includes('mock orchestrator API')) resolveStarted(child);
+      if (String(chunk).includes('mock Veritmo API')) resolveStarted(child);
     });
     child.on('exit', (code) => reject(new LauncherError(`The mock stopped before it listened (exit ${code}): is something else on :4667?`)));
   });

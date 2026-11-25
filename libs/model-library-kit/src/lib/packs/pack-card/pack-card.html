@@ -1,0 +1,89 @@
+<article class="card" [attr.data-testid]="'pack-' + pack().id" [attr.data-state]="pack().state" appAutoAnimate>
+  <header class="head">
+    <h4>{{ pack().name }}</h4>
+    <span class="state" [attr.data-state]="pack().state" data-testid="pack-state">{{ states[pack().state] }}</span>
+  </header>
+  <p class="meta">
+    @if (pack().author) {
+      <span>{{ t.by(pack().author) }}</span>
+    }
+    <span data-testid="pack-licence">{{ t.licence(pack().licence) }}</span>
+    <span class="data">{{ t.size(pack().size_bytes) }}</span>
+    @if (pack().state === 'installed') {
+      <span class="data" data-testid="pack-models">{{ t.models(pack().models) }}</span>
+    }
+    @if (pack().source === 'user') {
+      <span class="badge">{{ t.imported }}</span>
+    }
+    @if (pack().source === 'generated') {
+      <span class="badge" data-testid="pack-generated">{{ t.generated }}</span>
+    }
+  </p>
+  @if (pack().description) {
+    <p class="note">{{ pack().description }}</p>
+  }
+  @if (pack().attribution) {
+    <p class="note attribution" data-testid="pack-attribution"><mat-icon inline>info</mat-icon>{{ t.attribution }}</p>
+  }
+
+  @if (pack().state === 'installing') {
+    <div class="progress" data-testid="pack-progress">
+      <mat-progress-bar [mode]="known() ? 'determinate' : 'indeterminate'" [value]="percent()" [attr.aria-label]="states.installing" />
+      @if (known()) {
+        @if (pack().progress; as p) {
+          <span class="note data">{{ t.progress(p.done, p.total) }}</span>
+        }
+      }
+    </div>
+  }
+  @if (pack().state === 'failed' && pack().error) {
+    <p class="problem" role="alert" data-testid="pack-error"><mat-icon inline>error</mat-icon><span><strong>{{ t.failedWhy }}:</strong> <span class="data">{{ pack().error }}</span></span></p>
+  }
+  @if (pack().skipped?.length; as n) {
+    <p class="note" data-testid="pack-skipped">{{ t.skipped(n) }}</p>
+  }
+  @if (problem()) {
+    <p class="problem" role="alert" data-testid="pack-problem"><mat-icon inline>error</mat-icon><span class="data">{{ problem() }}</span></p>
+  }
+
+  @if (kenney()) {
+    <p class="note donate" data-testid="pack-donate">
+      {{ t.donate }}
+      <a href="https://kenney.nl/support" target="_blank" rel="noopener noreferrer">{{ t.donateLink }}</a>
+    </p>
+  }
+  @if (pack().page) {
+    <a class="note" [href]="pack().page" target="_blank" rel="noopener noreferrer">{{ t.page }}</a>
+  }
+
+  <footer class="actions">
+    @if (confirming()) {
+      <span class="note" role="alert" data-testid="pack-remove-ask">{{ t.removeAsk(pack().name) }}</span>
+      <button mat-flat-button type="button" data-testid="pack-remove-yes" (click)="confirm()">{{ t.removeYes }}</button>
+      <button mat-button type="button" data-testid="pack-remove-no" (click)="confirming.set(false)">{{ t.removeNo }}</button>
+    } @else {
+      @switch (pack().state) {
+        @case ('available') {
+          <button mat-flat-button type="button" data-testid="pack-install" [disabled]="busy()" (click)="install.emit()">
+            <mat-icon>download</mat-icon>{{ t.install }}
+          </button>
+        }
+        @case ('failed') {
+          <button mat-flat-button type="button" data-testid="pack-retry" [disabled]="busy()" (click)="install.emit()">
+            <mat-icon>refresh</mat-icon>{{ t.retry }}
+          </button>
+        }
+        @case ('installing') {
+          <button mat-stroked-button type="button" data-testid="pack-cancel" [disabled]="busy()" (click)="cancel.emit()">
+            <mat-icon>close</mat-icon>{{ t.cancel }}
+          </button>
+        }
+        @case ('installed') {
+          <button mat-stroked-button type="button" data-testid="pack-remove" [disabled]="busy()" (click)="ask()">
+            <mat-icon>delete</mat-icon>{{ t.remove }}
+          </button>
+        }
+      }
+    }
+  </footer>
+</article>

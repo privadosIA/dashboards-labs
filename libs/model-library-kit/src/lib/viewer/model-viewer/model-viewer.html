@@ -1,0 +1,110 @@
+<div class="head">
+  <h2 mat-dialog-title class="title data" data-testid="viewer-title">{{ title() }}</h2>
+  <button mat-icon-button type="button" mat-dialog-close [attr.aria-label]="t.close" data-testid="viewer-close"><mat-icon>close</mat-icon></button>
+</div>
+<mat-dialog-content class="content">
+  <div class="layout">
+    <div class="stage" #stage [attr.data-phase]="phase()">
+      @if (phase() === 'loading' || phase() === 'ready') {
+        <canvas
+          #canvas
+          class="canvas"
+          tabindex="0"
+          role="img"
+          [attr.aria-label]="t.stage(data.name)"
+          aria-describedby="viewer-keys"
+          [class.hidden]="phase() !== 'ready'"
+          data-testid="viewer-canvas"
+          (keydown)="key($event)"
+        ></canvas>
+      }
+      @if (phase() === 'loading') {
+        <div class="loading" role="status" data-testid="viewer-loading">
+          <span>{{ t.loading }}</span>
+          @if (percent() !== null) {
+            <progress max="100" [value]="percent()" [attr.aria-label]="t.loading"></progress>
+            <span class="data">{{ t.progress(sizeText(progress().loaded), sizeText(progress().total ?? 0)) }}</span>
+          } @else if (progress().loaded > 0) {
+            <span class="data">{{ sizeText(progress().loaded) }}</span>
+          }
+        </div>
+      }
+      @if (phase() !== 'loading' && phase() !== 'ready') {
+        <div class="fallback" data-testid="viewer-fallback" [attr.data-phase]="phase()">
+          @if (picture()) {
+            <img [src]="picture()" [alt]="t.thumbnailAlt(data.name)" />
+          } @else {
+            <span class="none"><mat-icon>image_not_supported</mat-icon><span>{{ t.noThumbnail }}</span></span>
+          }
+        </div>
+      }
+    </div>
+    <div class="side">
+      @if (note(); as text) {
+        <p class="note" [attr.role]="phase() === 'failed' ? 'alert' : 'status'" data-testid="viewer-note">
+          <mat-icon inline>{{ phase() === 'failed' ? 'error' : 'info' }}</mat-icon><span>{{ text }}</span>
+        </p>
+        @if (phase() === 'failed') {
+          <button mat-stroked-button type="button" data-testid="viewer-retry" (click)="retry()">{{ t.retry }}</button>
+        }
+      }
+      @if (pictureless()) {
+        <p class="note" role="status" data-testid="viewer-pictureless"><mat-icon inline>info</mat-icon><span>{{ t.noPictures }}</span></p>
+      }
+      @if (phase() === 'ready') {
+        <p id="viewer-keys" class="keys">{{ t.keys }}</p>
+        <div class="controls" data-testid="viewer-controls">
+          <button mat-stroked-button type="button" data-testid="viewer-reset" (click)="reset()"><mat-icon>center_focus_strong</mat-icon>{{ t.reset }}</button>
+          <button mat-stroked-button type="button" data-testid="viewer-wireframe" [attr.aria-pressed]="wire()" [class.on]="wire()" (click)="toggleWire()">
+            <mat-icon>grid_on</mat-icon>{{ t.wireframe }}
+          </button>
+        </div>
+        @if (clips().length) {
+          <div class="clips" data-testid="viewer-clips">
+            <label class="label" for="viewer-clip">{{ t.clip }}</label>
+            <select id="viewer-clip" class="select data" [value]="clip()" (change)="choose($any($event.target).value)">
+              @for (name of clips(); track name) {
+                <option [value]="name" [selected]="name === clip()">{{ name }}</option>
+              }
+            </select>
+            <button mat-flat-button type="button" data-testid="viewer-play" (click)="togglePlay()">
+              <mat-icon>{{ playing() ? 'pause' : 'play_arrow' }}</mat-icon>{{ playing() ? t.pause : t.play }}
+            </button>
+          </div>
+        } @else {
+          <p class="note" data-testid="viewer-no-clips">{{ t.noClips }}</p>
+        }
+      }
+      <dl class="info" [attr.aria-label]="t.info" data-testid="viewer-info">
+        <dt>{{ t.name }}</dt>
+        <dd class="data">{{ data.name }}</dd>
+        <dt>{{ t.pack }}</dt>
+        <dd class="data">{{ data.pack }}</dd>
+        @if (model(); as m) {
+          <dt>{{ t.licence }}</dt>
+          <dd>{{ m.licence }}</dd>
+          @if (m.author) {
+            <dt>{{ t.author }}</dt>
+            <dd>{{ m.author }}</dd>
+          }
+          @if (m.engine) {
+            <dt>{{ t.engine }}</dt>
+            <dd class="data">{{ m.engine }}</dd>
+          }
+          @if (m.prompt) {
+            <dt>{{ t.prompt }}</dt>
+            <dd class="data prompt">{{ m.prompt }}</dd>
+          }
+        }
+        @if (triangles() !== null) {
+          <dt>{{ t.triangles }}</dt>
+          <dd class="data" data-testid="viewer-triangles">{{ triangles()!.toLocaleString() }}</dd>
+        }
+        @if (fileBytes() > 0) {
+          <dt>{{ t.fileSize }}</dt>
+          <dd class="data" data-testid="viewer-size">{{ sizeText(fileBytes()) }}</dd>
+        }
+      </dl>
+    </div>
+  </div>
+</mat-dialog-content>

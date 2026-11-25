@@ -187,7 +187,7 @@ describe('AssistantStore', () => {
     it('an unreachable server uses the connection hint', () => {
       store.ask('a', 'prompt', 'x');
       http.expectOne('/api/assist').error(new ProgressEvent('error'), { status: 0 });
-      expect(store.failure()!.message).toContain('orchestrator serve');
+      expect(store.failure()!.message).toContain('veritmo serve');
     });
 
     it('the message clears when a new request starts and when dismissed', () => {

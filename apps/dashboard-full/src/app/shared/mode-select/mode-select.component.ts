@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
-import { ANIMATION_MODE, ModeFilterStore, PROJECT_MODES, PROJECT_ORIGINS, ProjectMode, ProjectOrigin } from '../../core/mode-filter.store';
+import { ANIMATION_MODE, ModeFilterStore, PROJECT_ORIGINS, ProjectMode, ProjectOrigin } from '../../core/mode-filter.store';
 
 /**
  * The modes the user wants to see (video, images, music) and where they were made (desktop, phone), as two
@@ -29,11 +29,11 @@ export class ModeSelectComponent {
   /** Adds the Animation option: only Runs lists the runs of animations. */
   readonly animations = input(false);
 
-  protected readonly options = computed<readonly (ProjectMode | typeof ANIMATION_MODE)[]>(() => (this.animations() ? [...PROJECT_MODES, ANIMATION_MODE] : PROJECT_MODES));
+  protected readonly options = computed<readonly (ProjectMode | typeof ANIMATION_MODE)[]>(() => (this.animations() ? [...this.filter.offered(), ANIMATION_MODE] : this.filter.offered()));
   protected readonly originOptions = PROJECT_ORIGINS;
   protected readonly chosenOrigins = computed(() => PROJECT_ORIGINS.filter((o) => this.filter.origins().has(o)));
   protected readonly chosen = computed<(ProjectMode | typeof ANIMATION_MODE)[]>(() => [
-    ...PROJECT_MODES.filter((m) => this.filter.modes().has(m)),
+    ...this.filter.offered().filter((m) => this.filter.modes().has(m)),
     ...(this.animations() && this.filter.animations() ? [ANIMATION_MODE as typeof ANIMATION_MODE] : []),
   ]);
 
@@ -60,6 +60,8 @@ export class ModeSelectComponent {
         return $localize`:@@modes.images:Images`;
       case 'music':
         return $localize`:@@modes.music:Music`;
+      case 'models3d':
+        return $localize`:@@modes.models3d:3D models`;
     }
   }
 }

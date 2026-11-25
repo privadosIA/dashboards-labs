@@ -1,0 +1,177 @@
+<mo-page-header
+  title="3D models"
+  i18n-title="@@m3p.title"
+  description="Objects made by the server's engines from a text or a picture: write the entries, run the project and keep the models."
+  i18n-description="@@m3p.desc"
+>
+  <a moActions mat-stroked-button routerLink="/projects" data-testid="m3p-back">
+    <mat-icon>arrow_back</mat-icon>
+    <ng-container i18n="@@m3p.back">Projects</ng-container>
+  </a>
+  <button moActions mat-stroked-button type="button" data-testid="m3p-save" [hidden]="!store.isModels3d()" [disabled]="!store.dirty() || !store.canSave()" (click)="save()">
+    <mat-icon>save</mat-icon>
+    <ng-container i18n="@@m3p.save">Save</ng-container>
+  </button>
+  <button moActions mat-flat-button type="button" data-testid="m3p-run" [hidden]="!store.isModels3d()" [disabled]="store.running() || store.entries().length === 0 || (store.dirty() && !store.canSave())" (click)="run()">
+    <mat-icon>deployed_code</mat-icon>
+    <ng-container i18n="@@m3p.run">Make the models</ng-container>
+  </button>
+</mo-page-header>
+
+@if (store.loading()) {
+  <p class="note" role="status" data-testid="m3p-loading" i18n="@@m3p.loading">Reading the project…</p>
+} @else if (!store.isModels3d()) {
+  <mo-empty-state icon="deployed_code" message="This is not a project of 3D models." i18n-message="@@m3p.notThis" hint="Its scenes are edited in the scene editor." i18n-hint="@@m3p.notThisHint">
+    <a mat-stroked-button [routerLink]="['/projects', id(), 'editor']" data-testid="m3p-to-editor" i18n="@@m3p.toEditor">Open the scene editor</a>
+  </mo-empty-state>
+} @else {
+  <div class="sections">
+    @for (w of store.warnings(); track $index) {
+      <p class="note" data-testid="m3p-warning"><mat-icon inline>warning</mat-icon>{{ w }}</p>
+    }
+    @if (store.dirty()) {
+      <p class="note" role="status" data-testid="m3p-unsaved" i18n="@@m3p.unsaved">There are changes that are not saved. Making the models saves them first.</p>
+    }
+    @if (general(); as why) {
+      <p class="problem" role="alert" data-testid="m3p-save-error"><mat-icon inline>error</mat-icon><span class="mo-data">{{ why }}</span></p>
+    }
+
+    <mo-panel heading="Pictures of the texts" i18n-heading="@@m3p.pictures" description="A model is made from a picture: the picture of each text is drawn with the image model of the project. An entry with its own picture does not use it." i18n-description="@@m3p.picturesDesc">
+      <div class="defaults">
+        <label class="field">
+          <span class="label" i18n="@@m3p.look">Look</span>
+          <select class="control" data-testid="m3p-look" [disabled]="store.styles().length === 0" (change)="setLook($any($event.target).value)">
+            <option value="" [selected]="!store.style()" i18n="@@m3p.lookPick">Choose a look…</option>
+            @for (s of store.styles(); track s) {
+              <option [value]="s" [selected]="store.style() === s">{{ styleLabel(s) }}</option>
+            }
+          </select>
+        </label>
+        @if (store.pictureModel(); as model) {
+          <p class="note" data-testid="m3p-picture-model" i18n="@@m3p.modelIs">The pictures are drawn with {{ model.name }}.</p>
+        }
+      </div>
+      @if (store.needsPictureModel()) {
+        <p class="problem" role="alert" data-testid="m3p-needs-model">
+          <mat-icon inline>warning</mat-icon>
+          @if (store.styles().length > 0) {
+            <span i18n="@@m3p.needsModel">The project has no installed image model for its pictures: choose a look.</span>
+          } @else {
+            <span i18n="@@m3p.noModels">No image model is installed on the server: install one in Models, or give each entry a picture of its own.</span>
+          }
+        </p>
+      }
+    </mo-panel>
+
+    <mo-panel heading="What the entries use when they say nothing" i18n-heading="@@m3p.defaults">
+      <div class="defaults">
+        <label class="field">
+          <span class="label" i18n="@@m3p.engine">Engine</span>
+          <select class="control" data-testid="m3p-default-engine" (change)="setDefault('engine', $any($event.target).value)">
+            <option value="" [selected]="!store.defaults().engine" i18n="@@m3p.engineDefault">TripoSR (the server's default)</option>
+            <option value="triposr" [selected]="store.defaults().engine === 'triposr'">{{ engineNames.triposr }}</option>
+            <option value="sf3d" [selected]="store.defaults().engine === 'sf3d'">{{ engineNames.sf3d }}</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="label" i18n="@@m3p.detail">Detail</span>
+          <select class="control" data-testid="m3p-default-detail" (change)="setDefault('detail', $any($event.target).value)">
+            <option value="" [selected]="!store.defaults().detail" i18n="@@m3p.detailDefault">Normal (the server's default)</option>
+            <option value="low" [selected]="store.defaults().detail === 'low'" i18n="@@m3p.low">Low</option>
+            <option value="normal" [selected]="store.defaults().detail === 'normal'" i18n="@@m3p.normal">Normal</option>
+            <option value="high" [selected]="store.defaults().detail === 'high'" i18n="@@m3p.high">High</option>
+          </select>
+        </label>
+      </div>
+    </mo-panel>
+
+    <section class="entries" data-testid="m3p-entries">
+      <header class="head">
+        <h3 i18n="@@m3p.entries">Entries</h3>
+        <button mat-stroked-button type="button" data-testid="m3p-add" (click)="add()">
+          <mat-icon>add</mat-icon>
+          <ng-container i18n="@@m3p.add">Add an entry</ng-container>
+        </button>
+      </header>
+      @if (store.entries().length === 0) {
+        <p class="note" data-testid="m3p-empty" i18n="@@m3p.empty">This project has no entries yet: add one to describe an object.</p>
+      }
+      @for (entry of store.entries(); track $index) {
+        <app-model-entry-form
+          [entry]="entry"
+          [index]="$index"
+          [problems]="store.validation().problems[$index]"
+          [pictures]="store.pictures()"
+          [defaults]="store.defaults()"
+          [refusal]="refusal($index)"
+          [uploading]="store.sourceBusy()"
+          [busy]="store.running()"
+          (changed)="change($index, $event)"
+          (remove)="store.removeEntry($index)"
+          (duplicate)="store.duplicateEntry($index)"
+          (makeOne)="run(entry.id)"
+          (upload)="upload($index, $event)"
+        />
+      }
+      @if (store.sourceError(); as why) {
+        <p class="problem" role="alert" data-testid="m3p-upload-error"><mat-icon inline>error</mat-icon><span class="mo-data">{{ why }}</span></p>
+      }
+    </section>
+
+    @if (runIssue(); as issue) {
+      <p class="problem" role="alert" data-testid="m3p-run-problem">
+        <mat-icon inline>error</mat-icon>
+        <span>
+          @if (issue.words) {
+            {{ issue.words }}
+          }
+          <span class="mo-data">{{ issue.message }}</span>
+          @if (issue.engine) {
+            <a routerLink="/models/3d" data-testid="m3p-to-library" i18n="@@m3p.toLibrary">Open the 3D library to start or install the engine</a>
+          }
+        </span>
+      </p>
+    }
+
+    @if (store.stream(); as stream) {
+      <mo-panel heading="Making" i18n-heading="@@m3p.making" data-testid="m3p-run-panel">
+        <button moPanelActions mat-stroked-button class="danger" type="button" data-testid="m3p-cancel" [disabled]="!store.running()" (click)="cancel()">
+          <mat-icon>stop_circle</mat-icon>
+          <ng-container i18n="@@m3p.cancel">Cancel</ng-container>
+        </button>
+        <p class="mo-data" data-testid="m3p-run-state">{{ state() }}</p>
+        <app-phase-strip [events]="stream.events()" />
+      </mo-panel>
+    }
+
+    <section class="made" data-testid="m3p-made">
+      <h3 i18n="@@m3p.made">Models made</h3>
+      @if (made().length === 0) {
+        <p class="note" data-testid="m3p-nothing" i18n="@@m3p.nothing">Nothing has been made yet.</p>
+      }
+      <div class="grid">
+        @for (item of made(); track item.line.file) {
+          <div class="item" [attr.data-testid]="'made-' + item.line.name">
+            @if (item.model; as model) {
+              <lab-model-card [model]="model" />
+            } @else {
+              <p class="name mo-data">{{ item.line.name }}</p>
+            }
+            <p class="facts">
+              <span class="mo-data" data-testid="made-engine">{{ engineOf(item.line) }}</span>
+              <span class="mo-data" i18n="@@m3p.seed">seed {{ item.line.seed }}</span>
+              <span class="mo-data" i18n="@@m3p.seconds">{{ secondsText(item.line.seconds) }} s</span>
+              @if (item.line.adult) {
+                <span i18n="@@m3p.adult">For people of 18 or older</span>
+              }
+            </p>
+            <a mat-stroked-button [href]="download(item.line.file)" [attr.download]="item.line.name + '.glb'" data-testid="made-download">
+              <mat-icon>download</mat-icon>
+              <ng-container i18n="@@m3p.download">Download the .glb</ng-container>
+            </a>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+}

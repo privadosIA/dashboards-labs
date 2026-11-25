@@ -356,6 +356,64 @@
         }
       }
     },
+    "blender-scene-kit": {
+      "projectType": "library",
+      "root": "libs/blender-scene-kit",
+      "sourceRoot": "libs/blender-scene-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
+    "model-library-kit": {
+      "projectType": "library",
+      "root": "libs/model-library-kit",
+      "sourceRoot": "libs/model-library-kit/src",
+      "prefix": "lab",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/architect:true",
+          "options": {},
+          "configurations": {
+            "development": {}
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "coverageReporters": [
+              "lcov",
+              "text-summary"
+            ]
+          }
+        }
+      }
+    },
     "demo-notice": {
       "projectType": "library",
       "root": "libs/demo-notice",

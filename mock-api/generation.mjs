@@ -5,6 +5,7 @@
 import { randomBytes } from 'node:crypto';
 import { clientFilter } from './listing.mjs';
 import * as fx from './fixtures.mjs';
+import { descriptionProblems } from './blender-descriptions.mjs';
 
 const RUN_STEPS = 8;
 const err = (status, code, message) => [status, { error: { code, message } }];
@@ -148,19 +149,38 @@ export function generationHandlers({ db, save, ts, speed }) {
         if (!source) return invalid(`reuse_inputs_of: generation "${req.reuse_inputs_of}" does not exist`);
         if (!source.inputs?.length) return invalid(`reuse_inputs_of: generation "${req.reuse_inputs_of}" kept no inputs`);
       }
+      const option = req.option ? fx.VIDEO_OPTIONS.find((o) => o.id === req.option) : fx.VIDEO_OPTIONS.find((o) => o.default);
+      const scene = option?.inputs?.scene === true;
       const hasPicture = read.files.some((f) => f.field === 'image' || f.field === 'reference_images') || (source?.inputs ?? []).some((i) => i.kind === 'start_image' || i.kind === 'reference_image');
-      if (!prompt && !hasPicture) return invalid('a prompt or a start picture is needed');
+      if (!scene && !prompt && !hasPicture) return invalid('a prompt or a start picture is needed');
       if (prompt.length > 2000) return invalid('the prompt is longer than 2000 characters');
       const client = clientOf(req);
       if (client.error) return client.error;
-      const option = req.option ? fx.VIDEO_OPTIONS.find((o) => o.id === req.option) : fx.VIDEO_OPTIONS.find((o) => o.default);
       if (!option) return invalid(`option "${req.option}" is unknown: use one of the identifiers of GET /api/generation/options`);
       if (!option.available) return unavailable(`option ${option.id} cannot run now: ${option.reason}`);
+      // The 3D scene: only the option `blender` takes a description, and a scene it reuses is used only by it.
+      const sent = req.blender?.description;
+      if (req.blender !== undefined && !scene) return invalid(`blender: option ${option.id} does not take a 3D scene: only the option blender does`);
+      if (source?.inputs?.some((i) => i.kind === 'scene') && !scene) return invalid(`reuse_inputs_of: generation "${req.reuse_inputs_of}" used a 3D scene, which option ${option.id} does not take`);
+      if (scene && read.files.length) return invalid('the option blender takes a description and no picture or reference');
+      if (scene && sent !== undefined && (sent === null || typeof sent !== 'object' || Array.isArray(sent))) return invalid('blender.description: must be the JSON of a scene');
+      const duration = req.duration || option.duration.default;
+      if (scene && sent !== undefined) {
+        const faults = descriptionProblems(sent, duration);
+        if (faults.length) return invalid(`blender.description does not pass: ${faults.join('; ')}`);
+      }
+      const reusedScene = source?.scene && sent === undefined ? source.scene : undefined;
+      if (scene && sent === undefined && !reusedScene) return invalid('blender: the option blender needs the description of the scene (blender.description)');
+      if (reusedScene) {
+        const faults = descriptionProblems(reusedScene, duration);
+        if (faults.length) return invalid(`the reused scene does not fit the duration: ${faults.join('; ')}`);
+      }
       const kept = source ? source.inputs.map((i) => ({ field: Object.keys(INPUT_PARTS).find((k) => INPUT_PARTS[k].kind === i.kind), filename: i.name })) : null;
-      const checked = checkInputs(option, kept ?? read.files);
+      const checked = checkInputs(option, (kept ?? read.files).filter((f) => f.field));
       if (checked.error) return checked.error;
       const resolved = { option: option.id, duration: req.duration || option.duration.default, aspect_ratio: req.aspect_ratio || '16:9', quality: req.quality || 'high' };
-      if (prompt) resolved.prompt = prompt;
+      if (prompt && !scene) resolved.prompt = prompt;
+      if (scene) resolved.blender = {};
       if (req.audio) resolved.audio = true;
       if (typeof req.adult === 'boolean') resolved.adult = req.adult;
       if (req.reuse_inputs_of !== undefined) resolved.reuse_inputs_of = req.reuse_inputs_of;
@@ -172,6 +192,7 @@ export function generationHandlers({ db, save, ts, speed }) {
       if (!fx.QUALITIES.includes(resolved.quality)) return invalid(`quality "${resolved.quality}" is not one of ${fx.QUALITIES.join(', ')}`);
       if (resolved.audio && !option.audio) return invalid(`option ${option.id} cannot write audio: only MiniMax H3 and LTX 2.3 can`);
       const id = newId('api-gen-');
+      const sceneInputs = scene ? [{ kind: 'scene', name: `${id}.scene.json`, address: `/api/projects/${id}/artifacts/sources/${id}.scene.json` }] : null;
       const rec = {
         id,
         created_at: ts(),
@@ -181,7 +202,8 @@ export function generationHandlers({ db, save, ts, speed }) {
         estimate: option.estimate,
         fails: prompt.includes('[fail]'),
         bytes: Math.round(resolved.duration * 900_000),
-        inputs: source ? source.inputs.map((i) => ({ ...i, address: i.address.replace(source.id, id) })) : inputsOfFiles(id, read.files),
+        inputs: sceneInputs ?? (source ? source.inputs.map((i) => ({ ...i, address: i.address.replace(source.id, id) })) : inputsOfFiles(id, read.files)),
+        ...(scene ? { scene: sent ?? reusedScene } : {}),
       };
       db.generations[id] = rec;
       save();

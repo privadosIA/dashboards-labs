@@ -52,3 +52,24 @@ test('writes a Motion line as an animated scene, which the confirmation then ref
   const r = readDataset(JSON.stringify([row('1', 'A kite\nMotion: the camera follows it')]), 'video');
   assert.match(r.yaml, /animate: true\n    motion_prompt: the camera follows it/);
 });
+
+test('reads a Blender line of a video as the scene\'s 3D file, drops its Motion with a note, and rejects a bad or doubled line', () => {
+  const rows = JSON.stringify([
+    ['a', 'A', '', 'Blender: a.scene.json\nMotion: pan left\na title card'],
+    ['b', 'B', '', 'Blender: ../b.scene.json\nanother'],
+    ['c', 'C', '', 'Blender: c.scene.json\nBlender: d.scene.json\nagain'],
+  ]);
+  const r = readDataset(rows, 'video', { 'a.scene.json': { version: 1 } });
+  assert.equal(r.imported, 1);
+  assert.equal(r.rejected, 2);
+  assert.match(r.yaml, /blender:\n {6}build: a\.scene\.json/);
+  assert.ok(!/motion_prompt/.test(r.yaml));
+  assert.match(r.report, /discarded: Motion/);
+  assert.deepEqual(r.warnings, []);
+});
+
+test('a Blender line stays text in a songs dataset', () => {
+  const r = readDataset(JSON.stringify([['t', 'T', '', 'Blender: a.scene.json\nsynthpop']]), 'music');
+  assert.equal(r.imported, 1);
+  assert.deepEqual(r.warnings, []);
+});

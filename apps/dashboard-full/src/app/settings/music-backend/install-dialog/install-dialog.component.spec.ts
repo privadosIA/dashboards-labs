@@ -15,7 +15,7 @@ const plan = (extra: Partial<InstallPlan> = {}): InstallPlan => ({
   backend: 'docker',
   parts: [{ part: 'weights', need_bytes: 9.5 * GB, licenses: ['CC-BY-NC-4.0 (MuQ-MuLan)'] }],
   total_bytes: 9.5 * GB,
-  disk: [{ path: '/var/lib/mediaorquestator', parts: ['weights'], need_bytes: 9.5 * GB, free_bytes: 400 * GB, sufficient: true }],
+  disk: [{ path: '/var/lib/veritmo', parts: ['weights'], need_bytes: 9.5 * GB, free_bytes: 400 * GB, sufficient: true }],
   confirm_required: true,
   ...extra,
 });
@@ -102,7 +102,7 @@ describe('InstallDialogComponent', () => {
   });
 
   it('says how much disk is missing and does not offer to start', async () => {
-    await open({}, plan({ disk: [{ path: '/var/lib/mediaorquestator', parts: ['weights'], need_bytes: 9.5 * GB, free_bytes: 2 * GB, sufficient: false }] }));
+    await open({}, plan({ disk: [{ path: '/var/lib/veritmo', parts: ['weights'], need_bytes: 9.5 * GB, free_bytes: 2 * GB, sufficient: false }] }));
     expect(q('install-disk')!.textContent).toContain('7.5 GB');
     q('install-accept')!.querySelector<HTMLInputElement>('input')!.click();
     await settle();

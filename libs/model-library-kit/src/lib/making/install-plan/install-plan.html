@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>{{ t.title(data.label) }}</h2>
+<mat-dialog-content class="content">
+  @if (loading()) {
+    <p class="note" role="status" data-testid="plan-loading">{{ t.loading }}</p>
+  }
+  @if (plan(); as p) {
+    <section class="plan" data-testid="install-plan">
+      @if (backendName()) {
+        <p class="label" data-testid="plan-backend">{{ t.backend(backendName()) }}</p>
+      }
+      @if (offered().length) {
+        <fieldset class="parts" data-testid="plan-parts">
+          <legend class="label">{{ t.parts }}</legend>
+          @for (part of offered(); track part) {
+            <mat-checkbox [checked]="ticked().has(part)" [attr.data-testid]="'plan-part-' + part" (change)="toggle(part, $event.checked)">{{ label(part) }}</mat-checkbox>
+          }
+        </fieldset>
+        @if (noneTicked()) {
+          <p class="note" data-testid="plan-no-parts">{{ t.noParts }}</p>
+        }
+      }
+      @if (p.missing.length) {
+        <p class="label" data-testid="plan-files-missing">{{ t.files }}</p>
+        <ul class="files data">
+          @for (f of p.missing; track f) {
+            <li>{{ f }}</li>
+          }
+        </ul>
+      }
+      <p class="facts">
+        <span data-testid="plan-size">{{ t.size(p.bytes) }}</span>
+        <span data-testid="plan-licence">{{ t.licence(p.licence) }}</span>
+        <span data-testid="plan-free">{{ t.free(p.free_bytes) }}</span>
+        <span class="data">{{ t.path(p.path) }}</span>
+      </p>
+      @if (p.gated && p.missing.length) {
+        <p class="gated" data-testid="plan-gated"><mat-icon inline>info</mat-icon>{{ t.gated }}</p>
+      } @else {
+        <p class="note">{{ t.key }}</p>
+      }
+      @if (noRoom()) {
+        <p class="problem" role="alert" data-testid="plan-no-room"><mat-icon inline>error</mat-icon>{{ t.noRoom }}</p>
+      }
+    </section>
+  }
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="plan-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="plan-cancel" mat-dialog-close>{{ t.cancel }}</button>
+  <button mat-flat-button type="button" data-testid="plan-confirm" [disabled]="!canConfirm()" (click)="confirm()">
+    <mat-icon>download</mat-icon>
+    {{ t.confirm }}
+  </button>
+</mat-dialog-actions>

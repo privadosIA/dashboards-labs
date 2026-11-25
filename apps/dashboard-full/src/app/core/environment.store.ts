@@ -55,6 +55,8 @@ export class EnvironmentStore {
     const b = this.report()?.binaries.find((x) => x.name === 'chrome');
     return b ? { present: b.present, version: b.version, fix: b.fix } : null;
   });
+  /** Blender is ready: the report is known and lists `blender` as present. False while the report is not loaded, so no 3D is shown before it arrives. */
+  readonly blenderReady = computed(() => !!this.report()?.binaries?.some((b) => b.name === 'blender' && b.present));
   /** Download keys the server has, or null until the report (or its `tokens`) is known. */
   readonly tokens = computed<TokenStatus | null>(() => this.report()?.tokens ?? null);
 

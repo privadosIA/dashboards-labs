@@ -12,6 +12,8 @@ import { fileURLToPath } from 'node:url';
 import * as fx from './fixtures.mjs';
 import { parseMultipart } from './generation.mjs';
 import { clientFilter } from './listing.mjs';
+import { descriptionProblems, example as sceneExample } from './blender-descriptions.mjs';
+import { listOf, placedBy, putFile } from './models3d.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -136,7 +138,7 @@ export const THEME_PARTS = [
   { name: 'grain', description: 'A fine film grain over the whole frame.', levels: LEVELS, cost_ms: 6, manual: true, source: 'builtin', params: [{ name: 'amount', type: 'number', default: '0.08', min: 0, max: 1, description: 'How strong the grain is.' }] },
 ];
 
-export const catalog = () => ({ parts: PARTS, characters: CHARACTERS, backgrounds: BACKGROUNDS, levels: LEVELS, styles: STYLES, frame_rates: FRAME_RATES, actions: ACTIONS, fonts: FONTS, font_stacks: Object.fromEntries(FONTS.map((n) => [n, stackOf(n)])), modes: MODES, font_files: FONT_FILES, features: ['svg', 'scene', 'theme', 'review', 'word-timing', 'reference-breakdown'] });
+export const catalog = () => ({ parts: PARTS, characters: CHARACTERS, backgrounds: BACKGROUNDS, levels: LEVELS, styles: STYLES, frame_rates: FRAME_RATES, actions: ACTIONS, fonts: FONTS, font_stacks: Object.fromEntries(FONTS.map((n) => [n, stackOf(n)])), modes: MODES, font_files: FONT_FILES, features: ['svg', 'scene', 'theme', 'review', 'word-timing', 'reference-breakdown', 'dataset', 'blender', 'blender-motion', 'blender-models'] });
 
 /** A fragment the mock gives to every part that comes with the program: the mock has no real ones, so each is a labelled card that follows the beat. */
 const builtinFragment = (name) =>
@@ -295,13 +297,21 @@ export function readDefault(q) {
 }
 
 /** The reason a script is refused, or ''. Names the piece. */
-export function scriptProblem(script, map, level, song = PALETTES[0], parts = PARTS) {
+export function scriptProblem(script, map, level, song = PALETTES[0], parts = PARTS, models = {}) {
   if (!script || script.version !== 1 || !Array.isArray(script.pieces) || !script.pieces.length) return 'the script needs version 1 and at least one piece';
   let at = 0;
   for (const p of script.pieces) {
     if (!(p.end > p.start)) return `piece ${p.id}: it ends before it starts`;
     if (Math.abs(p.start - at) > 0.01) return `piece ${p.id}: ${p.start < at ? 'overlaps the one before' : `leaves a gap from ${at} to ${p.start} seconds`}`;
     at = p.end;
+    // A 3D piece is a scene Blender draws: no part and none of what goes with one, and a description that passes for the length of the piece (the server's words quote the piece by its id).
+    if (p.blender !== undefined) {
+      if (p.part) return `"${p.id}": a piece is a part or a 3D scene, not both`;
+      for (const field of ['params', 'animate', 'with', 'design', 'mode', 'lines', 'hit', 'stage']) if (p[field] !== undefined) return `"${p.id}": a 3D piece has no ${field}`;
+      const faults = descriptionProblems(p.blender?.description, p.end - p.start, { files: models, place: 'the models of the piece' });
+      if (faults.length) return `"${p.id}": the 3D scene does not pass the checks: ${faults.join('; ')}`;
+      continue;
+    }
     const part = parts.find((x) => x.name === p.part);
     if (!part) return `piece ${p.id}: part "${p.part}" is not in the catalog`;
     for (const [name, value] of Object.entries(p.params ?? {})) {
@@ -580,7 +590,7 @@ export function seedSample(db, songs, now = Date.now()) {
   }
 }
 
-export function musicMotionHandlers({ db, save, ts, speed }) {
+export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
   const step = 600 / speed;
   const newId = () => `api-mm-${ts().replace(/[-:.TZ]/g, '').slice(0, 14)}-${randomBytes(3).toString('hex')}`;
 
@@ -878,12 +888,14 @@ export function musicMotionHandlers({ db, save, ts, speed }) {
   function reviewOf(rec) {
     const r = rec.review;
     if (Date.now() - Date.parse(r.started_at) < step * 2) return { state: 'running', started_at: r.started_at, model: r.model, scenes: [] };
-    const scenes = rec.script.pieces.map((q) => {
+    // The pieces Blender draws are not pages to grade: the review leaves them out and says so.
+    const skipped = rec.script.pieces.filter((q) => q.blender !== undefined).map((q) => q.id);
+    const scenes = rec.script.pieces.filter((q) => q.blender === undefined).map((q) => {
       const score = 3 + ((q.lines ?? []).map((l) => l.text ?? '').join(' ').length % 7);
       return { script_piece: q.id, score, verdict: verdictOf(score), notes: score >= 7 ? [] : ['The keyword is not the biggest thing on the frame.', 'Two accents compete.'] };
     });
     const mean = scenes.length ? Math.round(scenes.reduce((a, x) => a + x.score, 0) / scenes.length) : 0;
-    return { state: 'done', started_at: r.started_at, finished_at: ts(), model: r.model, scenes, overall: { score: mean, notes: ['Type and palette are consistent.', 'Two scenes use the same metaphor.'], repeated: scenes.length > 3 ? [[scenes[0].script_piece, scenes[2].script_piece]] : [] } };
+    return { state: 'done', started_at: r.started_at, finished_at: ts(), model: r.model, ...(skipped.length ? { skipped } : {}), scenes, overall: { score: mean, notes: ['Type and palette are consistent.', 'Two scenes use the same metaphor.'], repeated: scenes.length > 3 ? [[scenes[0].script_piece, scenes[2].script_piece]] : [] } };
   }
 
   /** The parts of the catalog: the ones the server has and the ones approved from drafts. */
@@ -1150,7 +1162,7 @@ export function musicMotionHandlers({ db, save, ts, speed }) {
       if (bad) return bad;
       if (busy(rec)) return drawing(rec.id);
       if (proposing(rec)) return proposalBusy(rec.id);
-      const why = scriptProblem(body, rec.song_map, rec.level, rec.design.design, allParts());
+      const why = scriptProblem(body, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {});
       if (why) return invalid(why);
       rec.script = body;
       rec.script_source = 'user';
@@ -1168,12 +1180,14 @@ export function musicMotionHandlers({ db, save, ts, speed }) {
         if (why) return invalid(why);
       }
       const script = body?.script ?? rec.script;
-      const why = scriptProblem(script, rec.song_map, rec.level, design, allParts());
+      const why = scriptProblem(script, rec.song_map, rec.level, design, allParts(), rec.models ?? {});
       if (why) return invalid(why);
       const only = (query?.get('scenes') ?? '').split(',').map((x) => x.trim()).filter(Boolean);
       for (const id of only) if (!script.pieces.some((p) => p.id === id)) return invalid(`scenes: "${id}" is not a piece of the script`);
       const chosen = script.pieces.filter((p) => only.length === 0 || only.includes(p.id));
       const scenes = chosen.map((p) => {
+        // A 3D piece has no page: Blender draws it.
+        if (p.blender !== undefined) return { id: p.id, start: p.start, end: p.end, html: '', song: {}, blender: true };
         const song = {
           ...rec.song_map,
           beats: rec.song_map.beats.filter((b) => b >= p.start && b < p.end).map((b) => Math.round((b - p.start) * 1000) / 1000),
@@ -1196,6 +1210,48 @@ export function musicMotionHandlers({ db, save, ts, speed }) {
       if (!Number.isFinite(t) || t < 0) return invalid('t must be a number of seconds, 0 or more');
       const end = rec.script.pieces[rec.script.pieces.length - 1].end;
       if (t >= end) return invalid(`t=${t} is outside the piece (0 to ${end})`);
+      return [200, PLACEHOLDER_PNG(), 'image/png'];
+    },
+    // The writer of a 3D piece: a model writes (or, with `description`, changes) the scene for the length of the piece; `save: false` leaves the script as it was.
+    'POST /api/music-motion/pieces/{id}/script/{piece}/blender': ({ params, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (body === null || typeof body !== 'object' || Array.isArray(body)) return err(400, 'invalid_request', 'invalid JSON body');
+      const at = rec.script.pieces.findIndex((p) => p.id === params.piece);
+      if (at < 0) return err(404, 'not_found', `piece "${rec.id}" has no script piece "${params.piece}"`);
+      if (busy(rec)) return drawing(rec.id);
+      if (proposing(rec)) return proposalBusy(rec.id);
+      const idea = typeof body.idea === 'string' ? body.idea.trim() : '';
+      if (!idea) return err(400, 'invalid_request', 'idea: say what the scene shows');
+      if (idea.length > 2000) return err(400, 'invalid_request', 'idea: at most 2000 characters');
+      if (body.description !== undefined && (body.description === null || typeof body.description !== 'object' || Array.isArray(body.description))) return err(400, 'invalid_request', 'description: the JSON of the scene to change');
+      const stored = rec.script.pieces[at];
+      if (body.revise === true && body.description === undefined && stored.blender === undefined) return err(404, 'not_found', `script piece "${params.piece}" is not a 3D scene: there is nothing to change`);
+      if (idea.includes('[fail]')) return invalid(`"${params.piece}": no description that passes the checks after 3 attempts: camera.keys[1].t: 9 is outside the piece (simulated)`);
+      const base = body.description ?? (body.revise === true ? stored.blender.description : undefined);
+      const description = base ? { ...base, camera: { ...(base.camera ?? {}), lens: Math.max(18, Math.round(Number(base.camera?.lens ?? 50) * 0.8)) } } : sceneExample();
+      const save_ = body.save !== false;
+      if (save_) {
+        const { part: _p, params: _a, animate: _n, with: _w, design: _d, mode: _m, lines: _l, hit: _h, stage: _s, ...rest } = stored;
+        rec.script = { ...rec.script, pieces: rec.script.pieces.map((p, i) => (i === at ? { ...rest, blender: { description } } : p)) };
+        rec.script_source = 'user';
+        save();
+      }
+      const piece = save_ ? rec.script.pieces[at] : { id: stored.id, start: stored.start, end: stored.end, blender: { description } };
+      return [200, { piece, resolved: description, provider: 'mock', model: 'mock-model', attempts: 1, saved: save_ }];
+    },
+    // A frame of a description given in the body, checked for the length of the piece: nothing is stored.
+    'POST /api/music-motion/pieces/{id}/script/{piece}/blender/frame': ({ params, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      const stored = rec.script.pieces.find((p) => p.id === params.piece);
+      if (!stored) return err(404, 'not_found', `piece "${rec.id}" has no script piece "${params.piece}"`);
+      if (body === null || typeof body !== 'object' || Array.isArray(body)) return err(400, 'invalid_request', 'invalid JSON body');
+      const seconds = stored.end - stored.start;
+      if (typeof body.t !== 'number' || body.t < 0 || body.t > seconds) return err(400, 'invalid_request', `t: the second of the piece, from 0 to ${seconds}`);
+      if (body.width !== undefined && !(Number.isInteger(body.width) && body.width > 0 && body.width <= 960)) return err(400, 'invalid_request', 'width: up to 960');
+      const faults = descriptionProblems(body.description, seconds, { files: rec.models ?? {}, place: 'the models of the piece' });
+      if (faults.length) return err(400, 'invalid_request', `"${stored.id}": the 3D scene does not pass the checks: ${faults.join('; ')}`);
       return [200, PLACEHOLDER_PNG(), 'image/png'];
     },
     'GET /api/music-motion/library/characters/{name}': ({ params }) => {
@@ -1773,15 +1829,49 @@ export function musicMotionHandlers({ db, save, ts, speed }) {
       if (rec.review && reviewOf(rec).state === 'running') return err(409, 'conflict', `piece "${rec.id}" is being reviewed`);
       if (rec.batch && batchOf(rec).state === 'writing') return err(409, 'conflict', `piece "${rec.id}" is writing a batch of scenes`);
       if (!rec.script?.pieces?.length) return invalid(`piece "${rec.id}" has no script`);
+      if (rec.script.pieces.every((q) => q.blender !== undefined)) return invalid(`piece "${rec.id}": every piece is a 3D scene, and the review does not grade them`);
       rec.review = { started_at: ts(), model: 'gemma4:26b' };
       save();
       return [202, reviewOf(rec)];
+    },
+    // The 3D models of a piece (`.glb` and the pictures their textures name), kept with the piece; nothing changes while a render runs.
+    'GET /api/music-motion/pieces/{id}/models': ({ params }) => {
+      const rec = find(params);
+      return rec ? [200, { models: listOf((rec.models ??= {}), 'picture') }] : notFound(params.id);
+    },
+    'POST /api/music-motion/pieces/{id}/models': ({ params, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (busy(rec)) return drawing(rec.id);
+      const out = models3d.copyInto((rec.models ??= {}), body);
+      if (out[0] === 201) save();
+      return out;
+    },
+    'PUT /api/music-motion/pieces/{id}/models/{name}': ({ params, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (busy(rec)) return drawing(rec.id);
+      const out = putFile((rec.models ??= {}), params.name, body?.buffer);
+      if (out[0] === 201) save();
+      return out;
+    },
+    'DELETE /api/music-motion/pieces/{id}/models/{name}': ({ params }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      const files = (rec.models ??= {});
+      if (!files[params.name]) return err(404, 'not_found', `piece "${rec.id}" has no model or picture "${params.name}"`);
+      if (busy(rec)) return drawing(rec.id);
+      const users = placedBy(files, params.name, rec.script);
+      if (users.length) return err(409, 'conflict', `the 3D piece "${users[0]}" of the script places ${params.name}: take it out of the scene first`);
+      delete files[params.name];
+      save();
+      return [204];
     },
     'POST /api/music-motion/pieces/{id}/render': ({ params }) => {
       const rec = find(params);
       if (!rec) return notFound(params.id);
       if (busy(rec)) return drawing(rec.id);
-      const why = scriptProblem(rec.script, rec.song_map, rec.level, rec.design.design, allParts());
+      const why = scriptProblem(rec.script, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {});
       if (why) return invalid(why);
       rec.rendered_at = ts();
       rec.run_id = `run-mock-mm-${Object.keys(db.pieces).length}${randomBytes(2).toString('hex')}`;

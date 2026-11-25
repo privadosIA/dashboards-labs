@@ -1,11 +1,11 @@
 /**
  * The file name of an export: the one the server gives in `Content-Disposition` (`attachment; filename="x.zip"` or the
- * `filename*=UTF-8''x.zip` form), or `mediaorquestator-data-<yyyy-mm-dd>.zip` when the page cannot read that header (a page on
+ * `filename*=UTF-8''x.zip` form), or `veritmo-data-<yyyy-mm-dd>.zip` when the page cannot read that header (a page on
  * another origin only sees it if the server exposes it) or it has no usable name.
  */
 export function exportName(disposition: string | null | undefined, today = new Date()): string {
   const named = nameIn(disposition ?? '');
-  return named ?? `mediaorquestator-data-${today.toISOString().slice(0, 10)}.zip`;
+  return named ?? `veritmo-data-${today.toISOString().slice(0, 10)}.zip`;
 }
 
 function nameIn(header: string): string | null {

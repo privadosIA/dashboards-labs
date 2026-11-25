@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { StatsResult } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
+import { EnvironmentStore } from '../../core/environment.store';
 import { ModeFilterStore, PROJECT_ORIGINS } from '../../core/mode-filter.store';
 import { ProjectsStore } from '../../core/projects.store';
 import { ModeSelectComponent } from '../../shared/mode-select/mode-select.component';
@@ -43,6 +44,7 @@ export const MODES: readonly { id: string; label: string }[] = [
   { id: 'video', label: $localize`:@@modes.video:Video` },
   { id: 'images', label: $localize`:@@modes.images:Images` },
   { id: 'music', label: $localize`:@@modes.music:Music` },
+  { id: 'models3d', label: $localize`:@@modes.models3d:3D models` },
   { id: 'animation', label: $localize`:@@modes.animation:Animation` },
 ];
 
@@ -339,7 +341,9 @@ export class StatsPageComponent implements OnInit {
 
   // --- by kind of project ------------------------------------------------------------------
 
-  protected readonly modes = MODES;
+  private readonly env = inject(EnvironmentStore);
+  /** The kinds the person can ask for: no 3D models without Blender. */
+  protected readonly modes = computed(() => (this.env.blenderReady() ? MODES : MODES.filter((m) => m.id !== 'models3d')));
   /** Tooltip of the All toggle: the server leaves the animations out when no mode is asked for. */
   protected readonly allHint = $localize`:@@stats.allHint:All does not include animations.`;
   protected readonly modeData = computed<BarDatum[]>(() =>

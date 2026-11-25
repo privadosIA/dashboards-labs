@@ -102,7 +102,7 @@
   <section class="block" data-testid="data-export-block">
     <h4 class="sub" i18n="@@data.export">Backup</h4>
     <p class="note" i18n="@@data.exportNote">
-      A .zip with one file per table and a manifest. It holds no secret and no media. It is restored on the server with <code>orchestrator data restore</code>.
+      A .zip with one file per table and a manifest. It holds no secret and no media. It is restored on the server with <code>veritmo data restore</code>.
     </p>
     <div class="actions">
       <button mat-stroked-button type="button" data-testid="data-export" [disabled]="!!busy()" (click)="downloadExport()">

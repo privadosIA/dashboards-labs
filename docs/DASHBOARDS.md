@@ -20,7 +20,7 @@ npm run dashboard-full:build      # dist/dashboard-full/browser
 The server serves it from a folder, on the same origin as the API and without `--cors-origin`:
 
 ```bash
-orchestrator serve --web-dir ../dashboards-labs/dist/dashboard-full/browser    # o ORCHESTRATOR_WEB_DIR
+veritmo serve --web-dir ../dashboards-labs/dist/dashboard-full/browser    # o VERITMO_WEB_DIR
 ```
 
 Files with a hash in the name are cached for a year; `index.html`, `ngsw.json`, `ngsw-worker.js` and the manifest are

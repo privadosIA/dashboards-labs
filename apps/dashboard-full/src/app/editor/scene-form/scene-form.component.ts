@@ -11,11 +11,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BlenderScene } from '@lab/blender-scene-kit';
 
 import { ApiService } from '../../core/api.service';
 import { EnvironmentStore } from '../../core/environment.store';
 import { MotionCatalogStore } from '../../core/motion-catalog.store';
-import { SceneBlenderComponent } from './blocks/scene-blender/scene-blender.component';
+import { provideProjectBlenderScene } from './blocks/project-blender-scene';
+import { provideProjectModelPlace } from './blocks/project-model-place';
 import { SceneMotionPartComponent } from './blocks/scene-motion-part/scene-motion-part.component';
 import { ScenePictureModeComponent } from './blocks/scene-picture-mode/scene-picture-mode.component';
 import { ScenePictureSourceComponent } from './blocks/scene-picture-source/scene-picture-source.component';
@@ -76,7 +78,7 @@ import { SCENE_VALIDATORS, sceneRuleState } from './dynamic/validations';
     SceneInitComponent,
     ScenePictureModeComponent,
     SceneMotionPartComponent,
-    SceneBlenderComponent,
+    BlenderScene,
     ScenePictureSourceComponent,
     ScenePicturesComponent,
     SceneListenComponent,
@@ -86,7 +88,7 @@ import { SCENE_VALIDATORS, sceneRuleState } from './dynamic/validations';
     MotionPageComponent,
     ModelNoticeComponent,
   ],
-  providers: [SlotOutlet, SceneOptionSources],
+  providers: [SlotOutlet, SceneOptionSources, provideProjectBlenderScene(), provideProjectModelPlace()],
   templateUrl: './scene-form.component.html',
   styleUrl: './scene-form.component.scss',
 })

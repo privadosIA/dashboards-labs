@@ -33,7 +33,7 @@ test('with MOCK_BULK=170 the part drafts are 170 or more, a third failed, some o
 test('without MOCK_BULK the sample data is the same as before: no generated item and no page headers', async () => {
   const mock = await startMock({ env: { MOCK_SAMPLE: 'off' } });
   try {
-    assert.equal((await mock.json('GET', '/api/projects')).body.length, 2);
+    assert.equal((await mock.json('GET', '/api/projects')).body.length, 3);
     assert.equal((await mock.json('GET', '/api/library/songs')).body.length, 3);
     assert.deepEqual((await mock.json('GET', '/api/music-motion/part-drafts')).body, { drafts: [] });
     assert.equal((await mock.json('GET', '/api/projects/bulk-001')).status, 404);
@@ -57,7 +57,7 @@ test('the generated data is the same every time and adds nothing twice', () => {
 test('a value of MOCK_BULK that is not a number is ignored with a warning', async () => {
   const mock = await startMock({ env: { MOCK_BULK: 'lots', MOCK_SAMPLE: 'off' } });
   try {
-    assert.equal((await mock.json('GET', '/api/projects')).body.length, 2);
+    assert.equal((await mock.json('GET', '/api/projects')).body.length, 3);
   } finally {
     mock.stop();
   }

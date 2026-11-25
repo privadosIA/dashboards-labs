@@ -1,0 +1,77 @@
+<section class="models" data-testid="scene-models" appAutoAnimate>
+  <h4>{{ t.title }}</h4>
+  <p class="note">{{ t.intro }}</p>
+  <p class="note" data-testid="models-height"><mat-icon inline>height</mat-icon>{{ t.height }}</p>
+
+  @if (models().length > 0) {
+    <label class="fit" data-testid="models-fit-row">
+      <span class="note">{{ t.fit }}</span>
+      <select class="control" data-testid="models-fit" (change)="setFit($any($event.target).value)">
+        <option value="height" [selected]="fit() === 'height'">{{ t.fitHeight }}</option>
+        <option value="largest" [selected]="fit() === 'largest'">{{ t.fitLargest }}</option>
+      </select>
+    </label>
+    <p class="note" data-testid="models-fit-note">{{ t.fitNote }}</p>
+  }
+
+  @if (loading()) {
+    <p class="note" role="status">{{ t.loading }}</p>
+  } @else if (models().length === 0) {
+    <p class="note" data-testid="models-empty">{{ t.empty }}</p>
+  }
+
+  <ul class="list" appAutoAnimate>
+    @for (model of models(); track model.name) {
+      <li class="model" [attr.data-testid]="'model-row-' + model.name">
+        <div class="what">
+          <strong class="data">{{ model.name }}</strong>
+          <span class="meta">
+            @if (clipCount(model) > 0) {
+              <span class="data" [title]="model.clips?.join(', ')">{{ t.clips(clipCount(model)) }}</span>
+            } @else {
+              <span>{{ t.noClips }}</span>
+            }
+            <span class="data">{{ t.triangles(model.triangles ?? 0) }}</span>
+            @if (needCount(model) > 0) {
+              <span>{{ t.pictures(needCount(model)) }}</span>
+            }
+          </span>
+          @for (picture of missing(model); track picture) {
+            <span class="problem" role="alert" data-testid="model-missing"><mat-icon inline>warning</mat-icon>{{ t.missing(picture) }}. {{ t.missingFix }}</span>
+          }
+        </div>
+        <div class="actions">
+          @if (confirming() === model.name) {
+            <span class="note" role="alert">{{ t.removeAsk(model.name) }}</span>
+            <button mat-flat-button type="button" data-testid="model-remove-yes" [disabled]="busy()" (click)="remove(model.name)">{{ t.removeYes }}</button>
+            <button mat-button type="button" data-testid="model-remove-no" (click)="confirming.set(null)">{{ t.removeNo }}</button>
+          } @else {
+            <button mat-stroked-button type="button" data-testid="model-place" [disabled]="!canPlace() || busy()" [title]="canPlace() ? '' : t.needScene" (click)="place1(model)">
+              <mat-icon>add_circle</mat-icon>{{ t.place }}
+            </button>
+            <button mat-button type="button" data-testid="model-remove" [disabled]="busy()" (click)="confirming.set(model.name)">
+              <mat-icon>delete</mat-icon>{{ t.remove }}
+            </button>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  @if (models().length > 0 && !canPlace()) {
+    <p class="note" data-testid="models-need-scene">{{ t.needScene }}</p>
+  }
+
+  <div class="row">
+    <button mat-stroked-button type="button" data-testid="models-add" [disabled]="busy()" (click)="add()">
+      <mat-icon>library_add</mat-icon>{{ t.add }}
+    </button>
+    <label class="upload">
+      <input class="file" type="file" accept=".glb,.png,.jpg,.jpeg,.webp" data-testid="models-upload" [disabled]="busy()" (change)="upload($event)" />
+      <span class="note">{{ t.upload }}</span>
+    </label>
+  </div>
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="models-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+  }
+</section>

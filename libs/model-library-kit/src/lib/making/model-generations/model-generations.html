@@ -1,0 +1,50 @@
+<section class="generations" data-testid="model-generations">
+  <h4>{{ t.title }}</h4>
+  @if (store.generations().length === 0) {
+    <p class="note" data-testid="generations-empty">{{ t.empty }}</p>
+  }
+  <ul class="list" appAutoAnimate>
+    @for (g of store.generations(); track g.id) {
+      <li class="row" [attr.data-testid]="'generation-' + g.id" [attr.data-state]="g.state">
+        <div class="what">
+          <strong class="data">{{ g.name }}</strong>
+          <span class="badge" data-testid="generation-state" [attr.data-state]="g.state">{{ t.state[g.state] }}</span>
+          @if (g.step) {
+            <span class="note" data-testid="generation-step">{{ t.step[g.step] }}</span>
+          }
+          <p class="meta">
+            <span class="data">{{ g.prompt ?? t.fromPicture }}</span>
+          </p>
+          <p class="meta"><span class="data">{{ g.engine }} · {{ g.detail }}</span></p>
+          @if (g.error) {
+            <p class="problem" role="alert" data-testid="generation-error"><mat-icon inline>error</mat-icon><span class="data">{{ g.error }}</span></p>
+          }
+          @if (store.problems()[g.id]; as why) {
+            <p class="problem" role="alert" data-testid="generation-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+          }
+        </div>
+        <div class="actions">
+          @if (g.state === 'done' && g.model) {
+            <button mat-flat-button type="button" data-testid="generation-view" [attr.aria-label]="v.openModel(g.model)" (click)="look(g.model)">
+              <mat-icon>view_in_ar</mat-icon>{{ v.open }}
+            </button>
+            <button mat-stroked-button type="button" data-testid="generation-show" (click)="showModel.emit(g.model)">
+              <mat-icon>deployed_code</mat-icon>{{ t.model(g.model) }}
+            </button>
+          }
+          @if (live(g)) {
+            <button mat-button type="button" data-testid="generation-cancel" [disabled]="store.busy().has(g.id)" (click)="cancel(g.id)">{{ t.cancel }}</button>
+          } @else if (removing() === g.id) {
+            <span class="note">{{ t.removeNote }}</span>
+            <button mat-flat-button type="button" data-testid="generation-remove-yes" [disabled]="store.busy().has(g.id)" (click)="remove(g.id)">{{ t.remove }}</button>
+            <button mat-button type="button" (click)="removing.set(null)">×</button>
+          } @else {
+            <button mat-button type="button" data-testid="generation-remove" [disabled]="store.busy().has(g.id)" (click)="removing.set(g.id)">
+              <mat-icon>delete</mat-icon>{{ t.remove }}
+            </button>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+</section>

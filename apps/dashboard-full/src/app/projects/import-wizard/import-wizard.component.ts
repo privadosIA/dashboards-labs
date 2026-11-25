@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ImportMode, ImportPreview, ImportResult } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
+import { EnvironmentStore } from '../../core/environment.store';
 import { PROJECT_ID_PATTERN } from '../project-name-dialog/project-name-dialog.component';
 
 /**
@@ -39,6 +40,8 @@ import { PROJECT_ID_PATTERN } from '../project-name-dialog/project-name-dialog.c
 })
 export class ImportWizardComponent {
   private readonly api = inject(ApiService);
+  /** The 3D models choice is offered only when the machine has Blender. */
+  protected readonly blenderReady = inject(EnvironmentStore).blenderReady;
   private readonly ref = inject(MatDialogRef<ImportWizardComponent, ImportResult>);
 
   private readonly stepper = viewChild.required(MatStepper);

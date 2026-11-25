@@ -184,7 +184,7 @@ export class App implements OnInit {
       if (e instanceof NavigationEnd) {
         this.url.set(this.router.url);
         this.section.set(sectionWindowFor(this.router.url));
-        this.documentTitle.setTitle(`${this.currentTitle()} · mediaOrquestator`);
+        this.documentTitle.setTitle(`${this.currentTitle()} · Veritmo`);
       }
     });
   }

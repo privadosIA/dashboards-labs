@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "id": "import-pack",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "id",
+      "type": "text",
+      "label": "Id of the pack",
+      "description": "Lower case letters, digits and hyphens, up to 48.",
+      "validation": {
+        "required": true,
+        "pattern": "^[a-z0-9][a-z0-9-]{0,47}$",
+        "messages": { "required": "Give the pack an id.", "pattern": "Lower case letters, digits and hyphens, up to 48, starting with a letter or digit." }
+      },
+      "props": { "attributes": { "data-testid": "import-id" } }
+    },
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Name (optional)",
+      "props": { "attributes": { "data-testid": "import-name" } }
+    },
+    {
+      "key": "author",
+      "type": "text",
+      "label": "Author (optional)",
+      "props": { "attributes": { "data-testid": "import-author" } }
+    },
+    {
+      "key": "licence",
+      "type": "text",
+      "label": "Licence",
+      "description": "What the pack allows, in your words (for example “CC-BY 4.0, name the author”).",
+      "validation": { "required": true, "messages": { "required": "The licence is required: say what the pack allows." } },
+      "props": { "attributes": { "data-testid": "import-licence" } }
+    },
+    {
+      "key": "sourceUrl",
+      "type": "text",
+      "label": "Where it comes from (optional)",
+      "props": { "attributes": { "data-testid": "import-source" } }
+    }
+  ]
+}

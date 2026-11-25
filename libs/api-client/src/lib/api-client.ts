@@ -1,6 +1,6 @@
-import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, filter, from, map, switchMap, throwError } from 'rxjs';
 import type { HttpMethod } from 'openapi-typescript-helpers';
 
 import { ApiError } from './api-error';
@@ -52,6 +52,20 @@ export class ApiClient {
   }
 
   /**
+   * For a `POST` whose answer is a file (a picture drawn from what the body holds): the bytes and their content type. A refused call
+   * is read from the JSON error the server sends where the file would have been.
+   */
+  postBlob<P extends Path<'post'>>(path: P, ...args: CallArgs<Operation<P, 'post'>>): Observable<{ body: Blob; contentType: string }> {
+    const options = args[0] as LooseOptions | undefined;
+    return this.http
+      .post(this.url(path, options), options?.body ?? null, { params: this.params(options), headers: this.headers(), context: this.context(), responseType: 'blob', observe: 'response' })
+      .pipe(
+        map((res: HttpResponse<Blob>) => ({ body: res.body as Blob, contentType: res.headers.get('Content-Type') ?? '' })),
+        catchError((e) => this.failBlob(e)),
+      );
+  }
+
+  /**
    * For a `POST` whose body is `multipart/form-data` (a JSON part and a file part): the form is sent as it is, with the token, and
    * the JSON of the success response is answered. The path is the contract's; what goes in the form is up to the caller.
    */
@@ -72,6 +86,24 @@ export class ApiClient {
       .get(this.urlOf(address), { headers: this.headers(), context: this.context(), responseType: 'blob', observe: 'response' })
       .pipe(
         map((res: HttpResponse<Blob>) => ({ body: res.body as Blob, contentType: res.headers.get('Content-Type') ?? '' })),
+        catchError((e) => this.fail(e)),
+      );
+  }
+
+  /**
+   * Reads a file from an address the server returned, with the token, and says how much has arrived: each step is `{ loaded, total }` (`total` is `null` when the server did not
+   * say the size) and the last one carries the `body`. Unsubscribing cancels the download.
+   */
+  downloadAt(address: string): Observable<{ loaded: number; total: number | null; body?: Blob }> {
+    return this.http
+      .get(this.urlOf(address), { headers: this.headers(), context: this.context(), responseType: 'blob', observe: 'events', reportProgress: true })
+      .pipe(
+        map((event) => {
+          if (event.type === HttpEventType.DownloadProgress) return { loaded: event.loaded, total: event.total ?? null };
+          if (event.type === HttpEventType.Response) return { loaded: event.body?.size ?? 0, total: event.body?.size ?? null, body: event.body as Blob };
+          return null;
+        }),
+        filter((step): step is { loaded: number; total: number | null; body?: Blob } => step !== null),
         catchError((e) => this.fail(e)),
       );
   }
@@ -125,6 +157,21 @@ export class ApiClient {
     const t = this.config.token;
     const token = typeof t === 'function' ? t() : t;
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
+
+  /** A refused call that asked for a file: its error arrives as a Blob, whose text is the contract's error body. */
+  private failBlob(e: unknown): Observable<never> {
+    if (!(e instanceof HttpErrorResponse) || typeof Blob === 'undefined' || !(e.error instanceof Blob)) return this.fail(e);
+    return from(e.error.text()).pipe(
+      map((text): unknown => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      }),
+      switchMap((body) => throwError(() => ApiError.from(e.status, body, e.status === 0 ? 'No answer from the server' : e.message))),
+    );
   }
 
   private fail(e: unknown): Observable<never> {

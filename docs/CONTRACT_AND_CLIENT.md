@@ -7,7 +7,7 @@ How the dashboards know the server: a versioned copy of its OpenAPI contract and
 ## The contract
 
 ```bash
-npm run contract:sync -- ../mediaOrquestator/internal/server/openapi.yaml     # desde un fichero
+npm run contract:sync -- ../veritmo/internal/server/openapi.yaml     # desde un fichero
 npm run contract:sync -- http://servidor:4666/api/openapi.json --token …      # o desde un servidor en marcha
 npm run contract:check -- http://servidor:4666/api/openapi.json               # ¿sigue al día? (no escribe nada)
 ```

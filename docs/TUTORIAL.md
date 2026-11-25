@@ -1,4 +1,4 @@
-# mediaOrquestator dashboard tutorial
+# Veritmo dashboard tutorial
 
 [← Back to the README](../README.md) · [Spanish version](TUTORIAL.es.md)
 
@@ -12,7 +12,7 @@ In the screenshots, the **numbered orange circles** point at what the text below
 
 > The screenshots come from a few example projects (`live`, `acuarelas`, `cancion-demo`, `chicas-patines`) made for this guide, with the dashboard in English. Your screen will show your own projects and models. The Spanish version of this guide ([TUTORIAL.es.md](TUTORIAL.es.md)) has the same figures with the Spanish labels.
 
-> This is the screen-by-screen half of the guide. The concepts (1 and 2), when something fails (11), the terminal (12), the glossary (13), the API screen and the worked example with its `scenes.yaml` stay with the server, in [its TUTORIAL.md](../../mediaOrquestator/docs/TUTORIAL.md), and the links to them point there.
+> This is the screen-by-screen half of the guide. The concepts (1 and 2), when something fails (11), the terminal (12), the glossary (13), the API screen and the worked example with its `scenes.yaml` stay with the server, in [its TUTORIAL.md](../../veritmo/docs/TUTORIAL.md), and the links to them point there.
 
 ## Contents
 
@@ -55,8 +55,8 @@ In the screenshots, the **numbered orange circles** point at what the text below
 From the project folder:
 
 ```bash
-go build -o bin/orchestrator ./cmd/orchestrator   # once
-bin/orchestrator serve --addr 127.0.0.1:4666 --projects-dir projects
+go build -o bin/veritmo ./cmd/veritmo   # once
+bin/veritmo serve --addr 127.0.0.1:4666 --projects-dir projects
 ```
 
 If you are going to use it from another machine, better start it with the script, which creates a token, prints it and reuses it on every start (you paste it in the side menu, under "Connection"):
@@ -73,7 +73,7 @@ Open <http://127.0.0.1:4666> in the browser. The first time, the project list wi
 ![Empty projects screen](tutorial/en/01-proyectos-vacio.png)
 
 1. **Create**: start one from scratch (the box in the middle of the screen has the same button, **Create project**). Next to it, **Music** starts a songs project and **Motion graphics** one of animated graphics.
-2. **Import dataset**: turns a list you already have (JSON or HTML) into a project. You choose the type: **video scenes**, **animated graphics** (each entry is a graphic described in words, with its length and, if you want, a title over it) or **songs**. A sample file and a worked example of each is in [docs/IMPORT.md](../../mediaOrquestator/docs/IMPORT.md#worked-examples). Next to it, **Import full project** reads the `.zip` that another installation exported and tells you which models you have and which are missing.
+2. **Import dataset**: turns a list you already have (JSON or HTML) into a project. You choose the type: **video scenes**, **animated graphics** (each entry is a graphic described in words, with its length and, if you want, a title over it) or **songs**. A sample file and a worked example of each is in [docs/IMPORT.md](../../veritmo/docs/IMPORT.md#worked-examples). Next to it, **Import full project** reads the `.zip` that another installation exported and tells you which models you have and which are missing.
 3. **Side menu**: the screens: Create, Projects, Runs, Statistics, Gallery (with a **Refresh** button at the top right that reads the project again; the images of an images project, the final video and the clip of each scene of a video one, and the songs of a music one, each with its player), Library (the songs of the music projects), Models, Environment, API and Settings. It also has the **language switch** (English / Español) and the light/dark theme switch.
 4. **Empty state**: when there is nothing, the screen tells you what to do instead of staying blank.
 
@@ -84,11 +84,11 @@ Here you see whether your machine has everything it needs **before** you launch 
 ![Environment](tutorial/en/02-entorno.png)
 
 1. **Binaries**: `piper`, `sd`, `ffmpeg`, `ffprobe` (the four are required) and `nvidia-smi` (optional, only to warn about VRAM). Also `yt-dlp`, optional, only to add the audio of a YouTube video as a source (`bash scripts/get-ytdlp.sh`). `ace-lm`, `ace-synth` and `ace-server` also appear: the music engine. They are optional and only needed for music projects and for generated background music (install them with `bash scripts/build-acestep.sh`; `ace-server` only if you choose the server engine). If one shows as "falta" (missing), the command that fixes it appears below (for example `bash scripts/get-piper.sh`).
-2. **GPUs**: your cards, with the index (0, 1…) you will use later to choose them, and the memory free right now. If the desktop or Ollama uses a GPU, you will see less free memory here. If Ollama keeps a model loaded in a GPU (it holds it a few minutes after use) or little VRAM is free (under 6 GB), the card carries a warning, the same one that shows in the launch form of Runs; the **Free Ollama's VRAM** button there drops the loaded models so the render has the memory. Every card has a **Free memory** button: it unloads those models, stops those containers and says what it let go of (a container that a run is using is not stopped, and the row says why). The last panel, **RAM**, shows the memory available and in use (`ram` in the report). Below them, **Disk** shows the free space of the disk that holds the projects and warns when it is low (under 20 GB; change it with `ORCHESTRATOR_MIN_FREE_GB`, or `0` to turn the warning off). The same warning appears under the table of projects and in the launch form of Runs; it never stops a run.
+2. **GPUs**: your cards, with the index (0, 1…) you will use later to choose them, and the memory free right now. If the desktop or Ollama uses a GPU, you will see less free memory here. If Ollama keeps a model loaded in a GPU (it holds it a few minutes after use) or little VRAM is free (under 6 GB), the card carries a warning, the same one that shows in the launch form of Runs; the **Free Ollama's VRAM** button there drops the loaded models so the render has the memory. Every card has a **Free memory** button: it unloads those models, stops those containers and says what it let go of (a container that a run is using is not stopped, and the row says why). The last panel, **RAM**, shows the memory available and in use (`ram` in the report). Below them, **Disk** shows the free space of the disk that holds the projects and warns when it is low (under 20 GB; change it with `VERITMO_MIN_FREE_GB`, or `0` to turn the warning off). The same warning appears under the table of projects and in the launch form of Runs; it never stops a run.
 3. **Models**: what is already installed in `models/`. The music ones (`models/music/`) and the retouch ones (FLUX.1 Kontext and Qwen-Image-Edit, with their text encoders and VAE) have their own box each, so they are not mistaken for image models.
 4. **Refresh**: checks again (useful after installing something).
 
-> If something required is missing, install it with the scripts in `scripts/` (see the [installation guide](../../mediaOrquestator/docs/INSTALL.md); you can also run `bash scripts/install.sh`, which detects what is missing and asks whether to install it) and press **Refresh**.
+> If something required is missing, install it with the scripts in `scripts/` (see the [installation guide](../../veritmo/docs/INSTALL.md); you can also run `bash scripts/install.sh`, which detects what is missing and asks whether to install it) and press **Refresh**.
 
 ### The "Settings" screen: where Ollama is
 
@@ -258,7 +258,7 @@ What you put here applies to **all** scenes (each one can override it).
 
 ![Defaults](tutorial/en/07-editor-ajustes.png)
 
-1. **Single checkpoint / Model set**: choose how you will configure the model (see [concepts](../../mediaOrquestator/docs/TUTORIAL.md#2-minimum-concepts)).
+1. **Single checkpoint / Model set**: choose how you will configure the model (see [concepts](../../veritmo/docs/TUTORIAL.md#2-minimum-concepts)).
 2. **Diffusion model** (and, for a set, also text encoder and VAE). The lists are filled with what you have installed.
 3. **Use recommended settings**: appears when the chosen model has a preset. It writes steps, resolution and cfg_scale in one go. **It is never applied on its own**: you decide.
 4. **Resolution, Steps, Sampler, FPS…**: the values the button has just filled in. `Steps` are the drawing steps: more steps = more time; "Turbo" models are built for few (8).
@@ -284,7 +284,7 @@ Empty fields use their default values, shown in small print below ("default 832x
 
 > Times measured here (5060 Ti GPU): Wan 5B ≈ 85 s per scene; A14B ≈ 680 s per scene and ~21 GiB of RAM; AnimateDiff ≈ 60-80 s per 2 s clip; MiniMax H3 ≈ 260-290 s per shot (≈ 100 s with the turbo LoRA); LTX 2.3 ≈ 145 s per 2 s shot at 768x416 (116 s on a 12 GB RTX 4070).
 
-> **If the movement does not come out right**: each scene is **one picture animated for 2 to 4 seconds**, saved forward and then in reverse so that it loops; it is not a continuous clip. Ask for **one action per scene**, make the scene last **as long as the forward part** (frames ÷ fps: 33 frames at 16 fps = 2.06 s) so it never reaches the reversed half, and cut between scenes instead of expecting one to flow into the next. A complete worked example, with its `scenes.yaml`, is [at the end of this tutorial](../../mediaOrquestator/docs/TUTORIAL.md#a-worked-example-two-friends-on-a-bench-who-skate-away).
+> **If the movement does not come out right**: each scene is **one picture animated for 2 to 4 seconds**, saved forward and then in reverse so that it loops; it is not a continuous clip. Ask for **one action per scene**, make the scene last **as long as the forward part** (frames ÷ fps: 33 frames at 16 fps = 2.06 s) so it never reaches the reversed half, and cut between scenes instead of expecting one to flow into the next. A complete worked example, with its `scenes.yaml`, is [at the end of this tutorial](../../veritmo/docs/TUTORIAL.md#a-worked-example-two-friends-on-a-bench-who-skate-away).
 
 ### Video with audio: MiniMax H3
 
@@ -312,7 +312,7 @@ What you need and what it costs (measured here, RTX 5060 Ti with 16 GB, 30 GB of
 
 ![A shot of the cat on a wave, 864x480, 56 frames, 20 steps](tutorial/en/45-minimax-gato.png)
 
-**The turbo LoRA is for drafts.** In the editor it is the optional "Turbo LoRA" selector (it comes as "none"). With it the default steps go down to 4 and a shot takes **about 100 s** instead of 260-290 s, but with people the faces deform and the background blurs in the last half second, clearly more than with 20 steps and no LoRA (measured on three shots of two women). Use it to try prompts and leave it out of the final render. In the YAML it is `defaults.animate.lora` (see [SCENES_YAML.md](../../mediaOrquestator/docs/SCENES_YAML.md)).
+**The turbo LoRA is for drafts.** In the editor it is the optional "Turbo LoRA" selector (it comes as "none"). With it the default steps go down to 4 and a shot takes **about 100 s** instead of 260-290 s, but with people the faces deform and the background blurs in the last half second, clearly more than with 20 steps and no LoRA (measured on three shots of two women). Use it to try prompts and leave it out of the final render. In the YAML it is `defaults.animate.lora` (see [SCENES_YAML.md](../../veritmo/docs/SCENES_YAML.md)).
 
 ### Scenes
 
@@ -489,7 +489,7 @@ If you have a picture or a clip that shows what you want, you do not need to put
 - **One scene or one per shot.** By default a clip is **one** scene. Choose **Several scenes (one per shot)** before picking the file and the clip is cut at its shot changes (at most 12 shots; shots under 1.5 s are merged into the previous one): the proposal lists **one entry per shot** with its time range, an editable prompt and a checkbox to drop it. **Create N scenes** inserts the checked ones right after the current scene, in order, without touching any existing scene; each one records the model (`described_by`), and in a video project its length is the shot's (as silence, so the project validates; replace it with narration if you want). If the project animates, the new scenes animate with that shot's movement. A clip without cuts becomes one scene, and the editor says so.
 - **If the model refuses** (or answers something that is not a description) the editor says so and offers **Try with** the other installed vision models; nothing is invented. The refusal is the model's own, the application adds no content filter. Adult material was described literally in our tests with swimwear and lingerie; for anything stronger, try your own files.
 - **Age check.** Before describing anything, every person or character in the file (every frame, for a clip) is checked. If someone is or looks under 18 (photograph, drawing or anime), or their age cannot be confirmed, nothing is described and the file is deleted. The prompts it writes always give an adult age. It is a safeguard made by a model, not a guarantee, and what you upload remains your responsibility.
-- **While a run is in progress** it waits (it needs the memory), and the uploaded file is deleted as soon as you use or discard the proposal. From the terminal: `bin/orchestrator describe photo.png`.
+- **While a run is in progress** it waits (it needs the memory), and the uploaded file is deleted as soon as you use or discard the proposal. From the terminal: `bin/veritmo describe photo.png`.
 
 ### Background music under the voice
 

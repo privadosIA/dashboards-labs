@@ -10,7 +10,7 @@ const TEXT_ATTRS = new Set([
 ]);
 
 /** Text that is not a sentence to translate: names, units, symbols. */
-const ALLOWED = new Set(['GPU', 'API', 'LUFS', 'BPM', 'mediaOrquestator', 'Piper', 'Ollama', 'Whisper', 'SQLite', 'MySQL', 'Postgres', 'LAION-CLAP', 'MuQ', 'MuQ-MuLan', 'Wan', 'Krea', 'LoRA', 'ffmpeg', 'sd', 'seed', 'video', 'images', 'music', 'run', 'tts', 'English', 'Español', 'Steps', 'steps', 'variants', 'lora', 'VAE', 'Sampler', 'FPS', 'AnimateDiff', 'strength', 'id', 'prompt', 'mp3', 'wav', 'force', 'bpm', 'RAM', 'keep-tmp', '_global', 'C', 'minor', '·']);
+const ALLOWED = new Set(['GPU', 'API', 'LUFS', 'BPM', 'Veritmo', 'Piper', 'Ollama', 'Whisper', 'SQLite', 'MySQL', 'Postgres', 'LAION-CLAP', 'MuQ', 'MuQ-MuLan', 'Wan', 'Krea', 'LoRA', 'ffmpeg', 'sd', 'seed', 'video', 'images', 'music', 'run', 'tts', 'English', 'Español', 'Steps', 'steps', 'variants', 'lora', 'VAE', 'Sampler', 'FPS', 'AnimateDiff', 'strength', 'id', 'prompt', 'mp3', 'wav', 'force', 'bpm', 'RAM', 'keep-tmp', '_global', 'C', 'minor', '·']);
 
 /** YAML keys and other identifiers shown as they are written in scenes.yaml. */
 const IDENT = /^([a-z]+(_[a-z]+)+|[\w.-]+\/[\w.-]+)$/;

@@ -64,7 +64,7 @@ export class ApiDocsPageComponent implements OnInit {
       return $localize`:@@api.err.unauthorized:The server rejected the request: the token is missing or incorrect. Enter it under “Connection” (side menu) and reload this page.`;
     }
     if (status === 0) {
-      return $localize`:@@api.err.unreachable:Cannot connect to the server. Check the address under “Connection” and that “orchestrator serve” is running.`;
+      return $localize`:@@api.err.unreachable:Cannot connect to the server. Check the address under “Connection” and that “veritmo serve” is running.`;
     }
     if (status === 404) {
       return $localize`:@@api.err.notFound:This server does not publish the API description. Update the server to a version that includes /api/openapi.json.`;

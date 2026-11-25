@@ -63,19 +63,20 @@ const until = async (read, ok, what) => {
   assert.fail(`never ${what}`);
 };
 
-test('the options list eleven videos, each with its inputs, and the models, with one default each and a reason for what cannot run', async () => {
+test('the options list twelve videos, each with its inputs, and the models, with one default each and a reason for what cannot run', async () => {
   const m = await start();
   try {
     const res = await m.json('GET', '/api/generation/options');
     const body = await res.json();
     fits('/api/generation/options', 'get', 200, body);
-    assert.equal(body.video.length, 11);
-    assert.equal(new Set(body.video.map((o) => o.id)).size, 11);
+    assert.equal(body.video.length, 12);
+    assert.equal(new Set(body.video.map((o) => o.id)).size, 12);
     const inputs = Object.fromEntries(body.video.map((o) => [o.id, o.inputs]));
     assert.equal(inputs['ltx'].end_image, true);
     assert.equal(inputs['wan-high'].end_image, false);
     assert.deepEqual(inputs['h3-ref'].reference_images, { min: 1, max: 2 });
     assert.equal(inputs['h3-ref'].start_image, false);
+    assert.equal(inputs['blender'].scene, true);
     assert.deepEqual(body.video.filter((o) => o.default).map((o) => o.id), ['wan-high']);
     for (const o of body.video) assert.equal(!o.available, !!o.reason, o.id);
     assert.deepEqual(body.image_models.filter((x) => x.default).map((x) => x.kind), ['instruction']);

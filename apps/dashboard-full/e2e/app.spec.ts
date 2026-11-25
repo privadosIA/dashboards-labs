@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 // The suite drives the EMBEDDED build (go build -tags webui) served by a
-// real `orchestrator serve` over stub pipeline binaries (e2e/run-e2e.sh).
+// real `veritmo serve` over stub pipeline binaries (e2e/run-e2e.sh).
 test.describe.configure({ mode: 'serial' });
 
 /** An answer of `GET /api/models/availability` in which every model task can run: the e2e server has no Ollama. */

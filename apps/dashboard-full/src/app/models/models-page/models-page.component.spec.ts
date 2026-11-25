@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AssetKindListing, CatalogEntry, CivitaiResolve, DownloadRecord, ModelsDirectory, TokenSources, TokenStatus } from '../../core/api.models';
@@ -152,8 +153,9 @@ const envReport = (
   tokens: TokenStatus = { huggingface: false, civitai: false },
   token_sources: TokenSources = {},
   models_dir?: ModelsDirectory,
+  binaries: { name: string; required: boolean; present: boolean }[] = [],
 ) => ({
-  binaries: [],
+  binaries,
   models: [],
   voices: [],
   loras: [],
@@ -200,13 +202,14 @@ describe('ModelsPageComponent', () => {
     tokens?: TokenStatus;
     sources?: TokenSources;
     modelsDir?: ModelsDirectory;
+    blender?: boolean;
   } = {}): Promise<void> {
     fixture.detectChanges();
     http.expectOne('/api/assets').flush({ kinds: kinds(opts.models, opts.music, opts.adapters) });
     http.expectOne('/api/assets/catalog').flush({ entries: opts.cat ?? catalog() });
     http.expectOne('/api/downloads').flush({ downloads: opts.downloads ?? [] });
     // the key status comes from the environment report
-    http.expectOne('/api/environment').flush(envReport(opts.tokens, opts.sources, opts.modelsDir));
+    http.expectOne('/api/environment').flush(envReport(opts.tokens, opts.sources, opts.modelsDir, opts.blender === undefined ? [] : [{ name: 'blender', required: false, present: opts.blender }]));
     await settle();
   }
 
@@ -216,7 +219,7 @@ describe('ModelsPageComponent', () => {
     handlers = new Map();
     await TestBed.configureTestingModule({
       imports: [ModelsPageComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: EnginesStore, useValue: fakeEngines() }],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), { provide: EnginesStore, useValue: fakeEngines() }],
     }).compileComponents();
     TestBed.inject(DownloadStreamService).connect = (id, h) => {
       handlers.set(id, h);
@@ -234,6 +237,18 @@ describe('ModelsPageComponent', () => {
     (root().querySelectorAll('[role="tab"]')[index] as HTMLElement).click();
     await settle();
   };
+
+  describe('3D library button', () => {
+    it('is offered when Blender is present', async () => {
+      await open({ blender: true });
+      expect(root().querySelector('[data-testid="models-to-3d"]')).not.toBeNull();
+    });
+
+    it('is not offered when Blender is missing', async () => {
+      await open({ blender: false });
+      expect(root().querySelector('[data-testid="models-to-3d"]')).toBeNull();
+    });
+  });
 
   describe('models directory', () => {
     const dir = (over: Partial<ModelsDirectory> = {}): ModelsDirectory => ({

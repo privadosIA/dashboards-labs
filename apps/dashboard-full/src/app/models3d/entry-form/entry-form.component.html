@@ -1,0 +1,50 @@
+<article class="entry" [attr.data-testid]="'entry-' + index()">
+  <header class="head">
+    <mat-button-toggle-group class="source" [value]="source()" aria-label="source" i18n-aria-label="@@m3p.sourceLabel" (change)="setSource($event.value)" data-testid="entry-source">
+      <mat-button-toggle value="text" data-testid="entry-source-text" i18n="@@m3p.fromText">From a text</mat-button-toggle>
+      <mat-button-toggle value="picture" data-testid="entry-source-picture" i18n="@@m3p.fromPicture">From a picture</mat-button-toggle>
+    </mat-button-toggle-group>
+    <span class="actions">
+      <button mat-stroked-button type="button" data-testid="entry-make" [disabled]="busy()" (click)="makeOne.emit()">
+        <mat-icon>deployed_code</mat-icon>
+        <ng-container i18n="@@m3p.makeOne">Make this one</ng-container>
+      </button>
+      <button mat-button type="button" data-testid="entry-duplicate" (click)="duplicate.emit()">
+        <mat-icon>content_copy</mat-icon>
+        <ng-container i18n="@@m3p.duplicate">Duplicate</ng-container>
+      </button>
+      <button mat-button type="button" class="danger" data-testid="entry-remove" (click)="remove.emit()">
+        <mat-icon>delete</mat-icon>
+        <ng-container i18n="@@m3p.remove">Remove</ng-container>
+      </button>
+    </span>
+  </header>
+
+  <dynamic-form [schema]="schema()" [model]="model()" (modelChange)="onModel($any($event))" [showDefaultActions]="false" showErrors="always" />
+
+  @if (source() === 'picture') {
+    <div class="picture">
+      <label class="label" [attr.for]="'entry-image-' + index()" i18n="@@m3p.picture">Picture of the project</label>
+      <select class="control" [id]="'entry-image-' + index()" data-testid="entry-image" (change)="choose($any($event.target).value)">
+        <option value="" [selected]="!image()" i18n="@@m3p.pickPicture">Choose a picture…</option>
+        @for (p of pictures(); track p.name) {
+          <option [value]="p.name" [selected]="image() === p.name">{{ p.name }}</option>
+        }
+      </select>
+      <label class="upload">
+        <input class="file" type="file" accept=".png,.jpg,.jpeg,.webp" data-testid="entry-upload" [disabled]="uploading()" (change)="pick($event)" />
+        <span class="note" i18n="@@m3p.upload">Upload a .png, .jpg, .jpeg or .webp to the project</span>
+      </label>
+      <p class="note" i18n="@@m3p.onePicture">An entry with its own picture makes one model.</p>
+    </div>
+  }
+
+  @for (why of [problems().id, problems().source, problems().prompt, problems().variants]; track $index) {
+    @if (why) {
+      <p class="problem" role="alert" data-testid="entry-problem"><mat-icon inline>error</mat-icon>{{ why }}</p>
+    }
+  }
+  @if (refusal()) {
+    <p class="problem" role="alert" data-testid="entry-refusal"><mat-icon inline>error</mat-icon><span class="mo-data">{{ refusal() }}</span></p>
+  }
+</article>

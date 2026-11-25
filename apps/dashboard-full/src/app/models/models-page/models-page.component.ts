@@ -14,6 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -113,6 +114,7 @@ function trimmedPattern(re: RegExp) {
     NgTemplateOutlet,
     BytesPipe,
     MiddleEllipsisPipe,
+    RouterLink,
   ],
   templateUrl: './models-page.component.html',
   styleUrl: './models-page.component.scss',

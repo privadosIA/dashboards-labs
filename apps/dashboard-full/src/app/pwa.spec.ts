@@ -10,7 +10,7 @@ const ngsw = read('ngsw-config.json');
 
 describe('web manifest', () => {
   it('is installable: name, standalone display, Create as the start address', () => {
-    expect(manifest.name).toBe('mediaOrquestator');
+    expect(manifest.name).toBe('Veritmo');
     expect(manifest.display).toBe('standalone');
     expect(manifest.start_url).toBe('/create');
   });

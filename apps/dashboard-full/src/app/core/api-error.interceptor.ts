@@ -55,7 +55,7 @@ export function describeError(err: HttpErrorResponse, remoteServer?: string): st
     return $localize`:@@error.unreachableRemote:Cannot connect to ${remoteServer}:server:. Check the address, that the server is running with a reachable --addr, and that this page's origin is listed in its --cors-origin.`;
   }
   if (err.status === 0) {
-    return $localize`:@@error.unreachable:Cannot connect to the server. Start “orchestrator serve” and try again.`;
+    return $localize`:@@error.unreachable:Cannot connect to the server. Start “veritmo serve” and try again.`;
   }
   const body = err.error as ApiErrorBody | undefined;
   const detail = body?.error?.message ?? err.message;

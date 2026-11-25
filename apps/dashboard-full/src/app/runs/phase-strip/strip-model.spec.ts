@@ -361,3 +361,20 @@ describe('buildStrip with background music', () => {
     expect(cells).toMatchObject({ concat: 'done', bgm: 'cache', mix: 'running' });
   });
 });
+
+describe('buildStrip for a project of 3D models', () => {
+  const ev = (type: PipelineEvent['type'], scene?: string, phase?: string): PipelineEvent => ({ timestamp: '2026-11-24T10:00:00Z', type, ...(scene ? { scene_id: scene } : {}), ...(phase ? { phase } : {}) });
+
+  it('has the two phases of a model, the picture and the model, and none of a video', () => {
+    const m = buildStrip([ev('pipeline_start'), ev('phase_start', 'patin', 'render'), ev('phase_end', 'patin', 'render'), ev('phase_start', 'patin', 'model3d')]);
+    expect(m.phases).toEqual(['render', 'model3d']);
+    expect(m.globalPhases).toEqual([]);
+    expect(m.globalRow).toBeNull();
+    expect(m.rows.map((r) => r.sceneId)).toEqual(['patin']);
+  });
+
+  it('shows a phase that was not needed as reused (the cache), as every mode does', () => {
+    const m = buildStrip([ev('pipeline_start'), ev('skipped', 'gato', 'render'), ev('phase_start', 'gato', 'model3d')]);
+    expect(m.rows[0].cells.find((c) => c.phase === 'render')?.state).toBe('cache');
+  });
+});

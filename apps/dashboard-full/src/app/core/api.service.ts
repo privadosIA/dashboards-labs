@@ -110,6 +110,15 @@ import {
   InstallPlan,
   InstallRequest,
   MusicBackend,
+  LibraryModelInfo,
+  LibraryModelsQuery,
+  ModelEngineInfo,
+  ModelGenerationInfo,
+  ModelInstallInfo,
+  ModelInstallPlanInfo,
+  ModelInstallRequest,
+  ModelCopyResult,
+  ModelPackInfo,
 } from './api.models';
 
 /**
@@ -149,7 +158,7 @@ export class ApiService {
     });
   }
 
-  /** Downloads a project: its scenes or songs as a dataset `orchestrator import` reads, or a package with scenes.yaml and sources. */
+  /** Downloads a project: its scenes or songs as a dataset `veritmo import` reads, or a package with scenes.yaml and sources. */
   exportProject(id: string, format: 'dataset' | 'zip', lang: 'es' | 'en' = activeLang()): Observable<HttpResponse<Blob>> {
     return this.http.get(`${this.base}/projects/${id}/export?format=${format}&lang=${lang}`, { observe: 'response', responseType: 'blob' });
   }
@@ -391,6 +400,135 @@ export class ApiService {
       `${this.base}/projects/${projectId}/sources/${encodeURIComponent(name)}`,
       { context: new HttpContext().set(SKIP_ERROR_TOAST, true) },
     );
+  }
+
+  // --- 3D model library (docs/MODEL_LIBRARY.md) -------------------------------------
+  // The refusals are explained by the library's own views, so none of these raises the generic error toast.
+  private readonly quiet = () => ({ context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
+
+  /** The packs the server lists and the ones imported, with their state. */
+  listModelPacks(): Observable<{ packs: ModelPackInfo[] }> {
+    return this.http.get<{ packs: ModelPackInfo[] }>(`${this.base}/models3d/packs`, this.quiet());
+  }
+
+  getModelPack(id: string): Observable<ModelPackInfo> {
+    return this.http.get<ModelPackInfo>(`${this.base}/models3d/packs/${encodeURIComponent(id)}`, this.quiet());
+  }
+
+  /** Queues the install (202); the progress is read with `getModelPack`. */
+  installModelPack(id: string): Observable<ModelPackInfo> {
+    return this.http.post<ModelPackInfo>(`${this.base}/models3d/packs/${encodeURIComponent(id)}/install`, {}, this.quiet());
+  }
+
+  cancelModelPack(id: string): Observable<ModelPackInfo> {
+    return this.http.post<ModelPackInfo>(`${this.base}/models3d/packs/${encodeURIComponent(id)}/cancel`, {}, this.quiet());
+  }
+
+  deleteModelPack(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/models3d/packs/${encodeURIComponent(id)}`, this.quiet());
+  }
+
+  /** Imports a zip as a pack; `licence` is required (the server keeps it and does not judge it). */
+  importModelPack(params: { id: string; licence: string; name?: string; author?: string; source_url?: string }, zip: Blob): Observable<ModelPackInfo> {
+    const query = new HttpParams({ fromObject: Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== '')) as Record<string, string> });
+    return this.http.post<ModelPackInfo>(`${this.base}/models3d/packs/import`, zip, { ...this.quiet(), params: query, headers: { 'Content-Type': 'application/zip' } });
+  }
+
+  /** The models of the installed packs; the page is in the query and the total in the body. */
+  listLibraryModels(query: LibraryModelsQuery): Observable<{ models: LibraryModelInfo[]; total: number }> {
+    const entries = Object.entries(query).filter(([, v]) => v !== undefined && v !== '' && v !== false);
+    const params = new HttpParams({ fromObject: Object.fromEntries(entries.map(([k, v]) => [k, String(v)])) });
+    return this.http.get<{ models: LibraryModelInfo[]; total: number }>(`${this.base}/models3d/models`, { ...this.quiet(), params });
+  }
+
+  /** The picture of a model (a 503 says the pack has none and Blender is not installed). */
+  libraryModelThumbnail(pack: string, name: string): Observable<Blob> {
+    return this.http.get(`${this.base}/models3d/models/${encodeURIComponent(pack)}/${encodeURIComponent(name)}/thumbnail`, { ...this.quiet(), responseType: 'blob' });
+  }
+
+  /**
+   * The `.glb` of a model, saying how far it has got (`total` is `null` when the server did not give the size); the last step carries the body. A server that does not serve the route yet answers 404
+   * (docs/server-request-model-file.md). Unsubscribing cancels the download.
+   */
+  libraryModelFile(pack: string, name: string): Observable<{ loaded: number; total: number | null; body?: Blob }> {
+    return this.http
+      .get(`${this.base}/models3d/models/${encodeURIComponent(pack)}/${encodeURIComponent(name)}/file`, { ...this.quiet(), responseType: 'blob', observe: 'events', reportProgress: true })
+      .pipe(
+        map((event) => {
+          if (event.type === HttpEventType.DownloadProgress) return { loaded: event.loaded, total: event.total ?? null };
+          if (event.type === HttpEventType.Response) return { loaded: event.body?.size ?? 0, total: event.body?.size ?? null, body: event.body as Blob };
+          return null;
+        }),
+        filter((step): step is { loaded: number; total: number | null; body?: Blob } => step !== null),
+      );
+  }
+
+  // --- the engines that make 3D models and their generations (docs/MODEL_GENERATION.md) ---
+
+  /** The engines and whether each can be used; a server with no 3D service answers 503. */
+  listModelEngines(): Observable<{ engines: Record<string, ModelEngineInfo> }> {
+    return this.http.get<{ engines: Record<string, ModelEngineInfo> }>(`${this.base}/models3d/engines`, this.quiet());
+  }
+
+  startModelEngine(engine: string): Observable<{ container: { state: 'stopped' | 'starting' | 'running'; error?: string } }> {
+    return this.http.post<{ container: { state: 'stopped' | 'starting' | 'running'; error?: string } }>(`${this.base}/models3d/engines/${encodeURIComponent(engine)}/start`, {}, this.quiet());
+  }
+
+  stopModelEngine(engine: string): Observable<{ container: { state: 'stopped' | 'starting' | 'running'; error?: string } }> {
+    return this.http.post<{ container: { state: 'stopped' | 'starting' | 'running'; error?: string } }>(`${this.base}/models3d/engines/${encodeURIComponent(engine)}/stop`, {}, this.quiet());
+  }
+
+  /** Without `confirm` the plan of the install (nothing changes); with `confirm: true` the job (202). The backend and the parts are sent only when given. */
+  modelEngineInstall(engine: string, confirm: boolean, request: ModelInstallRequest = {}): Observable<{ plan?: ModelInstallPlanInfo; install?: ModelInstallInfo }> {
+    const body = { ...(request.backend ? { backend: request.backend } : {}), ...(request.parts ? { parts: request.parts } : {}), ...(confirm ? { confirm: true } : {}) };
+    return this.http.post<{ plan?: ModelInstallPlanInfo; install?: ModelInstallInfo }>(`${this.base}/models3d/engines/${encodeURIComponent(engine)}/install`, body, this.quiet());
+  }
+
+  /** Saves how TripoSR runs (`'dotnet'`, `'docker'`; `''` goes back to the .NET service). The caller explains a 422 (Docker does not answer) or a 409 (an external service, or one that is starting). */
+  putModel3dBackend(backend: 'dotnet' | 'docker' | ''): Observable<SettingsResponse> {
+    return this.http.put<SettingsResponse>(`${this.base}/settings`, { model3d_backend: backend }, this.quiet());
+  }
+
+  getModelInstall(id: string): Observable<ModelInstallInfo> {
+    return this.http.get<ModelInstallInfo>(`${this.base}/models3d/installs/${encodeURIComponent(id)}`, this.quiet());
+  }
+
+  cancelModelInstall(id: string): Observable<ModelInstallInfo> {
+    return this.http.post<ModelInstallInfo>(`${this.base}/models3d/installs/${encodeURIComponent(id)}/cancel`, {}, this.quiet());
+  }
+
+  /** Starts a generation from a text (JSON) or a picture (multipart: the picture is the `image` part and the other fields are text). 202. */
+  createModelGeneration(fields: { prompt?: string; engine?: string; detail?: string; name?: string; client?: string; adult?: boolean }, image?: File): Observable<ModelGenerationInfo> {
+    if (image) {
+      const form = new FormData();
+      for (const [k, v] of Object.entries(fields)) if (v !== undefined && k !== 'prompt') form.append(k, String(v));
+      form.append('image', image, image.name);
+      return this.http.post<ModelGenerationInfo>(`${this.base}/models3d/generations`, form, this.quiet());
+    }
+    return this.http.post<ModelGenerationInfo>(`${this.base}/models3d/generations`, fields, this.quiet());
+  }
+
+  /** The generations, newest first. */
+  listModelGenerations(): Observable<ModelGenerationInfo[]> {
+    return this.http.get<ModelGenerationInfo[]>(`${this.base}/models3d/generations`, this.quiet());
+  }
+
+  getModelGeneration(id: string): Observable<ModelGenerationInfo> {
+    return this.http.get<ModelGenerationInfo>(`${this.base}/models3d/generations/${encodeURIComponent(id)}`, this.quiet());
+  }
+
+  cancelModelGeneration(id: string): Observable<ModelGenerationInfo> {
+    return this.http.post<ModelGenerationInfo>(`${this.base}/models3d/generations/${encodeURIComponent(id)}/cancel`, {}, this.quiet());
+  }
+
+  /** Removes the generation and its project, not the model it made. */
+  deleteModelGeneration(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/models3d/generations/${encodeURIComponent(id)}`, this.quiet());
+  }
+
+  /** Copies a model of the library, with its pictures, into a project's sources: `201` when written, `200` when it was already there. */
+  copyModelToProject(projectId: string, from: string, name?: string): Observable<HttpResponse<ModelCopyResult>> {
+    return this.http.post<ModelCopyResult>(`${this.base}/projects/${projectId}/sources/model`, { from, ...(name ? { name } : {}) }, { ...this.quiet(), observe: 'response' });
   }
 
   // --- prompt assistant -----------------------------------------------------

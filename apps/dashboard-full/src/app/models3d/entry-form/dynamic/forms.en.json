@@ -1,0 +1,142 @@
+{
+  "version": "1.0",
+  "id": "model-entry",
+  "layout": {
+    "columns": 2
+  },
+  "fields": [
+    {
+      "key": "id",
+      "type": "text",
+      "label": "Id",
+      "layout": {
+        "col": 6
+      },
+      "description": "The file is named after it: <id>.glb.",
+      "props": {
+        "attributes": {
+          "data-testid": "entry-id"
+        }
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What the object is",
+      "layout": {
+        "col": 12
+      },
+      "description": "One object alone: its shape, material, colour and finish.",
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "entry-prompt"
+        }
+      }
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Engine",
+      "defaultValue": "",
+      "layout": {
+        "col": 4
+      },
+      "options": [
+        {
+          "value": "",
+          "label": "Same as the project"
+        },
+        {
+          "value": "triposr",
+          "label": "TripoSR (MIT)"
+        },
+        {
+          "value": "sf3d",
+          "label": "Stable Fast 3D"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "entry-engine"
+        }
+      }
+    },
+    {
+      "key": "detail",
+      "type": "select",
+      "label": "Detail",
+      "defaultValue": "",
+      "layout": {
+        "col": 4
+      },
+      "options": [
+        {
+          "value": "",
+          "label": "Same as the project"
+        },
+        {
+          "value": "low",
+          "label": "Low"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "high",
+          "label": "High"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "entry-detail"
+        }
+      }
+    },
+    {
+      "key": "variants",
+      "type": "number",
+      "label": "Variants (1 to 4)",
+      "defaultValue": 1,
+      "layout": {
+        "col": 4
+      },
+      "props": {
+        "step": 1,
+        "attributes": {
+          "data-testid": "entry-variants"
+        }
+      }
+    },
+    {
+      "key": "seed",
+      "type": "number",
+      "label": "Seed (optional)",
+      "layout": {
+        "col": 6
+      },
+      "description": "The picture's seed for the first variant; each next one adds 1.",
+      "props": {
+        "step": 1,
+        "attributes": {
+          "data-testid": "entry-seed"
+        }
+      }
+    },
+    {
+      "key": "adult",
+      "type": "checkbox",
+      "label": "For people of 18 or older",
+      "defaultValue": false,
+      "layout": {
+        "col": 6
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "entry-adult"
+        }
+      }
+    }
+  ]
+}

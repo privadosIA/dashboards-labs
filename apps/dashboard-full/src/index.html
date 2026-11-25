@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <title>mediaOrquestator</title>
+    <title>Veritmo</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1316" />
@@ -34,7 +34,7 @@
           if (!root || root.childNodes.length > 0) return;
           var pre = document.createElement('pre');
           pre.style.cssText = 'position:fixed;inset:0;z-index:99999;margin:0;box-sizing:border-box;overflow:auto;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-word;padding:20px;font:20px/1.4 monospace;color:#b00020;background:#fff';
-          pre.textContent = 'mediaOrquestator did not start.\n\n' + (errors.join('\n\n') || 'No error was reported: the script may not have loaded.') + '\n\n' + navigator.userAgent;
+          pre.textContent = 'Veritmo did not start.\n\n' + (errors.join('\n\n') || 'No error was reported: the script may not have loaded.') + '\n\n' + navigator.userAgent;
           document.body.appendChild(pre);
         }, 6000);
       })();

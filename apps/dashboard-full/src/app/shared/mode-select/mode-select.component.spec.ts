@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
+import { EnvironmentReport } from '../../core/api.models';
+import { EnvironmentStore } from '../../core/environment.store';
 import { ModeFilterStore } from '../../core/mode-filter.store';
 import { ModeSelectComponent } from './mode-select.component';
 
 describe('ModeSelectComponent', () => {
+  const blender = (present: boolean) => TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
   async function create() {
     await TestBed.configureTestingModule({ imports: [ModeSelectComponent] }).compileComponents();
     const fixture = TestBed.createComponent(ModeSelectComponent);
@@ -33,19 +36,28 @@ describe('ModeSelectComponent', () => {
 
   it('offers Animation only where the screen asks for it, and keeps it apart from the project modes', async () => {
     const f = await create();
+    blender(true);
     f.componentRef.setInput('animations', false);
     f.detectChanges();
     const opts = (f.componentInstance as unknown as { options(): string[] }).options;
-    expect(opts()).toEqual(['video', 'images', 'music']);
+    expect(opts()).toEqual(['video', 'images', 'music', 'models3d']);
     f.componentRef.setInput('animations', true);
     f.detectChanges();
-    expect(opts()).toEqual(['video', 'images', 'music', 'animation']);
+    expect(opts()).toEqual(['video', 'images', 'music', 'models3d', 'animation']);
     const store = TestBed.inject(ModeFilterStore);
     (f.componentInstance as unknown as { change(m: string[]): void }).change(['video', 'animation']);
     expect([...store.modes()]).toEqual(['video']);
     expect(store.animations()).toBe(true);
     (f.componentInstance as unknown as { change(m: string[]): void }).change(['video']);
     expect(store.animations()).toBe(false);
+  });
+
+  it('does not offer 3D models without Blender, nor before the report is known', async () => {
+    const f = await create();
+    const opts = (f.componentInstance as unknown as { options(): string[] }).options;
+    expect(opts()).toEqual(['video', 'images', 'music']);
+    blender(false);
+    expect(opts()).toEqual(['video', 'images', 'music']);
   });
 
   it('says so when no mode is chosen', async () => {

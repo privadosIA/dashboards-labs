@@ -122,20 +122,20 @@ export class RunsPageComponent implements OnInit {
    * list can be cut down to videos, pictures or songs. The project already picked stays, whatever its mode.
    */
   protected readonly launchProjects = computed(() => {
-    const list = visibleProjects(this.projects.projects(), this.modes.modes(), this.modes.origins());
+    const list = visibleProjects(this.projects.projects(), this.modes.active(), this.modes.origins());
     const picked = this.selectedProject();
     const current = picked && !list.some((p) => p.id === picked) ? this.projects.projects().find((p) => p.id === picked) : undefined;
     return current ? [current, ...list] : list;
   });
 
   /** The runs of the modes the user chose (the same choice as the projects list and the gallery). */
-  protected readonly visibleHistory = computed(() => visibleRuns(this.history(), this.projects.projects(), this.modes.modes(), this.modes.origins(), this.modes.animations()));
+  protected readonly visibleHistory = computed(() => visibleRuns(this.history(), this.projects.projects(), this.modes.active(), this.modes.origins(), this.modes.animations()));
   /** The modes with runs that are not chosen. */
-  protected readonly hiddenModes = computed(() => hiddenRunModes(this.history(), this.projects.projects(), this.modes.modes(), this.modes.origins(), this.modes.animations()));
+  protected readonly hiddenModes = computed(() => hiddenRunModes(this.history(), this.projects.projects(), this.modes.active(), this.modes.origins(), this.modes.animations()));
   protected readonly finished = computed(() => this.visibleHistory().filter((r) => this.isFinished(r)));
 
   protected modeLabel(mode: string): string {
-    return mode === 'animation' ? $localize`:@@modes.animation:Animation` : mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : $localize`:@@modes.music:Music`;
+    return mode === 'animation' ? $localize`:@@modes.animation:Animation` : mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : mode === 'models3d' ? $localize`:@@modes.models3d:3D models` : $localize`:@@modes.music:Music`;
   }
 
   /** The selected GPUs, by index. */

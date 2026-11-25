@@ -1,0 +1,40 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+  min-width: min(28rem, 80vw);
+}
+
+.zip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-1);
+}
+
+.label {
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.file {
+  color: var(--lab-ink);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.data {
+  font-family: var(--lab-font-mono);
+}

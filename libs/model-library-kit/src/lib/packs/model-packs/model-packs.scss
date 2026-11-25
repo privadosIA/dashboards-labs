@@ -1,0 +1,42 @@
+.packs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lab-space-3);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lab-space-3);
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--lab-space-4);
+}
+
+.note {
+  margin: 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  margin: 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}
+
+.data {
+  font-family: var(--lab-font-mono);
+}

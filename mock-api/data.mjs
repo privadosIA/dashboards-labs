@@ -150,7 +150,7 @@ export function dataHandlers({ db, save, ts, speed = 1 }) {
       ];
       // named like the real server's: the date and the time, with no separators
       const stamp = ts().replace(/\.\d+Z$/, '').replace(/[-:]/g, '').replace('T', '-');
-      return [200, zip(files), 'application/zip', { 'Content-Disposition': `attachment; filename="mediaorquestator-data-${stamp}.zip"` }];
+      return [200, zip(files), 'application/zip', { 'Content-Disposition': `attachment; filename="veritmo-data-${stamp}.zip"` }];
     },
   };
 

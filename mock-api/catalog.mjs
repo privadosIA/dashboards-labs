@@ -10,7 +10,7 @@ const err = (status, code, message) => [status, { error: { code, message } }];
 const slug = (text, max) => text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, max);
 const isRemote = (url) => !/^https?:\/\/(localhost|127\.[\d.]+|\[?::1\]?)(:|\/|$)/.test(url);
 
-const KINDS = ['image', 'video', 'motion', 'music', 'animation'];
+const KINDS = ['image', 'video', 'motion', 'music', 'animation', 'model3d'];
 const MAX_PROMPT = 2000;
 const MAX_TAGS = 20;
 

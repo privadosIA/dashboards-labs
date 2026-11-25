@@ -13,6 +13,9 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { ImportResult, ProjectConfig, ProjectSummary, Scene } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
+import { EnvironmentStore } from '../../core/environment.store';
+import { ServerModelLibrary } from '../../core/model-library.adapter';
+import { toModelsYaml } from '../../models3d/models3d-yaml';
 import { ProjectsStore } from '../../core/projects.store';
 import { toYaml } from '../../shared/project-yaml';
 import { easyConfigForNewProject, machineOf } from '../../editor/auto-plan';
@@ -32,7 +35,7 @@ import {
 } from '../project-name-dialog/project-name-dialog.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { AvailabilityStore } from '../../core/availability.store';
-import { PROJECT_MODES, ProjectMode, ModeFilterStore, hiddenModes, visibleProjects } from '../../core/mode-filter.store';
+import { ProjectMode, ModeFilterStore, hiddenModes, visibleProjects } from '../../core/mode-filter.store';
 import { SimpleModeStore } from '../../core/simple-mode.store';
 import { ModeSelectComponent } from '../../shared/mode-select/mode-select.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
@@ -70,7 +73,7 @@ export class ProjectsListComponent implements OnInit {
     this.route.queryParamMap.pipe(
       map((q) => {
         const mode = q.get('mode');
-        return PROJECT_MODES.includes(mode as ProjectMode) ? (mode as ProjectMode) : null;
+        return this.modes.offered().includes(mode as ProjectMode) ? (mode as ProjectMode) : null;
       }),
     ),
     { initialValue: null },
@@ -78,7 +81,7 @@ export class ProjectsListComponent implements OnInit {
   /** The modes this list shows: the one the address asks for, or else the ones the user chose. */
   private readonly shown = computed<ReadonlySet<ProjectMode>>(() => {
     const only = this.only();
-    return only ? new Set<ProjectMode>([only]) : this.modes.modes();
+    return only ? new Set<ProjectMode>([only]) : this.modes.active();
   });
 
   /** The projects of the modes shown (and those with no mode). */
@@ -87,7 +90,7 @@ export class ProjectsListComponent implements OnInit {
   protected readonly hidden = computed(() => hiddenModes(this.store.projects(), this.shown(), this.modes.origins()));
 
   protected modeLabel(mode: string): string {
-    return mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : $localize`:@@modes.music:Music`;
+    return mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : mode === 'models3d' ? $localize`:@@modes.models3d:3D models` : $localize`:@@modes.music:Music`;
   }
   /** Goes back to the modes the user chose: the address stops asking for one. */
   protected clearOnly(): void {
@@ -99,6 +102,18 @@ export class ProjectsListComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly snack = inject(MatSnackBar);
   protected readonly availability = inject(AvailabilityStore);
+  private readonly library = inject(ServerModelLibrary);
+  /** The server has the 3D service (its engines answer): only then a project that makes 3D models is offered, because it could not be run otherwise. */
+  private readonly service3d = signal(false);
+  private readonly env = inject(EnvironmentStore);
+  /** ...and the machine has Blender: without it nothing 3D is offered. */
+  protected readonly models3dAvailable = computed(() => this.service3d() && this.env.blenderReady());
+  /** The 3D library needs Blender on the server's machine, whatever engine it has. */
+  protected readonly library3dAvailable = computed(() => this.env.blenderReady());
+  /** A project of the 3D models mode that cannot be worked on here: it stays listed, without edit, and says why. */
+  protected needsBlender(p: ProjectSummary): boolean {
+    return p.mode === 'models3d' && !this.env.blenderReady();
+  }
 
   /** The projects table: columns and paging live in `dynamic/tables.<lang>.json`. */
   protected readonly tables = schemaFor({ es: tablesEs, en: tablesEn });
@@ -135,6 +150,16 @@ export class ProjectsListComponent implements OnInit {
   ngOnInit(): void {
     void this.store.load();
     void this.loadSizes();
+    void this.load3dService();
+  }
+
+  /** A server with no 3D service answers 503 to the engines (read as "none"): nothing is offered then, and nothing is said. */
+  private async load3dService(): Promise<void> {
+    try {
+      this.service3d.set((await firstValueFrom(this.library.engines())) !== null);
+    } catch {
+      this.service3d.set(false);
+    }
   }
 
   private async loadSizes(): Promise<void> {
@@ -240,6 +265,37 @@ export class ProjectsListComponent implements OnInit {
   }
 
   /**
+   * A project that makes 3D models: one entry to start from. The server creates every project as a video starter, so this swaps it for the models starter;
+   * if the server refuses, the half-made project is removed again and the server's explanation reaches the user.
+   */
+  protected async createModelsProject(): Promise<void> {
+    const id = await firstValueFrom(
+      this.dialog
+        .open<ProjectNameDialogComponent, ProjectNameDialogData, string>(ProjectNameDialogComponent, {
+          data: {
+            title: $localize`:@@projects.createModelsTitle:New 3D models project`,
+            confirmLabel: $localize`:@@projects.createModelsAction:Create 3D models project`,
+          },
+        })
+        .afterClosed(),
+    );
+    if (!id) return;
+    await this.store.create(id);
+    try {
+      // the server's own starter holds the image model, the sampler and the steps the pictures of the texts are drawn with: they are kept
+      const res = await firstValueFrom(this.api.getConfig(id));
+      if (!res.parsed) throw new Error('the new project has no configuration');
+      const starter = { ...res.parsed, output: { ...res.parsed.output, mode: 'models3d' }, scenes: [], models: [{ id: 'object-1', prompt: $localize`:@@m3p.starterPrompt:A small wooden chair, painted red` }] };
+      await firstValueFrom(this.api.saveConfig(id, toModelsYaml(starter)));
+    } catch (err) {
+      await this.store.remove(id);
+      throw err;
+    }
+    await this.store.load();
+    await this.router.navigate(['/projects', id, 'models3d']);
+  }
+
+  /**
    * A project that makes songs. The server creates every project as a video
    * starter, so this switches it to music right away; if the server refuses
    * (the music models are not installed yet) the half-made project is removed
@@ -305,9 +361,9 @@ export class ProjectsListComponent implements OnInit {
     await this.router.navigate(['/projects', id, 'editor']);
   }
 
-  /** Where "edit" leads: the music studio for a music project, the scene editor otherwise. */
+  /** Where "edit" leads: the music studio for a music project, the 3D models page for a 3D models one, the scene editor otherwise. */
   protected editLink(p: ProjectSummary): string[] {
-    return ['/projects', p.id, p.mode === 'music' ? 'music' : 'editor'];
+    return ['/projects', p.id, p.mode === 'music' ? 'music' : p.mode === 'models3d' ? 'models3d' : 'editor'];
   }
 
   protected countOf(p: ProjectSummary): number {
@@ -415,7 +471,7 @@ export class ProjectsListComponent implements OnInit {
     if (created) {
       await this.store.load();
       // Songs are written in the studio, not in the scene editor.
-      await this.router.navigate(['/projects', created.id, created.mode === 'music' ? 'music' : 'editor']);
+      await this.router.navigate(['/projects', created.id, created.mode === 'music' ? 'music' : created.mode === 'models3d' ? 'models3d' : 'editor']);
     }
   }
 }

@@ -59,7 +59,7 @@ describe('DataCardComponent', () => {
       getDataStatus: vi.fn(() => of(status)),
       importData: vi.fn(() => of({ imports: [] })),
       cleanLegacyData: vi.fn(() => of({ cleaned: [] })),
-      downloadDataExport: vi.fn(() => of(new HttpResponse({ body: new Blob(['zip']), headers: new HttpHeaders({ 'Content-Disposition': 'attachment; filename="mediaorquestator-data-20261119-133655.zip"' }) }))),
+      downloadDataExport: vi.fn(() => of(new HttpResponse({ body: new Blob(['zip']), headers: new HttpHeaders({ 'Content-Disposition': 'attachment; filename="veritmo-data-20261119-133655.zip"' }) }))),
     };
     share = { saveBlob: vi.fn() };
     await TestBed.configureTestingModule({
@@ -177,7 +177,7 @@ describe('DataCardComponent', () => {
       expect(share.saveBlob).toHaveBeenCalledTimes(1);
       const [blob, name] = share.saveBlob.mock.calls[0];
       expect(blob).toBeInstanceOf(Blob);
-      expect(name).toBe('mediaorquestator-data-20261119-133655.zip');
+      expect(name).toBe('veritmo-data-20261119-133655.zip');
       expect(q('data-error')).toBeNull();
     });
 
@@ -185,7 +185,7 @@ describe('DataCardComponent', () => {
       await open();
       api['downloadDataExport'].mockReturnValue(of(new HttpResponse({ body: new Blob(['zip']) })));
       await click('data-export');
-      expect(share.saveBlob.mock.calls[0][1]).toMatch(/^mediaorquestator-data-\d{4}-\d{2}-\d{2}\.zip$/);
+      expect(share.saveBlob.mock.calls[0][1]).toMatch(/^veritmo-data-\d{4}-\d{2}-\d{2}\.zip$/);
     });
 
     it('says so, with the server\'s reason, and saves nothing when the server refuses', async () => {

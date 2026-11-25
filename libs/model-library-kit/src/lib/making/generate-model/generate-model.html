@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>{{ t.generate.title }}</h2>
+<mat-dialog-content class="content">
+  <mat-button-toggle-group class="source" aria-label="source" [value]="source()" (change)="setSource($event.value)" data-testid="generate-source">
+    <mat-button-toggle value="text" data-testid="generate-source-text">{{ t.generate.fromText }}</mat-button-toggle>
+    <mat-button-toggle value="picture" data-testid="generate-source-picture">{{ t.generate.fromPicture }}</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+
+  @if (source() === 'picture') {
+    <div class="picture">
+      <label class="label" for="generate-picture">{{ t.generate.picture }}</label>
+      <input id="generate-picture" class="file" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" data-testid="generate-picture" (change)="pick($event)" />
+      @if (!picture()) {
+        <span class="note" data-testid="generate-no-picture">{{ t.generate.noPicture }}</span>
+      }
+      @if (tooBig()) {
+        <span class="problem" role="alert" data-testid="generate-too-big"><mat-icon inline>error</mat-icon>{{ t.generate.tooBig }}</span>
+      }
+    </div>
+  }
+
+  <p class="note" data-testid="generate-largest">{{ t.generate.largest }}</p>
+  @if (noneUsable()) {
+    <p class="problem" role="alert" data-testid="generate-none-usable"><mat-icon inline>error</mat-icon>{{ t.generate.blocked }}</p>
+  } @else if (blockedReason(); as why) {
+    <p class="problem" role="alert" data-testid="generate-engine-blocked"><mat-icon inline>error</mat-icon>{{ why }}</p>
+  }
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="generate-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="generate-cancel" mat-dialog-close>{{ t.generate.cancel }}</button>
+  <button mat-flat-button type="button" data-testid="generate-send" [disabled]="!canSend()" (click)="send()">
+    <mat-icon>deployed_code</mat-icon>
+    {{ sending() ? t.generate.sending : t.generate.send }}
+  </button>
+</mat-dialog-actions>

@@ -27,6 +27,7 @@ const SOURCES: SourceInfo[] = [
   { name: 'balada.mp3', kind: 'audio', size: 1, modified: 'a' },
   { name: 'clip.mp4', kind: 'video', size: 1, modified: 'b' },
   { name: 'foto.png', kind: 'image', size: 1, modified: 'c' },
+  { name: 'hero.glb', kind: 'model', size: 1, modified: 'd', clips: ['idle'], triangles: 900, needs: ['foto.png'] },
 ];
 const HEARD = { language: 'es', language_detected: true, text: 'Camino por la calle\nbajo la lluvia', segments: [], dropped: 0, model: 'm' };
 const MEASURE = { duration: 30, bpm: 71, bpm_alternatives: [35.5, 142], bpm_confidence: 0.4, keyscale: 'F# major', key_confidence: 0.3 };
@@ -109,7 +110,7 @@ describe('ExtractDialogComponent', () => {
     expect(notes).toContain('derechos');
   });
 
-  it('offers the audios and the kept videos, not the pictures, and chooses the first', async () => {
+  it('offers the audios and the kept videos, not the pictures or the 3D models, and chooses the first', async () => {
     await open();
     const cmp = fixture.componentInstance as unknown as { sources(): SourceInfo[]; picked(): string };
     expect(cmp.sources().map((s) => s.name)).toEqual(['balada.mp3', 'clip.mp4']);

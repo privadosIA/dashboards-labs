@@ -35,6 +35,8 @@ export interface StripModel {
 const VIDEO_PHASES = ['tts', 'probe', 'render', 'clip'];
 const IMAGE_PHASES = ['render', 'export'];
 const MUSIC_PHASES = ['compose', 'synth', 'export'];
+/** A project of 3D models: the picture of each prompt, then the model. */
+const MODELS3D_PHASES = ['render', 'model3d'];
 
 /**
  * An error whose message starts with this prefix was emitted for a scene that
@@ -92,10 +94,11 @@ export function buildStrip(events: PipelineEvent[]): StripModel {
   // (absent for a track that brings its own lyrics) and synth.
   // A music mix has its own row (its id) with a `mix` phase; the video's soundtrack mix is the `_global` one.
   const mixes = events.some((e) => e.phase === 'mix' && e.scene_id !== undefined && e.scene_id !== '_global');
-  const musicMode = mixes || events.some((e) => e.phase === 'compose' || e.phase === 'synth');
-  const imagesMode = !musicMode && events.some((e) => e.phase === 'export');
-  const basePhases = musicMode ? (mixes ? [...musicPhases(events), 'mix'] : musicPhases(events)) : imagesMode ? IMAGE_PHASES : videoPhases(events);
-  const baseGlobal = musicMode || imagesMode ? ['export'] : ['concat'];
+  const modelsMode = events.some((e) => e.phase === 'model3d');
+  const musicMode = !modelsMode && (mixes || events.some((e) => e.phase === 'compose' || e.phase === 'synth'));
+  const imagesMode = !modelsMode && !musicMode && events.some((e) => e.phase === 'export');
+  const basePhases = modelsMode ? MODELS3D_PHASES : musicMode ? (mixes ? [...musicPhases(events), 'mix'] : musicPhases(events)) : imagesMode ? IMAGE_PHASES : videoPhases(events);
+  const baseGlobal = modelsMode ? [] : musicMode || imagesMode ? ['export'] : ['concat'];
   const phases = [...basePhases, ...unknownPhases(events, [...basePhases, ...baseGlobal], false)];
   const globalPhases = [...baseGlobal, ...unknownPhases(events, baseGlobal, true)];
 
@@ -203,7 +206,8 @@ export function buildStrip(events: PipelineEvent[]): StripModel {
   }
 
   const globalCells = cells.get('_global');
-  if (globalCells || model.rows.length > 0) {
+  // a project of 3D models has no step of its own after the models: its strip has no global row
+  if (globalPhases.length > 0 && (globalCells || model.rows.length > 0)) {
     model.globalRow = {
       sceneId: '_global',
       cells: globalPhases.map(

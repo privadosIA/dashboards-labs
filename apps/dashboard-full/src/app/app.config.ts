@@ -15,9 +15,14 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideMotionParts } from '@lab/motion-parts';
 import { provideServerConnection } from '@lab/server-connection';
+import { provideBlenderScene } from '@lab/blender-scene-kit';
+import { MODEL_LIBRARY_PORT, provideModelLibrary } from '@lab/model-library-kit';
 
 import { apiErrorInterceptor } from './core/api-error.interceptor';
 import { authInterceptor } from './core/auth.interceptor';
+import { isDesktopShell } from './core/desktop-shell';
+import { provideBlenderGate } from './core/blender-gate';
+import { ServerModelLibrary } from './core/model-library.adapter';
 import { activeLang } from './core/language';
 import { PaginatorIntl } from './core/paginator-intl';
 import { provideAppDynamicForms } from './shared/dynamic/dynamic-forms.providers';
@@ -34,11 +39,16 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     { provide: LOCALE_ID, useFactory: activeLang },
     // Keeps the compiled app so it opens fast and says so when the server is down. Never data (see ngsw-config.json).
-    provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000' }),
+    // Not inside the desktop shell: it already ships the compiled app, and a second cache would keep an old build.
+    provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode() && !isDesktopShell(), registrationStrategy: 'registerWhenStable:30000' }),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor, apiErrorInterceptor])),
     provideServerConnection({ lang: activeLang() }),
     provideMotionParts({ lang: activeLang() }),
+    provideBlenderScene({ lang: activeLang() }),
+    provideBlenderGate(),
+    provideModelLibrary({ lang: activeLang() }),
+    { provide: MODEL_LIBRARY_PORT, useExisting: ServerModelLibrary },
     provideAppDynamicForms(),
     { provide: MatPaginatorIntl, useClass: PaginatorIntl },
     // Outlined fields with no reserved error gap: the default filled style rendered as a tinted block.

@@ -7,11 +7,13 @@ import { Router, provideRouter } from '@angular/router';
 import { provideAppDynamicForms } from '../../shared/dynamic/dynamic-forms.providers';
 import { of } from 'rxjs';
 
-import { ProjectSummary } from '../../core/api.models';
+import { EnvironmentReport, ProjectSummary } from '../../core/api.models';
 import { ALL_AVAILABLE, missing } from '../../core/availability.fake';
 import { AvailabilityStore } from '../../core/availability.store';
+import { EnvironmentStore } from '../../core/environment.store';
 import { ModeFilterStore } from '../../core/mode-filter.store';
 import { SimpleModeStore } from '../../core/simple-mode.store';
+import { ServerModelLibrary } from '../../core/model-library.adapter';
 import { ProjectsStore } from '../../core/projects.store';
 import { ProjectDetailsDialogComponent } from '../project-details-dialog/project-details-dialog.component';
 import { ProjectHistoryDialogComponent } from '../project-history-dialog/project-history-dialog.component';
@@ -32,8 +34,11 @@ describe('ProjectsListComponent', () => {
   const dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
   let navigate: ReturnType<typeof vi.spyOn>;
   let http: HttpTestingController;
+  /** What the engines of the 3D service answer: `null` is a server with none (nothing about 3D models is offered). */
+  let engines: unknown = null;
 
   beforeEach(async () => {
+    engines = null;
     sessionStorage.clear();
     dialogOpen.mockClear();
     await TestBed.configureTestingModule({
@@ -44,6 +49,7 @@ describe('ProjectsListComponent', () => {
         { provide: MatDialog, useValue: { open: dialogOpen } },
         provideRouter([]),
         provideAppDynamicForms(),
+        { provide: ServerModelLibrary, useValue: { engines: () => of(engines) } },
       ],
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
@@ -375,6 +381,132 @@ describe('ProjectsListComponent', () => {
       expect(yaml).toContain('mode: music');
       expect(yaml).toContain('id: pista_1');
       expect(yaml).not.toContain('scenes');
+    });
+  });
+
+  describe('a project of 3D models', () => {
+    const tick = () => new Promise((r) => setTimeout(r, 0));
+    /** The environment report as the app has it once loaded: with Blender or without it. */
+    const withBlender = (present: boolean) => TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
+    const OBJECTS = { id: 'objetos', name: 'objetos', mode: 'models3d', scene_count: 0 } as ProjectSummary;
+    const header = (fixture: { nativeElement: unknown }) => (fixture.nativeElement as HTMLElement).querySelector('[data-testid=page-actions]')!;
+
+    it('offers nothing about 3D models on a server with no 3D service', async () => {
+      const fixture = await create([]);
+      expect(header(fixture).querySelector('[data-testid=create-models-project]')).toBeNull();
+    });
+
+    it('has a link to the 3D library after the others, only where Blender is, and not in the simple version', async () => {
+      withBlender(true);
+      const fixture = await create([]);
+      const link = header(fixture).querySelector('[data-testid=open-models3d]');
+      expect(link?.textContent).toContain('Biblioteca 3D');
+      expect(link?.getAttribute('href')).toBe('/models/3d');
+      expect(link?.getAttribute('target')).toBe('_blank');
+      expect(link?.getAttribute('aria-label')).toBe('Biblioteca 3D, se abre en una pestaña nueva');
+      const order = [...header(fixture).querySelectorAll('[data-testid^=open-]')].map((b) => b.getAttribute('data-testid'));
+      expect(order).toEqual(['open-animation', 'open-video', 'open-music', 'open-flow', 'open-dataset', 'open-models3d']);
+      TestBed.inject(SimpleModeStore).set(true);
+      fixture.detectChanges();
+      expect(header(fixture).querySelector('[data-testid=open-models3d]')).toBeNull();
+    });
+
+    it('has no link to the 3D library on a machine without Blender', async () => {
+      withBlender(false);
+      const fixture = await create([]);
+      expect(header(fixture).querySelector('[data-testid=open-models3d]')).toBeNull();
+    });
+
+    it('offers to start a project of 3D models where the server has the service', async () => {
+      engines = { triposr: { available: true } };
+      withBlender(true);
+      const fixture = await create([]);
+      const button = header(fixture).querySelector('[data-testid=create-models-project]');
+      expect(button?.textContent).toContain('Modelos 3D');
+    });
+
+    it('offers nothing about 3D models on a machine without Blender, whatever the server has', async () => {
+      engines = { triposr: { available: true } };
+      withBlender(false);
+      const fixture = await create([]);
+      expect(header(fixture).querySelector('[data-testid=create-models-project]')).toBeNull();
+    });
+
+    it('keeps a project of this mode listed without Blender, with the note and no edit action', async () => {
+      withBlender(false);
+      const fixture = await create([OBJECTS]);
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.querySelector('[data-testid=needs-blender]')?.textContent).toContain('Necesita Blender');
+      expect(root.querySelector('[data-testid="edit-objetos"]')).toBeNull();
+    });
+
+    it('lists it with its edit action when Blender is there, and with no note', async () => {
+      withBlender(true);
+      const fixture = await create([OBJECTS]);
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.querySelector('[data-testid=needs-blender]')).toBeNull();
+    });
+
+    it('opens a project of this mode in its own page, not in the scene editor', async () => {
+      const fixture = await create([OBJECTS]);
+      const link = (fixture.componentInstance as unknown as { editLink(p: ProjectSummary): string[] }).editLink(OBJECTS);
+      expect(link).toEqual(['/projects', 'objetos', 'models3d']);
+    });
+
+    const start = async () => {
+      engines = { triposr: { available: true } };
+      withBlender(true);
+      const fixture = await create([]);
+      dialogResult = 'objetos';
+      const done = (fixture.componentInstance as unknown as { createModelsProject(): Promise<void> }).createModelsProject();
+      await tick();
+      http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'objetos' }, { status: 201, statusText: 'Created' });
+      await tick();
+      http.expectOne('/api/projects').flush([]);
+      await tick();
+      return { done };
+    };
+
+    const STARTER = {
+      project: 'objetos',
+      output: { mode: 'video', file: 'out/objetos.mp4', contact_sheet: false },
+      defaults: { model: 'models/m.safetensors', voice: 'voices/v.onnx', resolution: '1280x720', sampler: 'euler', steps: 30, fps: 30, subject_prompt: '', negative_prompt: '', lora_model_dir: '' },
+      scenes: [{ id: 'escena_1', prompt: 'x', negative_prompt: '', tts_text: 'hola', speed: 1, lora: '' }],
+    };
+
+    it('makes the project with one entry, keeping the image model, sampler and steps of the server’s starter, and opens its page', async () => {
+      const { done } = await start();
+      await tick();
+      http.expectOne({ method: 'GET', url: '/api/projects/objetos/config' }).flush({ yaml: '', parsed: STARTER, valid: true });
+      await tick();
+      const save = http.expectOne({ method: 'PUT', url: '/api/projects/objetos/config' });
+      expect(save.request.body.yaml).toContain('mode: models3d');
+      expect(save.request.body.yaml).toContain('id: object-1');
+      expect(save.request.body.yaml).toContain('sampler: euler');
+      expect(save.request.body.yaml).toContain('steps: 30');
+      expect(save.request.body.yaml).toContain('model: models/m.safetensors');
+      expect(save.request.body.yaml).not.toContain('scenes');
+      expect(save.request.body.yaml).not.toContain('voice');
+      expect(save.request.body.yaml).not.toContain('fps');
+      save.flush({ saved: true });
+      await tick();
+      http.expectOne('/api/projects').flush([OBJECTS]);
+      await done;
+      expect(navigate).toHaveBeenCalledWith(['/projects', 'objetos', 'models3d']);
+    });
+
+    it('removes the half-made project when the server refuses it', async () => {
+      const { done } = await start();
+      await tick();
+      http.expectOne({ method: 'GET', url: '/api/projects/objetos/config' }).flush({ yaml: '', parsed: STARTER, valid: true });
+      await tick();
+      http.expectOne({ method: 'PUT', url: '/api/projects/objetos/config' }).flush({ error: { code: 'validation_failed', message: 'config: models: nope' } }, { status: 422, statusText: 'Unprocessable' });
+      await tick();
+      http.expectOne({ method: 'DELETE', url: '/api/projects/objetos' }).flush(null, { status: 204, statusText: 'No Content' });
+      await tick();
+      http.expectOne('/api/projects').flush([]);
+      await expect(done).rejects.toBeTruthy();
+      expect(navigate).not.toHaveBeenCalled();
     });
   });
 

@@ -207,6 +207,18 @@ describe('EditorPageComponent', () => {
     expect(text()).toContain('empty tts_text');
   });
 
+  it('sends a project of 3D models to its own page: it declares models, not scenes', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const other = TestBed.createComponent(EditorPageComponent);
+    other.componentRef.setInput('id', 'objetos');
+    other.detectChanges();
+    http.expectOne('/api/projects/objetos/config').flush({ yaml: '', parsed: { ...structuredClone(CONFIG), project: 'objetos', output: { mode: 'models3d', file: '', contact_sheet: false }, scenes: [], models: [{ id: 'a', prompt: 'x' }] }, valid: true, warnings: [] });
+    http.match('/api/environment').forEach((r) => r.flush(ENV));
+    await other.whenStable();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(navigate).toHaveBeenCalledWith(['/projects', 'objetos', 'models3d'], { replaceUrl: true });
+  });
+
   describe('switching the project to music', () => {
     const el = () => fixture.nativeElement as HTMLElement;
     const settle = async () => {

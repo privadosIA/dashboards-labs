@@ -1261,7 +1261,7 @@ export interface paths {
         };
         /**
          * Project sources (audio for remix, repaint, extract, reference and background music; scene images)
-         * @description The files in `sources/`, sorted by name; `kind` is `audio`, `image`, `video` (a clip a scene can use as its own) or `blend` (a Blender scene for `blender.file`). A video carries `used_by`, the scenes that use it (empty if nobody uses it, in which case it can be deleted). They are played through the artifacts endpoint (`sources/<name>`).
+         * @description The files in `sources/`, sorted by name; `kind` is `audio`, `image`, `video` (a clip a scene can use as its own), `blend` (a Blender scene for `blender.file`), `scene` (a `.scene.json` description of a 3D scene), `font` (a `.ttf` or `.otf` for a 3D text) or `model` (a `.glb` that a 3D scene can place with an object of type `model`). A video carries `used_by`, the scenes that use it (empty if nobody uses it, in which case it can be deleted). A model carries `clips` (the animations the file has), `triangles` and `needs` (the names of the pictures of the sources the file refers to, such as the shared texture of a pack, which are uploaded as ordinary pictures); an upload of a `.glb` that is not a usable binary glTF is a `400`. They are played through the artifacts endpoint (`sources/<name>`).
          */
         get: {
             parameters: {
@@ -1285,9 +1285,15 @@ export interface paths {
                             sources?: {
                                 name?: string;
                                 /** @enum {string} */
-                                kind?: "audio" | "image" | "video" | "blend";
+                                kind?: "audio" | "image" | "video" | "blend" | "scene" | "font" | "model";
                                 /** @description Videos only: ids of the scenes that use it as a `clip`. */
                                 used_by?: string[];
+                                /** @description Models only: the names of the animations the file has (possibly none). */
+                                clips?: string[];
+                                /** @description Models only: the number of triangles of its meshes. */
+                                triangles?: number;
+                                /** @description Models only: the names of the pictures of the sources the file refers to (possibly none); a scene that places the model is refused while one is missing. */
+                                needs?: string[];
                                 size?: number;
                                 /** Format: date-time */
                                 modified?: string;
@@ -2284,12 +2290,12 @@ export interface paths {
                                  * @description Only on a generation API project (with `managed=include`).
                                  * @enum {string}
                                  */
-                                kind?: "generation" | "image_edit" | "video_edit";
+                                kind?: "generation" | "image_edit" | "video_edit" | "model_generation";
                             }[];
                             disk?: {
                                 free_bytes?: number;
                                 total_bytes?: number;
-                                /** @description Below this the space is low: 20 GB, or `ORCHESTRATOR_MIN_FREE_GB` (0 disables the warning). */
+                                /** @description Below this the space is low: 20 GB, or `VERITMO_MIN_FREE_GB` (0 disables the warning). */
                                 warn_below_bytes?: number;
                                 /** @description Less than `warn_below_bytes` is left. It is a warning: it never prevents launching a run. */
                                 low?: boolean;
@@ -2484,7 +2490,7 @@ export interface paths {
                                  * @description Only if the project belongs to the generation API (with `managed=include`).
                                  * @enum {string}
                                  */
-                                project_kind?: "generation" | "image_edit" | "video_edit";
+                                project_kind?: "generation" | "image_edit" | "video_edit" | "model_generation";
                             }[];
                         };
                     };
@@ -2690,8 +2696,8 @@ export interface paths {
         };
         get?: never;
         /**
-         * Uploads an audio as a source
-         * @description Raw body (the file), up to 256 MB. `.mp3`, `.wav` and images (`.png`, `.jpg`, `.jpeg`, `.webp`, for a scene's own image) are stored as they are; a video (`.mp4`, `.mov`, `.mkv`, `.webm`, `.avi`) is converted: its audio is extracted to `<name>.mp3` with ffmpeg and the video is not kept (the response gives the stored name). An existing name answers 409 and is not replaced; a video with no audio or that ffmpeg cannot read answers 422; without ffmpeg, 503.
+         * Uploads a source (audio, a picture, a video, a Blender file, a font or a 3D model)
+         * @description Raw body (the file), up to 256 MB. A `.glb` is a 3D model (binary glTF, up to 32 MiB): it is read before it is stored and a file that is not a usable model, that keeps its data in another file or whose pictures point outside the sources is a `400` that says why and nothing is stored; in the list it has `kind: model` with its `clips`, `triangles` and `needs` (the pictures of the sources it refers to). `.mp3`, `.wav` and images (`.png`, `.jpg`, `.jpeg`, `.webp`, for a scene's own image) are stored as they are; a video (`.mp4`, `.mov`, `.mkv`, `.webm`, `.avi`) is converted: its audio is extracted to `<name>.mp3` with ffmpeg and the video is not kept (the response gives the stored name). An existing name answers 409 and is not replaced; a video with no audio or that ffmpeg cannot read answers 422; without ffmpeg, 503.
          */
         put: {
             parameters: {
@@ -2764,7 +2770,7 @@ export interface paths {
         post?: never;
         /**
          * Deletes a source
-         * @description Answers 409 while a track of the project uses it or a run is active.
+         * @description Answers 409 while a track of the project uses it, while a scene's 3D description places it (a model) or places a model that needs it (a picture), naming the scene, or while a run is active.
          */
         delete: {
             parameters: {
@@ -2883,16 +2889,22 @@ export interface paths {
                         project?: string;
                         silence_seconds?: number;
                         /**
-                         * @description video (default) writes scenes; motion writes motion graphics scenes (description + Duration:, Overlay: and other markers); music writes tracks (style + Lyrics: + markers).
+                         * @description video (default) writes scenes; motion writes motion graphics scenes (description + Duration:, Overlay: and other markers); music writes tracks (style + Lyrics: + markers); models3d writes the models of a project of that mode (the lines before the first marker are the prompt of one object; `Engine:`, `Detail:`, `Variants:`, `Seed:`, `Image:` (a file of the sources) and `Adult:` set one field each; an id is made plain and unique with a warning; `output_mode` does not apply). A censored server refuses a dataset with `Adult: true` with `content_not_allowed` (`422`).
                          * @enum {string}
                          */
-                        mode?: "video" | "motion" | "music";
+                        mode?: "video" | "motion" | "music" | "models3d";
                         /**
                          * @description images makes the project an images project (`output.mode: images`); only for a scenes dataset (not `mode` music or motion).
                          * @default video
                          * @enum {string}
                          */
                         output_mode?: "video" | "images";
+                        /** @description The files of the 3D scenes the entries name with a `Blender: <name>.scene.json` line (modes `video` and `motion`), by name (a plain `.scene.json` name; at most 20 files and 1 MB in all). Each is checked as a hand-written description is; a bad name is `400`. What is wrong with them comes back in `warnings`. */
+                        descriptions?: {
+                            [key: string]: {
+                                [key: string]: unknown;
+                            };
+                        };
                     };
                 };
             };
@@ -2905,6 +2917,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             yaml?: string;
+                            /** @description A scene that names a 3D description that is not in `descriptions` (the project cannot be created without it), a description no scene names and one that does not pass the checks. */
+                            warnings?: string[];
                             report?: {
                                 [key: string]: unknown;
                             };
@@ -2939,7 +2953,7 @@ export interface paths {
         put?: never;
         /**
          * Creates the project with the previewed YAML
-         * @description Never overwrites an existing id.
+         * @description Never overwrites an existing id. The `descriptions` are written to the project's `sources/` before it is validated; the call is `422` and creates nothing when one does not pass the checks of a hand-written description, when no scene names it, or when a scene names a file that is neither given nor already there.
          */
         post: {
             parameters: {
@@ -2953,6 +2967,12 @@ export interface paths {
                     "application/json": {
                         id: string;
                         yaml: string;
+                        /** @description The files of the 3D scenes the YAML names with `blender.build`, by name (at most 20 files and 1 MB in all). */
+                        descriptions?: {
+                            [key: string]: {
+                                [key: string]: unknown;
+                            };
+                        };
                         /**
                          * @description replaces the `output.mode` of the YAML; `images` makes an images project.
                          * @default video
@@ -3553,6 +3573,148 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/blender/descriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write or change the description of a 3D scene with no project
+         * @description The writer of `POST /api/projects/{id}/blender/descriptions` for a client that has no project yet (the one-call generation): the model of the `motion_graphics` task writes the description of a scene `seconds` long for a frame of `aspect_ratio` (16:9 when it is not given), or, with `description`, changes that one as the idea says. It is told no design and no tempo: the keys are in seconds, colours are `#rrggbb` and a text cannot name a font. It is asked again with the problems up to 3 times and stores nothing. Same guards as the writer of a project: `409` while a run is active and the model loads on this machine, `503` without a model, `422` with the last problems when no attempt passes.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        idea: string;
+                        seconds: number;
+                        /**
+                         * @default 16:9
+                         * @enum {string}
+                         */
+                        aspect_ratio?: "16:9" | "9:16" | "1:1" | "4:3" | "3:4";
+                        /** @description The description to change; without it a new one is written. */
+                        description?: {
+                            [key: string]: unknown;
+                        };
+                        provider?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description The description. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            description?: {
+                                [key: string]: unknown;
+                            };
+                            /** @description The same with every key in seconds. */
+                            resolved?: {
+                                [key: string]: unknown;
+                            };
+                            provider?: string;
+                            model?: string;
+                            attempts?: number;
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["Unprocessable"];
+                /** @description There is no model for the task. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blender/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * One frame of a 3D scene description given in the body
+         * @description The preview of `POST /api/projects/{id}/blender/descriptions/{name}/preview` for a description that is not stored: it is checked as a hand-written one against a scene `seconds` long (no design, no tempo, no font files), drawn at second `t` on the CPU (`width` up to 960 pixels, 480 by default, in the shape of `aspect_ratio`) and answered as a PNG. Nothing is stored. `400` when `t` is outside the scene, `width` is too big or the description does not pass the checks (the message names each fault by its place), and `503` when Blender is not installed, with how to install it.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        description: {
+                            [key: string]: unknown;
+                        };
+                        t: number;
+                        seconds: number;
+                        /**
+                         * @default 16:9
+                         * @enum {string}
+                         */
+                        aspect_ratio?: "16:9" | "9:16" | "1:1" | "4:3" | "3:4";
+                        width?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description The frame. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/png": string;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                /** @description Blender is not installed. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{id}/videoclip/plan": {
         parameters: {
             query?: never;
@@ -3701,7 +3863,7 @@ export interface paths {
                          */
                         overlap?: number;
                         /** @enum {string} */
-                        mode?: "video" | "images" | "music";
+                        mode?: "video" | "images" | "music" | "models3d";
                     };
                 };
             };
@@ -3745,7 +3907,7 @@ export interface paths {
                 query?: {
                     project?: string;
                     limit?: number;
-                    /** @description Only the runs of projects of those types: `video`, `images`, `music` or `animation` (the pieces of the music-motion mode, projects `api-mm-`), comma-separated; anything else is 400. Without it the list has every run, as before. */
+                    /** @description Only the runs of projects of those types: `video`, `images`, `music`, `models3d` or `animation` (the pieces of the music-motion mode, projects `api-mm-`), comma-separated; anything else is 400. Without it the list has every run, as before. */
                     mode?: string;
                 };
                 header?: never;
@@ -4152,7 +4314,7 @@ export interface paths {
             parameters: {
                 query?: {
                     project?: string;
-                    /** @description Only the runs of projects of those types: `video`, `images`, `music` or `animation` (the runs of the music-motion pieces, projects `api-mm-`), comma-separated. Without it the runs of animations are NOT counted (the same figures as `video,images,music`); ask for `animation`, alone or in the list, to bring them in. */
+                    /** @description Only the runs of projects of those types: `video`, `images`, `music`, `models3d` or `animation` (the runs of the music-motion pieces, projects `api-mm-`), comma-separated. Without it the runs of animations are NOT counted (the same figures as `video,images,music,models3d`); ask for `animation`, alone or in the list, to bring them in. */
                     mode?: string;
                     /** @description Only the runs of projects made on `desktop` or `mobile` (those the Create page makes, named `mobile-…`), comma-separated. */
                     origin?: string;
@@ -4293,7 +4455,7 @@ export interface paths {
         };
         /**
          * Binaries, models, voices, LoRAs and GPUs of the machine
-         * @description `content_mode` is `censored` (projects for over-18s do not exist for the API) or `strict` (only those marked as suitable); `edition` is `private` or `public` and is fixed when the program is built (see `docs/DEVELOPMENT.md`): there is no way to change it while running. The binaries include `ace-lm`, `ace-synth` and `ace-server` (music engine; `ace-server` is the server engine, `engine: server`; optional: their absence does not affect video or images) and the report lists in `music` the files of `models/music` and in `music_adapters` the installed LoRA adapters (one per file or folder). `ram` gives the machine's total and available memory (`total_bytes`, `available_bytes`). `ollama` gives the Ollama address in use (`host`), where it comes from (`source`: `setting`, `env` or `default`) and whether it is not this machine (`remote`), without contacting it; with a remote Ollama the Ollama VRAM-retention warning is not added to the GPUs. `disk` gives the free and total space of the projects' disk and whether it is low (`low`, below 20 GB or `ORCHESTRATOR_MIN_FREE_GB`).
+         * @description `content_mode` is `censored` (projects for over-18s do not exist for the API) or `strict` (only those marked as suitable); `edition` is `private` or `public` and is fixed when the program is built (see `docs/DEVELOPMENT.md`): there is no way to change it while running. The binaries include `ace-lm`, `ace-synth` and `ace-server` (music engine; `ace-server` is the server engine, `engine: server`; optional: their absence does not affect video or images) and the report lists in `music` the files of `models/music` and in `music_adapters` the installed LoRA adapters (one per file or folder). `ram` gives the machine's total and available memory (`total_bytes`, `available_bytes`). `ollama` gives the Ollama address in use (`host`), where it comes from (`source`: `setting`, `env` or `default`) and whether it is not this machine (`remote`), without contacting it; with a remote Ollama the Ollama VRAM-retention warning is not added to the GPUs. `disk` gives the free and total space of the projects' disk and whether it is low (`low`, below 20 GB or `VERITMO_MIN_FREE_GB`).
          */
         get: {
             parameters: {
@@ -4376,7 +4538,7 @@ export interface paths {
                             negative?: string;
                             tags?: string;
                         }[];
-                        /** @description A model installed in Ollama (see `GET /api/assist/models`); empty or absent = the server's (`ORCHESTRATOR_ASSIST_MODEL`, otherwise `qwen3:8b`). Nothing is downloaded. */
+                        /** @description A model installed in Ollama (see `GET /api/assist/models`); empty or absent = the server's (`VERITMO_ASSIST_MODEL`, otherwise `qwen3:8b`). Nothing is downloaded. */
                         model?: string;
                         /** @description A provider that replaces the `assistant` routing for this call only (see `GET /api/routing`); if remote it requires consent (`consent_required`). */
                         provider?: string;
@@ -4685,7 +4847,7 @@ export interface paths {
         put?: never;
         /**
          * Interpret a free-form request (what is asked for, title and the texts of that type) in a single call
-         * @description Turns a written or dictated sentence, in any language, into what the generator needs: the type (`video`, `image` or `music`), a short title, the language and the texts of that type, written with the same assistant tasks (CPU, memory check, model refusal, remote provider with consent). An image carries `image_prompt`; a video, `image_prompt` and `motion_prompt` (without `image_prompt` if an image or a video is attached, which are the starting point); a song, `caption`, `lyrics` (empty if instrumental) and, with the `heartmula` or `diffrhythm2` generator, `tags`. The type comes from `kind` (`kind_source: user`), from the model (`model`), from the attachment (`attachment`: an audio is music, an image or a video is video) or is `video` (`default`). If the type is known but a text cannot be written, the response carries the type and the title, that text empty and a warning in `warnings`; if the model refuses the request and there is no text at all, 422 `assist_refused`. An empty text or one of more than 2000 characters, an unknown `kind` or a language that is not an ISO code answer 400; while a run is queued or active, 409; without Ollama, without the model or without memory, 503.
+         * @description Turns a written or dictated sentence, in any language, into what the generator needs: the type (`video`, `image`, `music` or `model3d`), a short title, the language and the texts of that type, written with the same assistant tasks (CPU, memory check, model refusal, remote provider with consent). An image carries `image_prompt`; a video, `image_prompt` and `motion_prompt` (without `image_prompt` if an image or a video is attached, which are the starting point); a song, `caption`, `lyrics` (empty if instrumental) and, with the `heartmula` or `diffrhythm2` generator, `tags`; a 3D model (`kind: model3d`), `model_prompt`, an English prompt of one object alone (the picture's background wording is added when the model is made). The type comes from `kind` (`kind_source: user`), from the model (`model`), from the attachment (`attachment`: an audio is music, an image or a video is video) or is `video` (`default`); the model never decides `model3d`: only the caller asks for it. If the type is known but a text cannot be written, the response carries the type and the title, that text empty and a warning in `warnings`; if the model refuses the request and there is no text at all, 422 `assist_refused`. An empty text or one of more than 2000 characters, an unknown `kind` or a language that is not an ISO code answer 400; while a run is queued or active, 409; without Ollama, without the model or without memory, 503.
          */
         post: {
             parameters: {
@@ -4702,10 +4864,10 @@ export interface paths {
                         /** @description ISO 639-1 code of the request, if known. */
                         language?: string;
                         /**
-                         * @description Sets the type; the model does not decide it.
+                         * @description Sets the type; the model does not decide it (and never decides `model3d`).
                          * @enum {string}
                          */
-                        kind?: "video" | "image" | "music";
+                        kind?: "video" | "image" | "music" | "model3d";
                         /** @description Music generator (ace-step, heartmula, diffrhythm2) for the tags and the sections. */
                         generator?: string;
                         /** @description With `music`: the song's duration in seconds; sets the structure of the lyrics (up to 75 s short, more than 150 s long, otherwise normal). */
@@ -4731,13 +4893,15 @@ export interface paths {
                     content: {
                         "application/json": {
                             /** @enum {string} */
-                            kind?: "video" | "image" | "music";
+                            kind?: "video" | "image" | "music" | "model3d";
                             /** @enum {string} */
                             kind_source?: "user" | "model" | "attachment" | "default";
                             title?: string;
                             language?: string;
                             image_prompt?: string;
                             motion_prompt?: string;
+                            /** @description Only for `kind: model3d`: an English prompt of one object alone. */
+                            model_prompt?: string;
                             caption?: string;
                             lyrics?: string;
                             tags?: string;
@@ -4971,7 +5135,7 @@ export interface paths {
         put?: never;
         /**
          * Write a dataset of several entries from one sentence
-         * @description Turns one sentence, in any language, into a dataset in the tuple shape `POST /api/import/preview` reads: a storyboard (`mode: video`: each entry is a scene with its `Dialogue:`, `Motion:` and picture line), animated graphics (`motion`: an entry names a part of the catalog with `Part:` and `Param` lines, checked against it, or describes a graphic with `Graphic:`) or songs (`music`: each entry is a track with its style, `Lyrics:` unless instrumental and `Tags:` in the `generator`'s vocabulary; at most 6 tracks, each one more model call). At most 12 entries. The lines the request fixes are written by the server, not left to the model: `negative` becomes the `Negative:` line and `images.variants` the `Variants:` line of every scene, and `look` ends the picture line of every scene. Every entry is checked with the import's own mapping before it is returned; one that fails (a repeated id is renamed, a scene with no picture line, a part that is not in the catalog) is left out with an entry in `warnings`, so what comes back previews. It has the guards of `POST /api/assist/plan`: routing and consent for a remote provider, the wait for a run in progress (`409`), the memory rule, CPU only for a local model and the model's refusal (`422` `assist_refused`); nothing usable written is `422` `validation_failed`. A server that has it lists `dataset` in the `features` of `GET /api/music-motion/catalog`.
+         * @description Turns one sentence, in any language, into a dataset in the tuple shape `POST /api/import/preview` reads: a storyboard (`mode: video`: each entry is a scene with its `Dialogue:`, `Motion:` and picture line), animated graphics (`motion`: an entry names a part of the catalog with `Part:` and `Param` lines, checked against it, or describes a graphic with `Graphic:`) or songs (`music`: each entry is a track with its style, `Lyrics:` unless instrumental and `Tags:` in the `generator`'s vocabulary; at most 6 tracks, each one more model call) or 3D models (`models3d`: each entry is the prompt of **one object alone**, with `Engine:`, `Detail:` or `Variants:` only when the request asks for them; an entry that describes a scene or people is written again once as one object and left out with a warning if it still does; `picture` and `project` are `400` for this mode; the `examples` are the presets of the kind `model3d` the caller sends). At most 12 entries. With `picture: "blender"` (mode `video` or `motion`) every scene or graphic is a 3D scene (in mode `motion` each entry is a line that says what is built and a `Duration:`, with the `Blender:` line the server writes; no `Part:`, `Graphic:` or `Param`): the server writes the description of each with the writer and the checks of `POST /api/projects/{id}/blender/descriptions` (the model of the `motion_graphics` task, up to 3 attempts), gives the entry a `Blender: <id>.scene.json` line instead of `Motion:`, `Negative:` and `Variants:`, and answers the descriptions in `descriptions`; at most 6 scenes per call, the rest left out with a warning, and a scene whose description does not pass is left out with a warning (`422` only when none is usable). The lines the request fixes are written by the server, not left to the model: `negative` becomes the `Negative:` line and `images.variants` the `Variants:` line of every scene, and `look` ends the picture line of every scene. Every entry is checked with the import's own mapping before it is returned; one that fails (a repeated id is renamed, a scene with no picture line, a part that is not in the catalog) is left out with an entry in `warnings`, so what comes back previews. It has the guards of `POST /api/assist/plan`: routing and consent for a remote provider, the wait for a run in progress (`409`), the memory rule, CPU only for a local model and the model's refusal (`422` `assist_refused`); nothing usable written is `422` `validation_failed`. A server that has it lists `dataset` in the `features` of `GET /api/music-motion/catalog`, and `blender` when it writes 3D scenes.
          */
         post: {
             parameters: {
@@ -4984,7 +5148,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** @enum {string} */
-                        mode: "video" | "motion" | "music";
+                        mode: "video" | "motion" | "music" | "models3d";
                         /** @description The sentence (up to 2000 characters). */
                         text: string;
                         /** @description ISO 639-1 code of the sentence, and of the narration. */
@@ -5001,6 +5165,13 @@ export interface paths {
                         };
                         /** @description The music generator whose tag vocabulary the tracks use (music mode). */
                         generator?: string;
+                        /**
+                         * @description `blender` makes every scene of a storyboard (`video`) or every graphic (`motion`) a 3D scene (`400` with `music`). The server must list `blender` in the `features` of the catalog.
+                         * @enum {string}
+                         */
+                        picture?: "blender";
+                        /** @description With `picture: blender`, an existing project (`404` otherwise) whose design, tempo and frame the descriptions are written for. Without it: no design, keys in seconds and a 16:9 frame. */
+                        project?: string;
                         /** @description Prompts of the house style (each field up to 2000 characters), put in the model's context as examples to follow and never to copy. A server that takes them lists `examples` in the `features` of `GET /api/music-motion/catalog`. */
                         examples?: {
                             prompt: string;
@@ -5026,11 +5197,18 @@ export interface paths {
                             entries: string[][];
                             mode: string;
                             warnings: string[];
+                            /** @description With `picture: blender`: the description of every 3D scene by file name (`<id>.scene.json`), to send as `descriptions` of `POST /api/import/preview` and `/confirm` with the entries. */
+                            descriptions?: {
+                                [key: string]: {
+                                    [key: string]: unknown;
+                                };
+                            };
                         };
                     };
                 };
                 400: components["responses"]["BadRequest"];
                 401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 /** @description The model refused (`assist_refused`) or nothing usable was written (`validation_failed`). */
                 422: {
@@ -5063,12 +5241,12 @@ export interface paths {
         };
         /**
          * Search the prompt presets
-         * @description Prompts of a house style that people pick from and that the assistant receives as examples, kept in the database. `q` matches title, prompt and tags (case-insensitive) and, unless `sort` is given, sorts the best match first (the title weighs more than a tag, a tag more than the prompt); `tags` lists tags that must all be present; the rest is by date, newest first. A censored server does not list the presets marked `nsfw`. The list is always a page: 50 presets unless `limit` says otherwise (at most 200), `offset` skips presets, and when a page parameter is sent `X-Total-Count` and `Link` say how many there are in all and where the other pages are. Presets written by the command `orchestrator prompts fetch` (public datasets whose licence it reads from their card) are listed without a restart.
+         * @description Prompts of a house style that people pick from and that the assistant receives as examples, kept in the database. `q` matches title, prompt and tags (case-insensitive) and, unless `sort` is given, sorts the best match first (the title weighs more than a tag, a tag more than the prompt); `tags` lists tags that must all be present; the rest is by date, newest first. A censored server does not list the presets marked `nsfw`. The list is always a page: 50 presets unless `limit` says otherwise (at most 200), `offset` skips presets, and when a page parameter is sent `X-Total-Count` and `Link` say how many there are in all and where the other pages are. Presets written by the command `veritmo prompts fetch` (public datasets whose licence it reads from their card) are listed without a restart.
          */
         get: {
             parameters: {
                 query?: {
-                    kind?: "image" | "video" | "motion" | "music" | "animation";
+                    kind?: "image" | "video" | "motion" | "music" | "animation" | "model3d";
                     q?: string;
                     /** @description Comma-separated. */
                     tags?: string;
@@ -5119,7 +5297,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** @enum {string} */
-                        kind: "image" | "video" | "motion" | "music" | "animation";
+                        kind: "image" | "video" | "motion" | "music" | "animation" | "model3d";
                         title?: string;
                         prompt: string;
                         negative?: string;
@@ -5199,7 +5377,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** @enum {string} */
-                        kind?: "image" | "video" | "motion" | "music" | "animation";
+                        kind?: "image" | "video" | "motion" | "music" | "animation" | "model3d";
                         title?: string;
                         prompt: string;
                         negative?: string;
@@ -5466,7 +5644,7 @@ export interface paths {
         };
         /**
          * Saves or removes the Ollama address
-         * @description It is saved in `~/.config/mediaorquestator/settings.json` (permissions 600) and applies from the next request, without restarting. Priority: saved setting, `OLLAMA_HOST`, default value. Only `http` or `https` addresses are accepted (or without a scheme: `http`), with a host, no user or password, no path, query or fragment, and up to 200 characters. An empty value removes the setting.
+         * @description It is saved in `~/.config/veritmo/settings.json` (permissions 600) and applies from the next request, without restarting. Priority: saved setting, `OLLAMA_HOST`, default value. Only `http` or `https` addresses are accepted (or without a scheme: `http`), with a host, no user or password, no path, query or fragment, and up to 200 characters. An empty value removes the setting.
          */
         put: {
             parameters: {
@@ -5490,6 +5668,11 @@ export interface paths {
                          * @enum {string}
                          */
                         diffrhythm2_backend?: "dotnet" | "docker" | "";
+                        /**
+                         * @description How the 3D generator runs on this machine, for both engines: `dotnet` (`triposr-service` and `stablefast3d-service`, published by `scripts/get-services.sh --only triposr,stable-fast-3d`, the default) or `docker` (the container of `docker/model3d`, the fallback); empty = remove the setting. `422` for another value, and for `docker` when Docker does not answer (`reason: no_docker`); `409` when the server uses a service elsewhere (`MODEL3D_HOST`) and while a run is making 3D models (a generation or a `models3d` project: wait for it or cancel it). What runs on the old backend is stopped; it takes effect without a restart.
+                         * @enum {string}
+                         */
+                        model3d_backend?: "dotnet" | "docker" | "";
                         music_motion?: {
                             /** @description Grade every part draft of music motion with the vision model of the `check` task. */
                             review_drafts?: boolean;
@@ -5587,7 +5770,7 @@ export interface paths {
         };
         /**
          * Where the run history is stored
-         * @description `saved` is what is stored and `active` what this server started with: the engine is read only once, at startup, so changing it requires a restart (`restart_required`). Nothing saved means the `MO_DB_*` variables of the environment if they describe a MySQL or Postgres, else the SQLite file (`source` says which); what is saved always wins. It never returns the password (`password_set`). `server_name` is what this server is called in a shared history and `servers` the names that already have runs in it.
+         * @description `saved` is what is stored and `active` what this server started with: the engine is read only once, at startup, so changing it requires a restart (`restart_required`). Nothing saved means the `VERITMO_DB_*` variables of the environment if they describe a MySQL or Postgres, else the SQLite file (`source` says which); what is saved always wins. It never returns the password (`password_set`). `server_name` is what this server is called in a shared history and `servers` the names that already have runs in it.
          */
         get: {
             parameters: {
@@ -5874,7 +6057,7 @@ export interface paths {
         };
         /**
          * Downloads the data as a .zip
-         * @description One `<table>.jsonl` per table (a JSON object per line, by column name) and a `manifest.json` with the migrations applied, the engine and the date. It holds no secret and no media. It can be restored into an empty database of any engine with `orchestrator data restore`.
+         * @description One `<table>.jsonl` per table (a JSON object per line, by column name) and a `manifest.json` with the migrations applied, the engine and the date. It holds no secret and no media. It can be restored into an empty database of any engine with `veritmo data restore`.
          */
         get: {
             parameters: {
@@ -5973,7 +6156,7 @@ export interface paths {
         };
         /**
          * This server's state in the Prometheus text format
-         * @description Everything is computed on request and speaks only of this server (in a shared history, each one counts its own runs). It never names a project in a label, so one hidden by the content mode is not given away. Families: `mediaorquestator_info`, `_uptime_seconds`, `_database_up`, `_runs{state,client,kind}`, `_run_duration_seconds{client,kind}` (histogram of the last 1000 successful runs; `kind` is `video`, `edit` or `project` and `client` the dashboard that requested the run, `embedded` for normal projects; only the 20 clients with the most runs are named and the rest are summed under `other`), `_memory_{used,total,available}_bytes`, `_disk_free_bytes{folder}`, `_gpu_{memory_used,memory_total}_bytes`, `_gpu_utilization_ratio`, `_gpu_temperature_celsius`, `_gpu_power_watts` (per card, absent if there is no `nvidia-smi`), `_music_service_running{service}` and `_music_service_starting{service}`. It requires the same token as the rest of `/api`: in Prometheus, `metrics_path: /api/metrics` and `authorization: { credentials_file: ... }`.
+         * @description Everything is computed on request and speaks only of this server (in a shared history, each one counts its own runs). It never names a project in a label, so one hidden by the content mode is not given away. Families: `veritmo_info`, `_uptime_seconds`, `_database_up`, `_runs{state,client,kind}`, `_run_duration_seconds{client,kind}` (histogram of the last 1000 successful runs; `kind` is `video`, `edit` or `project` and `client` the dashboard that requested the run, `embedded` for normal projects; only the 20 clients with the most runs are named and the rest are summed under `other`), `_memory_{used,total,available}_bytes`, `_disk_free_bytes{folder}`, `_gpu_{memory_used,memory_total}_bytes`, `_gpu_utilization_ratio`, `_gpu_temperature_celsius`, `_gpu_power_watts` (per card, absent if there is no `nvidia-smi`), `_music_service_running{service}` and `_music_service_starting{service}`. It requires the same token as the rest of `/api`: in Prometheus, `metrics_path: /api/metrics` and `authorization: { credentials_file: ... }`.
          */
         get: {
             parameters: {
@@ -7157,6 +7340,8 @@ export interface paths {
          * @description Plans the generation (engine, models, resolution, duration, audio), creates it as a project of its own (hidden: it does not appear in `GET /api/projects`, the storage or the per-project statistics), launches its run on the usual queue and answers `202` with its identifier and the run's. With a start image the request is `multipart/form-data` (`request` part with the JSON and `image` part); without it, `application/json`. The duration is the scene's: the engine's clip is short (`clip_seconds`) and repeats until it fills it; clips are not chained. `422` with the reason if the option does not accept the request (duration, aspect ratio, quality, audio, unknown option, neither prompt nor image) or if the server does not keep adult content; `503` if the option cannot be run now. In both cases nothing is created.
          *
          *     Besides the start image it accepts an **end image** (`end_image`) with the options whose `inputs` says `end_image: true`, and **references** (images, videos and audios) with those that advertise `reference_images` (`h3-ref`, `h3-ref-draft`), with the maximums and durations of `inputs`, which depend on the card. References cannot be combined with `image` or `end_image`, and carry at least one image, which anchors the scene and is the first reference; in the prompt they are named `<Picture 1>`, `<Picture 2>`… in the order of the parts. An end image needs the start one. With an end image the clip does not go back and forth: it plays once and its last frame is held until the duration is filled. `reuse_inputs_of` uses the files of another generation without sending them again. Each rejection is a `422` with the part and what is accepted.
+         *
+         *     With the option `blender` the video is a **3D scene** that Blender draws: the request carries `blender: {description}` (the JSON of a scene, in the body or in the `request` part), no prompt is needed and no picture or reference is accepted. The description is checked as a hand-written one against the request's `duration` (no design, no tempo: keys in seconds, `#rrggbb` colours, no font files), `422` naming each fault by its place in the JSON and nothing created; it is stored in the project's `sources/` as `<id>.scene.json` and reported in `inputs` with `kind: scene`. The `aspect_ratio` shapes the frame and `quality` the size and the samples. `reuse_inputs_of` of a generation made this way copies its scene (`422` for another option); a `blender.description` sent with it wins.
          */
         post: {
             parameters: {
@@ -7473,7 +7658,7 @@ export interface paths {
         post?: never;
         /**
          * Deletes a block
-         * @description Deletes the record of the block and its folder (its files, its thumbnail) and answers `204`; `404` for a block that does not exist. A part that was made from the block (`orchestrator parts import-hyperframes`) is a part of its own and is never deleted with it.
+         * @description Deletes the record of the block and its folder (its files, its thumbnail) and answers `204`; `404` for a block that does not exist. A part that was made from the block (`veritmo parts import-hyperframes`) is a part of its own and is never deleted with it.
          */
         delete: {
             parameters: {
@@ -9463,7 +9648,7 @@ export interface paths {
         };
         /**
          * A frame of the saved piece, drawn like the render
-         * @description A PNG of the saved piece at second `t`, drawn with Chrome as the render draws it, to compare with a preview in the browser; not for scrubbing. `422` for a `t` that is not a number or is outside the piece (no browser is started); `503` when there is no Chrome.
+         * @description A PNG of the saved piece at second `t`, drawn with Chrome as the render draws it, to compare with a preview in the browser; not for scrubbing. `422` for a `t` that is not a number or is outside the piece (no browser is started); `503` when there is no Chrome. A 3D piece (`blender`) is drawn by Blender on the CPU at the piece's own second (small, few samples, about a second) and `503` then means Blender is not installed.
          */
         get: {
             parameters: {
@@ -9502,6 +9687,354 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/music-motion/pieces/{id}/script/{piece}/blender": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A model writes or changes the 3D scene of a piece of the script
+         * @description The writer of `POST /api/projects/{id}/blender/descriptions` for a piece of the script: the model of the `motion_graphics` task writes the description of a scene as long as the piece `{piece}`, for the piece's frame, told the song's tempo (and how many seconds after the start the song's first beat falls) and the design's colours and fonts, and puts it in the script as the piece's `blender` (the piece stops being made from a part). With `revise` the stored description is shown to the model (`404` when the piece is not 3D); with `description` the one given is changed, so an editor that has not saved can work with what it holds; with `save: false` the script is left as it was and the description only answered. It is asked again with the problems up to 3 times (`422` with the last problems and the script untouched). `409` while the piece is being drawn or a proposal runs, `404` for an unknown piece or script piece, `503` without a model.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    /** @description The id of the script piece. */
+                    piece: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        idea: string;
+                        revise?: boolean;
+                        /** @description The description to change, instead of the stored one. */
+                        description?: {
+                            [key: string]: unknown;
+                        };
+                        provider?: string;
+                        /** @default true */
+                        save?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description The piece. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            piece: components["schemas"]["MusicScriptPiece"];
+                            /** @description The description with every key in seconds and every colour `#rrggbb`. */
+                            resolved?: {
+                                [key: string]: unknown;
+                            };
+                            provider: string;
+                            model: string;
+                            attempts: number;
+                            saved: boolean;
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["Unprocessable"];
+                /** @description There is no model for the task. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/music-motion/pieces/{id}/script/{piece}/blender/frame": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * One frame of a description of a 3D piece, given in the body
+         * @description The preview of `POST /api/blender/preview` with the settings of the piece: the description in the body is checked like a hand-written one for a scene as long as the piece `{piece}`, with the song's tempo and design, and drawn at second `t` of the piece on the CPU. Nothing is stored. `400` naming each fault by its place in the JSON, `t` outside the piece or a width over 960; `503` when Blender is not installed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    piece: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        description: {
+                            [key: string]: unknown;
+                        };
+                        /** @description The second of the piece (0 to its length). */
+                        t: number;
+                        width?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description The frame. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/png": string;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description Blender is not installed. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/music-motion/pieces/{id}/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The 3D models of a piece
+         * @description The files of the piece that its 3D pieces can place with objects of type `model`: the `.glb` models (`kind: model`, with their `clips`, `triangles` and `needs`, the names of the pictures they refer to) and the pictures their textures name (`kind: picture`), sorted by name. A server that has this lists `blender-models` in the `features` of `GET /api/music-motion/catalog`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The files. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            models: {
+                                name: string;
+                                /** @enum {string} */
+                                kind: "model" | "picture";
+                                size: number;
+                                /** @description Models only: the animations the file has (possibly none). */
+                                clips?: string[];
+                                /** @description Models only. */
+                                triangles?: number;
+                                /** @description Models only: the names of the pictures of the piece the file refers to; a script that places the model is refused while one is missing. */
+                                needs?: string[];
+                            }[];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        /**
+         * Adds a model of the library to a piece
+         * @description Copies the model `from` (`<pack>/<model>`) into the piece's models as `POST /api/projects/{id}/sources/model` does for a project (the pictures renamed `<pack>--<picture>`, what is already there reused, `409` for another file of the same name or while a render of the piece is queued or running; `400` for a `from` that is not `<pack>/<model>`, `404` for a pack that is not installed or a model it does not have).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        from: string;
+                        name?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description It was already there. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelCopy"];
+                    };
+                };
+                /** @description Copied. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelCopy"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description Another file has that name */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/music-motion/pieces/{id}/models/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Uploads a 3D model, or a picture for its textures, to a piece
+         * @description A raw body, up to 32 MiB, stored in the sources of the piece's project. `name` is a plain file name ending in `.glb` (binary glTF, read before it is stored: a file that is not a usable model is a `400` that says why and nothing is stored) or in `.png`, `.jpg`, `.jpeg` or `.webp` (what a model's textures name, found by their name). It never replaces a file (`409`) and a piece with a render queued or running refuses it with `409`; `.gltf`, `.fbx` and `.obj` are a `400` as any name that is not accepted.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            responses: {
+                /** @description Stored. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            name: string;
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description The name exists or a render is queued or running. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The file is larger than 32 MiB. */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        /**
+         * Removes a model or a picture of a piece
+         * @description `404` when it is not there; `409` while a render is queued or running and when a 3D piece of the saved script places the model (or places a model that needs the picture), naming the piece.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Removed. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description A 3D piece of the script uses it */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -11441,6 +11974,1112 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/models3d/packs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The packs of 3D models the server knows and the ones a person imported
+         * @description The list that ships with the server (only CC0 packs, each with the hash of the version that was checked) and the packs imported by the person, with their `state` (`available`, `installing`, `installed`, `failed` with its `error`), their size and, when installed, how many models they have. A pack that is being installed has its `progress`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The packs. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            packs: components["schemas"]["ModelPack"][];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/packs/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Imports a pack from a zip the person has
+         * @description The body is the zip (`application/zip`, up to 200 MB). It is unpacked with the safety rules of an install (no links, no paths that leave the folder, at most 5,000 entries and 1 GB unpacked) and keeps only what a library uses. `licence` says what the pack allows and is required: the server keeps it and shows it with each model, and does not judge it. A pack with no `.glb` is a `422`; an `id` already in use is a `409`.
+         */
+        post: {
+            parameters: {
+                query: {
+                    id: string;
+                    licence: string;
+                    name?: string;
+                    author?: string;
+                    source_url?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/zip": string;
+                };
+            };
+            responses: {
+                /** @description Installed. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelPack"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                409: components["responses"]["Conflict"];
+                /** @description The zip is larger than 200 MB. */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["Unprocessable"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/packs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One pack */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The pack. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelPack"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Removes an installed or imported pack
+         * @description Its files and its models leave the library; a pack of the list goes back to `available`. A project or piece that copied one of its models keeps it. `409` while it is being installed (cancel it first).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Removed. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/packs/{id}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Installs a pack of the list
+         * @description Queues the download from the host of the pack's page only, checks the SHA-256 of the zip and the words of its licence text against the version that was checked, unpacks it safely and indexes its models. Answers `202` with the pack in state `installing`; ask `GET /api/models3d/packs/{id}` for its `progress`. A pack that changed, a page that no longer gives its download or a failure ends the pack in state `failed` with the reason and no file left behind. `409` for a pack that is installed or being installed; `404` for one that is not in the list.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Queued. */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelPack"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/packs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels the install of a pack
+         * @description The pack goes back to `available` and nothing is left behind. `409` when it is not being installed.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Cancelled. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelPack"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                409: components["responses"]["Conflict"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The models of the installed packs
+         * @description Each with its `clips`, `triangles` and `needs` (read from the file), the `tags` of its pack and of the words of its name, the `licence` and `author` of its pack and whether the licence asks for `attribution`. `q` is searched in the name and the tags without regard to case; `has_clips=true` leaves out the ones with no animation; `limit` and `offset` take a page (`X-Total-Count` and `Link` say where the others are). Add one to a project with `POST /api/projects/{id}/sources/model` or to a piece with `POST /api/music-motion/pieces/{id}/models`.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    pack?: string;
+                    q?: string;
+                    tag?: string;
+                    has_clips?: boolean;
+                    /** @description Where the model comes from: `catalog` (a pack of the catalog), `user` (an imported one) or `generated` (made by an engine here). */
+                    source?: "catalog" | "user" | "generated";
+                    /** @description Only the generated models made by this engine. */
+                    engine?: "triposr" | "sf3d";
+                    /** @description Only the generated models that this project (or generation) made. */
+                    project?: string;
+                    /** @description A page of at most this many items (1 to 500). Without it, and without `offset`, `sort` and `q`, the list answers all its items as it always did. `offset` alone uses a limit of 100. The answer carries `X-Total-Count` and `Link`. */
+                    limit?: components["parameters"]["ListLimit"];
+                    /** @description How many items to skip (0 or more). Beyond the end the answer is an empty list with the total. */
+                    offset?: components["parameters"]["ListOffset"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The models. A model marked `adult` is left out by a server that does not show content for adults (its detail and thumbnail are `404` there). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            models: components["schemas"]["LibraryModel"][];
+                            total: number;
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/models/{pack}/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One model of the library */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    pack: string;
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The model. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LibraryModel"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/models/{pack}/{name}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A small picture of a model
+         * @description The pack's own preview picture when it has one; otherwise one 256-pixel frame drawn by Blender on the CPU and kept, so it is drawn once. `503` with how to install Blender when the pack has no preview and Blender is missing. For an `<img>`, which cannot send headers, `?ticket=` is accepted (see `POST /api/auth/ticket`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Ticket from `POST /api/auth/ticket`, for clients that cannot send headers. */
+                    ticket?: components["parameters"]["Ticket"];
+                };
+                header?: never;
+                path: {
+                    pack: string;
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The picture. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/png": string;
+                        "image/jpeg": string;
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description The model has no preview picture and Blender is not installed. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/models/{pack}/{name}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The binary glTF of a model
+         * @description The `.glb` of a model of the library as it is stored, for a viewer or a download (the library refuses a `.glb` that is not a usable binary glTF; the pictures a model `needs` are not part of the answer). The answer carries an `ETag` and `Cache-Control: private`; `If-None-Match` is answered with `304` and a `Range` with `206`. `404` for a model that is not in the library (or is for adults on a server that does not show them). For a viewer in a plain tag or an `<a download>`, which cannot send headers, `?ticket=` is accepted (see `POST /api/auth/ticket`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Ticket from `POST /api/auth/ticket`, for clients that cannot send headers. */
+                    ticket?: components["parameters"]["Ticket"];
+                };
+                header?: never;
+                path: {
+                    pack: string;
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The model. */
+                200: {
+                    headers: {
+                        ETag?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "model/gltf-binary": string;
+                    };
+                };
+                /** @description The part of the file the `Range` asked for. */
+                206: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The model has not changed since the `ETag` the caller has. */
+                304: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The engines that make a 3D model from a picture and whether each can be used now
+         * @description `triposr` (TripoSR, MIT licence; the default) and `sf3d` (Stable Fast 3D, Stability AI Community License), run by an optional service: its own .NET service (the default) or the one container of `docker/model3d` (`model3d_backend`), or one that `MODEL3D_HOST` names. Each is `available`, or has a `reason` and a `detail`: `no_service`, `no_docker`, `no_image`, `no_gpu_runtime`, `no_weights`, `no_gpu`, `not_running` (everything is there but the service or container is stopped), `unreachable`, `not_built` (the image was built without that engine), and for `sf3d` also `key_missing` (no Hugging Face key is saved), `key_rejected` (Hugging Face does not know the saved key) and `licence_not_accepted` (Hugging Face refuses the key for the repository: the detail names it and says its licence has to be accepted there with the account of the key). It starts nothing. `503` when this server has no 3D service. The server never accepts a licence, creates an account or asks for a key on anyone's behalf: it only says what is missing.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Each engine. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            engines: {
+                                [key: string]: components["schemas"]["EngineAvailability"];
+                            };
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description This server has no 3D service set up. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/engines/{engine}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start the service of a 3D engine (its .NET service or the container)
+         * @description Starts the engine's service (the .NET service on a free port of loopback, or the container when `model3d_backend` is `docker`, where the two engines are the one container) on the card with most free memory and waits in the background for it to be ready (watch `GET /api/models3d/engines`). `200` with its state (also when it already runs); `409` with the `reason` of the engine when it cannot be used yet (anything but `not_running`), and when the service is an external one (`MODEL3D_HOST`), which is managed where it runs; `404` for an unknown engine.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    engine: "triposr" | "sf3d";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The container. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            container?: components["schemas"]["ContainerState"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                /** @description This server has no 3D service set up. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/engines/{engine}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop the service of a 3D engine (its .NET service or the container)
+         * @description Stops the engine's service, or removes the container on the `docker` backend (not an error when there is none). `409` for an external service and while a run is making 3D models; `404` for an unknown engine.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    engine: "triposr" | "sf3d";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The container. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            container?: components["schemas"]["ContainerState"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                /** @description This server has no 3D service set up. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/engines/{engine}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan or start the install of what an engine lacks, for one backend
+         * @description What an engine needs depends on how it runs (`model3d_backend`): the `dotnet` backend (the default) is the **service** (`scripts/get-services.sh --only <engine>`) and the **weights**, downloaded by this server with no Docker (`sf3d` adds `sf3d/160_tets.npz`, which only its service reads, and uses the saved Hugging Face key for its two gated files); the `docker` backend (the optional fallback) is the **image** (`docker build` of `docker/model3d`, TripoSR only) and the **weights**, fetched by `fetch.py` inside the image (`sf3d`'s use the saved Hugging Face key, handed to the container by its environment and never in an argument). `backend` names the one to install for, so the container can be installed before it is chosen (default: the one in use); `parts` picks among `service`, `image` and `weights` (empty: everything missing, in that order). **Without `confirm`** it answers the plan (`200`): the backend, the parts it would run, the weight files that are missing, their approximate size, the licence they come under, whether they are `gated` and the room on the disk. It changes nothing. **With `confirm: true`** it starts a job (`202`); follow it at `GET /api/models3d/installs/{id}`. `409` when nothing is missing, while another install runs, and for an external service; `422` with the `reason` when it cannot be done that way (`no_service` without .NET, `no_docker`, `no_gpu_runtime`, `not_built`, an image of `sf3d` that is not built, a part the backend does not have, and `key_missing`, `key_rejected` or `licence_not_accepted` for `sf3d`) or `no_disk`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    engine: "triposr" | "sf3d";
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description The way to install for (default: the one the engine runs on now).
+                         * @enum {string}
+                         */
+                        backend?: "dotnet" | "docker";
+                        /** @description Only these parts (default: all that are missing). */
+                        parts?: ("service" | "image" | "weights")[];
+                        /** @description The person read the plan, including the licence: start the job. */
+                        confirm?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description The plan (no `confirm`). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            plan: components["schemas"]["Model3DInstallPlan"];
+                        };
+                    };
+                };
+                /** @description The job. */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            install: components["schemas"]["Model3DInstall"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                /** @description The engine cannot be installed now (`reason`) or the disk has no room (`no_disk`). */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description This server has no 3D service set up. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/installs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One download of weights */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The job, with the last lines of what it printed. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Model3DInstall"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/installs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a download of weights
+         * @description `409` when it is not running.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The job, `cancelled`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Model3DInstall"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/generations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lists the generations of 3D models, most recent first
+         * @description A generation is a hidden project (`api-m3d-…`, kind `model_generation`) in the mode `models3d` with one entry. It does not appear in `GET /api/projects` without `managed=include`. The list can be paged (`limit`, `offset`, `sort` = `created_at`, newest first by default) and kept to some clients (`client`); with no parameter it answers every generation. `400` for a value that is not valid.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Only the calls made by these clients (comma separated: names, `embedded` or `unknown`). */
+                    client?: string;
+                    /** @description A page of at most this many items (1 to 500). Without it, and without `offset`, `sort` and `q`, the list answers all its items as it always did. `offset` alone uses a limit of 100. The answer carries `X-Total-Count` and `Link`. */
+                    limit?: components["parameters"]["ListLimit"];
+                    /** @description How many items to skip (0 or more). Beyond the end the answer is an empty list with the total. */
+                    offset?: components["parameters"]["ListOffset"];
+                    /** @description `created_at` (newest first by default); a `-` before it reverses the order. */
+                    sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The generations. With a page parameter the headers `X-Total-Count` and `Link` say how many there are and where the other pages are. */
+                200: {
+                    headers: {
+                        "X-Total-Count": components["headers"]["XTotalCount"];
+                        Link: components["headers"]["Link"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelGeneration"][];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        /**
+         * Makes a 3D model in a single call
+         * @description Takes a `prompt` (the server draws the picture with the best image model installed here and makes the model from it) or a picture (`multipart/form-data` with the `image` part: `.png`, `.jpg`, `.jpeg` or `.webp`, up to 20 MB, and the other fields as text), with the optional `engine` (`triposr`, the default, or `sf3d`), `detail` (`low`, `normal`, `high`), `name` (a plain lower-case name; one is made from the prompt when it is absent), `client` and `adult`. It makes the project of the generation, launches its run on the usual queue and answers `202` at once; the model is added to the pack `generated` of the library when the run ends. `400` naming the field for a prompt and a picture together, neither, an empty or longer than 1000 characters prompt, an unknown engine or detail, a name or a client that is not valid; `413` for a picture over 20 MB; `422` with `content_not_allowed` for `adult: true` on a server that does not keep content for adults; `503` (`unavailable`, with the engine's `reason`) when the engine cannot be used now (`not_running`, `no_weights`, `key_missing`, ...) or, for a prompt, when no image model is installed (`no_image_model`). In no case is anything created.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ModelGenerationRequest"];
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description The picture the model is made from; then no `prompt`.
+                         */
+                        image?: string;
+                        prompt?: string;
+                        /** @enum {string} */
+                        engine?: "triposr" | "sf3d";
+                        /** @enum {string} */
+                        detail?: "low" | "normal" | "high";
+                        name?: string;
+                        client?: string;
+                        /** @enum {string} */
+                        adult?: "true" | "false";
+                    };
+                };
+            };
+            responses: {
+                /** @description Generation accepted. */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelGeneration"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                /** @description The picture is larger than 20 MB. */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["Unprocessable"];
+                /** @description The engine, or the image model of a prompt, cannot be used now (`unavailable`, with the reason). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/generations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * State, step and model of a generation
+         * @description `state` is `queued`, `running`, `done`, `failed` or `cancelled`; while it runs `step` says `picture` (the picture of the prompt) or `model`; when `done`, `model` is the `<pack>/<name>` in the library (see `GET /api/models3d/models/{pack}/{name}`). If it failed, `error` says why.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The generation. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelGeneration"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Deletes a generation with its project, not the model it made
+         * @description Cancels the run if it is going. The model stays in the library: remove it there.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted. */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models3d/generations/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stops a generation that is queued or running
+         * @description `409` when it is already `done`, `failed` or `cancelled`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The generation, `cancelled`. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelGeneration"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}/sources/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adds a model of the library to a project's sources
+         * @description Copies the model `from` (`<pack>/<model>`) as `<model>.glb` (or `name`) and the pictures it needs as `<pack>--<picture>`, with the addresses inside the copy rewritten to match, so that two packs that call their texture the same never collide. What is already there with the same content is reused (`200` when nothing was written); another file of the same name is a `409` and nothing is written. `from` that is not `<pack>/<model>` is a `400`; a pack that is not installed, or a model it does not have, is a `404`. From then on it is an ordinary source (`kind: model`), independent of the library.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Project identifier. */
+                    id: components["parameters"]["ProjectId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description `<pack>/<model>` of the library. */
+                        from: string;
+                        /** @description A plain file name ending in `.glb`; the model's own by default. */
+                        name?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description It was already there. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelCopy"];
+                    };
+                };
+                /** @description Copied. */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ModelCopy"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+                /** @description Another file has that name */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/downloads": {
         parameters: {
             query?: never;
@@ -11732,7 +13371,7 @@ export interface components {
             /** @description Given by the server. */
             id?: string;
             /** @enum {string} */
-            kind: "image" | "video" | "motion" | "music" | "animation";
+            kind: "image" | "video" | "motion" | "music" | "animation" | "model3d";
             title?: string;
             prompt: string;
             negative?: string;
@@ -11798,7 +13437,7 @@ export interface components {
             active: components["schemas"]["DatabaseView"];
             restart_required: boolean;
             /**
-             * @description Where `saved` comes from: the settings file, the `MO_DB_*` variables of the environment (the default while nothing is saved) or the SQLite file.
+             * @description Where `saved` comes from: the settings file, the `VERITMO_DB_*` variables of the environment (the default while nothing is saved) or the SQLite file.
              * @enum {string}
              */
             source: "setting" | "env" | "default";
@@ -11980,6 +13619,19 @@ export interface components {
             ollama: components["schemas"]["OllamaSetting"];
             heartmula: components["schemas"]["MusicServiceSetting"];
             diffrhythm2: components["schemas"]["MusicServiceSetting"];
+            /** @description How the 3D generator (both engines) runs on this machine. */
+            model3d: {
+                /**
+                 * @description `dotnet` (the `triposr` and `stable-fast-3d` services of `bin/services`) or `docker` (the container of `docker/model3d`).
+                 * @enum {string}
+                 */
+                backend: "dotnet" | "docker";
+                /**
+                 * @description `setting` when `PUT /api/settings {model3d_backend}` saved it, `default` otherwise (the .NET service).
+                 * @enum {string}
+                 */
+                backend_source: "setting" | "default";
+            };
             /** @description Remote model provider. */
             remote: {
                 /** @description Cap on calls to a remote provider. */
@@ -12082,8 +13734,14 @@ export interface components {
             audio?: boolean;
             /** @description The label the client puts on the generation (like `adult` in a scenes.yaml). With `true` a server that hides adult content rejects it. */
             adult?: boolean;
-            /** @description The identifier of another generation of the API whose input files (start image, end image, references) are used without sending them again. `422` if input parts are also sent, if it does not exist or if it kept none. */
+            /** @description The identifier of another generation of the API whose input files (start image, end image, references, or the 3D scene of the option `blender`) are used without sending them again. `422` if input parts are also sent, if it does not exist or if it kept none; a `blender.description` sent with it takes the place of the reused scene. */
             reuse_inputs_of?: string;
+            /** @description The 3D scene of the option `blender`: `description` is the JSON of a scene, checked like a hand-written one for the request's `duration` (`422` naming each fault by its place). Only that option takes it. A generation reports `blender: {}`: the description is one of its `inputs` (`kind: scene`). */
+            blender?: {
+                description?: {
+                    [key: string]: unknown;
+                };
+            };
             /** @description The name of the dashboard making the request, its own (for example `my-dashboard`): 1 to 32 lowercase letters, digits or hyphens. Without it, `unknown` applies; if it does not match the pattern, `422` and nothing is created. It is saved in the project's `scenes.yaml` and in the run, and is used to group in the statistics and the metrics. */
             client?: string;
         };
@@ -12117,7 +13775,7 @@ export interface components {
         };
         GenerationInput: {
             /** @enum {string} */
-            kind: "start_image" | "end_image" | "reference_image" | "reference_video" | "reference_audio";
+            kind: "start_image" | "end_image" | "reference_image" | "reference_video" | "reference_audio" | "scene";
             /** @description Its name in the generation project's `sources/`. */
             name: string;
             /** @description Read-only address it is downloaded from (a project artifact, with the same access as the video). */
@@ -12151,7 +13809,7 @@ export interface components {
             };
             /** @description `dark`, `light`. */
             modes: string[];
-            /** @description What this server's scripts support beyond the base format: `animate` (keyframes on a parameter, see `MusicScriptPiece.animate`) and `layers` (lanes of parts over the pieces, see `MusicScript.layers`). A dashboard checks it before it saves a script that needs it. `svg` is not about scripts: it says `POST /api/assist/svg` exists. `review` says part drafts and pieces can be graded by the vision model (`review` on `POST /part-drafts` and `/scenes`, `POST /pieces/{id}/review`, the setting `music_motion.review_drafts`). `theme` says a design may carry `theme` and `transition_seconds`, the pack of fonts is embedded and the built-in `hud-chrome` and `grain` parts exist. `scene` says scenes written for the verses of a piece exist: `scene` on `POST /part-drafts`, `verse: own`/`hit: own` in a part's manifest, `POST /pieces/{id}/scenes` and `include=scene`/`piece=` on the catalog. */
+            /** @description What this server's scripts support beyond the base format: `animate` (keyframes on a parameter, see `MusicScriptPiece.animate`) and `layers` (lanes of parts over the pieces, see `MusicScript.layers`). A dashboard checks it before it saves a script that needs it. `svg` is not about scripts: it says `POST /api/assist/svg` exists. `review` says part drafts and pieces can be graded by the vision model (`review` on `POST /part-drafts` and `/scenes`, `POST /pieces/{id}/review`, the setting `music_motion.review_drafts`). `theme` says a design may carry `theme` and `transition_seconds`, the pack of fonts is embedded and the built-in `hud-chrome` and `grain` parts exist. `blender-motion` says a piece of a script can be a 3D scene (`MusicScriptPiece.blender`) with `POST /pieces/{id}/script/{piece}/blender`; `blender-models` says such a piece can place the 3D models (`.glb`) of its piece (`PUT|GET|DELETE /pieces/{id}/models`); `blender` is a different entry: it says the datasets can have 3D scenes. `scene` says scenes written for the verses of a piece exist: `scene` on `POST /part-drafts`, `verse: own`/`hit: own` in a part's manifest, `POST /pieces/{id}/scenes` and `include=scene`/`piece=` on the catalog. */
             features: string[];
         };
         /** @description The last batch of scenes written for the script of a piece (`POST /pieces/{id}/scenes`). */
@@ -12211,6 +13869,8 @@ export interface components {
             /** Format: date-time */
             finished_at?: string;
             model?: string;
+            /** @description The script pieces the review left out because Blender draws them (a 3D scene is not a page to grade). `422` when every piece is one. */
+            skipped?: string[];
             scenes: {
                 script_piece: string;
                 score: number;
@@ -12247,10 +13907,12 @@ export interface components {
                 id: string;
                 start: number;
                 end: number;
-                /** @description The page of the piece, wrapped for a sandboxed frame. */
+                /** @description The page of the piece, wrapped for a sandboxed frame. Empty for a 3D piece. */
                 html: string;
-                /** @description The song map cut to the piece, as the renderer gives it to the page. */
+                /** @description The song map cut to the piece, as the renderer gives it to the page. `{}` for a 3D piece. */
                 song: Record<string, never>;
+                /** @description The piece is a 3D scene drawn by Blender: it has no page. Ask for its frames with `GET /pieces/{id}/frame?t=` or `POST /pieces/{id}/script/{piece}/blender/frame`. */
+                blender?: boolean;
             }[];
             replacements: {
                 piece: string;
@@ -12259,6 +13921,178 @@ export interface components {
             }[];
             /** @description What the proposal did not use of what it was given: a reference with no rhythm sheet (analysed before shots existed: run its breakdown) or one that is no longer in the library. */
             notes?: string[];
+        };
+        ModelPack: {
+            id: string;
+            name: string;
+            author: string;
+            /** @description `CC0` for every pack of the list; for a pack the person imported, the text they gave. */
+            licence: string;
+            /** @description Whether the licence asks for the author to be named. */
+            attribution: boolean;
+            /**
+             * @description `generated` is the pack of the models that an engine made (`GET /api/models3d/engines`): created with the first one, removable like any pack, and an import over its id is `409`.
+             * @enum {string}
+             */
+            source: "catalog" | "user" | "generated";
+            page?: string;
+            version?: string;
+            size_bytes: number;
+            description?: string;
+            tags: string[];
+            /** @enum {string} */
+            state: "available" | "installing" | "installed" | "failed";
+            /** @description Why a pack is `failed`. */
+            error?: string;
+            /** @description Only while the pack is `installing`: `done` is the bytes of the zip downloaded and `total` its size in bytes (the size the host announces, or the one in the list); it is not a count of files. */
+            progress?: {
+                done?: number;
+                total?: number;
+            };
+            /** @description How many models it has when installed. */
+            models: number;
+            /** @description Files of the pack that were left out of the catalog and why. */
+            skipped?: {
+                file?: string;
+                reason?: string;
+            }[];
+        };
+        LibraryModel: {
+            /** @description `<pack>/<name>`, what `from` takes. */
+            id: string;
+            pack: string;
+            name: string;
+            tags: string[];
+            /** @description The animations the file has (possibly none). */
+            clips: string[];
+            triangles: number;
+            /** @description The pictures the file refers to; the copy of a model brings them. */
+            needs: string[];
+            /** @description For a generated model, its engine's. */
+            licence: string;
+            author: string;
+            attribution: boolean;
+            /** @description Only for a generated model: the text it was made from (or the name of the picture). */
+            prompt?: string;
+            /** @description Only for a generated model: `triposr` or `sf3d`. */
+            engine?: string;
+            /** @description Only for a generated model: the engine's version (`triposr@<commit>`, or `triposr-net@<version>` / `sf3d-net@<version>` from the .NET services). */
+            engine_version?: string;
+            /**
+             * Format: date-time
+             * @description Only for a generated model.
+             */
+            generated_at?: string;
+            /**
+             * @description Where it comes from.
+             * @enum {string}
+             */
+            source?: "catalog" | "user" | "generated";
+            /** @description Only for a generated model made by a project or a generation: which one. */
+            project?: string;
+            /** @description Only with `project`: the name the entry gave the model (`-<n>` after the first variant). */
+            entry?: string;
+            /** @description Only for a generated model that was asked for as adult content. */
+            adult?: boolean;
+        };
+        /** @description A prompt or a picture (the picture goes in a multipart request, as the `image` part), never both. */
+        ModelGenerationRequest: {
+            prompt?: string;
+            /**
+             * @default triposr
+             * @enum {string}
+             */
+            engine: "triposr" | "sf3d";
+            /**
+             * @default normal
+             * @enum {string}
+             */
+            detail: "low" | "normal" | "high";
+            /** @description A plain lower-case name (letters, digits, `.`, `_`, `-`); made from the prompt when it is absent. */
+            name?: string;
+            /** @description The dashboard that asks (see `client` in the generation API). */
+            client?: string;
+            /** @description Marks the model as for people of 18 or older; `422` on a server that does not keep that content. */
+            adult?: boolean;
+        };
+        ModelGeneration: {
+            /** @description `api-m3d-…` */
+            id: string;
+            /** @description The dashboard that requested it (`unknown` if it named none). */
+            client: string;
+            /** @enum {string} */
+            state: "queued" | "running" | "done" | "failed" | "cancelled";
+            /**
+             * @description Only while it runs.
+             * @enum {string}
+             */
+            step?: "picture" | "model";
+            /** @description Absent when the call brought a picture. */
+            prompt?: string;
+            /** @enum {string} */
+            engine: "triposr" | "sf3d";
+            /** @enum {string} */
+            detail: "low" | "normal" | "high";
+            name: string;
+            /** @description `<pack>/<name>` of the model in the library, once it is `done`. */
+            model?: string;
+            error?: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            finished_at?: string;
+            /** @description The run that makes it (`GET /api/runs/{id}`, `mode=models3d`). */
+            run: string;
+        };
+        Model3DInstallPlan: {
+            engine: string;
+            /**
+             * @description The way the engine runs that the install is for.
+             * @enum {string}
+             */
+            backend: "dotnet" | "docker";
+            /** @description What the job would run, in order. */
+            parts: ("service" | "image" | "weights")[];
+            /** @description Files of the weights folder that are not there. */
+            missing: string[];
+            /**
+             * Format: int64
+             * @description About how much they take (0 when it was never measured).
+             */
+            bytes: number;
+            /** @description The engine's licence, which the weights come under. */
+            licence: string;
+            /** @description The weights come from a repository whose licence the person's own Hugging Face account has to accept. */
+            gated: boolean;
+            /** @description The weights folder. */
+            path: string;
+            /** Format: int64 */
+            free_bytes: number;
+        };
+        Model3DInstall: {
+            id: string;
+            engine: string;
+            /** @enum {string} */
+            backend: "dotnet" | "docker";
+            parts: ("service" | "image" | "weights")[];
+            /** @description The part that runs now. */
+            part?: string;
+            /** @enum {string} */
+            state: "running" | "done" | "failed" | "cancelled";
+            /** @description The part that failed and the last lines of what it printed. */
+            error?: string;
+            /** @description What the download printed (up to 200 lines), one per step. */
+            log: string[];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            finished_at?: string;
+        };
+        ModelCopy: {
+            /** @description The `.glb` in the sources. */
+            name: string;
+            /** @description The pictures it needs, which are there too (`<pack>--<name>`). */
+            pictures: string[];
         };
         MusicLibraryCharacter: {
             name: string;
@@ -12489,7 +14323,7 @@ export interface components {
             learning_id?: string;
             /** Format: date-time */
             approved_at: string;
-            /** @description `hyperframes` when the part is a block of HyperFrames converted by `orchestrator parts import-hyperframes` (the part is named `hf-<block>`); absent otherwise. */
+            /** @description `hyperframes` when the part is a block of HyperFrames converted by `veritmo parts import-hyperframes` (the part is named `hf-<block>`); absent otherwise. */
             source?: string;
             /** @description The name of the block it was made from. */
             block?: string;
@@ -13186,12 +15020,21 @@ export interface components {
             end: number;
             animate?: components["schemas"]["MusicAnimate"];
         };
+        /** @description A piece is made from a part of the catalog (`part`) or is a 3D scene drawn by Blender (`blender`), never both. A 3D piece has no `part`, `params`, `animate`, `with`, `design`, `mode`, `lines`, `hit` or `stage` (`422` naming the piece and the field). */
         MusicScriptPiece: {
             id: string;
             start: number;
             end: number;
             section?: string;
-            part: string;
+            /** @description The part of the catalog the piece is made from; empty for a 3D piece. */
+            part?: string;
+            /** @description Makes the piece a 3D scene: Blender draws it as a scene of the piece's project, for the length of the piece, following the song's tempo (a key may be in beats: `beat`, counted from the start of the piece) and the song's design (`bg`, `fg`, `accent` colours and the `display`/`body` fonts when the design has one in the server's pack); no font files. The description is checked like a hand-written one when the script is saved and when it renders (`422` naming the piece and each fault by its place in the JSON). It is returned by `GET` of the piece and of the script. */
+            blender?: {
+                /** @description The JSON of a scene (contract version 1 of the Blender engine). */
+                description: {
+                    [key: string]: unknown;
+                };
+            };
             params?: {
                 [key: string]: unknown;
             };
@@ -13386,7 +15229,7 @@ export interface components {
             name: string;
             description: string;
             /** @enum {string} */
-            engine: "wan" | "animatediff" | "minimax-h3" | "ltx-2.3";
+            engine: "wan" | "animatediff" | "minimax-h3" | "ltx-2.3" | "blender";
             available: boolean;
             /** @description What is missing or why it does not fit, when it is not available. */
             reason?: string;
@@ -13408,6 +15251,8 @@ export interface components {
             reference_images?: components["schemas"]["InputLimit"];
             reference_videos?: components["schemas"]["InputLimit"];
             reference_audios?: components["schemas"]["InputLimit"];
+            /** @description Accepts the description of a 3D scene (`blender.description`) and nothing else: the option `blender`. */
+            scene?: boolean;
         };
         InputLimit: {
             /** @description Minimum (reference images require at least one). */
@@ -13658,7 +15503,7 @@ export interface components {
              * @description Empty when the project cannot be read (`invalid`); in that case `name` is also empty and `scene_count` is 0.
              * @enum {string}
              */
-            mode: "video" | "images" | "music" | "";
+            mode: "video" | "images" | "music" | "models3d" | "";
             /** @description Scenes of the project; 0 for a music one and for one that cannot be read. */
             scene_count: number;
             /** @description Number of tracks of a music project. */
@@ -13673,7 +15518,7 @@ export interface components {
              * @description Only on a generation API project (with `managed=include`).
              * @enum {string}
              */
-            kind?: "generation" | "image_edit" | "video_edit";
+            kind?: "generation" | "image_edit" | "video_edit" | "model_generation";
         };
         /** @description A run from the history. */
         Run: {
@@ -13778,13 +15623,13 @@ export interface components {
             low_vram?: boolean;
             warnings?: string[];
         };
-        /** @description Only if the server has a models folder (`--models-dir`, `MODELS_DIR` or `~/.config/mediaorquestator/models-dir`). The repository's `models/` is a link to it, so models are installed and read there. If the disk is not mounted `available` is false and nothing is installed (nothing is written to the local disk); it is not the same as having no models. */
+        /** @description Only if the server has a models folder (`--models-dir`, `MODELS_DIR` or `~/.config/veritmo/models-dir`). The repository's `models/` is a link to it, so models are installed and read there. If the disk is not mounted `available` is false and nothing is installed (nothing is written to the local disk); it is not the same as having no models. */
         ModelsDirectory: {
             /** @description Absolute path of the models folder, as the server sees it. */
             dir: string;
             /** @description The folder exists and is writable. */
             available: boolean;
-            /** @description The repository's `models/` leads to this folder. If false and `available` is true, `orchestrator models migrate` needs to be run. */
+            /** @description The repository's `models/` leads to this folder. If false and `available` is true, `veritmo models migrate` needs to be run. */
             linked: boolean;
             /** @description Why it is not available, or what is missing. */
             reason?: string;
@@ -13960,7 +15805,7 @@ export interface components {
              * @description Absent if the project no longer exists.
              * @enum {string}
              */
-            mode?: "video" | "images" | "music";
+            mode?: "video" | "images" | "music" | "models3d";
             result_available: boolean;
         };
         StatsResult: {

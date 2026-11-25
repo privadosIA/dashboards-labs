@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
 
+import { blenderReadyGuard } from './core/blender-ready.guard';
 import { SimpleModeStore, allowedInSimple, allowedOnScreen } from './core/simple-mode.store';
 
 /** The simple version has no other screens: their addresses lead to Create. */
@@ -27,6 +28,11 @@ const allRoutes: Routes = [
   {
     path: 'projects/:id/editor',
     loadComponent: () => import('./editor/editor-page/editor-page.component').then((m) => m.EditorPageComponent),
+  },
+  {
+    path: 'projects/:id/models3d',
+    canActivate: [blenderReadyGuard],
+    loadComponent: () => import('./models3d/models3d-page/models3d-page.component').then((m) => m.Models3dPageComponent),
   },
   {
     path: 'projects/:id/music',
@@ -61,6 +67,11 @@ const allRoutes: Routes = [
     loadComponent: () => import('./models/models-page/models-page.component').then((m) => m.ModelsPageComponent),
   },
   {
+    path: 'models/3d',
+    canActivate: [blenderReadyGuard],
+    loadComponent: () => import('./models/models-3d-page/models-3d-page.component').then((m) => m.Models3dPageComponent),
+  },
+  {
     path: 'environment',
     loadComponent: () =>
       import('./environment/environment-page/environment-page.component').then((m) => m.EnvironmentPageComponent),
@@ -78,4 +89,4 @@ const allRoutes: Routes = [
   { path: '**', redirectTo: 'projects' },
 ];
 
-export const routes: Routes = allRoutes.map((r) => (r.path === '' || r.path === '**' || r.path === 'create' || r.path === 'gallery' || r.redirectTo !== undefined ? r : { ...r, canActivate: [simpleGuard] }));
+export const routes: Routes = allRoutes.map((r) => (r.path === '' || r.path === '**' || r.path === 'create' || r.path === 'gallery' || r.redirectTo !== undefined ? r : { ...r, canActivate: [simpleGuard, ...(r.canActivate ?? [])] }));

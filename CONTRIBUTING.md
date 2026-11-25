@@ -25,7 +25,7 @@ This repository is maintained by one person in their free time. Issues and pull 
 
 ## What is not here
 
-This repository contains no server code. The server is [`mediaOrquestator`](https://github.com/privadosIA/mediaOrquestator); a change to the API belongs there.
+This repository contains no server code. The server is [`veritmo`](https://github.com/privadosIA/veritmo); a change to the API belongs there.
 
 ## Security
 

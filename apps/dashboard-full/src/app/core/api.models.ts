@@ -5,7 +5,7 @@
 export interface ProjectSummary {
   id: string;
   name: string;
-  mode: 'video' | 'images' | 'music' | '';
+  mode: 'video' | 'images' | 'music' | 'models3d' | '';
   scene_count: number;
   /** Songs of a music project. */
   track_count?: number;
@@ -304,10 +304,14 @@ export type MusicTask = 'cover' | 'cover-nofsq' | 'repaint' | 'extract';
 /** An audio file in a project's sources folder (GET /api/projects/{id}/sources). */
 export interface SourceInfo {
   name: string;
-  /** audio (mp3, wav), image, video (a clip a scene can use) or blend (a Blender scene); older servers do not say. */
-  kind?: 'audio' | 'image' | 'video' | 'blend';
+  /** audio (mp3, wav), image, video (a clip a scene can use), blend (a Blender scene), scene (a 3D description), font or model (a `.glb`); older servers do not say. */
+  kind?: 'audio' | 'image' | 'video' | 'blend' | 'scene' | 'font' | 'model';
   /** Only for videos: the scenes that use it as their clip (empty: nobody, so it can be deleted). */
   used_by?: string[];
+  /** Only for models: the animations the file has (possibly none), its triangles and the pictures of the sources it names. */
+  clips?: string[];
+  triangles?: number;
+  needs?: string[];
   size: number;
   modified: string;
 }
@@ -385,6 +389,21 @@ export interface MotionDefaults {
   song?: string;
 }
 
+/** An entry of `models:` of a project of the mode `models3d`: the text or the picture of one object and how its model is made. */
+export interface ModelEntry {
+  id: string;
+  /** The text of one object alone, up to 1000 characters; not with `image`. */
+  prompt?: string;
+  /** A picture of `sources/` the model is made from; not with `prompt`. */
+  image?: string;
+  engine?: string;
+  detail?: string;
+  /** One to four models with different seeds (one for an entry with its own picture). */
+  variants?: number;
+  seed?: number;
+  adult?: boolean;
+}
+
 export interface ProjectConfig {
   project: string;
   /** true: for adults (18+); false: reviewed and fine for everyone; absent: not reviewed. */
@@ -412,7 +431,11 @@ export interface ProjectConfig {
     transition?: string;
     /** The tempo, design and song of the scenes drawn by a part of the catalog. */
     motion?: MotionDefaults;
+    /** Only in the mode `models3d`: the engine and the detail of the entries that say none. */
+    models3d?: { engine?: string; detail?: string };
   };
+  /** Only in the mode `models3d`: the objects to make, one model (or several variants) each. */
+  models?: ModelEntry[];
   scenes: Scene[];
   /** Background music of a video project. */
   bgm?: BackgroundMusic;
@@ -559,7 +582,7 @@ export interface ImportPreview {
 }
 
 /** What an import produces: scenes for a video project, tracks for a music one. */
-export type ImportMode = 'video' | 'motion' | 'music';
+export type ImportMode = 'video' | 'motion' | 'music' | 'models3d';
 
 export interface ImportResult {
   id: string;
@@ -609,7 +632,7 @@ export interface GpuStatus {
 export interface DiskReport {
   free_bytes?: number;
   total_bytes?: number;
-  /** Below this the space is low (20 GB, or ORCHESTRATOR_MIN_FREE_GB). */
+  /** Below this the space is low (20 GB, or VERITMO_MIN_FREE_GB). */
   warn_below_bytes?: number;
   /** A warning only: it never prevents a run. */
   low?: boolean;
@@ -775,6 +798,14 @@ export interface SettingsResponse {
   remote?: { max_calls: number };
   browser?: BrowserSettings;
   motion_model?: MotionModelSettings;
+  /** How the 3D generator runs; an older server sends no block. */
+  model3d?: Model3dSettings;
+}
+
+/** How TripoSR runs: the .NET service (the default) or the Docker container; `backend_source` is `setting` when a person chose it. */
+export interface Model3dSettings {
+  backend: 'dotnet' | 'docker';
+  backend_source: 'setting' | 'default';
 }
 
 export interface OllamaTestResult {
@@ -1706,7 +1737,7 @@ export interface ModelsDirectory {
   dir: string;
   /** False when its disk is not mounted: nothing can be installed (it is not the same as having no models). */
   available: boolean;
-  /** `models/` leads to it; false with `available` true means `orchestrator models migrate` is missing. */
+  /** `models/` leads to it; false with `available` true means `veritmo models migrate` is missing. */
   linked: boolean;
   /** Why it is not available, or what is missing. */
   reason?: string;
@@ -2007,4 +2038,141 @@ export interface DataImportAnswer {
 
 export interface DataCleanAnswer {
   cleaned: { entity: string; deleted: number; bytes: number }[];
+}
+
+// --- 3D model library (docs/MODEL_LIBRARY.md) ------------------------------------------------------------
+
+/** A pack of 3D models as the server lists it (the list that ships with it, and the ones imported). */
+export interface ModelPackInfo {
+  id: string;
+  name: string;
+  author: string;
+  licence: string;
+  attribution: boolean;
+  source: 'catalog' | 'user' | 'generated';
+  page?: string;
+  version?: string;
+  size_bytes: number;
+  description?: string;
+  tags: string[];
+  state: 'available' | 'installing' | 'installed' | 'failed';
+  error?: string;
+  progress?: { done: number; total: number };
+  models: number;
+  skipped?: { file?: string; reason?: string }[];
+}
+
+/** A model of an installed pack. */
+export interface LibraryModelInfo {
+  id: string;
+  pack: string;
+  name: string;
+  tags: string[];
+  clips: string[];
+  triangles: number;
+  needs: string[];
+  licence: string;
+  author: string;
+  attribution: boolean;
+  /** Only a generated model has the fields below (`source` is on every one). */
+  source?: 'catalog' | 'user' | 'generated';
+  prompt?: string;
+  engine?: string;
+  engine_version?: string;
+  generated_at?: string;
+  project?: string;
+  entry?: string;
+  adult?: boolean;
+}
+
+/** The query of the catalog of models. */
+export interface LibraryModelsQuery {
+  pack?: string;
+  q?: string;
+  tag?: string;
+  has_clips?: boolean;
+  source?: string;
+  engine?: string;
+  project?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/** Whether an engine that makes 3D models can be used now and, if not, why (`EngineAvailability`). */
+export interface ModelEngineInfo {
+  available: boolean;
+  mode?: 'local' | 'external';
+  reason?: string;
+  detail?: string;
+  missing?: string[];
+  version?: string;
+  container?: { state: 'stopped' | 'starting' | 'running'; error?: string };
+  /** What each way of running the engine (`dotnet`, `docker`) has and lacks. */
+  backends?: Record<string, ModelBackendInfo>;
+}
+
+/** One way of running an engine and what it lacks (`BackendStatus`). */
+export interface ModelBackendInfo {
+  available: boolean;
+  missing?: string[];
+  reason?: string;
+  detail?: string;
+  need_bytes?: number;
+}
+
+/** What an install of an engine is asked with: the backend to install for and the parts (`service`, `image`, `weights`). */
+export interface ModelInstallRequest {
+  backend?: 'dotnet' | 'docker';
+  parts?: ('service' | 'image' | 'weights')[];
+}
+
+/** What an install of an engine needs (`Model3DInstallPlan`). */
+export interface ModelInstallPlanInfo {
+  engine: string;
+  backend?: string;
+  parts?: string[];
+  missing: string[];
+  bytes: number;
+  licence: string;
+  gated: boolean;
+  path: string;
+  free_bytes: number;
+}
+
+/** An install of what an engine lacks (`Model3DInstall`). */
+export interface ModelInstallInfo {
+  id: string;
+  engine: string;
+  backend?: string;
+  parts?: string[];
+  /** The part that runs now. */
+  part?: string;
+  state: 'running' | 'done' | 'failed' | 'cancelled';
+  error?: string;
+  log: string[];
+  created_at: string;
+  finished_at?: string;
+}
+
+/** A generation of a 3D model (`ModelGeneration`). */
+export interface ModelGenerationInfo {
+  id: string;
+  client: string;
+  state: 'queued' | 'running' | 'done' | 'failed' | 'cancelled';
+  step?: 'picture' | 'model';
+  prompt?: string;
+  engine: string;
+  detail: string;
+  name: string;
+  model?: string;
+  error?: string;
+  created_at: string;
+  finished_at?: string;
+  run: string;
+}
+
+/** What copying a model of the library into a project or a piece answers. */
+export interface ModelCopyResult {
+  name: string;
+  pictures: string[];
 }

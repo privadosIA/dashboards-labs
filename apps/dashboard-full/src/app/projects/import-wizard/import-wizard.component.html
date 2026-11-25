@@ -18,15 +18,23 @@
         <mat-button-toggle value="video" i18n="@@import.modeVideo">Video scenes</mat-button-toggle>
         <mat-button-toggle value="motion" i18n="@@import.modeMotion">Animated graphics</mat-button-toggle>
         <mat-button-toggle value="music" i18n="@@import.modeMusic">Songs</mat-button-toggle>
+        @if (blenderReady()) {
+          <mat-button-toggle value="models3d" i18n="@@import.modeModels">3D models</mat-button-toggle>
+        }
       </mat-button-toggle-group>
       <p i18n="@@import.uploadHint">
         Accepts a JSON of [id, title, lora, prompt] tuples or an HTML with
         <span class="mo-data">const data = [...]</span> — the same format as
-        <span class="mo-data">orchestrator import</span>.
+        <span class="mo-data">veritmo import</span>.
       </p>
       @if (mode() === 'motion') {
         <p class="dim" data-testid="motion-hint" i18n="@@import.motionHint">
           In animated graphics, the lines before the markers describe what the graphic shows (or a “Graphic:” line); “Duration:” sets its length in seconds, “Dialogue:” narrates it and “Overlay:” (with Overlay position, start and end) adds a title over it. The pages are written by the model when the project runs, not when it is imported.
+        </p>
+      }
+      @if (mode() === 'models3d') {
+        <p class="dim" data-testid="models-hint" i18n="@@import.modelsHint">
+          For 3D models, the lines before the markers are the text of one object alone; “Engine:”, “Detail:”, “Variants:”, “Seed:”, “Image:” (a file of the project's sources) and “Adult:” set their fields. The project is made in the mode of 3D models; the models are made when it runs.
         </p>
       }
       @if (mode() === 'music') {
@@ -68,7 +76,7 @@
           <span i18n="@@import.totalImported">Imported: {{ p.imported }}</span> ·
           @if (mode() === 'music') {
             <span i18n="@@import.totalInstrumental">instrumental: {{ p.instrumental ?? 0 }}</span> ·
-          } @else {
+          } @else if (mode() !== 'models3d') {
             <span i18n="@@import.totalSilent">silent: {{ p.silent }}</span> ·
           }
           <span class="rejected" i18n="@@import.totalRejected">rejected: {{ p.rejected }}</span>

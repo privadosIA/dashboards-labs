@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>{{ t.title(data.place) }}</h2>
+<mat-dialog-content class="content">
+  <label class="field">
+    <span class="label">{{ t.name }}</span>
+    <input class="control data" type="text" data-testid="picker-name" [value]="name()" (input)="name.set($any($event.target).value)" />
+    <span class="note">{{ t.nameHint }}</span>
+  </label>
+  @if (said(); as s) {
+    <p class="said" [class.problem]="!s.ok" role="status" data-testid="picker-said">
+      <mat-icon inline>{{ s.ok ? 'check_circle' : 'error' }}</mat-icon>
+      <span class="data">{{ s.text }}</span>
+    </p>
+  }
+  <lab-model-catalog [pickable]="!busy()" (picked)="pick($event)" />
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button type="button" data-testid="picker-close" (click)="close()">{{ t.close }}</button>
+</mat-dialog-actions>

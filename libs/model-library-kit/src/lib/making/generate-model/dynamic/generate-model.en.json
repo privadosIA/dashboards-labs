@@ -1,0 +1,103 @@
+{
+  "version": "1.0",
+  "id": "generate-model",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "What the object is",
+      "description": "One object alone: its shape, material, colour and finish. Up to 1000 characters.",
+      "validation": {
+        "required": true,
+        "maxLength": 1000,
+        "messages": {
+          "required": "Describe the object.",
+          "maxLength": "At most 1000 characters."
+        }
+      },
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "generate-prompt"
+        }
+      }
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Engine",
+      "defaultValue": "triposr",
+      "options": [
+        {
+          "value": "triposr",
+          "label": "TripoSR (MIT)"
+        },
+        {
+          "value": "sf3d",
+          "label": "Stable Fast 3D"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "generate-engine"
+        }
+      }
+    },
+    {
+      "key": "detail",
+      "type": "select",
+      "label": "Detail",
+      "defaultValue": "normal",
+      "options": [
+        {
+          "value": "low",
+          "label": "Low"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "high",
+          "label": "High"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "generate-detail"
+        }
+      }
+    },
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Name (optional)",
+      "description": "Lower case letters, digits, dots, underscores and hyphens; one is made from the text when it is empty.",
+      "validation": {
+        "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+        "messages": {
+          "pattern": "Lower case letters, digits, dots, underscores and hyphens, up to 64."
+        }
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "generate-name"
+        }
+      }
+    },
+    {
+      "key": "adult",
+      "type": "checkbox",
+      "label": "For people of 18 or older",
+      "defaultValue": false,
+      "props": {
+        "attributes": {
+          "data-testid": "generate-adult"
+        }
+      }
+    }
+  ]
+}

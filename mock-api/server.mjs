@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Standalone mock of the `orchestrator serve` HTTP API, so the dashboard can be
+// Standalone mock of the `veritmo serve` HTTP API, so the dashboard can be
 // developed without the Go server, GPUs or models.
 //
 //   node server.mjs [--spec openapi.yaml|URL] [--port 4667] [--latency 0] [--token T] [--persist file.json] [--speed 1]
@@ -22,7 +22,8 @@ import * as fx from './fixtures.mjs';
 import { generationHandlers } from './generation.mjs';
 import { videoEditHandlers } from './video-edit.mjs';
 import { motionPageHandlers } from './motion-pages.mjs';
-import { blenderDescriptionHandlers } from './blender-descriptions.mjs';
+import { blenderDescriptionHandlers, descriptionProblems, filesOf, isSceneName } from './blender-descriptions.mjs';
+import { datasetAssistHandlers } from './dataset-assist.mjs';
 import { musicMotionHandlers, PARTS, SAMPLE_VIDEO_FILE, isSampleVideo, seedSample } from './music-motion.mjs';
 import { motionChoice, motionConfigProblem } from './motion-scenes.mjs';
 import { pager, isPaged } from './listing.mjs';
@@ -30,6 +31,9 @@ import { databaseHandlers } from './database.mjs';
 import { dataHandlers } from './data.mjs';
 import { catalogHandlers } from './catalog.mjs';
 import { musicBackendHandlers } from './music-backend.mjs';
+import { modelsProblem, simulateModels, manifestOf, outFiles } from './models3d-project.mjs';
+import { makeGlb, models3dHandlers } from './models3d.mjs';
+import { readModelsDataset } from './models3d-dataset.mjs';
 import { seedBulk } from './bulk.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -40,7 +44,7 @@ const arg = (name, def) => {
 const PORT = Number(arg('port', process.env.MOCK_PORT ?? 4667));
 const HOST = arg('host', '127.0.0.1');
 const LATENCY = Number(arg('latency', 0));
-const TOKEN = arg('token', process.env.ORCHESTRATOR_TOKEN ?? '');
+const TOKEN = arg('token', process.env.VERITMO_TOKEN || process.env.ORCHESTRATOR_TOKEN || '');
 const PERSIST = arg('persist', '');
 const SPEED = Number(arg('speed', 1)); // >1 = faster simulated runs
 
@@ -51,7 +55,7 @@ export const spec = yaml.load(specText);
 
 // ---------------------------------------------------------------- state
 const db = {
-  projects: { demo: fx.SEED_VIDEO, 'demo-musica': fx.SEED_MUSIC },
+  projects: { demo: fx.SEED_VIDEO, 'demo-musica': fx.SEED_MUSIC, 'demo-modelos': fx.SEED_MODELS },
   runs: [],
   downloads: [],
   settings: {},
@@ -108,6 +112,9 @@ function settingsBody() {
   if (saved.browser) body.browser.saved = saved.browser;
   if (saved.motion_model) body.motion_model.saved = saved.motion_model;
   if (typeof saved.music_motion?.review_drafts === 'boolean') body.music_motion = { review_drafts: saved.music_motion.review_drafts };
+  // how TripoSR runs (the .NET service by default, or the Docker container): only a server with a 3D service has the block
+  if (process.env.MOCK_MODEL3D === 'none') delete body.model3d;
+  else body.model3d = models3d.settingsBlock();
   for (const [block, port] of [['heartmula', 8787], ['diffrhythm2', 8788]]) {
     const host = saved[`${block}_host`] ? address(saved[`${block}_host`], port) : '';
     const remote = host ? isRemote(host) : false;
@@ -173,6 +180,9 @@ const publicRun = ({ events, ...r }) => r;
 
 function simulate(run) {
   const cfg = parse(db.projects[run.project]).value ?? {};
+  if (modeOf(cfg) === 'models3d') {
+    return simulateModels(run, cfg, { db, ts, emit, setState, timers, step: 600 / SPEED, engineProblem: (name) => models3d.engineProblem(name), addGenerated: (info) => models3d.addGenerated(info), dropGenerated: (project, entry) => models3d.dropGenerated(project, entry) });
+  }
   const music = modeOf(cfg) === 'music';
   const items = (music ? cfg.tracks : cfg.scenes) ?? [];
   const phases = music ? ['compose', 'synth', 'export'] : ['tts', 'render', 'clip'];
@@ -213,6 +223,47 @@ function simulate(run) {
 // ---------------------------------------------------------------- explicit handlers
 const err = (status, code, message) => [status, { error: { code, message } }];
 const noProject = (id) => err(404, 'not_found', `project "${id}" not found`);
+/** The `descriptions` of an import as the contract takes them: plain `.scene.json` names, at most 20 files and 1 MB in all (`400` otherwise). */
+const badDescriptions = (descriptions) => {
+  if (descriptions === undefined) return null;
+  if (!descriptions || typeof descriptions !== 'object' || Array.isArray(descriptions)) return err(400, 'invalid_request', 'descriptions: an object of files by name');
+  const names = Object.keys(descriptions);
+  if (names.length > 20) return err(400, 'invalid_request', 'descriptions: at most 20 files');
+  const wrong = names.find((n) => !isSceneName(n));
+  if (wrong) return err(400, 'invalid_request', `descriptions: "${wrong}" is not a plain .scene.json name`);
+  if (Buffer.byteLength(JSON.stringify(descriptions)) > 1024 * 1024) return err(400, 'invalid_request', 'descriptions: at most 1 MB in all');
+  return null;
+};
+
+/** What makes a confirm with 3D scenes `422` (and creates nothing): a description that does not pass, one no scene names, or a scene naming a file that is neither given nor already stored. */
+const unsatisfiedScenes = (text, given) => {
+  let named = [];
+  try {
+    const doc = yaml.load(text);
+    named = [...(Array.isArray(doc?.scenes) ? doc.scenes : []), ...(Array.isArray(doc?.graphics) ? doc.graphics : [])].map((s) => s?.blender?.build).filter((n) => typeof n === 'string');
+  } catch {
+    return null;
+  }
+  for (const [name, d] of Object.entries(given)) {
+    const problems = descriptionProblems(d, 5);
+    if (problems.length) return err(422, 'validation_failed', `description ${name} does not pass: ${problems.join('; ')}`);
+    if (!named.includes(name)) return err(422, 'validation_failed', `description ${name} is not named by any scene`);
+  }
+  const missing = named.find((n) => !given[n]);
+  return missing ? err(422, 'validation_failed', `a scene names ${missing}, which is not in descriptions`) : null;
+};
+
+const RUN_MODES = ['video', 'images', 'music', 'models3d', 'animation'];
+/** The modes a request asks for (`mode=video,models3d`), or a 400 that lists them. */
+const modesOf = (raw) => {
+  if (raw === null || raw === undefined || raw === '') return null;
+  const asked = raw.split(',').map((m) => m.trim());
+  const bad = asked.find((m) => !RUN_MODES.includes(m));
+  return bad === undefined ? new Set(asked) : { problem: err(400, 'invalid_request', `mode: "${bad}" is not a mode: ${RUN_MODES.slice(0, -1).join(', ')} or ${RUN_MODES.at(-1)}`) };
+};
+/** The mode of a run: its own, or its project's; the runs of a music-motion piece are the animations. */
+const runModeOf = (r) => (r.project.startsWith('api-mm-') ? 'animation' : r.mode || modeOf(parse(db.projects[r.project] ?? '').value));
+
 const badId = (id) => typeof id !== 'string' || !/^[\w][\w.-]*$/.test(id);
 
 const hasActiveRun = (id) => db.runs.some((r) => r.project === id && ['queued', 'running'].includes(r.state));
@@ -220,6 +271,8 @@ const hasActiveRun = (id) => db.runs.some((r) => r.project === id && ['queued', 
 const musicBackend = musicBackendHandlers({ db, save, ts, speed: SPEED });
 const database = databaseHandlers({ db, save, ts, parse, summary, clientOf, listQuery, wanted, hasActiveRun });
 const { recordVersion } = database;
+// The library of 3D models and the models of a project's sources (the piece's own are in music-motion.mjs).
+const models3d = models3dHandlers({ db, save, speed: SPEED, fallback: (method, path) => generic(method, path), hasActiveRun });
 
 const handlers = {
   'GET /api/health': () => [200, { status: 'ok' }],
@@ -263,6 +316,7 @@ const handlers = {
     if (value) {
       value.defaults ??= {};
       if (modeOf(value) === 'music') value.tracks ??= [];
+      else if (modeOf(value) === 'models3d') value.models ??= [];
       else value.scenes ??= [];
     }
     return [200, value ? { yaml: text, parsed: value, valid: true } : { yaml: text, valid: false, error }];
@@ -274,6 +328,8 @@ const handlers = {
     if (!value || typeof value !== 'object') return err(422, 'validation_failed', `config: ${error || 'not a mapping'}`);
     const motion = motionConfigProblem(value, [...PARTS, ...Object.values(db.parts)]);
     if (motion) return err(422, 'validation_failed', `config: ${motion}`);
+    const models = modelsProblem(value);
+    if (models) return err(422, 'validation_failed', `config: ${models}`);
     recordVersion(params.id, db.projects[params.id], body.yaml, 'save');
     db.projects[params.id] = body.yaml;
     save();
@@ -282,8 +338,10 @@ const handlers = {
 
   'POST /api/projects/{id}/runs': ({ params, body }) => {
     if (!db.projects[params.id]) return noProject(params.id);
-    const { error } = parse(db.projects[params.id]);
+    const { error, value: launched } = parse(db.projects[params.id]);
     if (error) return err(422, 'validation_failed', error);
+    const modelsIssue = modelsProblem(launched);
+    if (modelsIssue) return err(422, 'validation_failed', `config: ${modelsIssue}`);
     const busy = db.runs.filter((r) => ['queued', 'running'].includes(r.state));
     const run = {
       id: randomUUID().slice(0, 8),
@@ -308,6 +366,9 @@ const handlers = {
   },
   'GET /api/runs': ({ query }) => {
     let list = db.runs;
+    const modes = modesOf(query.get('mode'));
+    if (modes?.problem) return modes.problem;
+    if (modes) list = list.filter((r) => modes.has(runModeOf(r)));
     if (query.get('project')) list = list.filter((r) => r.project === query.get('project'));
     const limit = Number(query.get('limit')) || list.length;
     return [200, list.slice(0, limit).map(publicRun)];
@@ -344,14 +405,16 @@ const handlers = {
   'PUT /api/settings': ({ body }) => {
     // db.settings keeps what the person saved, under the names of the request; the answer is built from it.
     // An empty text removes a setting, as on the server.
-    const refused = musicBackend.checkSettings(body);
+    const refused = musicBackend.checkSettings(body) ?? models3d.checkSettings(body);
     if (refused) return refused;
     const before = musicBackend.backendsBefore();
+    const modelBackendBefore = db.settings.model3d_backend;
     for (const [key, value] of Object.entries(body ?? {})) {
       if (value === '' || value === null) delete db.settings[key];
       else db.settings[key] = value;
     }
     musicBackend.afterSettings(before, body);
+    models3d.afterSettings(modelBackendBefore, body);
     save();
     return [200, settingsBody()];
   },
@@ -368,7 +431,14 @@ const handlers = {
   // The dataset import (a JSON list of entries, or an HTML page with a list), read the way the server does for its two modes: the preview creates nothing,
   // the confirm creates the project and never overwrites an id.
   'POST /api/import/preview': ({ body }) => {
-    const read = fx.readDataset(String(body?.content ?? ''), body?.mode === 'music' ? 'music' : 'video');
+    const bad = badDescriptions(body?.descriptions);
+    if (bad) return bad;
+    if (body?.mode === 'models3d') {
+      const models = readModelsDataset(String(body?.content ?? ''), { adultKept: process.env.MOCK_ADULT === '1' });
+      if (models === null) return err(422, 'unprocessable', 'the file is not a JSON or HTML dataset');
+      return models.refused ?? [200, models];
+    }
+    const read = fx.readDataset(String(body?.content ?? ''), body?.mode === 'music' ? 'music' : body?.mode === 'motion' ? 'motion' : 'video', body?.descriptions ?? {});
     return read ? [200, read] : err(422, 'unprocessable', 'the file is not a JSON or HTML dataset');
   },
   'POST /api/import/confirm': ({ body }) => {
@@ -378,6 +448,16 @@ const handlers = {
     const animated = /^ {2}- id: "?([^"\n]+)"?\n(?:(?! {2}- id:).*\n)*? {4}animate: true/m.exec(body.yaml);
     if (animated && !/^defaults:\n(?: {2}.*\n)*? {2}animate:/m.test(body.yaml)) return err(422, 'validation_failed', `config: scene "${animated[1]}" has animate: true but defaults.animate is not set`);
     if (db.projects[body.id]) return err(409, 'conflict', `project "${body.id}" already exists`);
+    const imported = parse(body.yaml).value;
+    const modelsIssue = imported ? modelsProblem(imported) : null;
+    if (modelsIssue) return err(422, 'validation_failed', `config: ${modelsIssue}`);
+    // a picture an entry names has to be in the project's sources, which an import cannot carry: a new project is refused with it
+    const missingPicture = (imported?.models ?? []).findIndex((m) => typeof m?.image === 'string');
+    if (missingPicture >= 0) return err(422, 'validation_failed', `config: models[${missingPicture}].image: "${imported.models[missingPicture].image}" is not in the project's sources`);
+    // the 3D scenes the YAML names: written to sources/ before it is validated, and nothing is created when one does not pass
+    const badFiles = badDescriptions(body.descriptions) ?? unsatisfiedScenes(body.yaml, body.descriptions ?? {});
+    if (badFiles) return badFiles;
+    if (body.descriptions) Object.assign(filesOf(body.id), body.descriptions);
     db.projects[body.id] = body.yaml;
     db.updated[body.id] = ts();
     save();
@@ -388,7 +468,11 @@ const handlers = {
   'GET /api/downloads': () => [200, { downloads: db.downloads }],
   'GET /api/storage': ({ query }) => listQuery(query) ?? [200, fx.storage(Object.keys(db.projects).filter(wanted(query)), clientOf)],
   'GET /api/projects/{id}/storage': () => [200, fx.projectStorage()],
-  'GET /api/stats': () => [200, fx.stats(db.runs)],
+  'GET /api/stats': ({ query }) => {
+    const modes = modesOf(query.get('mode'));
+    if (modes?.problem) return modes.problem;
+    return [200, fx.stats(modes ? db.runs.filter((r) => modes.has(runModeOf(r))) : db.runs)];
+  },
   'GET /api/runs/{id}/resources': () => [200, fx.runResources()],
   'GET /api/settings/monitoring': () => [200, fx.monitoring()],
   'GET /api/settings/database': () => [200, fx.database()],
@@ -399,7 +483,9 @@ const handlers = {
   ...videoEditHandlers({ db, save, ts, speed: SPEED }),
   ...motionPageHandlers({ db }),
   ...blenderDescriptionHandlers({ db }),
-  ...musicMotionHandlers({ db, save, ts, speed: SPEED }),
+  ...datasetAssistHandlers({ db }),
+  ...models3d.handlers,
+  ...musicMotionHandlers({ db, save, ts, speed: SPEED, models3d }),
 };
 
 // Queued runs start as soon as the active one ends (checked every 300 ms).
@@ -467,8 +553,10 @@ const routes = Object.keys(spec.paths).map((p) => {
   const re = new RegExp('^' + p.replace(/\{(\w+)\}/g, (_, n) => (names.push(n), '([^/]+)')).replace(/\/\{path\}$/, '') + '$');
   return { path: p, re, names, wildcard: p.endsWith('{path}') };
 });
+// A path with a literal segment wins over one with a parameter in its place (`/sources/model` over `/sources/{name}`), whatever the order of the contract.
+const specific = [...routes].sort((a, b) => Number(a.wildcard) - Number(b.wildcard) || (a.names.length > b.names.length ? 1 : a.names.length < b.names.length ? -1 : 0));
 function match(pathname) {
-  for (const r of routes) {
+  for (const r of specific) {
     if (r.wildcard) {
       const base = r.path.replace('{path}', '').replace(/\{(\w+)\}/g, '([^/]+)');
       const m = new RegExp('^' + base + '(.+)$').exec(pathname);
@@ -573,6 +661,22 @@ createServer(async (req, res) => {
     return made ? send(200, made) : send(...err(404, 'not_found', 'no record of a choice for that scene'));
   }
 
+  // The 3D scene a generation of the option blender was made from: its description, as the input the generation lists.
+  const scene = hit.path.endsWith('/artifacts/{path}') ? /^\/api\/projects\/([^/]+)\/artifacts\/sources\/[^/]+\.scene\.json$/.exec(url.pathname) : null;
+  if (scene && db.generations[scene[1]]?.scene) return send(200, db.generations[scene[1]].scene);
+
+  // What a run of a 3D models project left: the models and the manifest of `out/<project>/`.
+  const made = hit.path.endsWith('/artifacts/{path}') ? /^\/api\/projects\/([^/]+)\/artifacts\/out\/([^/]+)\/([^/]+)$/.exec(url.pathname) : null;
+  if (made && outFiles(db, made[1]).includes(decodeURIComponent(made[3])) && made[1] === made[2]) {
+    const name = decodeURIComponent(made[3]);
+    if (name === 'manifest.json') return send(200, manifestOf(db, made[1]));
+    const model = db.models3dOut[made[1]].models.find((m) => m.file.endsWith(`/${name}`));
+    const data = makeGlb({ triangles: Math.min(model.triangles, 5000) });
+    log(200);
+    res.writeHead(200, { 'Content-Type': 'model/gltf-binary', 'Content-Length': data.length, 'Content-Disposition': `attachment; filename="${name}"` });
+    return res.end(data);
+  }
+
   if (hit.path.endsWith('/artifacts/{path}')) {
     const ext = (url.pathname.match(/\.([a-z0-9]+)$/i) ?? [])[1]?.toLowerCase() ?? '';
     const file = { png: 'png', jpg: 'png', jpeg: 'png', webp: 'png', gif: 'png', mp4: 'mp4', webm: 'mp4', mov: 'mp4', mp3: 'mp3', wav: 'mp3', ogg: 'mp3', flac: 'mp3', m4a: 'mp3' }[ext];
@@ -597,12 +701,12 @@ createServer(async (req, res) => {
   const body = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) ? await readBody(req) : undefined;
   const h = handlers[`${req.method} ${hit.path}`];
   const page = pager(spec, op, url);
-  let out = h ? await h({ params: hit.params, query: url.searchParams, body, page, url }) : generic(req.method, hit.path);
+  let out = h ? await h({ params: hit.params, query: url.searchParams, body, page, url, headers: req.headers }) : generic(req.method, hit.path);
   // A list the mock has no data for answers an empty page (validated, with its headers) when it was asked for one.
   if (!h && req.method === 'GET' && isPaged(spec, op) && Array.isArray(out[1])) out = page(out[1]);
   send(...out);
 }).listen(PORT, HOST, () => {
-  console.log(`mock orchestrator API on http://${HOST}:${PORT}  (${Object.keys(spec.paths).length} paths from openapi.yaml)`);
+  console.log(`mock Veritmo API on http://${HOST}:${PORT}  (${Object.keys(spec.paths).length} paths from openapi.yaml)`);
   console.log(`projects: ${Object.keys(db.projects).join(', ')}${TOKEN ? '  [token required]' : ''}${PERSIST ? `  [persist: ${PERSIST}]` : ''}`);
 });
 

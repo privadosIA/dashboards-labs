@@ -7,7 +7,7 @@
 // Without --check it replaces the copy and its record (contract/SOURCE.json: where it came from, when, SHA-256).
 // With --check it writes nothing and exits 1, naming what differs, when the source is not the copy. A source that
 // cannot be read, or that is not an OpenAPI 3 document, leaves both files untouched.
-// The token of the server can also come from ORCHESTRATOR_TOKEN (preferred: a flag shows up in `ps`).
+// The token of the server can also come from VERITMO_TOKEN, or its former name ORCHESTRATOR_TOKEN (preferred over a flag, which shows up in `ps`).
 import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -22,7 +22,7 @@ const flag = (name) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const check = args.includes('--check');
-const token = flag('token') ?? process.env.ORCHESTRATOR_TOKEN ?? '';
+const token = flag('token') ?? (process.env.VERITMO_TOKEN || process.env.ORCHESTRATOR_TOKEN || '');
 const dir = resolve(flag('contract') ?? resolve(here, '../contract'));
 const source = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--token' && args[i - 1] !== '--contract');
 
@@ -40,7 +40,7 @@ async function readSource() {
     } catch (e) {
       fail(`cannot reach ${source}: ${e.cause?.code ?? e.message}`);
     }
-    if (!res.ok) fail(`${source} answered ${res.status}${res.status === 401 ? ' (the server wants its token: --token or ORCHESTRATOR_TOKEN)' : ''}`);
+    if (!res.ok) fail(`${source} answered ${res.status}${res.status === 401 ? ' (the server wants its token: --token or VERITMO_TOKEN)' : ''}`);
     return { text: await res.text(), fromUrl: true };
   }
   try {

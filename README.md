@@ -1,8 +1,8 @@
 # dashboards-lab
 
-> **Live examples:** videos, songs, animation and images made with mediaOrquestator on a local machine, with how they were made: [orquestator.xuxo.net](https://orquestator.xuxo.net/) (es/en).
+> **Live examples:** videos, songs, animation and images made with Veritmo on a local machine, with how they were made: [orquestator.xuxo.net](https://orquestator.xuxo.net/) (es/en).
 
-The public edition of the dashboards of **mediaOrquestator**: the server's management dashboard (`apps/dashboard-full`) and the libraries it is built from. They share the API contract, the server mock, the generated client and the forms system.
+The public edition of the dashboards of **Veritmo**: the server's management dashboard (`apps/dashboard-full`) and the libraries it is built from. They share the API contract, the server mock, the generated client and the forms system.
 
 **This repository contains no server code.** It only consumes its contract (`contract/openapi.yaml`), a versioned copy
 of the OpenAPI description that the server serves at `GET /api/openapi.json`.
@@ -38,6 +38,7 @@ npm test                # los tests de los scripts, del simulado y de las librer
 | `libs/server-connection/` | The server connection box (address, token, tickets) used by all the dashboards |
 | `libs/theme-switch/` | The light/dark switch of the dashboards (service and header button) |
 | `libs/paged-list/` | The paged list used by the lists of the dashboards |
+| `libs/model-library-kit/` | The 3D model library (packs, catalog, engines and the generation of models, the picker and the **viewer** of a model: orbit, animation clips, wireframe; three.js is loaded only when a model is opened) (`@lab/model-library-kit`); mounted by `dashboard-full`, and its picker by the animation windows |
 | `apps/dashboard-full/` | The server's management dashboard, moved by areas from its `web/` |
 | `vendor/` | `@core/dynamic-forms` packaged, to install without a private registry |
 
@@ -55,7 +56,7 @@ Depends on `veritmo` (the contract in `contract/openapi.yaml` and the server it 
 | [`musicgen-core`](https://github.com/privadosIA/musicgen-core) | The TorchSharp building blocks shared by the five ports. |
 | [`triposr`](https://github.com/privadosIA/triposr) | C# port of [TripoSR](https://github.com/VAST-AI-Research/TripoSR): one picture in, one 3D model (`.glb`) out; makes the models of the *models3d* category (MIT original). |
 | [`stable-fast-3d`](https://github.com/privadosIA/stable-fast-3d) | C# port of [Stable Fast 3D](https://github.com/Stability-AI/stable-fast-3d): one picture in, one textured 3D model (`.glb`) out. **Under the Stability AI Community License, not Apache-2.0** (free for research and non-commercial use, and for commercial use under US$1M of yearly revenue). |
-| [`forms-lib`](https://github.com/privadosIA/forms-lib) | `@core/dynamic-forms`, the Angular library that draws forms and tables from JSON. |
+| [`forms-lib`](https://github.com/privadosIA/forms-lib) | `@core/dynamic-forms`, the Angular library that draws forms and tables from JSON (vendored in `dashboards-labs`). |
 
 The links are to the public copies of these repositories. The third-party tools, models and libraries they build on, with their licenses, are listed in [THIRD_PARTY.md](https://github.com/privadosIA/veritmo/blob/main/THIRD_PARTY.md).
 

@@ -8,7 +8,7 @@ import { DatabaseCardComponent } from './database-card.component';
 
 const SQLITE: DatabaseSettings = { saved: { driver: 'sqlite', password_set: false }, active: { driver: 'sqlite', password_set: false }, restart_required: false, source: 'default', server_name: 'estudio', servers: [] };
 const MYSQL_SAVED: DatabaseSettings = {
-  saved: { driver: 'mysql', host: 'db.lan', port: 3306, name: 'mediaorquestator', user: 'mo', password_set: true },
+  saved: { driver: 'mysql', host: 'db.lan', port: 3306, name: 'veritmo', user: 'mo', password_set: true },
   active: { driver: 'sqlite', password_set: false },
   restart_required: true,
   source: 'setting',
@@ -69,7 +69,7 @@ describe('DatabaseCardComponent', () => {
     await open(MYSQL_SAVED);
     await (q('db-save') as HTMLButtonElement).click();
     await settle();
-    expect(api['putDatabase']).toHaveBeenCalledWith({ driver: 'mysql', host: 'db.lan', name: 'mediaorquestator', user: 'mo', port: 3306, server_name: 'estudio' });
+    expect(api['putDatabase']).toHaveBeenCalledWith({ driver: 'mysql', host: 'db.lan', name: 'veritmo', user: 'mo', port: 3306, server_name: 'estudio' });
     await type('db-password', 's3cret');
     (q('db-save') as HTMLButtonElement).click();
     await settle();

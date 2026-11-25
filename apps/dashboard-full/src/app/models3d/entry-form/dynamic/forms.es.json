@@ -1,0 +1,142 @@
+{
+  "version": "1.0",
+  "id": "model-entry",
+  "layout": {
+    "columns": 2
+  },
+  "fields": [
+    {
+      "key": "id",
+      "type": "text",
+      "label": "Id",
+      "layout": {
+        "col": 6
+      },
+      "description": "El fichero se llama como él: <id>.glb.",
+      "props": {
+        "attributes": {
+          "data-testid": "entry-id"
+        }
+      }
+    },
+    {
+      "key": "prompt",
+      "type": "textarea",
+      "label": "Qué objeto es",
+      "layout": {
+        "col": 12
+      },
+      "description": "Un solo objeto: su forma, material, color y acabado.",
+      "props": {
+        "rows": 3,
+        "attributes": {
+          "data-testid": "entry-prompt"
+        }
+      }
+    },
+    {
+      "key": "engine",
+      "type": "select",
+      "label": "Motor",
+      "defaultValue": "",
+      "layout": {
+        "col": 4
+      },
+      "options": [
+        {
+          "value": "",
+          "label": "Como el proyecto"
+        },
+        {
+          "value": "triposr",
+          "label": "TripoSR (MIT)"
+        },
+        {
+          "value": "sf3d",
+          "label": "Stable Fast 3D"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "entry-engine"
+        }
+      }
+    },
+    {
+      "key": "detail",
+      "type": "select",
+      "label": "Detalle",
+      "defaultValue": "",
+      "layout": {
+        "col": 4
+      },
+      "options": [
+        {
+          "value": "",
+          "label": "Como el proyecto"
+        },
+        {
+          "value": "low",
+          "label": "Bajo"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "high",
+          "label": "Alto"
+        }
+      ],
+      "props": {
+        "attributes": {
+          "data-testid": "entry-detail"
+        }
+      }
+    },
+    {
+      "key": "variants",
+      "type": "number",
+      "label": "Variantes (1 a 4)",
+      "defaultValue": 1,
+      "layout": {
+        "col": 4
+      },
+      "props": {
+        "step": 1,
+        "attributes": {
+          "data-testid": "entry-variants"
+        }
+      }
+    },
+    {
+      "key": "seed",
+      "type": "number",
+      "label": "Semilla (opcional)",
+      "layout": {
+        "col": 6
+      },
+      "description": "La semilla de la imagen de la primera variante; cada siguiente suma 1.",
+      "props": {
+        "step": 1,
+        "attributes": {
+          "data-testid": "entry-seed"
+        }
+      }
+    },
+    {
+      "key": "adult",
+      "type": "checkbox",
+      "label": "Para mayores de 18 años",
+      "defaultValue": false,
+      "layout": {
+        "col": 6
+      },
+      "props": {
+        "attributes": {
+          "data-testid": "entry-adult"
+        }
+      }
+    }
+  ]
+}

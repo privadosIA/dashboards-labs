@@ -15,7 +15,7 @@ const SPEC_JSON = (extraPath = false) =>
 // Runs the script as a child (it is a command) and answers its exit code and what it printed.
 function run(args, env = {}) {
   return new Promise((done) => {
-    const p = spawn(process.execPath, [script, ...args], { env: { ...process.env, ORCHESTRATOR_TOKEN: '', ...env } });
+    const p = spawn(process.execPath, [script, ...args], { env: { ...process.env, VERITMO_TOKEN: '', ORCHESTRATOR_TOKEN: '', ...env } });
     let out = '';
     p.stdout.on('data', (d) => (out += d));
     p.stderr.on('data', (d) => (out += d));
@@ -64,6 +64,36 @@ test('updates the copy from a running server, sending its token', async () => {
     const rec = JSON.parse(readFileSync(files(dir).record, 'utf8'));
     assert.equal(rec.source, `${base}/api/openapi.json`);
     assert.match(readFileSync(files(dir).yaml, 'utf8'), /\/api\/health/);
+  });
+});
+
+test('takes the token from VERITMO_TOKEN, or from its former name ORCHESTRATOR_TOKEN', async () => {
+  for (const [name, expected] of [['VERITMO_TOKEN', 'Bearer new-one'], ['ORCHESTRATOR_TOKEN', 'Bearer old-one']]) {
+    const dir = workdir();
+    let seen = '';
+    await serve((req, res) => {
+      seen = req.headers.authorization ?? '';
+      res.setHeader('content-type', 'application/json');
+      res.end(SPEC_JSON());
+    }, async (base) => {
+      const r = await run([`${base}/api/openapi.json`, '--contract', dir], { [name]: expected.slice(7) });
+      assert.equal(r.code, 0, r.out);
+      assert.equal(seen, expected, name);
+    });
+  }
+});
+
+test('VERITMO_TOKEN wins over ORCHESTRATOR_TOKEN when both are set', async () => {
+  const dir = workdir();
+  let seen = '';
+  await serve((req, res) => {
+    seen = req.headers.authorization ?? '';
+    res.setHeader('content-type', 'application/json');
+    res.end(SPEC_JSON());
+  }, async (base) => {
+    const r = await run([`${base}/api/openapi.json`, '--contract', dir], { VERITMO_TOKEN: 'new-one', ORCHESTRATOR_TOKEN: 'old-one' });
+    assert.equal(r.code, 0, r.out);
+    assert.equal(seen, 'Bearer new-one');
   });
 });
 

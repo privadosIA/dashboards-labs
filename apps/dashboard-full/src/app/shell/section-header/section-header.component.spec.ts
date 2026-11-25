@@ -32,7 +32,7 @@ describe('SectionHeaderComponent', () => {
     expect(home.getAttribute('href')).toBe('/projects');
     expect(home.getAttribute('aria-label')).toBeTruthy();
     expect(home.classList.contains('lab-plain-link')).toBe(true);
-    expect(home.textContent).toContain('mediaOrquestator');
+    expect(home.textContent).toContain('Veritmo');
   });
 
   describe('the way back when another tab of the app opened this one', () => {

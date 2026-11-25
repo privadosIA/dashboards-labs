@@ -1,0 +1,42 @@
+<section class="packs" data-testid="model-packs">
+  <header class="head">
+    <h3>{{ t.title }}</h3>
+    @if (store.status() === 'ready') {
+      <button mat-stroked-button type="button" data-testid="packs-import" (click)="importZip()">
+        <mat-icon>upload_file</mat-icon>
+        {{ t.import }}
+      </button>
+    }
+  </header>
+  <p class="note">{{ t.intro }}</p>
+
+  @switch (store.status()) {
+    @case ('loading') {
+      <p class="note" role="status" data-testid="packs-loading">{{ t.loading }}</p>
+    }
+    @case ('unavailable') {
+      <p class="note" data-testid="packs-unavailable">{{ t.unavailable }}</p>
+    }
+    @case ('error') {
+      <p class="problem" role="alert" data-testid="packs-error"><mat-icon inline>error</mat-icon><span class="data">{{ store.error() }}</span></p>
+    }
+    @default {
+      @if (store.packs().length === 0) {
+        <p class="note" data-testid="packs-empty">{{ t.empty }}</p>
+      }
+      <div class="grid" appAutoAnimate>
+        @for (pack of store.packs(); track pack.id) {
+          <lab-pack-card
+            [pack]="pack"
+            [busy]="store.busy().has(pack.id)"
+            [problem]="store.problems()[pack.id] ?? ''"
+            (install)="install(pack.id)"
+            (cancel)="cancel(pack.id)"
+            (remove)="remove(pack.id)"
+          />
+        }
+      </div>
+      <p class="note">{{ t.importHint }}</p>
+    }
+  }
+</section>

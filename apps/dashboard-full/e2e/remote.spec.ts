@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // The UI is served by server A (no token) and pointed at server B, a
-// second `orchestrator serve` that requires a Bearer token and allows
+// second `veritmo serve` that requires a Bearer token and allows
 // A's origin through CORS (e2e/run-e2e.sh starts both).
 const REMOTE = process.env['E2E_REMOTE_URL'];
 const TOKEN = process.env['E2E_REMOTE_TOKEN'];

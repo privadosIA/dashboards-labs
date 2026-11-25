@@ -1,0 +1,16 @@
+@if (store.status() === 'ready') {
+  <section class="making" data-testid="model-making" appAutoAnimate>
+    <header class="head">
+      <h3>{{ t.title }}</h3>
+      <button mat-flat-button type="button" data-testid="making-open" (click)="open()">
+        <mat-icon>deployed_code</mat-icon>
+        {{ t.generate.open }}
+      </button>
+    </header>
+    <p class="note">{{ t.intro }}</p>
+    <lab-model-engines />
+    <lab-model-generations (showModel)="showModel.emit($event)" />
+  </section>
+} @else if (store.status() === 'error') {
+  <p class="problem" role="alert" data-testid="making-error"><mat-icon inline>error</mat-icon><span class="data">{{ store.error() }}</span></p>
+}

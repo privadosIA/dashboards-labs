@@ -16,7 +16,7 @@ test('the status names the engine, the migrations, the rows of each table and th
     assert.ok(body.migrations.applied.length > 0);
     assert.deepEqual(body.migrations.pending, []);
     const projects = body.tables.find((t) => t.name === 'projects');
-    assert.equal(projects.rows, 2);
+    assert.equal(projects.rows, 3);
     assert.deepEqual(body.imports, []);
     assert.deepEqual(body.legacy_files.map((f) => f.entity), ENTITIES);
     assert.ok(filesOf(body, 'prompts').files > 0);
@@ -125,7 +125,7 @@ test('the export is a zip that opens: a manifest and one .jsonl per table, with 
     const res = await mock.get('/api/data/export');
     assert.equal(res.status, 200);
     assert.equal(res.headers.get('content-type'), 'application/zip');
-    assert.match(res.headers.get('content-disposition'), /^attachment; filename="mediaorquestator-data-\d{8}-\d{6}\.zip"$/);
+    assert.match(res.headers.get('content-disposition'), /^attachment; filename="veritmo-data-\d{8}-\d{6}\.zip"$/);
 
     const files = unzip(Buffer.from(await res.arrayBuffer()));
     assert.ok(files.every((f) => f.crcOk), 'every CRC matches');

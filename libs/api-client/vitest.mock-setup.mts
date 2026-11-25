@@ -26,7 +26,7 @@ export default async function setup(project: TestProject): Promise<() => void> {
     child.once('error', fail);
     child.once('exit', (code) => fail(new Error(`the mock of the API exited with ${code}`)));
     child.stdout!.on('data', (chunk: Buffer) => {
-      if (chunk.toString().includes('mock orchestrator API on')) {
+      if (chunk.toString().includes('mock Veritmo API on')) {
         clearTimeout(timer);
         ready();
       }

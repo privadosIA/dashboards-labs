@@ -1,4 +1,4 @@
-# Tutorial del dashboard de mediaOrquestator
+# Tutorial del dashboard de Veritmo
 
 [English version](TUTORIAL.md)
 
@@ -13,7 +13,7 @@ En las capturas, los **círculos naranjas numerados** señalan lo que explica el
 
 > Las capturas son de unos proyectos de ejemplo (`live`, `acuarelas`, `cancion-demo`, `chicas-patines`) hechos para esta guía, con el dashboard en español. Tu pantalla tendrá tus propios proyectos y modelos. La versión en inglés de esta guía ([TUTORIAL.md](TUTORIAL.md)) tiene las mismas figuras con las etiquetas en inglés.
 
-> Esta es la mitad de la guía que va pantalla a pantalla. Los conceptos (1 y 2), cuando algo falla (11), la terminal (12), el glosario (13), la pantalla de API y el ejemplo completo con su `scenes.yaml` se quedan con el servidor, en [su TUTORIAL.es.md](../../mediaOrquestator/docs/TUTORIAL.es.md), y los enlaces a ellos apuntan allí.
+> Esta es la mitad de la guía que va pantalla a pantalla. Los conceptos (1 y 2), cuando algo falla (11), la terminal (12), el glosario (13), la pantalla de API y el ejemplo completo con su `scenes.yaml` se quedan con el servidor, en [su TUTORIAL.es.md](../../veritmo/docs/TUTORIAL.es.md), y los enlaces a ellos apuntan allí.
 
 ## Índice
 
@@ -58,8 +58,8 @@ En las capturas, los **círculos naranjas numerados** señalan lo que explica el
 Desde la carpeta del proyecto:
 
 ```bash
-go build -o bin/orchestrator ./cmd/orchestrator   # una vez
-bin/orchestrator serve --addr 127.0.0.1:4666 --projects-dir projects
+go build -o bin/veritmo ./cmd/veritmo   # una vez
+bin/veritmo serve --addr 127.0.0.1:4666 --projects-dir projects
 ```
 
 Si vas a usarlo desde otra máquina, arráncalo mejor con el script, que crea un token, lo muestra en pantalla y lo reutiliza en cada arranque (se pega en el menú lateral, en «Conexión»):
@@ -76,7 +76,7 @@ Abre <http://127.0.0.1:4666> en el navegador. La primera vez, la lista de proyec
 ![Proyectos vacío](tutorial/es/01-proyectos-vacio.png)
 
 1. **Crear**: empieza uno desde cero (el recuadro del centro de la pantalla tiene el mismo botón, **Crear proyecto**). A su lado, **Música** empieza un proyecto de canciones y **Gráficos animados** uno de gráficos animados.
-2. **Importar dataset**: convierte una lista que ya tengas (JSON o HTML) en un proyecto. Eliges el tipo: **escenas de vídeo**, **gráficos animados** (cada entrada es un gráfico descrito con palabras, con su duración y, si quieres, un rótulo encima) o **canciones**. En [docs/IMPORT.md](../../mediaOrquestator/docs/IMPORT.md#worked-examples) hay un fichero de muestra y un ejemplo paso a paso de cada uno (en inglés). Junto a él, **Importar proyecto completo** lee el `.zip` que exportó otra instalación y te dice qué modelos tienes y cuáles faltan.
+2. **Importar dataset**: convierte una lista que ya tengas (JSON o HTML) en un proyecto. Eliges el tipo: **escenas de vídeo**, **gráficos animados** (cada entrada es un gráfico descrito con palabras, con su duración y, si quieres, un rótulo encima) o **canciones**. En [docs/IMPORT.md](../../veritmo/docs/IMPORT.md#worked-examples) hay un fichero de muestra y un ejemplo paso a paso de cada uno (en inglés). Junto a él, **Importar proyecto completo** lee el `.zip` que exportó otra instalación y te dice qué modelos tienes y cuáles faltan.
 3. **Menú lateral**: las pantallas: Crear, Proyectos, Runs, Estadísticas, Galería (con un botón **Refrescar** arriba a la derecha que vuelve a leer el proyecto; las imágenes de un proyecto de imágenes, el vídeo final y el clip de cada escena de uno de vídeo, y las canciones de uno de música, cada uno con su reproductor), Biblioteca (las canciones de los proyectos de música), Modelos, Entorno, API y Configuración. También tiene el **interruptor de idioma** (English / Español) y el de tema claro/oscuro.
 4. **Estado vacío**: cuando no hay nada, la pantalla te dice qué hacer, no se queda en blanco.
 
@@ -87,11 +87,11 @@ Aquí ves si tu máquina tiene todo lo necesario **antes** de lanzar nada:
 ![Entorno](tutorial/es/02-entorno.png)
 
 1. **Binarios**: `piper`, `sd`, `ffmpeg`, `ffprobe` (los cuatro obligatorios) y `nvidia-smi` (opcional, solo para avisar de la VRAM). También `yt-dlp`, opcional, solo para añadir como origen el audio de un vídeo de YouTube (`bash scripts/get-ytdlp.sh`). También aparecen `ace-lm`, `ace-synth` y `ace-server`, el motor de música: son opcionales y solo hacen falta para los proyectos de música y para la música de fondo generada (se instalan con `bash scripts/build-acestep.sh`; `ace-server` solo si eliges el motor de servidor). Si alguno sale como «falta», debajo aparece el comando que lo arregla (por ejemplo `bash scripts/get-piper.sh`).
-2. **GPUs**: tus tarjetas, con el índice (0, 1…) que usarás después para elegirlas y la memoria libre ahora mismo. Si el escritorio o Ollama usan una GPU, aquí verás menos memoria libre. Si Ollama tiene un modelo cargado en una GPU (lo retiene unos minutos tras usarlo) o queda poca VRAM libre (menos de 6 GB), la tarjeta lleva un aviso, el mismo que sale en el formulario de lanzar de Runs; el botón **Liberar VRAM de Ollama** descarga los modelos cargados para que el render tenga la memoria. Cada tarjeta tiene un botón **Liberar memoria**: descarga esos modelos, para esos contenedores y dice qué soltó (un contenedor que un run está usando no se para, y la fila dice por qué). El último panel, **RAM**, muestra la memoria disponible y en uso (`ram` en el informe). Debajo, **Disco** muestra el espacio libre del disco que guarda los proyectos y avisa cuando es poco (menos de 20 GB; se cambia con `ORCHESTRATOR_MIN_FREE_GB`, o `0` para quitar el aviso). El mismo aviso sale bajo la tabla de proyectos y en el formulario de lanzar de Runs; nunca impide un run.
+2. **GPUs**: tus tarjetas, con el índice (0, 1…) que usarás después para elegirlas y la memoria libre ahora mismo. Si el escritorio o Ollama usan una GPU, aquí verás menos memoria libre. Si Ollama tiene un modelo cargado en una GPU (lo retiene unos minutos tras usarlo) o queda poca VRAM libre (menos de 6 GB), la tarjeta lleva un aviso, el mismo que sale en el formulario de lanzar de Runs; el botón **Liberar VRAM de Ollama** descarga los modelos cargados para que el render tenga la memoria. Cada tarjeta tiene un botón **Liberar memoria**: descarga esos modelos, para esos contenedores y dice qué soltó (un contenedor que un run está usando no se para, y la fila dice por qué). El último panel, **RAM**, muestra la memoria disponible y en uso (`ram` en el informe). Debajo, **Disco** muestra el espacio libre del disco que guarda los proyectos y avisa cuando es poco (menos de 20 GB; se cambia con `VERITMO_MIN_FREE_GB`, o `0` para quitar el aviso). El mismo aviso sale bajo la tabla de proyectos y en el formulario de lanzar de Runs; nunca impide un run.
 3. **Modelos**: lo que ya hay instalado en `models/`. Los de música (`models/music/`) y los de retoque (FLUX.1 Kontext y Qwen-Image-Edit, con sus codificadores de texto y VAE) tienen cada uno su propio recuadro, para no confundirlos con los modelos de imagen.
 4. **Actualizar**: vuelve a comprobar (útil tras instalar algo).
 
-> Si algo obligatorio falta, instálalo con los scripts de `scripts/` (ver la [guía de instalación](../../mediaOrquestator/docs/INSTALL.md); también puedes ejecutar `bash scripts/install.sh`, que detecta lo que falta y te pregunta si instalarlo) y pulsa **Actualizar**.
+> Si algo obligatorio falta, instálalo con los scripts de `scripts/` (ver la [guía de instalación](../../veritmo/docs/INSTALL.md); también puedes ejecutar `bash scripts/install.sh`, que detecta lo que falta y te pregunta si instalarlo) y pulsa **Actualizar**.
 
 ### Pantalla «Configuración»: dónde está Ollama
 
@@ -222,7 +222,7 @@ Elige el **modo**: `video` (todo el pipeline), `images` (solo imágenes, sin nar
 
 ### Revisar los clips desde el dashboard
 
-Cuando el vídeo está hecho, abre **Proyectos → Revisar los clips** (o *Revisar los clips* en el run terminado). *Analizar* mide el color y la nitidez de cada clip y, si eliges un modelo de visión de Ollama, busca caras y cuerpos deformados. Cada **hallazgo** muestra el fotograma señalado, lo que se ha visto y **cómo se arreglará**: recortar el clip, rehacerlo con otra semilla, cambiar el prompt de movimiento (el asistente puede proponer uno más tranquilo) o el de la imagen. Puedes cambiar el arreglo, ignorar un hallazgo y lanzar uno, los marcados o todos como tareas por la cola de runs; cada hallazgo sigue a su run. Si has visto algo que el análisis no vio, escríbelo en *Añadir lo que has visto* con la escena y el segundo. Las revisiones antiguas se borran como los runs. Lo mismo está en el terminal con `orchestrator check`.
+Cuando el vídeo está hecho, abre **Proyectos → Revisar los clips** (o *Revisar los clips* en el run terminado). *Analizar* mide el color y la nitidez de cada clip y, si eliges un modelo de visión de Ollama, busca caras y cuerpos deformados. Cada **hallazgo** muestra el fotograma señalado, lo que se ha visto y **cómo se arreglará**: recortar el clip, rehacerlo con otra semilla, cambiar el prompt de movimiento (el asistente puede proponer uno más tranquilo) o el de la imagen. Puedes cambiar el arreglo, ignorar un hallazgo y lanzar uno, los marcados o todos como tareas por la cola de runs; cada hallazgo sigue a su run. Si has visto algo que el análisis no vio, escríbelo en *Añadir lo que has visto* con la escena y el segundo. Las revisiones antiguas se borran como los runs. Lo mismo está en el terminal con `veritmo check`.
 
 ![La página de revisión](tutorial/es/38-revision.png)
 
@@ -287,7 +287,7 @@ Lo que pones aquí vale para **todas** las escenas (cada una puede sobrescribirl
 
 ![Defaults](tutorial/es/07-editor-ajustes.png)
 
-1. **Checkpoint único / Conjunto de modelos**: elige cómo vas a configurar el modelo (ver [conceptos](../../mediaOrquestator/docs/TUTORIAL.es.md#2-conceptos-mínimos)).
+1. **Checkpoint único / Conjunto de modelos**: elige cómo vas a configurar el modelo (ver [conceptos](../../veritmo/docs/TUTORIAL.es.md#2-conceptos-mínimos)).
 2. **Modelo de difusión** (y, en conjunto, también codificador de texto y VAE). Las listas se llenan con lo que tienes instalado.
 3. **Usar ajustes recomendados**: aparece cuando el modelo elegido tiene preset. Escribe de una vez pasos, resolución y cfg_scale. **Nunca se aplica solo**: tú decides.
 4. **Resolución, Steps, Sampler, FPS…**: los valores que acaba de rellenar el botón. `Steps` son los pasos de dibujado: más pasos = más tiempo; los modelos «Turbo» están hechos para pocos (8).
@@ -313,7 +313,7 @@ Los campos vacíos usan sus valores por defecto, y se ven en pequeño debajo («
 
 > Tiempos medidos aquí (GPU 5060 Ti): Wan 5B ≈ 85 s por escena; A14B ≈ 680 s por escena y ~21 GiB de RAM; AnimateDiff ≈ 60-80 s por clip de 2 s; MiniMax H3 ≈ 260-290 s por plano (≈ 100 s con el LoRA turbo); LTX 2.3 ≈ 145 s por plano de 2 s a 768x416 (116 s en una RTX 4070 de 12 GB).
 
-> **Si el movimiento no sale bien**: cada escena es **una imagen animada durante 2 a 4 segundos**, guardada hacia delante y luego marcha atrás para que haga bucle; no es un clip continuo. Pide **una sola acción por escena**, haz que la escena dure **lo que la parte hacia delante** (fotogramas ÷ fps: 33 fotogramas a 16 fps = 2,06 s) para que no llegue a la mitad invertida, y corta entre escenas en lugar de esperar que una fluya hacia la siguiente. Hay un ejemplo completo, con su `scenes.yaml`, [al final de este tutorial](../../mediaOrquestator/docs/TUTORIAL.es.md#un-ejemplo-completo-dos-amigas-en-un-banco-que-se-van-patinando).
+> **Si el movimiento no sale bien**: cada escena es **una imagen animada durante 2 a 4 segundos**, guardada hacia delante y luego marcha atrás para que haga bucle; no es un clip continuo. Pide **una sola acción por escena**, haz que la escena dure **lo que la parte hacia delante** (fotogramas ÷ fps: 33 fotogramas a 16 fps = 2,06 s) para que no llegue a la mitad invertida, y corta entre escenas en lugar de esperar que una fluya hacia la siguiente. Hay un ejemplo completo, con su `scenes.yaml`, [al final de este tutorial](../../veritmo/docs/TUTORIAL.es.md#un-ejemplo-completo-dos-amigas-en-un-banco-que-se-van-patinando).
 
 ### Vídeo con audio: MiniMax H3
 
@@ -341,7 +341,7 @@ Lo que necesita y lo que cuesta (medido aquí, RTX 5060 Ti de 16 GB, 30 GB de RA
 
 ![Un plano del gato sobre una ola, 864x480, 56 fotogramas, 20 pasos](tutorial/es/45-minimax-gato.png)
 
-**El LoRA turbo es para borradores.** En el editor es el selector opcional «LoRA turbo» (viene en «ninguno»). Con él los pasos por defecto bajan a 4 y un plano tarda **unos 100 s** en vez de 260-290 s, pero con personas las caras se deforman y el fondo se emborrona en el último medio segundo, claramente más que con 20 pasos y sin LoRA (medido en tres planos de dos chicas). Úsalo para probar prompts y déjalo fuera del render final. En el YAML es `defaults.animate.lora` (ver [SCENES_YAML.md](../../mediaOrquestator/docs/SCENES_YAML.md)).
+**El LoRA turbo es para borradores.** En el editor es el selector opcional «LoRA turbo» (viene en «ninguno»). Con él los pasos por defecto bajan a 4 y un plano tarda **unos 100 s** en vez de 260-290 s, pero con personas las caras se deforman y el fondo se emborrona en el último medio segundo, claramente más que con 20 pasos y sin LoRA (medido en tres planos de dos chicas). Úsalo para probar prompts y déjalo fuera del render final. En el YAML es `defaults.animate.lora` (ver [SCENES_YAML.md](../../veritmo/docs/SCENES_YAML.md)).
 
 ### Escenas
 
@@ -518,7 +518,7 @@ Si tienes una imagen o un vídeo que muestra lo que quieres, no hace falta poner
 - **Una escena o una por plano.** Por defecto un vídeo es **una** escena. Elige **Varias escenas (una por plano)** antes de escoger el archivo y el vídeo se corta en sus cambios de plano (como mucho 12; los planos de menos de 1,5 s se funden con el anterior): la propuesta lista **una entrada por plano** con su tiempo, un prompt editable y una casilla para quitarlo. **Crear N escenas** inserta las marcadas justo después de la escena actual, en orden, sin tocar ninguna existente; cada una anota el modelo (`described_by`) y, en un proyecto de vídeo, dura lo que el plano (como silencio, para que el proyecto valide; cámbialo por narración si quieres). Si el proyecto anima, las escenas nuevas se animan con el movimiento de ese plano. Un vídeo sin cortes se queda en una escena y el editor lo dice.
 - **Si el modelo se niega** (o responde algo que no es una descripción) el editor lo dice y ofrece **Probar con** los otros modelos de visión instalados; no se inventa nada. La negativa es del propio modelo, la aplicación no añade ningún filtro de contenido. En nuestras pruebas describió literalmente material adulto con bañadores y lencería; para algo más fuerte, prueba con tus archivos.
 - **Comprobación de edad.** Antes de describir nada se comprueba a cada persona o personaje del archivo (cada fotograma, en un vídeo). Si alguien es o parece menor de 18 años (fotografía, dibujo o anime), o no se puede confirmar su edad, no se describe nada y el archivo se borra. Los prompts que escribe siempre dan una edad adulta. Es una salvaguarda hecha por un modelo, no una garantía, y lo que subes sigue siendo responsabilidad tuya.
-- **Mientras hay una ejecución en marcha** espera (necesita la memoria), y el archivo subido se borra en cuanto usas o descartas la propuesta. Desde el terminal: `bin/orchestrator describe foto.png`.
+- **Mientras hay una ejecución en marcha** espera (necesita la memoria), y el archivo subido se borra en cuanto usas o descartas la propuesta. Desde el terminal: `bin/veritmo describe foto.png`.
 
 ### Música de fondo bajo la voz
 

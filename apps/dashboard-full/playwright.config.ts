@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-// The e2e suite runs against a REAL `orchestrator serve --web-dir` serving the built dashboard, over stub pipeline
+// The e2e suite runs against a REAL `veritmo serve --web-dir` serving the built dashboard, over stub pipeline
 // binaries. Launch it with: npm run dashboard-full:e2e  (which runs e2e/run-e2e.sh and sets E2E_BASE_URL).
 const baseURL = process.env['E2E_BASE_URL'] ?? 'http://127.0.0.1:4670';
 

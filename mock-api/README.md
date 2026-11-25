@@ -1,6 +1,6 @@
 # Mock API server
 
-A copy of the `orchestrator serve` API that starts in a second, with no GPU, no models and without the Go server.
+A copy of the `veritmo serve` API that starts in a second, with no GPU, no models and without the Go server.
 It serves to develop and test **any dashboard** of this workspace.
 
 ```bash
@@ -37,6 +37,33 @@ Options: `--spec <fichero o URL>` (by default, `contract/openapi.yaml` of this r
   anything else delays the entrances a little) and answers the page with `revised`. Refusals as the contract: `400` for an empty or
   over 1000 characters instruction, `404` for a missing project or page, `422` for a page without a block and for `[fail]` in the
   instruction; the stored page is untouched on a refusal.
+- **3D models** (`models3d.mjs`, and the piece's own routes in `music-motion.mjs`): the library `/api/models3d/` (the six CC0 packs of the server's list, a sample
+  of each one's models; an install is `installing` with a growing `progress` for `MOCK_MODELS_MS` ms (2000), then `installed`, and `MOCK_MODELS_FAIL=<pack>` makes
+  that pack fail once; cancel, remove, import of a zip with its required licence: `422` with no `.glb`, `409` for an id in use; the catalog with `q`, `pack`, `tag`,
+  `has_clips` and its page headers; thumbnails, with `kenney-retro-urban-kit` answering `503` as a pack with no preview does), the `model` kind of a project's sources
+  (a `.glb` read as the server reads it: clips, triangles, the pictures it names; `POST .../sources/model` copies one of the library with its pictures as
+  `<pack>--<picture>`) and the models of a piece (`GET`, `PUT`, `DELETE`, `POST .../models`, with `blender-models` in the catalog's features). A description that places a
+  model is refused by its place: no project, a file that is not there, a clip it does not have, a picture it misses.
+- **Making 3D models** (`models3d-generation.mjs`): the engines `GET /api/models3d/engines` with the server's reasons and, for each, the `backends` (TripoSR and Stable Fast 3D run as a .NET service, the default, or in the
+  Docker container, by one saved setting for both; the weights of Stable Fast 3D need the saved Hugging Face key whatever the backend), the setting `model3d_backend` and the block `model3d` of `GET /api/settings` (422 for another value and `no_docker`, 409 for an external service;
+  what ran on the old backend stops), start and stop of each engine's own service (`starting` for `MOCK_MODEL3D_START_MS` ms), the install by backend and parts (`POST .../install` answers the plan with
+  `backend` and `parts` (`service`, `image`, `weights`), `{confirm: true}` starts a job that runs its parts one after the other in about 1.5 x `MOCK_MODELS_MS` ms naming the one that runs, and
+  `.../installs/{id}` with its cancel) and the generations `/api/models3d/generations` (a text as JSON or a picture as multipart: queued, running with the step `picture` and then `model`, done with the
+  model in the pack `generated`; a text with the word `fail` ends failed; the refusals 400 naming the field, 413, 422, 503 with the engine's reason). The catalog also takes `source`, `engine` and
+  `project` and its `q` looks in the text. `MOCK_MODEL3D` picks the machine: unset (TripoSR's service and weights there, stopped; sf3d without a key), `bare` (no weights, to see the install),
+  `noservice` (neither the service nor the weights), `running` (TripoSR up) or `none` (no 3D service: 503); `MOCK_DOCKER=0` is a machine where Docker does not answer, `MOCK_MODEL3D_HOST=1` an external
+  service, `MOCK_INSTALL_FAIL=<part>` makes that part fail once, `MOCK_MODEL3D_SF3D=ready` makes sf3d usable, `MOCK_NO_IMAGE_MODEL=1` is a machine with no image model and `MOCK_ADULT=1` a server that
+  keeps adult content.
+- **A machine without Blender:** `MOCK_BLENDER=missing npm run mock` reports `blender` as missing in `GET /api/environment` (the default is present, version 4.2.3), so the dashboards show nothing 3D.
+- **A server that does not serve model files:** `MOCK_MODEL_FILE=missing npm run mock` answers `404` for `GET /api/models3d/models/{pack}/{name}/file` (the default serves a sample `.glb` with the model's clips and about its triangles, with `ETag`, `304` and `Range`).
+- **Projects of the mode `models3d`** (`models3d-project.mjs`): `output.mode: models3d` with `models:` and `defaults.models3d` is accepted and refused with the server's words (plain unique id, a prompt or an
+  image and not both, 1000 characters, engine, detail, variants 1 to 4, scenes or tracks, the keys in another mode); a run goes through the entries (the phases `render` and `model3d`, `skipped` when not needed),
+  leaves `out/<project>/<id>.glb` and `manifest.json` (served as artifacts), remakes only what a key says changed, copies each model into the pack `generated` with the project and the entry, and fails with the
+  engine's reason when an engine cannot be used (`MOCK_MODEL3D=running` makes triposr usable). `GET /api/runs` and `GET /api/stats` take `mode` (alone or in a list; a mode that is none is a 400 that lists them).
+- **Datasets of 3D models** (`models3d-dataset.mjs`, the assistant in `dataset-assist.mjs`): `POST /api/import/preview` with `mode: "models3d"` reads each tuple's text before the first marker as the prompt of one object and
+  `Engine:`, `Detail:`, `Variants:`, `Seed:`, `Image:` and `Adult:` as one field each (ids made plain and unique with a warning, `rejected` naming the line, the prompt dropped for an `Image:` line, `Adult: true` a 422 `content_not_allowed`
+  unless `MOCK_ADULT=1`); `POST /api/import/confirm` makes the project in the mode `models3d`; `POST /api/assist/dataset` with `mode: "models3d"` writes up to 12 objects alone (the sentence's objects, or three finishes of a single one;
+  `picture` and `project` are a 400) and the prompt presets accept the kind `model3d`.
 - **3D scene descriptions** (`blender-descriptions.mjs`): `POST /api/projects/{id}/blender/descriptions` (the "model" writes the example
   description of the server's tests, kept as `assets/titulo.scene.json`; with `revise` it adjusts the camera's lens by what the request says),
   `GET` and `PUT .../descriptions/{name}` (a save names each fault by its place in the JSON, for example `objects[1].keys[1].t: 7 is outside

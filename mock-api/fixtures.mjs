@@ -1,5 +1,9 @@
 // Realistic answers for the endpoints whose shape is free-form in openapi.yaml (the schema gives no fields to
 // generate from) and that the dashboard reads field by field. Sizes are in bytes; nothing here is a real file.
+import { descriptionProblems, isSceneName } from './blender-descriptions.mjs';
+
+/** The length a 3D scene of an imported dataset is checked against (the mock has no real scene length). */
+const SCENE_SECONDS = 5;
 const GB = 1024 ** 3;
 const MB = 1024 ** 2;
 
@@ -45,6 +49,23 @@ tracks:
     variants: 2
 `;
 
+export const SEED_MODELS = `project: demo-modelos
+output:
+  mode: models3d
+defaults:
+  model: models/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors
+  sampler: euler
+  steps: 30
+  models3d: { engine: triposr, detail: normal }
+models:
+  - id: patin
+    prompt: a retro roller skate, glossy pink
+  - id: copa
+    prompt: a golden trophy
+    variants: 2
+    seed: 7
+`;
+
 const asset = (name, size) => ({ name, size: Math.round(size) });
 
 // A server with a models directory: where the models are installed and what is left on that disk.
@@ -66,7 +87,10 @@ export const environment = () => ({
     { name: 'ffprobe', required: true, present: true, path: '/usr/bin/ffprobe', version: '7.1' },
     { name: 'ace-synth', required: false, present: true, path: '/usr/local/bin/ace-synth' },
     { name: 'yt-dlp', required: false, present: false, fix: 'bash scripts/get-ytdlp.sh' },
-    { name: 'blender', required: false, present: true, path: '/usr/bin/blender', version: '4.2.3', devices: ['OPTIX NVIDIA GeForce RTX 4070'] },
+    // `MOCK_BLENDER=missing` is a machine without Blender: the dashboards then show nothing 3D.
+    process.env.MOCK_BLENDER === 'missing'
+      ? { name: 'blender', required: false, present: false }
+      : { name: 'blender', required: false, present: true, path: '/usr/bin/blender', version: '4.2.3', devices: ['OPTIX NVIDIA GeForce RTX 4070'] },
   ],
   models: [asset('v1-5-pruned-emaonly.safetensors', 4 * GB), asset('juggernautXL_v9.safetensors', 6.6 * GB)],
   retouch: [],
@@ -94,6 +118,7 @@ export const settings = () => ({
   remote: { max_calls: 20 },
   browser: { saved: '', found: false },
   motion_model: { saved: '', default: 'gemma4:26b' },
+  model3d: { backend: 'dotnet', backend_source: 'default' },
   music_motion: { review_drafts: false },
 });
 
@@ -272,6 +297,7 @@ const video = (id, name, description, engine, over = {}) => ({
 // `h3-ref` and `h3-ref-draft` run so the References tab can be tried without the card the real H3 needs.
 const FRAMES = { start_image: true, end_image: true };
 const START = { start_image: true, end_image: false };
+const SCENE = { start_image: false, end_image: false, scene: true };
 const REFERENCES = { start_image: false, end_image: false, reference_images: { min: 1, max: 2 }, reference_videos: { max: 1, max_seconds: 2 }, reference_audios: { max: 1, max_seconds: 3 } };
 const NO_H3 = 'MiniMax H3 does not fit this machine: it needs 14 GB of VRAM and 24 GB of RAM';
 const NO_AD = 'the AnimateDiff motion module is not installed';
@@ -288,6 +314,8 @@ export const VIDEO_OPTIONS = [
   video('ad-low', 'AnimateDiff (low)', 'SD 1.5 with a motion module: the lightest way to move a picture, for very small cards; the result is rougher.', 'animatediff', { inputs: START, available: false, reason: NO_AD, clip_seconds: 2 }),
   video('h3-ref', 'MiniMax H3 (references)', 'MiniMax H3 guided by reference images, videos and audios instead of a start picture. Name the images <Picture 1>, <Picture 2>… in the prompt.', 'minimax-h3', { inputs: REFERENCES, clip_seconds: 4.7 }),
   video('h3-ref-draft', 'MiniMax H3 references (draft)', 'The references option with a turbo LoRA: much faster, a little less faithful.', 'minimax-h3', { inputs: REFERENCES, clip_seconds: 4.7 }),
+  // Never the default; it takes the description of a 3D scene and nothing else, and has no estimate (it depends on the scene).
+  video('blender', 'Blender (3D scene)', 'A 3D scene that Blender draws from a description: write it here, look at a frame and generate. No prompt, no pictures, no sound.', 'blender', { inputs: SCENE, clip_seconds: 5, duration: { min: 1, max: 30, default: 5 }, audio: false }),
 ];
 
 const model = (id, name, description, kind, over = {}) => ({
@@ -343,7 +371,7 @@ export const musicTags = () => ({
  * full_prompt]` tuples of strings, where `full_prompt` is the description followed by marker lines (`Lyrics:`, `Language:`, `BPM:`, `Duration:` and
  * `Key:` for music; `Dialogue:`, `Motion:`, `Seed:` for video). Answers null for what is not that (the server answers 422).
  */
-export const readDataset = (content, mode) => {
+export const readDataset = (content, mode, descriptions = {}) => {
   let rows;
   try {
     rows = JSON.parse(content);
@@ -351,33 +379,58 @@ export const readDataset = (content, mode) => {
     return null;
   }
   if (!Array.isArray(rows) || !rows.length || !rows.every((r) => Array.isArray(r) && r.length >= 4 && r.every((c) => typeof c === 'string'))) return null;
-  const MARK = /^(Lyrics|Tags|Language|BPM|Duration|Key|Dialogue|Motion|Seed|Negative|Speed|Silence|Variants):(.*)$/;
+  const MARK = /^(Lyrics|Tags|Language|BPM|Duration|Key|Dialogue|Motion|Seed|Negative|Speed|Silence|Variants|Blender):(.*)$/;
   const read = rows.map(([id, , , full]) => {
     const lines = full.split('\n');
     const marks = {};
     const text = [];
+    let blenderLines = 0;
     for (const l of lines) {
       const m = MARK.exec(l.trim());
-      if (m) marks[m[1].toLowerCase()] = m[2].trim();
-      else if (l.trim()) text.push(l.trim());
+      // a `Blender:` line is a marker of a storyboard and of graphics (in a songs dataset it stays as text)
+      if (m && (m[1] !== 'Blender' || mode === 'video' || mode === 'motion')) {
+        if (m[1] === 'Blender') blenderLines += 1;
+        marks[m[1].toLowerCase()] = m[2].trim();
+      } else if (l.trim()) text.push(l.trim());
     }
     const description = text.join(' ');
-    // what the real server refuses: an entry with no text, and (for a video) a Dialogue line whose text is not between quotes
-    const reject = !description ? 'entry yields an empty prompt' : mode === 'video' && marks.dialogue !== undefined && !/"[^"]+"/.test(marks.dialogue) ? 'Dialogue line without quoted text' : null;
-    return { id, description, marks, reject };
+    const blender = marks.blender;
+    const discarded = blender !== undefined && marks.motion !== undefined ? ['Motion: a 3D scene has no motion prompt'] : [];
+    if (blender !== undefined) delete marks.motion;
+    // what the real server refuses: an entry with no text, a Dialogue line whose text is not between quotes, and a bad Blender line
+    const reject =
+      blender !== undefined && (blenderLines > 1 || !isSceneName(blender))
+        ? 'Blender line must be one plain <name>.scene.json'
+        : !description && blender === undefined
+          ? 'entry yields an empty prompt'
+          : mode === 'video' && marks.dialogue !== undefined && !/"[^"]+"/.test(marks.dialogue)
+            ? 'Dialogue line without quoted text'
+            : null;
+    return { id, description, marks, reject, discarded };
   });
   const usable = read.filter((r) => !r.reject);
   const quiet = usable.filter((r) => !(mode === 'music' ? r.marks.lyrics : r.marks.dialogue)).length;
-  const mapped = (r) => [`prompt ← ${r.description.length} chars`, ...Object.entries(r.marks).map(([k, v]) => `${k} ← ${v.slice(0, 40)}`)];
-  const key = mode === 'music' ? 'tracks' : 'scenes';
-  const yamlOf = (r) => `  - id: ${JSON.stringify(r.id)}\n    prompt: ${r.description}${mode === 'music' && r.marks.lyrics ? `\n    lyrics: ${r.marks.lyrics}` : ''}${mode === 'music' && r.marks.tags ? `\n    tags: ${r.marks.tags.split(',').map((t) => t.trim()).join(',')}` : ''}${mode === 'video' && r.marks.motion ? `\n    animate: true\n    motion_prompt: ${r.marks.motion}` : ''}${mode === 'video' && r.marks.dialogue ? `\n    tts_text: ${/"([^"]+)"/.exec(r.marks.dialogue)[1]}` : ''}`;
+  const mapped = (r) => [`prompt ← ${r.description.length} chars`, ...Object.entries(r.marks).map(([k, v]) => `${k} ← ${v.slice(0, 40)}`), ...r.discarded.map((d) => `discarded: ${d}`)];
+  // what the server says about the 3D scenes: a line with no file, a file no line names and a description that does not pass
+  const named = usable.filter((r) => r.marks.blender !== undefined).map((r) => r.marks.blender);
+  const warnings =
+    mode === 'music'
+      ? []
+      : [
+          ...usable.filter((r) => r.marks.blender !== undefined && !descriptions[r.marks.blender]).map((r) => `scene "${r.id}": its Blender line names ${r.marks.blender}, which is not in descriptions`),
+          ...Object.keys(descriptions).filter((name) => !named.includes(name)).map((name) => `description ${name} is not named by any scene`),
+          ...Object.entries(descriptions).filter(([name]) => named.includes(name)).flatMap(([name, d]) => descriptionProblems(d, SCENE_SECONDS).map((p) => `description ${name} does not pass: ${p}`)),
+        ];
+  const key = mode === 'music' ? 'tracks' : mode === 'motion' ? 'graphics' : 'scenes';
+  const yamlOf = (r) => `  - id: ${JSON.stringify(r.id)}\n    prompt: ${r.description}${mode === 'music' && r.marks.lyrics ? `\n    lyrics: ${r.marks.lyrics}` : ''}${mode === 'music' && r.marks.tags ? `\n    tags: ${r.marks.tags.split(',').map((t) => t.trim()).join(',')}` : ''}${mode === 'video' && r.marks.motion ? `\n    animate: true\n    motion_prompt: ${r.marks.motion}` : ''}${mode === 'video' && r.marks.dialogue ? `\n    tts_text: ${/"([^"]+)"/.exec(r.marks.dialogue)[1]}` : ''}${mode === 'motion' && r.marks.duration ? `\n    duration: ${r.marks.duration}` : ''}${(mode === 'video' || mode === 'motion') && r.marks.blender ? `\n    blender:\n      build: ${r.marks.blender}` : ''}`;
   return {
-    yaml: `# Generated by \`orchestrator import --mode ${mode}\`.\n\nproject: imported\n\noutput:\n  mode: ${mode}\n\n${key}:\n${usable.map(yamlOf).join('\n')}\n`,
+    yaml: `# Generated by \`veritmo import --mode ${mode}\`.\n\nproject: imported\n\noutput:\n  mode: ${mode}\n\n${key}:\n${usable.map(yamlOf).join('\n')}\n`,
     report: `${read.map((r) => (r.reject ? `[${r.id}]\n  rejected: ${r.reject}` : `[${r.id}]\n${mapped(r).map((m) => `  mapped: ${m}`).join('\n')}`)).join('\n')}\nimported ${usable.length}, ${mode === 'music' ? 'instrumental' : 'silent'} ${quiet}, rejected ${read.length - usable.length}\n`,
     entries: read.map((r) => ({ id: r.id, mapped: r.reject ? [] : mapped(r), discarded: r.reject ? [r.reject] : null })),
     imported: usable.length,
     silent: mode === 'video' ? quiet : 0,
     instrumental: mode === 'music' ? quiet : 0,
     rejected: read.length - usable.length,
+    warnings,
   };
 };

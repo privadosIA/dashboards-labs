@@ -4,7 +4,7 @@
 JSON. The root `package.json` depends on it as `file:vendor/core-dynamic-forms-2.19.1.tgz`, so `npm ci` works without a
 private registry and without the server's repository.
 
-- **Origin:** the `.tgz` published with the library; copied once from `web/vendor/` of the mediaOrquestator repository
+- **Origin:** the `.tgz` published with the library; copied once from `web/vendor/` of the Veritmo repository
   (the same file that repository vendors). From then on it belongs to this repository.
 - **Version:** 2.19.1.
 - **Licence:** this release was published under MIT, Copyright (c) 2026 Jesús Suero; the text is inside the package (`package/LICENSE`)

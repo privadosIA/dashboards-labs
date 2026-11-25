@@ -3,7 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { ImportPreview } from '../../core/api.models';
+import { EnvironmentReport, ImportPreview } from '../../core/api.models';
+import { EnvironmentStore } from '../../core/environment.store';
 import { ImportWizardComponent } from './import-wizard.component';
 
 const PREVIEW: ImportPreview = {
@@ -141,5 +142,26 @@ describe('ImportWizardComponent', () => {
     http.expectOne({ method: 'POST', url: '/api/import/confirm' }).flush({ id: 'graphics' }, { status: 201, statusText: 'Created' });
     await confirm;
     expect(close).toHaveBeenCalledWith({ id: 'graphics', mode: 'motion' });
+  });
+
+  describe('the 3D models choice', () => {
+    const toggles = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('mat-button-toggle')).map((t) => (t as HTMLElement).getAttribute('value'));
+    const report = (present: boolean) => TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
+
+    it('is not offered before the report is known', () => {
+      expect(toggles()).toEqual(['video', 'motion', 'music']);
+    });
+
+    it('is not offered without Blender', () => {
+      report(false);
+      fixture.detectChanges();
+      expect(toggles()).toEqual(['video', 'motion', 'music']);
+    });
+
+    it('is offered with Blender', () => {
+      report(true);
+      fixture.detectChanges();
+      expect(toggles()).toEqual(['video', 'motion', 'music', 'models3d']);
+    });
   });
 });

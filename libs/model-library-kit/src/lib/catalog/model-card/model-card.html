@@ -1,0 +1,62 @@
+<article class="card" [attr.data-testid]="'model-' + model().id">
+  <div class="picture" [attr.data-state]="picture().state">
+    @switch (picture().state) {
+      @case ('ready') {
+        <img [src]="picture().url" [alt]="t.previewAlt(model().name)" loading="lazy" />
+      }
+      @case ('none') {
+        <span class="none" data-testid="model-no-preview"><mat-icon>image_not_supported</mat-icon><span>{{ t.noPreview }}</span></span>
+      }
+    }
+  </div>
+  <h4 class="name data">{{ model().name }}</h4>
+  <p class="meta">
+    <span>{{ model().pack }}</span>
+    @if (model().clips.length) {
+      <span class="data" [title]="clipsText()" data-testid="model-clips">{{ t.clips(model().clips.length) }}</span>
+    } @else {
+      <span>{{ t.noClips }}</span>
+    }
+    <span class="data">{{ t.triangles(model().triangles) }}</span>
+  </p>
+  @if (model().prompt; as prompt) {
+    <p class="made" data-testid="model-prompt"><span class="label">{{ t.madeFrom }}</span><span class="data prompt">{{ prompt }}</span></p>
+  }
+  @if (madeWith(); as made) {
+    <p class="meta" data-testid="model-engine">
+      <span>{{ made }}</span>
+      @if (model().generated_at; as at) {
+        <span>{{ t.madeAt(at) }}</span>
+      }
+    </p>
+  }
+  @if (model().adult) {
+    <p class="attribution" data-testid="model-adult"><mat-icon inline>eighteen_up_rating</mat-icon>{{ t.adult }}</p>
+  }
+  @if (model().tags.length) {
+    <p class="tags">
+      @for (tag of model().tags; track tag) {
+        <span class="tag">{{ tag }}</span>
+      }
+    </p>
+  }
+  <p class="meta" data-testid="model-licence">
+    <span>{{ t.licence(model().licence) }}</span>
+    @if (model().author) {
+      <span>{{ t.by(model().author) }}</span>
+    }
+  </p>
+  @if (model().attribution) {
+    <p class="attribution" data-testid="model-attribution"><mat-icon inline>info</mat-icon>{{ t.attribution }}</p>
+  }
+  <button mat-stroked-button type="button" class="look" [attr.data-testid]="'model-view-' + model().id" [attr.aria-label]="v.openModel(model().name)" (click)="look()">
+    <mat-icon>view_in_ar</mat-icon>
+    {{ v.open }}
+  </button>
+  @if (pickable()) {
+    <button mat-flat-button type="button" class="use" data-testid="model-use" (click)="pick.emit(model())">
+      <mat-icon>add</mat-icon>
+      {{ t.use }}
+    </button>
+  }
+</article>

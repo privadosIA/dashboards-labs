@@ -20,6 +20,15 @@ const BPM = 120;
 /** The colours the design names, as the server resolves them (the mock has one design). */
 const DESIGN = { bg: '#101418', fg: '#f2f2f2', accent: '#ff5a36' };
 
+/** The descriptions kept in memory, by project then file name: the writer and the import both put files here (a restart forgets them). */
+const stored = new Map();
+export const filesOf = (project) => {
+  if (!stored.has(project)) stored.set(project, {});
+  return stored.get(project);
+};
+/** A plain `.scene.json` file name, as the contract names them. */
+export const isSceneName = (name) => typeof name === 'string' && NAME.test(name);
+
 export const example = () => JSON.parse(readFileSync(resolve(here, 'assets/titulo.scene.json'), 'utf8'));
 
 /** The description with every key in seconds and every colour `#rrggbb`, as the server's `resolved`. */
@@ -35,8 +44,11 @@ export function resolveDescription(node) {
   return out;
 }
 
-/** What is wrong with a description, each fault by its place in the JSON (a simplification of the server's checks). */
-export function descriptionProblems(description, seconds) {
+/**
+ * What is wrong with a description, each fault by its place in the JSON (a simplification of the server's checks). `models` is where a model object finds its files:
+ * `{ files, place }` (the project's sources or a piece's models, as `models3d.mjs` keeps them), or `null` for a scene with no project, where a model is refused.
+ */
+export function descriptionProblems(description, seconds, models = null) {
   if (!description || typeof description !== 'object' || Array.isArray(description)) return ['description: must be a JSON object'];
   const problems = [];
   if (description.version !== 1) problems.push('version: must be 1');
@@ -52,8 +64,24 @@ export function descriptionProblems(description, seconds) {
     });
   };
   if (description.camera) checkKeys('camera', description.camera.keys);
-  (Array.isArray(description.objects) ? description.objects : []).forEach((o, i) => checkKeys(`objects[${i}]`, o?.keys));
+  (Array.isArray(description.objects) ? description.objects : []).forEach((o, i) => {
+    checkKeys(`objects[${i}]`, o?.keys);
+    if (o?.type === 'model') problems.push(...modelProblems(o, `objects[${i}]`, models));
+  });
   return problems;
+}
+
+/** What is wrong with an object of type `model`: the file, the clip and the pictures it needs, each by its place (the server reads the file as data before Blender starts). */
+function modelProblems(o, place, models) {
+  if (!models) return [`${place}.file: a model needs the sources of a project: a scene with no project has none`];
+  const { files, place: where } = models;
+  const file = files?.[o.file];
+  if (typeof o.file !== 'string' || file?.kind !== 'model') return [`${place}.file: "${o.file}" is not a model of ${where}`];
+  if (o.fit !== undefined && o.fit !== 'height' && o.fit !== 'largest') return [`${place}.fit: "${o.fit}" is not accepted: use "height" (the default) or "largest"`];
+  const clip = o.animation?.clip;
+  if (clip !== undefined && !file.clips.includes(clip)) return [`${place}.animation.clip: "${clip}" is not in ${o.file} (${file.clips.length ? `clips: ${file.clips.join(', ')}` : 'it has no animations'})`];
+  const missing = file.needs.find((n) => files[n]?.kind !== 'picture');
+  return missing ? [`${place}.file: ${o.file} needs the picture ${missing}, which is not in ${where}`] : [];
 }
 
 /** The lens of the camera changes with what the request says; anything else leaves the description as it was. */
@@ -68,16 +96,12 @@ function revise(description, idea) {
 }
 
 export function blenderDescriptionHandlers({ db }) {
-  /** @type {Map<string, Record<string, any>>} */
-  const stored = new Map();
-  const of = (project) => {
-    if (!stored.has(project)) stored.set(project, {});
-    return stored.get(project);
-  };
+  const of = filesOf;
   const noProject = (id) => (db.projects[id] ? null : err(404, 'not_found', `project "${id}" not found`));
   const badName = (name) => (typeof name === 'string' && NAME.test(name) ? null : err(400, 'invalid_request', 'name: a plain file name ending in .scene.json'));
   const badSeconds = (seconds) =>
     typeof seconds === 'number' && seconds >= MIN_SECONDS && seconds <= MAX_SECONDS ? null : err(400, 'invalid_request', `seconds: from ${MIN_SECONDS} to ${MAX_SECONDS}`);
+  const badAspect = (ratio) => (ratio === undefined || ['16:9', '9:16', '1:1', '4:3', '3:4'].includes(ratio) ? null : err(400, 'invalid_request', 'aspect_ratio: one of 16:9, 9:16, 1:1, 4:3, 3:4'));
   const noDescription = (name) => err(404, 'not_found', `there is no description "${name}": write the scene first`);
   const view = (name, description) => ({ name, description, resolved: resolveDescription(description) });
 
@@ -108,7 +132,7 @@ export function blenderDescriptionHandlers({ db }) {
       if (no) return no;
       const bad = badName(params.name) ?? badSeconds(body?.seconds);
       if (bad) return bad;
-      const problems = descriptionProblems(body.description, body.seconds);
+      const problems = descriptionProblems(body.description, body.seconds, { files: db.models3d?.projects?.[params.id] ?? {}, place: 'the sources' });
       if (problems.length) return err(400, 'invalid_request', problems.join('; '));
       of(params.id)[params.name] = body.description;
       return [200, view(params.name, body.description)];
@@ -121,6 +145,28 @@ export function blenderDescriptionHandlers({ db }) {
       if (bad) return bad;
       if (typeof body.t !== 'number' || body.t < 0) return err(400, 'invalid_request', 't: the second to draw, from 0');
       if (body.width !== undefined && !(Number.isInteger(body.width) && body.width > 0 && body.width <= 960)) return err(400, 'invalid_request', 'width: up to 960');
+      return [200, readFileSync(resolve(here, 'assets/placeholder.png')), 'image/png'];
+    },
+
+    // The same writer and preview with no project: nothing is stored, the description travels in the body.
+    'POST /api/blender/descriptions': ({ body }) => {
+      const bad = badSeconds(body?.seconds) ?? badAspect(body?.aspect_ratio);
+      if (bad) return bad;
+      const idea = typeof body.idea === 'string' ? body.idea.trim() : '';
+      if (!idea) return err(400, 'invalid_request', 'idea: say what the scene shows');
+      if (idea.length > MAX_IDEA) return err(400, 'invalid_request', `idea: at most ${MAX_IDEA} characters`);
+      if (body.description !== undefined && (body.description === null || typeof body.description !== 'object' || Array.isArray(body.description))) return err(400, 'invalid_request', 'description: the JSON of the scene to change');
+      if (idea.includes('[fail]')) return err(422, 'validation_failed', 'no description that passes the checks after 3 attempts: objects[0].keys[1].t: 7 is outside the scene (simulated)');
+      const description = body.description ? revise(body.description, idea) : example();
+      return [200, { description, resolved: resolveDescription(description), provider: 'mock', model: 'mock-model', attempts: 1 }];
+    },
+    'POST /api/blender/preview': ({ body }) => {
+      const bad = badSeconds(body?.seconds) ?? badAspect(body?.aspect_ratio);
+      if (bad) return bad;
+      if (typeof body.t !== 'number' || body.t < 0 || body.t > body.seconds) return err(400, 'invalid_request', `t: the second to draw, from 0 to ${body.seconds}`);
+      if (body.width !== undefined && !(Number.isInteger(body.width) && body.width > 0 && body.width <= 960)) return err(400, 'invalid_request', 'width: up to 960');
+      const faults = descriptionProblems(body.description, body.seconds);
+      if (faults.length) return err(400, 'invalid_request', `description does not pass: ${faults.join('; ')}`);
       return [200, readFileSync(resolve(here, 'assets/placeholder.png')), 'image/png'];
     },
   };

@@ -1,6 +1,6 @@
 {
-  "name": "mediaOrquestator",
-  "short_name": "mediaOrquestator",
+  "name": "Veritmo",
+  "short_name": "Veritmo",
   "description": "Create videos, images and songs on your own machine.",
   "start_url": "/create",
   "scope": "/",

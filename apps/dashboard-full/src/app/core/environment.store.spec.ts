@@ -29,3 +29,32 @@ describe('EnvironmentStore models', () => {
     expect(store.models()).toHaveLength(1);
   });
 });
+
+describe('EnvironmentStore blenderReady', () => {
+  const load = async (binaries: unknown[] | null) => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const store = TestBed.inject(EnvironmentStore);
+    if (binaries === null) return store;
+    const http = TestBed.inject(HttpTestingController);
+    const done = store.refresh();
+    http.expectOne('/api/environment').flush({ binaries, voices: [], loras: [], gpus: [], models: [] });
+    await done;
+    return store;
+  };
+
+  it('is not ready while the report is not loaded', async () => {
+    expect((await load(null)).blenderReady()).toBe(false);
+  });
+
+  it('is ready when blender is present', async () => {
+    expect((await load([{ name: 'blender', required: false, present: true }])).blenderReady()).toBe(true);
+  });
+
+  it('is not ready when blender is missing', async () => {
+    expect((await load([{ name: 'blender', required: false, present: false }])).blenderReady()).toBe(false);
+  });
+
+  it('is not ready when blender is not listed', async () => {
+    expect((await load([{ name: 'chrome', required: false, present: true }])).blenderReady()).toBe(false);
+  });
+});

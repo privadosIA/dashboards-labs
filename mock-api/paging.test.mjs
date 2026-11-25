@@ -17,14 +17,14 @@ test('a page of projects carries the total and the next page, and the headers ar
     const page = await mock.json('GET', '/api/projects?limit=1');
     assert.equal(page.status, 200);
     assert.equal(page.body.length, 1);
-    assert.equal(page.headers.get('x-total-count'), '2');
+    assert.equal(page.headers.get('x-total-count'), '3');
     assert.match(page.headers.get('link'), /offset=1[^>]*>; rel="next"/);
     const exposed = page.headers.get('access-control-expose-headers');
     assert.match(exposed, /X-Total-Count/);
     assert.match(exposed, /Link/);
 
     const all = await mock.json('GET', '/api/projects');
-    assert.equal(all.body.length, 2);
+    assert.equal(all.body.length, 3);
     assert.equal(all.headers.get('x-total-count'), null);
 
     const bad = await mock.json('GET', '/api/projects?sort=weight');

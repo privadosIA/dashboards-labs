@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>{{ t.title }}</h2>
+<mat-dialog-content class="content">
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="touched" (statusChange)="valid.set($event === 'VALID')" />
+
+  <div class="zip">
+    <label class="label" for="import-zip">{{ t.zip }}</label>
+    <input id="import-zip" class="file" type="file" accept=".zip,application/zip" data-testid="import-zip" (change)="pick($event)" />
+    @if (!zip()) {
+      <span class="note" data-testid="import-no-zip">{{ t.noZip }}</span>
+    }
+  </div>
+  <p class="note">{{ t.note }}</p>
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="import-problem"><mat-icon inline>error</mat-icon><span class="data">{{ why }}</span></p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="import-cancel" mat-dialog-close>{{ t.cancel }}</button>
+  <button mat-flat-button type="button" data-testid="import-send" [disabled]="!canSend()" (click)="send()">
+    <mat-icon>upload</mat-icon>
+    {{ sending() ? t.sending : t.send }}
+  </button>
+</mat-dialog-actions>

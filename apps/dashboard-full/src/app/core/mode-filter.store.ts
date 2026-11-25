@@ -1,9 +1,10 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ProjectSummary } from './api.models';
+import { EnvironmentStore } from './environment.store';
 
 /** The output modes a project can have, in the order the selector lists them. */
-export const PROJECT_MODES = ['video', 'images', 'music'] as const;
+export const PROJECT_MODES = ['video', 'images', 'music', 'models3d'] as const;
 export type ProjectMode = (typeof PROJECT_MODES)[number];
 
 const STORAGE_KEY = 'mo.modes';
@@ -70,7 +71,15 @@ export function hiddenModes(projects: readonly ProjectSummary[], chosen: Readonl
  */
 @Injectable({ providedIn: 'root' })
 export class ModeFilterStore {
+  private readonly env = inject(EnvironmentStore);
   readonly modes = signal<ReadonlySet<ProjectMode>>(this.read());
+  /** The modes a person can choose: 3D models only on a machine with Blender. */
+  readonly offered = computed<readonly ProjectMode[]>(() => (this.env.blenderReady() ? PROJECT_MODES : PROJECT_MODES.filter((m) => m !== 'models3d')));
+  /**
+   * The modes the screens list. Without Blender the 3D models mode cannot be chosen, so what already exists of it is always listed
+   * (read-only, with a note) instead of being lost from sight.
+   */
+  readonly active = computed<ReadonlySet<ProjectMode>>(() => (this.env.blenderReady() ? this.modes() : new Set<ProjectMode>([...this.modes(), 'models3d'])));
   /** Desktop and phone, both by default: the same preference for every screen that tells the modes apart. */
   readonly origins = signal<ReadonlySet<ProjectOrigin>>(this.readOrigins());
   /** Whether the runs of animations are listed in Runs (they are not by default; no project list or gallery has them). */

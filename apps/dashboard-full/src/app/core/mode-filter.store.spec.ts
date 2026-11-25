@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ProjectSummary } from './api.models';
+import { EnvironmentReport, ProjectSummary } from './api.models';
+import { EnvironmentStore } from './environment.store';
 import { ModeFilterStore, hiddenModes, hiddenRunModes, originOf, visibleProjects, visibleRuns } from './mode-filter.store';
 
 const P = (id: string, mode: ProjectSummary['mode']): ProjectSummary => ({ id, name: id, mode, scene_count: 1 });
@@ -66,7 +67,7 @@ describe('ModeFilterStore', () => {
     store.add('');
     expect([...store.modes()].sort()).toEqual(['music', 'video']);
     store.showAll();
-    expect(store.modes().size).toBe(3);
+    expect(store.modes().size).toBe(4);
   });
 
   it('a project that was not there before adds its mode; the first listing only records what exists', () => {
@@ -168,5 +169,40 @@ describe('where a project was made', () => {
       store.revealNew([P('v1', 'video'), P('mobile-20261022-gato', 'video')]);
       expect([...store.origins()].sort()).toEqual(['desktop', 'mobile']);
     });
+  });
+
+  it('knows the mode of the 3D models: it is shown, and hidden when the person did not choose it', () => {
+    const list = [P('v1', 'video'), P('o1', 'models3d')];
+    expect(visibleProjects(list, new Set(['video'])).map((p) => p.id)).toEqual(['v1']);
+    expect(visibleProjects(list, new Set(['models3d'])).map((p) => p.id)).toEqual(['o1']);
+    expect(hiddenModes(list, new Set(['video']))).toEqual([{ mode: 'models3d', count: 1 }]);
+  });
+});
+
+describe('ModeFilterStore and Blender', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const setup = (present: boolean | null) => {
+    fakeStorage();
+    const store = TestBed.inject(ModeFilterStore);
+    if (present !== null) TestBed.inject(EnvironmentStore).report.set({ binaries: [{ name: 'blender', required: false, present }], voices: [], loras: [], gpus: [], models: [] } as unknown as EnvironmentReport);
+    return store;
+  };
+
+  it('offers 3D models only with Blender', () => {
+    expect(setup(true).offered()).toContain('models3d');
+    TestBed.resetTestingModule();
+    expect(setup(false).offered()).not.toContain('models3d');
+    TestBed.resetTestingModule();
+    expect(setup(null).offered()).not.toContain('models3d');
+  });
+
+  it('lists what exists of 3D models without Blender, since the mode cannot be chosen, and only the chosen modes with it', () => {
+    const without = setup(false);
+    expect(without.active().has('models3d')).toBe(true);
+    TestBed.resetTestingModule();
+    const withBlender = setup(true);
+    expect(withBlender.active().has('models3d')).toBe(false);
+    withBlender.set(['video', 'models3d']);
+    expect(withBlender.active().has('models3d')).toBe(true);
   });
 });

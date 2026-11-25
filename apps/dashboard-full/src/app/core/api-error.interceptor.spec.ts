@@ -16,7 +16,7 @@ function errResponse(status: number, code: string, message: string): HttpErrorRe
 describe('describeError', () => {
   it('maps connection failures to a "start the server" hint', () => {
     const msg = describeError(new HttpErrorResponse({ status: 0 }));
-    expect(msg).toContain('orchestrator serve');
+    expect(msg).toContain('veritmo serve');
   });
 
   it('keeps the server validation message and says what to do next', () => {

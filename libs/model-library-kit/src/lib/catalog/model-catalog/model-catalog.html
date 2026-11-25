@@ -1,0 +1,79 @@
+<section class="catalog" data-testid="model-catalog">
+  <h3>{{ t.title }}</h3>
+  <p class="note">{{ t.intro }}</p>
+
+  @switch (store.status()) {
+    @case ('loading') {
+      <p class="note" role="status" data-testid="catalog-loading">{{ t.loading }}</p>
+    }
+    @case ('unavailable') {
+      <p class="note" data-testid="catalog-unavailable">{{ t.noPacks }}</p>
+    }
+    @case ('error') {
+      <p class="problem" role="alert" data-testid="catalog-error"><mat-icon inline>error</mat-icon><span class="data">{{ store.error() }}</span></p>
+    }
+    @default {
+      @if (store.installed().length === 0) {
+        <p class="note" data-testid="catalog-no-packs">{{ t.noPacks }}</p>
+      } @else {
+        <div class="filters">
+          <label class="field">
+            <span class="label">{{ t.search }}</span>
+            <input type="search" class="control" data-testid="catalog-search" [value]="text()" (input)="type($any($event.target).value)" />
+          </label>
+          <label class="field">
+            <span class="label">{{ t.pack }}</span>
+            <select class="control" data-testid="catalog-pack" (change)="pack($any($event.target).value)">
+              <option value="">{{ t.allPacks }}</option>
+              @for (p of store.installed(); track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span class="label">{{ t.source }}</span>
+            <select class="control" data-testid="catalog-source" [value]="store.query().source ?? ''" (change)="source($any($event.target).value)">
+              <option value="" [selected]="!store.query().source">{{ t.allSources }}</option>
+              @for (s of sources; track s) {
+                <option [value]="s" [selected]="store.query().source === s">{{ t.sources[s] }}</option>
+              }
+            </select>
+          </label>
+          @if (store.query().source === 'generated') {
+            <label class="field">
+              <span class="label">{{ t.engine }}</span>
+              <select class="control" data-testid="catalog-engine" [value]="store.query().engine ?? ''" (change)="engine($any($event.target).value)">
+                <option value="" [selected]="!store.query().engine">{{ t.allEngines }}</option>
+                <option value="triposr" [selected]="store.query().engine === 'triposr'">TripoSR</option>
+                <option value="sf3d" [selected]="store.query().engine === 'sf3d'">Stable Fast 3D</option>
+              </select>
+            </label>
+          }
+          <label class="field">
+            <span class="label">{{ t.tag }}</span>
+            <select class="control" data-testid="catalog-tag" (change)="tag($any($event.target).value)">
+              <option value="">{{ t.allTags }}</option>
+              @for (tag of store.tags(); track tag) {
+                <option [value]="tag">{{ tag }}</option>
+              }
+            </select>
+          </label>
+          <mat-checkbox data-testid="catalog-clips" (change)="onlyClips($event.checked)">{{ t.onlyClips }}</mat-checkbox>
+        </div>
+
+        @if (store.page().models.length === 0) {
+          <p class="note" data-testid="catalog-empty">{{ t.empty }}</p>
+        }
+        <lab-paged-list [listId]="listId" [data]="store.page().models" [total]="store.page().total" [index]="store.pageIndex()" [pageSizeOptions]="store.sizeOptions" [lang]="lang" (pageChange)="store.go($event)">
+          <ng-template let-models>
+            <div class="grid" appAutoAnimate>
+              @for (model of models; track model.id) {
+                <lab-model-card [model]="model" [pickable]="pickable()" (pick)="picked.emit($event)" />
+              }
+            </div>
+          </ng-template>
+        </lab-paged-list>
+      }
+    }
+  }
+</section>

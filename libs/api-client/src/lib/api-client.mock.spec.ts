@@ -17,9 +17,10 @@ describe('ApiClient against the mock of the API', () => {
 
   const keys = (o: object) => Object.keys(o).sort();
 
-  it('reads the settings with the seven blocks the contract describes, field by field', async () => {
+  it('reads the settings with the eight blocks the contract describes, field by field', async () => {
     const s = await firstValueFrom(api.get('/api/settings'));
-    expect(keys(s)).toEqual(['browser', 'diffrhythm2', 'heartmula', 'motion_model', 'music_motion', 'ollama', 'remote']);
+    expect(keys(s)).toEqual(['browser', 'diffrhythm2', 'heartmula', 'model3d', 'motion_model', 'music_motion', 'ollama', 'remote']);
+    expect(s.model3d).toEqual({ backend: 'dotnet', backend_source: 'default' });
     expect(keys(s.ollama)).toEqual(['host', 'remote', 'saved', 'source']);
     expect(keys(s.heartmula)).toEqual(['backend', 'backend_source', 'consented', 'remote', 'saved', 'source', 'token_set']);
     expect(keys(s.diffrhythm2)).toEqual(['backend', 'backend_source', 'consented', 'remote', 'saved', 'source', 'token_set']);

@@ -4,6 +4,12 @@
   description="Install and manage image, video, LoRA, music and voice models, and download keys."
   i18n-description="@@models.desc"
 >
+  @if (env.blenderReady()) {
+    <a data-keep moActions mat-stroked-button routerLink="/models/3d" data-testid="models-to-3d">
+      <mat-icon>view_in_ar</mat-icon>
+      <ng-container i18n="@@models.to3d">3D library</ng-container>
+    </a>
+  }
   <button data-keep moActions mat-stroked-button data-testid="refresh" (click)="refresh()">
     <mat-icon>refresh</mat-icon>
     <ng-container i18n="@@models.refresh">Refresh</ng-container>
@@ -42,7 +48,7 @@
     } @else if (!md.linked) {
       <p class="warn" role="status" data-testid="models-dir-unlinked">
         <mat-icon inline>warning</mat-icon>
-        <ng-container i18n="@@models.dirUnlinked">Run "orchestrator models migrate" so the server uses this folder.</ng-container>
+        <ng-container i18n="@@models.dirUnlinked">Run "veritmo models migrate" so the server uses this folder.</ng-container>
       </p>
     }
   </section>

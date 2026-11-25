@@ -22,7 +22,7 @@
     </ng-template>
 
     <ng-template moSlot="picture">
-      <app-scene-picture-mode [mode]="pictureMode()" [motionAllowed]="motionAvailable() || motionScene()" [partAllowed]="partAllowed()" [blenderAllowed]="videoMode()" (modeChange)="setPictureMode($event)" />
+      <app-scene-picture-mode [mode]="pictureMode()" [motionAllowed]="motionAvailable() || motionScene()" [partAllowed]="partAllowed()" [blenderAllowed]="videoMode() && (env.blenderReady() || blenderScene())" (modeChange)="setPictureMode($event)" />
     </ng-template>
 
     <ng-template moSlot="motionPart">
@@ -31,7 +31,13 @@
 
     <ng-template moSlot="blender">
       @if (s.blender; as blender) {
-        <app-scene-blender [sceneId]="s.id" [build]="blender.build" [sceneSeconds]="s.silence_seconds" />
+        @if (env.blenderReady()) {
+          <lab-blender-scene [scope]="blender.build" kind="project" [sceneSeconds]="s.silence_seconds" />
+        } @else {
+          <p class="note" data-testid="scene-needs-blender">
+            <ng-container i18n="@@blender.needed">Needs Blender</ng-container> · <span class="mo-data">{{ blender.build }}</span>
+          </p>
+        }
       }
     </ng-template>
 

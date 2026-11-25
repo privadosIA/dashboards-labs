@@ -4,28 +4,56 @@
   description="Each project is a collection of scenes with its settings, its cache and its results."
   i18n-description="@@projects.desc"
 >
-  <button moActions mat-flat-button class="mo-compact" data-testid="create-project" (click)="createProject()" i18n-aria-label="@@projects.createAction" aria-label="Create project">
-    <mat-icon>add</mat-icon>
-    <ng-container i18n="@@projects.createShort">Create</ng-container>
-  </button>
-  <button moActions mat-stroked-button class="mo-compact" data-testid="create-music-project" (click)="createMusicProject()" i18n-aria-label="@@projects.newMusicAction" aria-label="Music project">
-    <mat-icon>library_music</mat-icon>
-    <ng-container i18n="@@projects.musicShort">Music</ng-container>
-  </button>
-  @if (availability.available('motion_graphics')) {
-    <button moActions mat-stroked-button class="mo-compact" data-testid="create-motion-project" (click)="createMotionProject()" i18n-aria-label="@@projects.newMotionAction" aria-label="Motion graphics project">
-      <mat-icon>movie_filter</mat-icon>
-      <ng-container i18n="@@projects.motionShort">Motion graphics</ng-container>
+  <div moActions class="create-actions" data-testid="create-actions">
+    <button mat-flat-button class="mo-compact" data-testid="create-project" (click)="createProject()" i18n-aria-label="@@projects.createAction" aria-label="Create project">
+      <mat-icon>add</mat-icon>
+      <ng-container i18n="@@projects.createShort">Create</ng-container>
     </button>
+    <button mat-stroked-button class="mo-compact" data-testid="create-music-project" (click)="createMusicProject()" i18n-aria-label="@@projects.newMusicAction" aria-label="Music project">
+      <mat-icon>library_music</mat-icon>
+      <ng-container i18n="@@projects.musicShort">Music</ng-container>
+    </button>
+    @if (models3dAvailable()) {
+      <button mat-stroked-button class="mo-compact" data-testid="create-models-project" (click)="createModelsProject()" i18n-aria-label="@@projects.newModelsAction" aria-label="3D models project">
+        <mat-icon>deployed_code</mat-icon>
+        <ng-container i18n="@@projects.modelsShort">3D models</ng-container>
+      </button>
+    }
+    @if (availability.available('motion_graphics')) {
+      <button mat-stroked-button class="mo-compact" data-testid="create-motion-project" (click)="createMotionProject()" i18n-aria-label="@@projects.newMotionAction" aria-label="Motion graphics project">
+        <mat-icon>movie_filter</mat-icon>
+        <ng-container i18n="@@projects.motionShort">Motion graphics</ng-container>
+      </button>
+    }
+    <button mat-stroked-button class="mo-compact" data-testid="import-package" (click)="openPackageImport()" i18n-aria-label="@@projects.importPackageAction" aria-label="Import full project">
+      <mat-icon>folder_zip</mat-icon>
+      <ng-container i18n="@@projects.importFullShort">Import full</ng-container>
+    </button>
+    <button mat-stroked-button class="mo-compact" data-testid="import-project" (click)="openImport()">
+      <mat-icon>upload_file</mat-icon>
+      <ng-container i18n="@@projects.importAction">Import dataset</ng-container>
+    </button>
+  </div>
+  @if (!simple.simple()) {
+    <div moActions class="section-links" data-testid="section-links">
+      @if (links.shown('models3d') && library3dAvailable()) {
+        <a
+          mat-stroked-button
+          class="mo-compact"
+          routerLink="/models/3d"
+          target="_blank"
+          (click)="openSection($event)"
+          data-testid="open-models3d"
+          i18n-aria-label="@@projects.openModels3dAria"
+          aria-label="3D library, opens in a new tab"
+        >
+          <mat-icon>view_in_ar</mat-icon>
+          <ng-container i18n="@@projects.openModels3d">3D library</ng-container>
+          <mat-icon iconPositionEnd class="new-tab" aria-hidden="true">open_in_new</mat-icon>
+        </a>
+      }
+    </div>
   }
-  <button moActions mat-stroked-button class="mo-compact" data-testid="import-package" (click)="openPackageImport()" i18n-aria-label="@@projects.importPackageAction" aria-label="Import full project">
-    <mat-icon>folder_zip</mat-icon>
-    <ng-container i18n="@@projects.importFullShort">Import full</ng-container>
-  </button>
-  <button moActions mat-stroked-button class="mo-compact" data-testid="import-project" (click)="openImport()">
-    <mat-icon>upload_file</mat-icon>
-    <ng-container i18n="@@projects.importAction">Import dataset</ng-container>
-  </button>
 </mo-page-header>
 
 @if (store.loaded() && only(); as mode) {
@@ -103,22 +131,28 @@
               @if (p.client && p.client !== 'embedded') {
                 <span class="client-badge" data-testid="client-badge" [matTooltip]="p.client">{{ p.client }}</span>
               }
+              @if (needsBlender(p)) {
+                <span class="client-badge" data-testid="needs-blender" i18n="@@blender.needed">Needs Blender</span>
+              }
       </ng-template>
       <ng-template dfCell="size" let-p>
         <span class="mo-data" data-testid="project-size">{{ p.sizeBytes === null ? '' : (p.sizeBytes | moBytes) }}</span>
       </ng-template>
       <ng-template dfCell="actions" let-p>
         <span class="row-actions">
-              <a
-                mat-icon-button
-                [routerLink]="editLink(p)"
-                i18n-matTooltip="@@projects.edit"
-                matTooltip="Edit scenes or tracks"
-                i18n-aria-label="@@projects.edit"
-                aria-label="Edit scenes or tracks"
-              >
-                <mat-icon>edit</mat-icon>
-              </a>
+              @if (!needsBlender(p)) {
+                <a
+                  mat-icon-button
+                  [routerLink]="editLink(p)"
+                  [attr.data-testid]="'edit-' + p.id"
+                  i18n-matTooltip="@@projects.edit"
+                  matTooltip="Edit scenes or tracks"
+                  i18n-aria-label="@@projects.edit"
+                  aria-label="Edit scenes or tracks"
+                >
+                  <mat-icon>edit</mat-icon>
+                </a>
+              }
               @if (p.mode === 'video') {
                 <a
                   mat-icon-button

@@ -8,6 +8,7 @@ export const environment: Environment = {
     music: false,
     flow: false,
     dataset: false,
+    models3d: false,
   },
   demoNotice: true,
 };

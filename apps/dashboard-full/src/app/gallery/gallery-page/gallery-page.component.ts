@@ -78,13 +78,13 @@ export class GalleryPageComponent implements OnInit {
   /** The projects of the modes the user chose (and those with no mode): the selector lists only these. */
   protected readonly simpleMode = inject(SimpleModeStore);
   /** The simple version shows every mode of what Create made, whatever the saved preference says; that preference is left alone. */
-  private readonly shownModes = computed<ReadonlySet<ProjectMode>>(() => (this.simpleMode.simple() ? new Set(PROJECT_MODES) : this.modes.modes()));
+  private readonly shownModes = computed<ReadonlySet<ProjectMode>>(() => (this.simpleMode.simple() ? new Set(PROJECT_MODES) : this.modes.active()));
   private readonly shownOrigins = computed<ReadonlySet<ProjectOrigin>>(() => (this.simpleMode.simple() ? new Set<ProjectOrigin>(['mobile']) : this.modes.origins()));
   protected readonly listed = computed(() => visibleProjects(this.projects.projects(), this.shownModes(), this.shownOrigins()));
   protected readonly hidden = computed(() => hiddenModes(this.projects.projects(), this.shownModes(), this.shownOrigins()));
 
   protected modeLabel(mode: string): string {
-    return mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : $localize`:@@modes.music:Music`;
+    return mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : mode === 'models3d' ? $localize`:@@modes.models3d:3D models` : $localize`:@@modes.music:Music`;
   }
 
   /** Optional project preselection (?project=), e.g. from a run's result link. */

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Builds the dashboard, builds the server from a checkout of it (MEDIAORQUESTATOR_DIR, by default ../mediaOrquestator
-# next to this repository; only read, the binary goes to a scratch folder), starts `orchestrator serve --web-dir` in a
+# Builds the dashboard, builds the server from a checkout of it (VERITMO_DIR, by default ../veritmo
+# next to this repository; only read, the binary goes to a scratch folder), starts `veritmo serve --web-dir` in a
 # scratch workdir with stub pipeline binaries, and runs the Playwright suite against it. The built dashboard served by
 # the server from a directory IS the system under test.
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_DIR="$(cd "$APP_DIR/../.." && pwd)"
-SERVER_DIR="$(cd "${MEDIAORQUESTATOR_DIR:-$REPO_DIR/../mediaOrquestator}" && pwd)"
+SERVER_DIR="$(cd "${VERITMO_DIR:-$REPO_DIR/../veritmo}" && pwd)"
 DIST="$REPO_DIR/dist/dashboard-full/browser"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/mo-e2e.XXXXXX")"
 PORT="${E2E_PORT:-4670}"
@@ -16,11 +16,11 @@ trap 'kill "$SERVE_PID" 2>/dev/null || true; rm -rf "$WORK"' EXIT
 echo "== building the dashboard (production)"
 (cd "$REPO_DIR" && npx ng build dashboard-full >/dev/null)
 
-echo "== building orchestrator from $SERVER_DIR"
+echo "== building veritmo from $SERVER_DIR"
 # The private edition has its own files (see internal/edition); the public tree does not.
 TAGS=""
 [ -f "$SERVER_DIR/internal/edition/edition_private.go" ] && TAGS="private"
-(cd "$SERVER_DIR" && go build ${TAGS:+-tags "$TAGS"} -o "$WORK/orchestrator" ./cmd/orchestrator)
+(cd "$SERVER_DIR" && go build ${TAGS:+-tags "$TAGS"} -o "$WORK/veritmo" ./cmd/veritmo)
 
 echo "== stub pipeline binaries"
 mkdir -p "$WORK/bin" "$WORK/models" "$WORK/voices" "$WORK/projects"
@@ -132,8 +132,8 @@ chmod +x "$WORK/bin/"*
 # scratch dir, never the real user's, and start from no OLLAMA_HOST.
 export XDG_CONFIG_HOME="$WORK/config"
 unset OLLAMA_HOST
-echo "== starting orchestrator serve --web-dir on 127.0.0.1:$PORT"
-(cd "$WORK" && ./orchestrator serve --addr "127.0.0.1:$PORT" --web-dir "$DIST") &
+echo "== starting veritmo serve --web-dir on 127.0.0.1:$PORT"
+(cd "$WORK" && ./veritmo serve --addr "127.0.0.1:$PORT" --web-dir "$DIST") &
 SERVE_PID=$!
 for i in $(seq 1 30); do
   sleep 0.3
@@ -151,8 +151,8 @@ mkdir -p "$WORK/remote/projects"
 ln -s "$WORK/bin" "$WORK/remote/bin"
 ln -s "$WORK/models" "$WORK/remote/models"
 ln -s "$WORK/voices" "$WORK/remote/voices"
-echo "== starting REMOTE orchestrator serve on 127.0.0.1:$REMOTE_PORT (token + CORS)"
-(cd "$WORK/remote" && ../orchestrator serve --addr "127.0.0.1:$REMOTE_PORT" --token "$REMOTE_TOKEN" --cors-origin "http://127.0.0.1:$PORT") &
+echo "== starting REMOTE veritmo serve on 127.0.0.1:$REMOTE_PORT (token + CORS)"
+(cd "$WORK/remote" && ../veritmo serve --addr "127.0.0.1:$REMOTE_PORT" --token "$REMOTE_TOKEN" --cors-origin "http://127.0.0.1:$PORT") &
 REMOTE_PID=$!
 trap 'kill "$SERVE_PID" "$REMOTE_PID" 2>/dev/null || true; rm -rf "$WORK"' EXIT
 for i in $(seq 1 30); do

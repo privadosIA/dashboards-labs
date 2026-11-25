@@ -101,6 +101,7 @@ test('the sort fields of every list are the ones its contract names', () => {
     '/api/library/songs': ['created_at', 'title', 'rating', 'duration'],
     '/api/prompts': ['title', 'created_at'],
     '/api/generations': ['created_at'],
+    '/api/models3d/generations': ['created_at'],
     '/api/hyperframes/blocks': ['name', 'title'],
     '/api/music-motion/parts': ['name', 'updated_at'],
     '/api/music-motion/part-drafts': ['created_at', 'name'],
@@ -113,5 +114,6 @@ test('the sort fields of every list are the ones its contract names', () => {
     '/api/image-edits': ['created_at'],
     '/api/video-edits': ['created_at'],
     '/api/motions': ['created_at', 'title'],
+    '/api/models3d/models': [],
   });
 });

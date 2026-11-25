@@ -1,9 +1,9 @@
 {
-  "source": "../mediaOrquestator/internal/server/openapi.yaml",
-  "fetchedAt": "2026-11-23T15:42:18.368Z",
-  "sha256": "22c9e7664c95e66f221f4ebf548655658116b052942f0e40c14bbc635d519a8e",
+  "source": "../veritmo/internal/server/openapi.yaml",
+  "fetchedAt": "2026-11-25T08:44:52.349Z",
+  "sha256": "64771dd29a9137d9e6b8c4cd712f49aadcaf93b8c4f6075f39a687bf674b76ce",
   "openapi": "3.0.3",
-  "title": "mediaOrquestator API",
+  "title": "Veritmo API",
   "version": "1",
-  "operations": 239
+  "operations": 269
 }

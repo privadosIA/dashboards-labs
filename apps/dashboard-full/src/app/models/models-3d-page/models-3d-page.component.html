@@ -1,0 +1,17 @@
+<mo-page-header
+  title="3D library"
+  i18n-title="@@models3d.title"
+  description="Packs of 3D models with their animations and the models the server makes: install a pack, import a zip, make a model, and find the one to place in a 3D scene."
+  i18n-description="@@models3d.desc"
+>
+  <a moActions mat-stroked-button routerLink="/models" data-testid="models3d-back">
+    <mat-icon>arrow_back</mat-icon>
+    <ng-container i18n="@@models3d.back">AI models</ng-container>
+  </a>
+</mo-page-header>
+
+<div class="sections">
+  <lab-model-making (made)="generationEnded()" (showModel)="show($event)" />
+  <lab-model-packs (changed)="packsChanged()" [refresh]="ended()" />
+  <lab-model-catalog id="models3d-catalog" [refresh]="changes()" [find]="found()" />
+</div>

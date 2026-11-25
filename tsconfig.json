@@ -19,6 +19,12 @@
       "@lab/api-client": [
         "./libs/api-client/src/public-api.ts"
       ],
+      "@lab/blender-scene-kit": [
+        "./libs/blender-scene-kit/src/public-api.ts"
+      ],
+      "@lab/model-library-kit": [
+        "./libs/model-library-kit/src/public-api.ts"
+      ],
       "@lab/forms-kit": [
         "./libs/forms-kit/src/public-api.ts"
       ],

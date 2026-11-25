@@ -1,7 +1,7 @@
 {
   "name": "@dashboards-lab/mock-api",
   "version": "0.1.0",
-  "description": "Servidor simulado de la API de mediaOrquestator, para desarrollar un dashboard sin el servidor Go",
+  "description": "Servidor simulado de la API de Veritmo, para desarrollar un dashboard sin el servidor Go",
   "type": "module",
   "private": true,
   "license": "Apache-2.0",

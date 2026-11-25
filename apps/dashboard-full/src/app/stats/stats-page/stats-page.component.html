@@ -63,7 +63,7 @@
     aria-label="Project type" i18n-aria-label="@@stats.modeAria"
     data-testid="stats-mode"
   >
-    @for (m of modes; track m.id) {
+    @for (m of modes(); track m.id) {
       <mat-button-toggle [value]="m.id" [attr.data-testid]="'stats-mode-' + (m.id || 'all')" [attr.title]="m.id === '' ? allHint : null">{{ m.label }}</mat-button-toggle>
     }
   </mat-button-toggle-group>

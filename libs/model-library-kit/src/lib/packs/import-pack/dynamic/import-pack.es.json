@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "id": "import-pack",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "id",
+      "type": "text",
+      "label": "Id del pack",
+      "description": "Minúsculas, dígitos y guiones, hasta 48.",
+      "validation": {
+        "required": true,
+        "pattern": "^[a-z0-9][a-z0-9-]{0,47}$",
+        "messages": { "required": "Dale un id al pack.", "pattern": "Minúsculas, dígitos y guiones, hasta 48, empezando por letra o dígito." }
+      },
+      "props": { "attributes": { "data-testid": "import-id" } }
+    },
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nombre (opcional)",
+      "props": { "attributes": { "data-testid": "import-name" } }
+    },
+    {
+      "key": "author",
+      "type": "text",
+      "label": "Autor (opcional)",
+      "props": { "attributes": { "data-testid": "import-author" } }
+    },
+    {
+      "key": "licence",
+      "type": "text",
+      "label": "Licencia",
+      "description": "Lo que permite el pack, con tus palabras (por ejemplo «CC-BY 4.0, citar al autor»).",
+      "validation": { "required": true, "messages": { "required": "La licencia es obligatoria: di qué permite el pack." } },
+      "props": { "attributes": { "data-testid": "import-licence" } }
+    },
+    {
+      "key": "sourceUrl",
+      "type": "text",
+      "label": "De dónde viene (opcional)",
+      "props": { "attributes": { "data-testid": "import-source" } }
+    }
+  ]
+}
