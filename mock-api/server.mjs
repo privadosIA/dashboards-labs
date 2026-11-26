@@ -123,7 +123,7 @@ function settingsBody() {
   return body;
 }
 const modeOf = (cfg) => cfg?.output?.mode ?? 'video';
-// Who made a project: the `client:` of its scenes.yaml, `embedded` when it has none (the mock has no managed projects).
+// Who made a project: the `client:` of its scenes.yaml, `embedded` when it has none (the managed ones come from the generation API records).
 const CLIENT_RE = /^[a-z0-9-]{1,32}$/;
 const clientOf = (id) => {
   const c = parse(db.projects[id]).value?.client;
@@ -153,6 +153,23 @@ const summary = (id) => {
   if (typeof value.adult === 'boolean') s.adult = value.adult;
   return s;
 };
+
+// The generation API projects (`api-gen-`, `api-edit-`, `api-vid-`) that `?managed=include` adds to the listing: ordinary rows with
+// their `client` (`unknown` when the request named none) and their `kind`; `?client=` keeps only those clients.
+const managedProjects = (query) => {
+  if (query.get('managed') !== 'include') return [];
+  const c = query.get('client');
+  const set = c === null ? null : new Set(c.split(','));
+  const rows = [
+    ...Object.values(db.generations).map((r) => ({ r, mode: 'video', kind: 'generation' })),
+    ...Object.values(db.edits).map((r) => ({ r, mode: 'images', kind: 'image_edit' })),
+    ...Object.values(db.videoEdits ?? {}).map((r) => ({ r, mode: 'video', kind: 'video_edit' })),
+  ];
+  return rows
+    .map(({ r, mode, kind }) => ({ id: r.id, name: r.id, mode, scene_count: 1, client: r.request?.client ?? r.client ?? 'unknown', kind }))
+    .filter((p) => !set || set.has(p.client));
+};
+const listedProjects = (query) => [...Object.keys(db.projects).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).filter(wanted(query)).map(summary), ...managedProjects(query).sort((a, b) => (a.id < b.id ? -1 : 1))];
 
 // ---------------------------------------------------------------- runs + SSE
 const listeners = new Map(); // runId -> Set<res>
@@ -279,7 +296,7 @@ const handlers = {
   'GET /api/openapi.json': () => [200, spec],
   'POST /api/auth/ticket': () => [200, { ticket: randomBytes(12).toString('hex'), expiresAt: new Date(Date.now() + 6e5).toISOString() }],
 
-  'GET /api/projects': ({ query, page }) => listQuery(query) ?? page(Object.keys(db.projects).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).filter(wanted(query)).map(summary), { search: ['id', 'name'], by: { updated_at: (p) => db.updated?.[p.id] ?? '' } }),
+  'GET /api/projects': ({ query, page }) => listQuery(query) ?? page(listedProjects(query), { search: ['id', 'name'], by: { updated_at: (p) => db.updated?.[p.id] ?? '' } }),
   'POST /api/projects': ({ body }) => {
     if (badId(body?.id)) return err(400, 'invalid_request', 'invalid project id');
     if (db.projects[body.id]) return err(409, 'conflict', `project "${body.id}" already exists`);

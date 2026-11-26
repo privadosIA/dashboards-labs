@@ -80,7 +80,7 @@ describe('RunMonitorComponent', () => {
     const fixture = TestBed.createComponent(RunMonitorComponent);
     fixture.componentRef.setInput('id', run.id);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush(projects);
+    http.expectOne('/api/projects?managed=include').flush(projects);
     http.expectOne(`/api/runs/${run.id}`).flush({ run });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -226,7 +226,7 @@ describe('RunMonitorComponent', () => {
     const fixture = TestBed.createComponent(RunMonitorComponent);
     fixture.componentRef.setInput('id', 'run-deleted');
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([]);
+    http.expectOne('/api/projects?managed=include').flush([]);
     http
       .expectOne('/api/runs/run-deleted')
       .flush({ error: { code: 'not_found', message: 'run run-deleted not found' } }, { status: 404, statusText: 'Not Found' });

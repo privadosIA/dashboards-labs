@@ -61,7 +61,7 @@ describe('ProjectsListComponent', () => {
   async function create(list: ProjectSummary[] = TWO) {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush(list);
+    http.expectOne('/api/projects?managed=include').flush(list);
     http.expectOne('/api/storage').flush({ projects: list.map((p, i) => ({ id: p.id, total_bytes: (i + 1) * 1_000_000 })), disk: { free_bytes: 5e9, total_bytes: 1e10 } });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -107,7 +107,7 @@ describe('ProjectsListComponent', () => {
       .flush({ id: 'nuevo' }, { status: 201, statusText: 'Created' });
     await Promise.resolve();
     http
-      .expectOne('/api/projects')
+      .expectOne('/api/projects?managed=include')
       .flush([{ id: 'nuevo', name: 'nuevo', mode: 'video', scene_count: 1 }]);
     await done;
     expect(navigate).toHaveBeenCalledWith(['/projects', 'nuevo', 'editor']);
@@ -161,7 +161,7 @@ describe('ProjectsListComponent', () => {
       .expectOne({ method: 'DELETE', url: '/api/projects/demo' })
       .flush(null, { status: 204, statusText: 'No Content' });
     await Promise.resolve();
-    http.expectOne('/api/projects').flush([TWO[1]]);
+    http.expectOne('/api/projects?managed=include').flush([TWO[1]]);
     await done2;
     expect(storeOf(fixture).projects().some((p) => p.id === 'demo')).toBe(false);
   });
@@ -287,7 +287,7 @@ describe('ProjectsListComponent', () => {
       const f = await create([MIXED[0]]);
       const store = storeOf(f);
       const done = store.load();
-      http.expectOne('/api/projects').flush([MIXED[0], MIXED[2]]); // a music project appeared
+      http.expectOne('/api/projects?managed=include').flush([MIXED[0], MIXED[2]]); // a music project appeared
       await done;
       f.detectChanges();
       await f.whenStable();
@@ -341,7 +341,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'cancion' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects').flush([]); // the list reloads after creating
+      http.expectOne('/api/projects?managed=include').flush([]); // the list reloads after creating
       await tick();
       return { done }; // an object, not the promise: awaiting it must not wait for the whole flow
     };
@@ -354,7 +354,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).toBe(musicStarterYaml('cancion'));
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects').flush([MUSIC]);
+      http.expectOne('/api/projects?managed=include').flush([MUSIC]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'cancion', 'music']);
     });
@@ -370,7 +370,7 @@ describe('ProjectsListComponent', () => {
       const del = http.expectOne({ method: 'DELETE', url: '/api/projects/cancion' });
       del.flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -462,7 +462,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'objetos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await tick();
       return { done };
     };
@@ -490,7 +490,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).not.toContain('fps');
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects').flush([OBJECTS]);
+      http.expectOne('/api/projects?managed=include').flush([OBJECTS]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'objetos', 'models3d']);
     });
@@ -504,7 +504,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'DELETE', url: '/api/projects/objetos' }).flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -561,7 +561,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'graficos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await tick();
       http.expectOne('/api/projects/graficos/config').flush({ yaml: '', parsed: BASE, valid: true });
       await tick();
@@ -570,7 +570,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).toContain('silence_seconds: 4');
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'graficos', 'editor']);
     });
@@ -582,7 +582,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'graficos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await tick();
       http.expectOne('/api/projects/graficos/config').flush({ yaml: '', parsed: BASE, valid: true });
       await tick();
@@ -593,7 +593,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'DELETE', url: '/api/projects/graficos' }).flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -618,7 +618,7 @@ describe('ProjectsListComponent', () => {
       await Promise.resolve();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'nuevo' }, { status: 201, statusText: 'Created' });
       await Promise.resolve();
-      http.expectOne('/api/projects').flush([]);
+      http.expectOne('/api/projects?managed=include').flush([]);
       return done;
     }
 
@@ -704,7 +704,7 @@ describe('ProjectsListComponent', () => {
   it('shows who made a project beside its name, unless it is an ordinary one', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([
+    http.expectOne('/api/projects?managed=include').flush([
       { id: 'a', name: 'A', mode: 'video', scene_count: 1, client: 'embedded' },
       { id: 'b', name: 'B', mode: 'video', scene_count: 1, client: 'dashboard-full' },
     ]);
@@ -718,7 +718,7 @@ describe('ProjectsListComponent', () => {
   it('takes the free space and the warning from the media disk and shows its folder when the server has one', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush(TWO);
+    http.expectOne('/api/projects?managed=include').flush(TWO);
     http.expectOne('/api/storage').flush({
       projects: [],
       // the server's own disk is almost full, the media disk is not: only the second counts
@@ -749,7 +749,7 @@ describe('ProjectsListComponent', () => {
   it('marks the free-space line when the disk is low', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush(TWO);
+    http.expectOne('/api/projects?managed=include').flush(TWO);
     http.expectOne('/api/storage').flush({ projects: [], disk: { free_bytes: 3e9, total_bytes: 1e12, warn_below_bytes: 20e9, low: true } });
     await fixture.whenStable();
     fixture.detectChanges();

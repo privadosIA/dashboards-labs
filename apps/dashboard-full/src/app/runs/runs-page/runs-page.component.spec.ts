@@ -105,7 +105,7 @@ describe('RunsPageComponent', () => {
 
     fixture = TestBed.createComponent(RunsPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([{ id: 'demo', name: 'demo', mode: 'video', scene_count: 1 }]);
+    http.expectOne('/api/projects?managed=include').flush([{ id: 'demo', name: 'demo', mode: 'video', scene_count: 1 }]);
     http.expectOne('/api/environment').flush(ENV);
     for (let i = 0; i < 5; i++) await Promise.resolve();
     http.expectOne('/api/runs').flush(HISTORY);

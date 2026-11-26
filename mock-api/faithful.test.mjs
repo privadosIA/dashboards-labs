@@ -218,6 +218,7 @@ test('client is kept and filtered, managed accepts only include, and a managed p
     const only = await (await fetch(`${base}/api/projects?client=dashboard-full`)).json();
     assert.deepEqual(only.map((p) => p.id), ['from-studio']);
     assert.equal((await fetch(`${base}/api/projects?managed=include`)).status, 200);
+    assert.ok(!all.some((p) => p.id.startsWith('api-')), 'without managed=include no generation API project is listed');
     assert.equal((await fetch(`${base}/api/projects?managed=all`)).status, 400);
     assert.equal((await fetch(`${base}/api/library?client=Bad Name`)).status, 400);
     const storage = await (await fetch(`${base}/api/storage?client=dashboard-full`)).json();

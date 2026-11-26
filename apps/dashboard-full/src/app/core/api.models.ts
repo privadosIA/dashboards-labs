@@ -15,6 +15,8 @@ export interface ProjectSummary {
   error?: string;
   /** Who made the project: a client name, `embedded` (a normal project) or `unknown`. */
   client?: string;
+  /** Only on a generation API project (listed with `managed=include`). */
+  kind?: 'generation' | 'image_edit' | 'video_edit';
 }
 
 /** What `PATCH /api/projects/{id}` changes: only the fields sent. `null` removes the client or the label. */

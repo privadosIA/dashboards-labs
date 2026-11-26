@@ -24,7 +24,7 @@ describe('ProjectsStore: changing a project and restoring a version', () => {
     expect(req.request.body).toEqual({ name: 'Renamed' });
     req.flush({ id: 'demo', name: 'Renamed', mode: 'video', scene_count: 1, client: 'embedded' });
     await Promise.resolve();
-    http.expectOne('/api/projects').flush(listing('Renamed'));
+    http.expectOne('/api/projects?managed=include').flush(listing('Renamed'));
     const project = await done;
     expect(project.name).toBe('Renamed');
     expect(store.projects()[0].name).toBe('Renamed');
@@ -43,9 +43,21 @@ describe('ProjectsStore: changing a project and restoring a version', () => {
     expect(req.request.method).toBe('POST');
     req.flush({ restored: 3, project: { id: 'demo', name: 'Old name', mode: 'video', scene_count: 1, client: 'embedded' } });
     await Promise.resolve();
-    http.expectOne('/api/projects').flush(listing('Old name'));
+    http.expectOne('/api/projects?managed=include').flush(listing('Old name'));
     expect((await done).restored).toBe(3);
     expect(store.projects()[0].name).toBe('Old name');
+  });
+
+  it('deletes a generation API project by its own endpoint and an ordinary one by /projects, reading the list again each time', async () => {
+    for (const [id, url] of [['api-gen-1', '/api/generations/api-gen-1'], ['api-edit-2', '/api/image-edits/api-edit-2'], ['api-vid-3', '/api/video-edits/api-vid-3'], ['demo', '/api/projects/demo']]) {
+      const done = store.remove(id);
+      const req = http.expectOne(url);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      await Promise.resolve();
+      http.expectOne('/api/projects?managed=include').flush([]);
+      await done;
+    }
   });
 });
 

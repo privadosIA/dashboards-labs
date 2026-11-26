@@ -355,3 +355,21 @@ test('reuse_inputs_of repeats a generation with its inputs, and is refused with 
     m.stop();
   }
 });
+
+test('the generations are listed as projects only with managed=include, with their client and kind, and ?client= keeps those clients', async () => {
+  const m = await start();
+  try {
+    const made = await (await m.json('POST', '/api/generations', { prompt: 'a cat', option: 'ltx', duration: 2, client: 'other-client' })).json();
+    const plain = await (await fetch(`${m.base}/api/projects`)).json();
+    assert.ok(!plain.some((p) => p.id === made.id), 'not listed without managed=include');
+    const all = await (await fetch(`${m.base}/api/projects?managed=include`)).json();
+    fits('/api/projects', 'get', 200, all);
+    const row = all.find((p) => p.id === made.id);
+    assert.deepEqual([row.mode, row.client, row.kind], ['video', 'other-client', 'generation']);
+    assert.ok(all.some((p) => p.id === 'demo'), 'the ordinary projects stay');
+    const only = await (await fetch(`${m.base}/api/projects?managed=include&client=other-client`)).json();
+    assert.deepEqual(only.map((p) => p.id), [made.id]);
+  } finally {
+    m.stop();
+  }
+});

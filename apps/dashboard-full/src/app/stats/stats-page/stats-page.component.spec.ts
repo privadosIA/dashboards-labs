@@ -74,7 +74,7 @@ describe('StatsPageComponent', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(StatsPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([{ id: 'demo', name: 'demo', mode: 'video', scene_count: 1 }, { id: 'test', name: 'test', mode: 'video', scene_count: 1 }]);
+    http.expectOne('/api/projects?managed=include').flush([{ id: 'demo', name: 'demo', mode: 'video', scene_count: 1 }, { id: 'test', name: 'test', mode: 'video', scene_count: 1 }]);
     http.match('/api/settings/database').forEach((r) => r.flush({ saved: { driver: 'sqlite', password_set: false }, active: { driver: 'sqlite', password_set: false }, restart_required: false, source: 'default', server_name: 'x', servers }));
     http.match('/api/settings/monitoring').forEach((r) => r.flush({ tools: grafana ? [{ id: 'grafana', address: grafana, secret_set: false, source: 'setting' }] : [] }));
     statsReq().flush(stats);
@@ -163,7 +163,7 @@ describe('StatsPageComponent', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(StatsPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([]);
+    http.expectOne('/api/projects?managed=include').flush([]);
     http.match('/api/settings/database').forEach((r) => r.flush({ saved: { driver: 'sqlite', password_set: false }, active: { driver: 'sqlite', password_set: false }, restart_required: false, source: 'default', server_name: 'x', servers: [] }));
     http.match('/api/settings/monitoring').forEach((r) => r.flush({ tools: [] }));
     const req = statsReq();
@@ -294,7 +294,7 @@ describe('StatsPageComponent', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(StatsPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects').flush([]);
+    http.expectOne('/api/projects?managed=include').flush([]);
     http.match('/api/settings/database').forEach((r) => r.flush({ saved: { driver: 'sqlite', password_set: false }, active: { driver: 'sqlite', password_set: false }, restart_required: false, source: 'default', server_name: 'x', servers: [] }));
     http.match('/api/settings/monitoring').forEach((r) => r.flush({ tools: [] }));
     statsReq().flush({ error: { code: 'internal_error', message: 'x' } }, { status: 500, statusText: 'x' });

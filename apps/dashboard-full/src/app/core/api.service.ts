@@ -125,6 +125,13 @@ import {
  * Thin typed client over the management API (docs/http-api.md). All
  * pipeline knowledge stays on the server; this only moves JSON.
  */
+/** The generation API projects and the endpoint that deletes each kind. */
+const MANAGED_DELETE: ReadonlyArray<readonly [string, string]> = [
+  ['api-gen-', 'generations'],
+  ['api-edit-', 'image-edits'],
+  ['api-vid-', 'video-edits'],
+];
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
@@ -145,7 +152,8 @@ export class ApiService {
 
   // --- projects -----------------------------------------------------------
   listProjects(): Observable<ProjectSummary[]> {
-    return this.http.get<ProjectSummary[]>(`${this.base}/projects`);
+    // `managed=include`: the videos and edits the other dashboards make through the generation API are projects too.
+    return this.http.get<ProjectSummary[]>(`${this.base}/projects`, { params: { managed: 'include' } });
   }
 
   createProject(id: string): Observable<{ id: string }> {
@@ -183,8 +191,10 @@ export class ApiService {
     return this.http.post<{ id: string }>(`${this.base}/projects/${projectId}/videoclip`, req);
   }
 
+  /** A generation API project (`api-gen-`, `api-edit-`, `api-vid-`) is deleted by its own endpoint; `DELETE /projects/{id}` refuses it. */
   deleteProject(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/projects/${id}`);
+    const own = MANAGED_DELETE.find(([prefix]) => id.startsWith(prefix));
+    return this.http.delete<void>(own ? `${this.base}/${own[1]}/${id}` : `${this.base}/projects/${id}`);
   }
 
   /** Changes the name, the client or the adult label of a project by field; only what is sent changes. The dialog explains `409` and `422`. */
