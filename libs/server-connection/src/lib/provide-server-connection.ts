@@ -1,7 +1,8 @@
-import { EnvironmentProviders, InjectionToken, inject, makeEnvironmentProviders, provideAppInitializer } from '@angular/core';
+import { EnvironmentProviders, InjectionToken, inject, makeEnvironmentProviders, provideAppInitializer, provideEnvironmentInitializer } from '@angular/core';
 import { API_CLIENT_CONFIG } from '@lab/api-client';
 
 import { ConnectionService } from './connection.service';
+import { DialogDrag } from './dialog-drag';
 import type { ConnectionLang } from './texts';
 
 export interface ServerConnectionOptions {
@@ -19,6 +20,8 @@ export const SERVER_CONNECTION_LANG = new InjectionToken<ConnectionLang>('SERVER
 export function provideServerConnection(options: ServerConnectionOptions): EnvironmentProviders {
   return makeEnvironmentProviders([
     { provide: SERVER_CONNECTION_LANG, useValue: options.lang },
+    // every dialog of the dashboard can be moved by its title
+    provideEnvironmentInitializer(() => inject(DialogDrag).start()),
     // A deployment's config.json is known before the first call to the API, which is made after the initializers.
     provideAppInitializer(() => inject(ConnectionService).loadDefaults()),
     {

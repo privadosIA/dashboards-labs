@@ -1,16 +1,25 @@
+<ng-template #paginator>
+  @if (needed()) {
+    <mat-paginator
+      [class.sticky]="sticky()"
+      [length]="length()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions()"
+      (page)="onPage($event)"
+      [showFirstLastButtons]="!phone()"
+    />
+  }
+</ng-template>
+@if (sticky()) {
+  <ng-container *ngTemplateOutlet="paginator" />
+}
 <div class="items" data-testid="paged-list-items">
   <ng-container *ngTemplateOutlet="itemsTpl(); context: { $implicit: page() }" />
 </div>
 @if (nothingMatches() && emptyFilterText()) {
   <p class="no-match" role="status" data-testid="paged-list-no-match">{{ emptyFilterText() }}</p>
 }
-@if (needed()) {
-  <mat-paginator
-    [length]="length()"
-    [pageIndex]="pageIndex()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="pageSizeOptions()"
-    (page)="onPage($event)"
-    [showFirstLastButtons]="!phone()"
-  />
+@if (!sticky()) {
+  <ng-container *ngTemplateOutlet="paginator" />
 }

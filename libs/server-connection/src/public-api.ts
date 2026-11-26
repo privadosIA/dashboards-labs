@@ -6,3 +6,4 @@ export { ConnectionDialog, CONNECTION_RELOAD, type ProbeResult } from './lib/con
 export { ConnectionDialogService } from './lib/connection-dialog.service';
 export { ConnectionButton } from './lib/connection-button/connection-button';
 export { unauthorizedInterceptor } from './lib/unauthorized.interceptor';
+export { DialogDrag } from './lib/dialog-drag';

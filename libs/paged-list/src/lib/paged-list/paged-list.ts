@@ -56,9 +56,13 @@ export class PagedList<T> {
   private readonly intl = inject(LabPaginatorIntl);
 
   readonly listId = input.required<string>();
+  /** The paginator goes above the list and stays at the top edge of the scrolling panel the list is in, instead of at the end of a long list. */
+  readonly sticky = input(false);
   readonly data = input.required<readonly T[]>();
   readonly lang = input<PagedListLang>('en');
   readonly pageSizeOptions = input<readonly number[]>(PAGE_SIZE_OPTIONS);
+  /** The size a list starts with (one of `pageSizeOptions`) until the person chooses another; by default 10. */
+  readonly initialSize = input<number | null>(null);
   readonly filter = input<((item: T) => boolean) | null>(null);
   readonly emptyFilterText = input('');
   /** Server mode: how many items the server has in all. Without it the list pages `data` itself. */
@@ -75,7 +79,7 @@ export class PagedList<T> {
   /** The page shown: the host's in server mode, the list's own otherwise. */
   protected readonly pageIndex = computed(() => (this.server() ? this.index() : this.localIndex()));
   private readonly sizeOverride = signal<number | null>(null);
-  protected readonly pageSize = computed(() => this.sizeOverride() ?? this.store.get(this.listId(), this.pageSizeOptions().includes(10) ? 10 : this.pageSizeOptions()[0]));
+  protected readonly pageSize = computed(() => this.sizeOverride() ?? this.store.get(this.listId(), this.initialSize() ?? (this.pageSizeOptions().includes(10) ? 10 : this.pageSizeOptions()[0])));
   /** The items that pass the filter, or all of them without one. */
   protected readonly shown = computed(() => {
     const keep = this.filter();

@@ -8,6 +8,16 @@ mat-paginator {
   font-size: var(--lab-fs-meta);
 }
 
+// In a panel that scrolls, the paginator goes above the list and is always in sight: it sticks to the top edge of the scrolling box.
+mat-paginator.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--lab-surface);
+  border-top: 0;
+  border-bottom: 1px solid var(--lab-line);
+}
+
 // Items never make the page move sideways, and the list shows no scrollbar of its own (clip, unlike auto, adds none).
 .items {
   overflow-x: clip;
