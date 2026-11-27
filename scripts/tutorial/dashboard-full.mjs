@@ -510,6 +510,14 @@ export default {
       steps: [{ waitFor: 'tbody tr' }, { wait: 400 }],
       marks: [{ selector: '[data-testid="create-project"]' }, { selector: 'tbody tr td:first-child' }, { selector: 'tbody tr td:last-child', at: 'left' }],
     },
+    // Client labels: who made each item, with a colour, as chips that narrow the list (the mock labels its seed projects with MOCK_CLIENT_LABELS=1)
+    {
+      file: '63-etiquetas-cliente',
+      height: 900,
+      path: '/projects',
+      steps: [{ waitFor: '[data-testid="client-chips"]' }, { click: '[data-testid="client-chip-dashboard-full"]' }, { wait: 600 }],
+      marks: [{ selector: '[data-testid="client-chip-dashboard-full"]' }, { selector: '[data-testid="client-chip-menu-dashboard-full"]' }, { selector: '[data-testid="client-badge"]' }, { selector: '[data-testid="mode-select"]' }],
+    },
     {
       file: '43-almacenamiento',
       path: '/projects',

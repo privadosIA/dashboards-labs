@@ -1,5 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -10,6 +11,7 @@ import { of } from 'rxjs';
 import { EnvironmentReport, ProjectSummary } from '../../core/api.models';
 import { ALL_AVAILABLE, missing } from '../../core/availability.fake';
 import { AvailabilityStore } from '../../core/availability.store';
+import { ClientLabelsStore } from '../../core/client-labels.store';
 import { EnvironmentStore } from '../../core/environment.store';
 import { ModeFilterStore } from '../../core/mode-filter.store';
 import { SimpleModeStore } from '../../core/simple-mode.store';
@@ -36,10 +38,17 @@ describe('ProjectsListComponent', () => {
   let http: HttpTestingController;
   /** What the engines of the 3D service answer: `null` is a server with none (nothing about 3D models is offered). */
   let engines: unknown = null;
+  /** The client labels the server reports: the store of the labels is proved on its own, here it only says what the list draws. */
+  const labelsStub = { labels: signal<unknown[]>([]), loaded: signal(true), load: vi.fn(() => Promise.resolve()), colorOf: (name: string) => (name === 'other-app' ? '#aa3355' : '#336699') };
+  const label = (name: string, total: number) => ({ name, color: name === 'other-app' ? '#aa3355' : '#336699', counts: {}, total, last_used: '2026-11-27T10:00:00Z' });
 
   beforeEach(async () => {
     engines = null;
     sessionStorage.clear();
+    localStorage.removeItem('mo.clients');
+    localStorage.removeItem('mo.animations');
+    labelsStub.labels.set([]);
+    labelsStub.load.mockClear();
     dialogOpen.mockClear();
     await TestBed.configureTestingModule({
       imports: [ProjectsListComponent],
@@ -50,6 +59,7 @@ describe('ProjectsListComponent', () => {
         provideRouter([]),
         provideAppDynamicForms(),
         { provide: ServerModelLibrary, useValue: { engines: () => of(engines) } },
+        { provide: ClientLabelsStore, useValue: labelsStub },
       ],
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
@@ -61,8 +71,8 @@ describe('ProjectsListComponent', () => {
   async function create(list: ProjectSummary[] = TWO) {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush(list);
-    http.expectOne('/api/storage').flush({ projects: list.map((p, i) => ({ id: p.id, total_bytes: (i + 1) * 1_000_000 })), disk: { free_bytes: 5e9, total_bytes: 1e10 } });
+    http.expectOne('/api/projects?managed=all').flush(list);
+    http.expectOne('/api/storage?managed=all').flush({ projects: list.map((p, i) => ({ id: p.id, total_bytes: (i + 1) * 1_000_000 })), disk: { free_bytes: 5e9, total_bytes: 1e10 } });
     await fixture.whenStable();
     fixture.detectChanges();
     return fixture;
@@ -107,7 +117,7 @@ describe('ProjectsListComponent', () => {
       .flush({ id: 'nuevo' }, { status: 201, statusText: 'Created' });
     await Promise.resolve();
     http
-      .expectOne('/api/projects?managed=include')
+      .expectOne('/api/projects?managed=all')
       .flush([{ id: 'nuevo', name: 'nuevo', mode: 'video', scene_count: 1 }]);
     await done;
     expect(navigate).toHaveBeenCalledWith(['/projects', 'nuevo', 'editor']);
@@ -161,7 +171,7 @@ describe('ProjectsListComponent', () => {
       .expectOne({ method: 'DELETE', url: '/api/projects/demo' })
       .flush(null, { status: 204, statusText: 'No Content' });
     await Promise.resolve();
-    http.expectOne('/api/projects?managed=include').flush([TWO[1]]);
+    http.expectOne('/api/projects?managed=all').flush([TWO[1]]);
     await done2;
     expect(storeOf(fixture).projects().some((p) => p.id === 'demo')).toBe(false);
   });
@@ -287,7 +297,7 @@ describe('ProjectsListComponent', () => {
       const f = await create([MIXED[0]]);
       const store = storeOf(f);
       const done = store.load();
-      http.expectOne('/api/projects?managed=include').flush([MIXED[0], MIXED[2]]); // a music project appeared
+      http.expectOne('/api/projects?managed=all').flush([MIXED[0], MIXED[2]]); // a music project appeared
       await done;
       f.detectChanges();
       await f.whenStable();
@@ -341,7 +351,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'cancion' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]); // the list reloads after creating
+      http.expectOne('/api/projects?managed=all').flush([]); // the list reloads after creating
       await tick();
       return { done }; // an object, not the promise: awaiting it must not wait for the whole flow
     };
@@ -354,7 +364,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).toBe(musicStarterYaml('cancion'));
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([MUSIC]);
+      http.expectOne('/api/projects?managed=all').flush([MUSIC]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'cancion', 'music']);
     });
@@ -370,7 +380,7 @@ describe('ProjectsListComponent', () => {
       const del = http.expectOne({ method: 'DELETE', url: '/api/projects/cancion' });
       del.flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -462,7 +472,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'objetos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await tick();
       return { done };
     };
@@ -490,7 +500,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).not.toContain('fps');
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([OBJECTS]);
+      http.expectOne('/api/projects?managed=all').flush([OBJECTS]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'objetos', 'models3d']);
     });
@@ -504,7 +514,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'DELETE', url: '/api/projects/objetos' }).flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -561,7 +571,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'graficos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await tick();
       http.expectOne('/api/projects/graficos/config').flush({ yaml: '', parsed: BASE, valid: true });
       await tick();
@@ -570,7 +580,7 @@ describe('ProjectsListComponent', () => {
       expect(save.request.body.yaml).toContain('silence_seconds: 4');
       save.flush({ saved: true });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await done;
       expect(navigate).toHaveBeenCalledWith(['/projects', 'graficos', 'editor']);
     });
@@ -582,7 +592,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'graficos' }, { status: 201, statusText: 'Created' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await tick();
       http.expectOne('/api/projects/graficos/config').flush({ yaml: '', parsed: BASE, valid: true });
       await tick();
@@ -593,7 +603,7 @@ describe('ProjectsListComponent', () => {
       await tick();
       http.expectOne({ method: 'DELETE', url: '/api/projects/graficos' }).flush(null, { status: 204, statusText: 'No Content' });
       await tick();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       await expect(done).rejects.toBeTruthy();
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -618,7 +628,7 @@ describe('ProjectsListComponent', () => {
       await Promise.resolve();
       http.expectOne({ method: 'POST', url: '/api/projects' }).flush({ id: 'nuevo' }, { status: 201, statusText: 'Created' });
       await Promise.resolve();
-      http.expectOne('/api/projects?managed=include').flush([]);
+      http.expectOne('/api/projects?managed=all').flush([]);
       return done;
     }
 
@@ -682,7 +692,7 @@ describe('ProjectsListComponent', () => {
     (el.querySelector('[data-testid="storage-demo"]') as HTMLButtonElement).click();
     expect(dialogOpen).toHaveBeenCalledWith(StorageDialogComponent, expect.objectContaining({ data: { projectId: 'demo', freeBytes: 5e9 } }));
     // closing it reloads the sizes, which changed if something was cleaned
-    http.expectOne('/api/storage').flush({ projects: [{ id: 'demo', total_bytes: 500_000 }, { id: 'roto', total_bytes: 0 }], disk: { free_bytes: 6e9 } });
+    http.expectOne('/api/storage?managed=all').flush({ projects: [{ id: 'demo', total_bytes: 500_000 }, { id: 'roto', total_bytes: 0 }], disk: { free_bytes: 6e9 } });
     await fixture.whenStable();
     fixture.detectChanges();
     expect(el.querySelector('[data-testid=disk-free]')?.textContent).toContain('5,6 GB');
@@ -704,22 +714,97 @@ describe('ProjectsListComponent', () => {
   it('shows who made a project beside its name, unless it is an ordinary one', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([
+    http.expectOne('/api/projects?managed=all').flush([
       { id: 'a', name: 'A', mode: 'video', scene_count: 1, client: 'embedded' },
       { id: 'b', name: 'B', mode: 'video', scene_count: 1, client: 'dashboard-full' },
     ]);
-    http.expectOne('/api/storage').flush({ projects: [], disk: {} });
+    http.expectOne('/api/storage?managed=all').flush({ projects: [], disk: {} });
     await fixture.whenStable();
     fixture.detectChanges();
     const badges = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="client-badge"]')).map((b) => b.textContent?.trim());
     expect(badges).toEqual(['dashboard-full']);
   });
 
+  describe('client labels', () => {
+    const PROJECTS: ProjectSummary[] = [
+      { id: 'a', name: 'A', mode: 'video', scene_count: 1, client: 'embedded' },
+      { id: 'b', name: 'B', mode: 'video', scene_count: 1, client: 'other-app' },
+      { id: 'c', name: 'C', mode: 'video', scene_count: 1, client: 'dashboard-full' },
+      { id: 'm', name: 'M', mode: 'music', scene_count: 0, client: 'other-app' },
+    ];
+    const el = (f: { nativeElement: unknown }) => f.nativeElement as HTMLElement;
+    // each row has two `.clip` cells, the id and then the name
+    const ids = (f: { nativeElement: unknown }) => Array.from(el(f).querySelectorAll('.clip')).filter((_, i) => i % 2 === 0).map((c) => c.textContent?.trim());
+    const chip = (f: { nativeElement: unknown }, name: string) => el(f).querySelector<HTMLButtonElement>(`[data-testid="client-chip-${name}"] .chip-main`)!;
+    const settle = async (f: { detectChanges(): void; whenStable(): Promise<unknown> }) => {
+      await f.whenStable();
+      f.detectChanges();
+    };
+
+    it('draws the chips of the labels the server reports above the list and reads them again when the list is read', async () => {
+      labelsStub.labels.set([label('other-app', 4), label('embedded', 9)]);
+      const fixture = await create(PROJECTS);
+      expect(Array.from(el(fixture).querySelectorAll('.chip .name')).map((n) => n.textContent?.trim())).toEqual(['other-app', 'embedded']);
+      expect(labelsStub.load).toHaveBeenCalled();
+    });
+
+    it('narrows the list to the chosen label, adds a second one, and the choice is remembered', async () => {
+      labelsStub.labels.set([label('other-app', 4), label('dashboard-full', 1), label('embedded', 9)]);
+      const fixture = await create(PROJECTS);
+      expect(ids(fixture)).toEqual(['a', 'b', 'c']);
+      chip(fixture, 'other-app').click();
+      await settle(fixture);
+      expect(ids(fixture)).toEqual(['b']);
+      chip(fixture, 'dashboard-full').click();
+      await settle(fixture);
+      expect(ids(fixture)).toEqual(['b', 'c']);
+      expect(JSON.parse(localStorage.getItem('mo.clients') ?? '[]')).toEqual(['other-app', 'dashboard-full']);
+    });
+
+    it('combines the label with the modes the user chose', async () => {
+      labelsStub.labels.set([label('other-app', 4)]);
+      const fixture = await create(PROJECTS);
+      TestBed.inject(ModeFilterStore).set(['music']);
+      chip(fixture, 'other-app').click();
+      await settle(fixture);
+      expect(ids(fixture)).toEqual(['m']);
+    });
+
+    it('says which labels are chosen when no project has them, and clears them', async () => {
+      labelsStub.labels.set([label('claude-test', 1), label('embedded', 9)]);
+      const fixture = await create([{ id: 'a', name: 'A', mode: 'video', scene_count: 1, client: 'embedded' }]);
+      chip(fixture, 'claude-test').click();
+      await settle(fixture);
+      const none = el(fixture).querySelector('[data-testid="projects-none-clients"]')!;
+      expect(none.textContent).toContain('claude-test');
+      (el(fixture).querySelector('[data-testid="projects-none-clients-clear"]') as HTMLButtonElement).click();
+      await settle(fixture);
+      expect(ids(fixture)).toEqual(['a']);
+    });
+
+    it('draws the badge with the colour of the label and shows embedded too while a label is chosen', async () => {
+      labelsStub.labels.set([label('other-app', 4), label('embedded', 9)]);
+      const fixture = await create(PROJECTS);
+      const badge = () => Array.from(el(fixture).querySelectorAll<HTMLElement>('[data-testid="client-badge"]'));
+      expect(badge().map((b) => [b.textContent?.trim(), b.style.getPropertyValue('--chip-color')])).toEqual([['other-app', '#aa3355'], ['dashboard-full', '#336699']]);
+      chip(fixture, 'embedded').click();
+      await settle(fixture);
+      expect(badge().map((b) => b.textContent?.trim())).toEqual(['embedded']);
+    });
+
+    it('does not filter by a label the server no longer reports', async () => {
+      localStorage.setItem('mo.clients', JSON.stringify(['gone']));
+      labelsStub.labels.set([label('other-app', 4)]);
+      const fixture = await create(PROJECTS);
+      expect(ids(fixture)).toEqual(['a', 'b', 'c']);
+    });
+  });
+
   it('takes the free space and the warning from the media disk and shows its folder when the server has one', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush(TWO);
-    http.expectOne('/api/storage').flush({
+    http.expectOne('/api/projects?managed=all').flush(TWO);
+    http.expectOne('/api/storage?managed=all').flush({
       projects: [],
       // the server's own disk is almost full, the media disk is not: only the second counts
       disk: { free_bytes: 3e9, total_bytes: 1e11, low: true },
@@ -738,7 +823,7 @@ describe('ProjectsListComponent', () => {
       expect.objectContaining({ data: { projectId: 'demo', freeBytes: 600e9, mediaDir: '/mnt/backups/media' } }),
     );
     // closing the dialog reloads the sizes
-    http.expectOne('/api/storage').flush({ projects: [], disk: {} });
+    http.expectOne('/api/storage?managed=all').flush({ projects: [], disk: {} });
   });
 
   it('shows no folder when the server has no media directory', async () => {
@@ -749,13 +834,101 @@ describe('ProjectsListComponent', () => {
   it('marks the free-space line when the disk is low', async () => {
     const fixture = TestBed.createComponent(ProjectsListComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush(TWO);
-    http.expectOne('/api/storage').flush({ projects: [], disk: { free_bytes: 3e9, total_bytes: 1e12, warn_below_bytes: 20e9, low: true } });
+    http.expectOne('/api/projects?managed=all').flush(TWO);
+    http.expectOne('/api/storage?managed=all').flush({ projects: [], disk: { free_bytes: 3e9, total_bytes: 1e12, warn_below_bytes: 20e9, low: true } });
     await fixture.whenStable();
     fixture.detectChanges();
     const line = (fixture.nativeElement as HTMLElement).querySelector('[data-testid=disk-free]');
     expect(line?.classList.contains('disk--low')).toBe(true);
     expect(line?.textContent).toContain('poco');
+  });
+
+  describe('animations of the music mode (managed=all)', () => {
+    const PIECE: ProjectSummary = { id: 'sample-piece', name: 'Morning light', mode: '', scene_count: 5, client: 'sample', kind: 'music_motion' };
+    const el = (f: { nativeElement: unknown }) => f.nativeElement as HTMLElement;
+    const q = (f: { nativeElement: unknown }, id: string) => el(f).querySelector(`[data-testid="${id}"]`) as HTMLElement | null;
+    /** The Animation option of the filter, on (the animations are listed) or off (the default). */
+    const animations = (on: boolean) => TestBed.inject(ModeFilterStore).setAnimations(on);
+    beforeEach(() => animations(true));
+
+    it('draws the row with its kind, its label and its size, whatever the modes chosen', async () => {
+      const fixture = await create([TWO[0], PIECE]);
+      expect(q(fixture, 'kind-badge')?.textContent?.trim()).toBe('Animación');
+      expect(q(fixture, 'client-badge')?.textContent?.trim()).toBe('sample');
+      expect(el(fixture).textContent).toContain('Morning light');
+    });
+
+    it('keeps the row when the server gives the animation a project mode that is not chosen', async () => {
+      const fixture = await create([TWO[0], { ...PIECE, mode: 'music' }]);
+      expect(q(fixture, 'kind-badge')).not.toBeNull();
+    });
+
+    it('offers Animation among the modes, and lists the animations only while it is on', async () => {
+      animations(false);
+      const fixture = await create([TWO[0], { ...PIECE, mode: 'video' }]);
+      expect(q(fixture, 'kind-badge')).toBeNull();
+      expect(el(fixture).textContent).toContain('demo');
+      expect(el(fixture).textContent).not.toContain('Morning light');
+      // the option is in the selector of the modes, next to the project modes
+      q(fixture, 'mode-select')!.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(document.querySelector('[data-testid="mode-option-animation"]')).not.toBeNull();
+    });
+
+    it('says the animations are hidden when they are all there is, and Show all brings them back', async () => {
+      animations(false);
+      const fixture = await create([{ ...PIECE, mode: 'video' }]);
+      const hidden = q(fixture, 'projects-hidden')!;
+      expect(hidden.textContent).toContain('Animación (1)');
+      q(fixture, 'projects-show-all')!.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(q(fixture, 'kind-badge')).not.toBeNull();
+    });
+
+    it('opens the piece instead of the scene editor and keeps the actions the server gives a project: details, history, storage, copy, export and delete', async () => {
+      const fixture = await create([PIECE]);
+      expect(q(fixture, 'open-piece-sample-piece')?.getAttribute('href')).toBe('/animation/pieces/sample-piece');
+      for (const kept of ['details-', 'history-', 'storage-', 'export-']) expect(q(fixture, `${kept}sample-piece`), kept).not.toBeNull();
+      expect(el(fixture).textContent).toContain('content_copy');
+      for (const gone of ['edit-', 'review-']) expect(q(fixture, `${gone}sample-piece`), gone).toBeNull();
+      expect(el(fixture).querySelector('mat-icon.danger, button.danger')).not.toBeNull();
+    });
+
+    it('opens the details with the animation, so its label goes by its own route', async () => {
+      const fixture = await create([PIECE]);
+      q(fixture, 'details-sample-piece')!.click();
+      await Promise.resolve();
+      expect(dialogOpen).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ data: { project: expect.objectContaining({ id: 'sample-piece', kind: 'music_motion' }) } }));
+    });
+
+    it('does not draw the animation actions on an ordinary project', async () => {
+      const fixture = await create([TWO[0]]);
+      expect(q(fixture, 'kind-badge')).toBeNull();
+      expect(q(fixture, 'open-piece-demo')).toBeNull();
+      expect(q(fixture, 'edit-demo')).not.toBeNull();
+    });
+
+    it('deletes by the piece route, says the server\'s reason when it refuses and leaves the row', async () => {
+      const fixture = await create([PIECE]);
+      const cmp = fixture.componentInstance as unknown as { deleteProject(p: ProjectSummary): Promise<void> };
+      const snack = vi.spyOn(TestBed.inject(MatSnackBar), 'open').mockReturnValue(undefined as never);
+      dialogResult = true;
+      const refused = cmp.deleteProject(PIECE);
+      await Promise.resolve();
+      http.expectNone({ method: 'DELETE', url: '/api/projects/sample-piece' });
+      http.expectOne({ method: 'DELETE', url: '/api/music-motion/pieces/sample-piece' }).flush({ error: { code: 'conflict', message: 'piece is being drawn' } }, { status: 409, statusText: 'Conflict' });
+      await refused;
+      expect(snack).toHaveBeenCalledWith('piece is being drawn', expect.any(String), expect.anything());
+      expect(storeOf(fixture).projects().some((p) => p.id === 'sample-piece')).toBe(true);
+      const done = cmp.deleteProject(PIECE);
+      await Promise.resolve();
+      http.expectOne({ method: 'DELETE', url: '/api/music-motion/pieces/sample-piece' }).flush(null, { status: 204, statusText: 'No Content' });
+      await Promise.resolve();
+      http.expectOne('/api/projects?managed=all').flush([]);
+      await done;
+    });
   });
 
   describe('the sections that open in their own tab', () => {

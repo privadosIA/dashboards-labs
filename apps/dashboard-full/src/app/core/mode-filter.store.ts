@@ -28,9 +28,12 @@ export function originOf(projectId: string): ProjectOrigin {
 
 const ALL_ORIGINS: ReadonlySet<ProjectOrigin> = new Set(PROJECT_ORIGINS);
 
-/** The projects of the chosen modes (and origins), plus those with no mode (an invalid YAML, say): they must stay reachable. */
-export function visibleProjects(projects: readonly ProjectSummary[], chosen: ReadonlySet<ProjectMode>, origins: ReadonlySet<ProjectOrigin> = ALL_ORIGINS): ProjectSummary[] {
-  return projects.filter((p) => origins.has(originOf(p.id)) && (p.mode === '' || chosen.has(p.mode)));
+/**
+ * The projects of the chosen modes (and origins), plus those with no mode (an invalid YAML, say): they must stay reachable. An animation of the music mode has no
+ * project mode (the server says `video` for it, but it is not a video project): it is listed when the Animation option is on, whatever the project modes chosen.
+ */
+export function visibleProjects(projects: readonly ProjectSummary[], chosen: ReadonlySet<ProjectMode>, origins: ReadonlySet<ProjectOrigin> = ALL_ORIGINS, animations = false): ProjectSummary[] {
+  return projects.filter((p) => origins.has(originOf(p.id)) && (p.kind === 'music_motion' ? animations : p.mode === '' || chosen.has(p.mode)));
 }
 
 /** The runs of the chosen modes and origins: a run takes the mode of its project; one whose project is gone (no mode) always stays by mode. */
@@ -60,8 +63,13 @@ export function hiddenRunModes<R extends { project: string; mode?: string }>(run
 export function hiddenModes(projects: readonly ProjectSummary[], chosen: ReadonlySet<ProjectMode>, origins: ReadonlySet<ProjectOrigin> = ALL_ORIGINS): { mode: ProjectMode; count: number }[] {
   const here = projects.filter((p) => origins.has(originOf(p.id)));
   return PROJECT_MODES.filter((m) => !chosen.has(m))
-    .map((mode) => ({ mode, count: here.filter((p) => p.mode === mode).length }))
+    .map((mode) => ({ mode, count: here.filter((p) => p.mode === mode && p.kind !== 'music_motion').length }))
     .filter((h) => h.count > 0);
+}
+
+/** How many animations are left out because the Animation option is off (among the origins chosen); 0 when it is on. */
+export function hiddenAnimations(projects: readonly ProjectSummary[], animations: boolean, origins: ReadonlySet<ProjectOrigin> = ALL_ORIGINS): number {
+  return animations ? 0 : projects.filter((p) => p.kind === 'music_motion' && origins.has(originOf(p.id))).length;
 }
 
 /**
@@ -82,7 +90,7 @@ export class ModeFilterStore {
   readonly active = computed<ReadonlySet<ProjectMode>>(() => (this.env.blenderReady() ? this.modes() : new Set<ProjectMode>([...this.modes(), 'models3d'])));
   /** Desktop and phone, both by default: the same preference for every screen that tells the modes apart. */
   readonly origins = signal<ReadonlySet<ProjectOrigin>>(this.readOrigins());
-  /** Whether the runs of animations are listed in Runs (they are not by default; no project list or gallery has them). */
+  /** Whether the animations are listed, in Runs and in the projects list (off by default; the gallery never has them). */
   readonly animations = signal<boolean>(this.readAnimations());
   private knownIds: Set<string> | null = null;
 

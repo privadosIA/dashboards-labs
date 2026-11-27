@@ -243,6 +243,9 @@ describe('SceneFormComponent: the scene\'s own clip', () => {
     };
     expect(picker.keptLabel({ project: 'other', scene: 's06', kind: 'animation' })).toContain('animación completa');
     expect(picker.keptLabel({ project: 'other', scene: 's06', kind: 'clip' })).not.toContain('animación');
+    // a clip of an animation of the music mode (managed=all) says so; an ordinary project's clip does not
+    expect(picker.keptLabel({ project: 'api-mm-1', scene: 'piece', kind: 'clip', project_kind: 'music_motion' })).toBe('api-mm-1 · piece · Animación');
+    expect(picker.keptLabel({ project: 'other', scene: 's06', kind: 'clip' })).toBe('other · s06');
     // a clip made from a motion graphic says how its page was made
     const motion = picker.keptLabel({ project: 'other', scene: 'gfx', kind: 'clip', motion: 'motion graphic · page written by writer:7b · Chrome 126.0.1' });
     expect(motion).toContain('other · gfx');

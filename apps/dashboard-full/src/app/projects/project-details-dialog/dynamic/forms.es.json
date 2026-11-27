@@ -15,7 +15,7 @@
       "type": "text",
       "label": "Cliente (quién lo hizo; vacío si ninguno)",
       "placeholder": "dashboard-full",
-      "props": { "attributes": { "data-testid": "details-client", "autocomplete": "off" } }
+      "props": { "attributes": { "data-testid": "details-client", "autocomplete": "off", "list": "details-client-labels" } }
     },
     {
       "key": "adult",

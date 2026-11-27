@@ -207,6 +207,17 @@ Each button asks for confirmation saying what it costs, and a project with a run
 3. **Clean** removes only that part, after asking.
 4. **Final video and exports** and **Sources** are shown but their button is disabled: they are yours.
 
+### Labels: who made each item
+
+![The project list narrowed by a client label](tutorial/en/63-etiquetas-cliente.png)
+
+Every item carries a **client label** that says who made it: `dashboard-full` for what you make here, the name of another program that uses the same server, `embedded` for a normal project and `unknown` for what asked for none. The labels are a category you can see and filter by.
+
+1. A **chip** for each label above the table, with its **colour** and how many items carry it, the most recently used first. Choose one to narrow the list to it (several at once are allowed, and they combine with the modes and the search); **Clear** takes them all off. The choice is remembered.
+2. The **palette** of a chip changes its colour (a form that takes `#rrggbb`) or restores the default one, which the server works out from the name. The colour is the server's: every dashboard that uses it shows the same.
+3. The **badge** next to a project's name has the colour of its label. Its **details** (the sliders button) change the label: the known ones are offered as you type, any other valid name (one to 32 lowercase letters, digits or hyphens) is accepted, and an empty one takes it off. A refusal (an item that is running cannot change its label) is written in the server's words and nothing changes.
+4. **Animation** is one more option of the **Modes shown** selector (the same one as in Runs): off, the animations of the music mode are not listed; on, each one is a row with the *Animation* mark. It **opens the piece** instead of the scene editor and keeps details, history, storage, copy and export; its label goes by the animation's own route.
+
 ## 6. The editor, section by section
 
 The editor has several stacked cards, folded when you open it: Output, Style and quality, Defaults, Animation, Background music, Scenes drawn by a part of the catalog (see [Scenes drawn by a part of the catalog](../apps/dashboard-full/README.md#scenes-drawn-by-a-part-of-the-catalog)) and the list of Scenes. Everything you change is saved in the project's `scenes.yaml`.

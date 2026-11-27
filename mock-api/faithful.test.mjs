@@ -199,7 +199,7 @@ test('the projects of a music kind and an unreadable one are listed as the contr
 // client and managed as the server reads them: the client of a project comes from its scenes.yaml (embedded without one),
 // ?client= keeps only those, anything else in ?managed= or ?client= is a 400, POST keeps a valid client and refuses a bad
 // one with 422, and a managed project is not deleted through /api/projects.
-test('client is kept and filtered, managed accepts only include, and a managed project is deleted elsewhere', async () => {
+test('client is kept and filtered, managed accepts only include and all, and a managed project is deleted elsewhere', async () => {
   const port = await freePort();
   const child = spawn(process.execPath, [resolve(here, 'server.mjs'), '--port', String(port), '--spec', specPath], { stdio: ['ignore', 'pipe', 'inherit'] });
   const base = `http://127.0.0.1:${port}`;
@@ -219,7 +219,8 @@ test('client is kept and filtered, managed accepts only include, and a managed p
     assert.deepEqual(only.map((p) => p.id), ['from-studio']);
     assert.equal((await fetch(`${base}/api/projects?managed=include`)).status, 200);
     assert.ok(!all.some((p) => p.id.startsWith('api-')), 'without managed=include no generation API project is listed');
-    assert.equal((await fetch(`${base}/api/projects?managed=all`)).status, 400);
+    assert.equal((await fetch(`${base}/api/projects?managed=every`)).status, 400);
+    assert.equal((await fetch(`${base}/api/projects?managed=all`)).status, 200);
     assert.equal((await fetch(`${base}/api/library?client=Bad Name`)).status, 400);
     const storage = await (await fetch(`${base}/api/storage?client=dashboard-full`)).json();
     assert.deepEqual(storage.projects.map((p) => [p.id, p.client]), [['from-studio', 'dashboard-full']]);

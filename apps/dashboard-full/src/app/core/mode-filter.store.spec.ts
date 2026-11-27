@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { EnvironmentReport, ProjectSummary } from './api.models';
 import { EnvironmentStore } from './environment.store';
-import { ModeFilterStore, hiddenModes, hiddenRunModes, originOf, visibleProjects, visibleRuns } from './mode-filter.store';
+import { ModeFilterStore, hiddenAnimations, hiddenModes, hiddenRunModes, originOf, visibleProjects, visibleRuns } from './mode-filter.store';
 
 const P = (id: string, mode: ProjectSummary['mode']): ProjectSummary => ({ id, name: id, mode, scene_count: 1 });
 const ALL_ORIGINS_FOR_TEST = new Set<'desktop' | 'mobile'>(['desktop', 'mobile']);
@@ -93,6 +93,25 @@ describe('visibleProjects and hiddenModes', () => {
     expect(hiddenModes(LIST, new Set(['video']))).toEqual([{ mode: 'images', count: 1 }, { mode: 'music', count: 1 }]);
     expect(hiddenModes(LIST, new Set(['video', 'images', 'music']))).toEqual([]);
     expect(hiddenModes([P('v', 'video')], new Set(['music']))).toEqual([{ mode: 'video', count: 1 }]);
+  });
+});
+
+describe('the animations of the music mode in the list', () => {
+  // The server gives an animation the mode `video` although it is not a video project.
+  const PIECE: ProjectSummary = { id: 'api-mm-1', name: 'api-mm-1', mode: 'video', scene_count: 18, kind: 'music_motion' };
+  const WITH = [P('v1', 'video'), P('m1', 'music'), PIECE];
+
+  it('are listed only while the Animation option is on, whatever the project modes chosen', () => {
+    expect(visibleProjects(WITH, new Set(['video'])).map((p) => p.id)).toEqual(['v1']);
+    expect(visibleProjects(WITH, new Set(['video']), undefined, true).map((p) => p.id)).toEqual(['v1', 'api-mm-1']);
+    expect(visibleProjects(WITH, new Set(['music']), undefined, true).map((p) => p.id)).toEqual(['m1', 'api-mm-1']);
+  });
+
+  it('are not counted as a hidden video project, but as hidden animations', () => {
+    expect(hiddenModes(WITH, new Set(['music']))).toEqual([{ mode: 'video', count: 1 }]); // v1 only: the animation is not a video project
+    expect(hiddenAnimations(WITH, false)).toBe(1);
+    expect(hiddenAnimations(WITH, true)).toBe(0);
+    expect(hiddenAnimations([P('v1', 'video')], false)).toBe(0);
   });
 });
 

@@ -8,7 +8,9 @@
 // service (`running`); the backend of both is the one saved setting `model3d_backend`. The weights of Stable Fast 3D need the saved Hugging Face key, whatever the backend. How the machine looks is picked by `MOCK_MODEL3D`: unset
 // (triposr's service and weights there, stopped; sf3d with no key), `bare` (the service but no weights, to see the install), `noservice` (neither), `running` (triposr already up) or
 // `none` (a server with no 3D service: every route answers 503). `MOCK_DOCKER=0` is a machine where Docker does not answer, `MOCK_MODEL3D_HOST=1` an external service,
-// `MOCK_INSTALL_FAIL=<part>` makes that part of an install fail once. `MOCK_MODEL3D_SF3D=ready` makes sf3d usable. `MOCK_NO_IMAGE_MODEL=1` is a machine with no image model; `MOCK_ADULT=1` a server that keeps adult content.
+// `MOCK_INSTALL_FAIL=<part>` makes that part of an install fail once. `MOCK_MODEL3D_SF3D=ready` makes sf3d usable; `=key` saves its Hugging Face key and leaves its weights to install. `MOCK_NO_IMAGE_MODEL=1` is a machine with no image model; `MOCK_ADULT=1` a server that keeps adult content.
+
+import { readClientPatch } from './clients.mjs';
 
 const err = (status, code, message, reason) => [status, { error: { code, message, ...(reason ? { reason } : {}) } }];
 
@@ -21,6 +23,11 @@ const MAX_PICTURE = 20 * 1024 * 1024;
 const VERSION = { triposr: 'triposr@3f1c9a2', sf3d: 'sf3d@8d41e07' };
 /** What an engine reports as its version when the .NET service runs it. */
 const VERSION_NET = { triposr: 'triposr-net@0.1.0', sf3d: 'sf3d-net@0.1.0' };
+/** The licence of each engine as the plan describes it (`LicenceTerms`). sf3d's has an `id`: the install is refused until the request carries it as `accept_licence`, and the acceptance is recorded (`lib.accepted`). */
+const LICENCES = {
+  triposr: { name: 'MIT', url: 'https://huggingface.co/stabilityai/TripoSR', summary: 'Use, copy and change freely, keeping the notice.', commercial: 'yes' },
+  sf3d: { id: 'stability-community', name: 'Stability AI Community License', url: 'https://huggingface.co/stabilityai/stable-fast-3d', summary: 'Free for personal use and for companies under a yearly revenue limit.', commercial: 'conditions' },
+};
 const WEIGHTS = {
   triposr: { files: ['triposr/config.yaml', 'triposr/model.ckpt'], bytes: 1_900_000_000, licence: 'MIT', gated: false, path: 'models/model3d/triposr' },
   sf3d: { files: ['sf3d/config.yaml', 'sf3d/model.safetensors', 'sf3d/160_tets.npz'], bytes: 3_900_000_000, licence: 'Stability AI Community License', gated: true, path: 'models/model3d/sf3d' },
@@ -93,10 +100,13 @@ export function generationHandlers({ db, lib, save, speed = 1, addGenerated, gen
   function state() {
     if (!lib.engines || lib.engines.container) {
       const m = mode();
-      const sf = process.env.MOCK_MODEL3D_SF3D === 'ready';
+      // MOCK_MODEL3D_SF3D: `ready` has Stable Fast 3D complete; `key` has the Hugging Face key saved and the weights still to install (what an install needs to be asked for).
+      const sfMode = process.env.MOCK_MODEL3D_SF3D;
+      const sf = sfMode === 'ready';
+      const key = sf || sfMode === 'key';
       lib.engines = {
         triposr: { service: m !== 'noservice', image: true, weights: m !== 'bare' && m !== 'noservice', key: true, running: m === 'running' ? { since: new Date().toISOString(), ready_at: 0 } : null },
-        sf3d: { service: m !== 'noservice', image: true, weights: sf, key: sf, running: null },
+        sf3d: { service: m !== 'noservice', image: true, weights: sf, key, running: null },
       };
     }
     return lib.engines;
@@ -162,6 +172,11 @@ export function generationHandlers({ db, lib, save, speed = 1, addGenerated, gen
   // --- the install of what an engine lacks ---
   const gb = (n) => `${(n / GB).toFixed(1)} GB`;
   /** The plan: the backend, the parts it would run (those missing, in order, among those asked) and what they take; `{ error }` when it cannot be made. */
+  /** The licence of an engine as the plan says it: `accepted` appears only where an acceptance is required, and is true once one was recorded. */
+  function termsOf(name) {
+    const terms = LICENCES[name];
+    return terms.id ? { ...terms, accepted: !!lib.accepted?.[terms.id] } : terms;
+  }
   function plan(name, body) {
     const backend = body?.backend ?? backendOf(name);
     if (!BACKENDS.includes(backend)) return { error: err(422, 'validation_failed', 'backend: dotnet or docker') };
@@ -176,7 +191,7 @@ export function generationHandlers({ db, lib, save, speed = 1, addGenerated, gen
     if (name === 'sf3d' && parts.includes('weights') && !state().sf3d.key) return { error: err(422, 'validation_failed', 'engine "sf3d" cannot be installed now: key_missing', 'key_missing') };
     const w = WEIGHTS[name];
     const bytes = bytesOf(name, parts);
-    return { backend, parts, value: { engine: name, backend, parts, missing: parts.includes('weights') ? w.files : [], bytes: Math.round(bytes), licence: w.licence, gated: w.gated, path: w.path, free_bytes: FREE_BYTES } };
+    return { backend, parts, value: { engine: name, backend, parts, missing: parts.includes('weights') ? w.files : [], bytes: Math.round(bytes), licence: termsOf(name), gated: w.gated, path: w.path, free_bytes: FREE_BYTES } };
   }
 
   /** The job as the clock leaves it: a part after the other, each with its lines; the part that failed ends it (`MOCK_INSTALL_FAIL=<part>` makes one fail once). */
@@ -285,6 +300,10 @@ export function generationHandlers({ db, lib, save, speed = 1, addGenerated, gen
       if (running()) return err(409, 'conflict', 'another install is running');
       if (made.value.bytes > FREE_BYTES) return err(422, 'validation_failed', 'the disk has no room for this install', 'no_disk');
       if (body?.confirm !== true) return [200, { plan: made.value }];
+      // An engine whose licence has an id is never installed on the strength of `confirm` alone: the person's acceptance has to come with it. The mock never accepts for anyone.
+      const needed = LICENCES[name].id;
+      if (needed && body?.accept_licence !== needed) return err(400, 'invalid_request', `the licence ${needed} (${LICENCES[name].name}, ${LICENCES[name].url}) has to be accepted: send accept_licence with that id after the person agreed`, 'licence_acceptance_required');
+      if (needed) (lib.accepted ??= {})[needed] = { licence: needed, at: new Date().toISOString(), client: typeof body?.client === 'string' ? body.client : 'unknown' };
       const id = `m3d-install-${Date.now().toString(36)}`;
       lib.installs[id] = { id, engine: name, backend: made.backend, parts: made.parts, part: made.parts[0], state: 'running', log: [], created_at: new Date().toISOString(), startedAt: Date.now() };
       save();
@@ -369,6 +388,17 @@ export function generationHandlers({ db, lib, save, speed = 1, addGenerated, gen
       if (noService()) return unavailable503();
       const rec = lib.generations[params.id];
       return rec ? [200, generationView(rec)] : err(404, 'not_found', `generation "${params.id}" not found`);
+    },
+    'PATCH /api/models3d/generations/{id}': ({ params, body }) => {
+      if (noService()) return unavailable503();
+      const rec = lib.generations[params.id];
+      if (!rec) return err(404, 'not_found', `generation "${params.id}" not found`);
+      const read = readClientPatch(body);
+      if (read.error) return read.error;
+      if (['queued', 'running'].includes(settleGeneration(rec).state)) return err(409, 'conflict', `generation "${params.id}" has an active run`);
+      rec.client = read.client;
+      save();
+      return [200, generationView(rec)];
     },
     'DELETE /api/models3d/generations/{id}': ({ params }) => {
       if (noService()) return unavailable503();

@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lab-space-2);
+}
+
+// The only colour that is not a token is the label's own (`--chip-color`, data from the server): it paints the dot and tints the surface, so the text
+// keeps the dashboard's ink and reads in both themes whatever colour the owner chose.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--chip-color) 45%, var(--lab-line));
+  border-radius: var(--lab-radius-pill);
+  background: color-mix(in srgb, var(--chip-color) 8%, var(--lab-surface));
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-meta);
+
+  &.on {
+    border-color: var(--chip-color);
+    background: color-mix(in srgb, var(--chip-color) 24%, var(--lab-surface));
+    box-shadow: var(--lab-elev-1);
+
+    // the strongest tint: the dim ink would not reach 4.5:1 on every colour (contrast.spec.ts)
+    .count {
+      color: var(--lab-ink);
+    }
+  }
+}
+
+.chip-main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-1) var(--lab-space-2) var(--lab-space-1) var(--lab-space-3);
+  border: 0;
+  border-radius: var(--lab-radius-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--lab-radius-pill);
+  background: var(--chip-color);
+}
+
+.count {
+  color: var(--lab-ink-dim);
+}
+
+// The palette button is small and sits inside the chip: it must not make the chip taller.
+.chip-menu {
+  --mat-icon-button-state-layer-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--lab-ink-dim);
+
+  ::ng-deep .mat-icon {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+  }
+}

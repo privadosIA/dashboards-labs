@@ -1,0 +1,20 @@
+<h2 mat-dialog-title i18n="@@clientLabel.title">Client label</h2>
+<mat-dialog-content>
+  <p class="id mo-data" data-testid="client-label-name">{{ data.name }}</p>
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+  <datalist id="client-label-options">
+    @for (l of labels.labels(); track l.name) {
+      <option [value]="l.name"></option>
+    }
+  </datalist>
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="client-label-problem">{{ why }}</p>
+  }
+</mat-dialog-content>
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="client-label-cancel" [mat-dialog-close]="false" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-flat-button type="button" data-testid="client-label-save" [disabled]="saving()" (click)="save()" i18n="@@clientLabel.save">Save</button>
+</mat-dialog-actions>

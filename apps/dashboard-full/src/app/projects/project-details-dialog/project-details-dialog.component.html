@@ -2,6 +2,11 @@
 <mat-dialog-content>
   <p class="id mo-data" data-testid="details-id">{{ data.project.id }}</p>
   <dynamic-form [schema]="schema()" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+  <datalist id="details-client-labels">
+    @for (l of labels.labels(); track l.name) {
+      <option [value]="l.name"></option>
+    }
+  </datalist>
   @if (problem(); as why) {
     <p class="problem" role="alert" data-testid="details-problem">{{ why }}</p>
   }

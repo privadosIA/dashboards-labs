@@ -10,6 +10,7 @@ import {
   AssetKind,
   MotionCatalogJson,
   ProjectEstimate,
+  ClientLabel,
   ProjectPatch,
   ProjectRestored,
   ProjectVersion,
@@ -85,6 +86,7 @@ import {
   PeaksResponse,
   PictureUploadResult,
   ProjectStorage,
+  ProjectKind,
   ProjectSummary,
   Review,
   ReviewDetail,
@@ -125,12 +127,26 @@ import {
  * Thin typed client over the management API (docs/http-api.md). All
  * pipeline knowledge stays on the server; this only moves JSON.
  */
-/** The generation API projects and the endpoint that deletes each kind. */
-const MANAGED_DELETE: ReadonlyArray<readonly [string, string]> = [
-  ['api-gen-', 'generations'],
-  ['api-edit-', 'image-edits'],
-  ['api-vid-', 'video-edits'],
+/**
+ * The items the projects list shows as projects without being one (the generation API's `api-gen-`, `api-edit-`, `api-vid-`, `api-m3d-` and the animations of the
+ * music mode, `api-mm-`) and the endpoint that owns each kind: it deletes the item (`DELETE /projects/{id}` refuses it) and it changes its client label
+ * (`PATCH /projects/{id}` refuses `client` for it). The kind a row carries (`kind`) says it as well as the prefix does and wins when it is known: a mock's sample
+ * animation has no `api-mm-` in its id, and a kind the dashboard does not know yet falls back to the prefix.
+ */
+const MANAGED_ROUTE: ReadonlyArray<readonly [string, ProjectKind, string]> = [
+  ['api-gen-', 'generation', 'generations'],
+  ['api-edit-', 'image_edit', 'image-edits'],
+  ['api-vid-', 'video_edit', 'video-edits'],
+  ['api-m3d-', 'model_generation', 'models3d/generations'],
+  ['api-mm-', 'music_motion', 'music-motion/pieces'],
 ];
+
+/** The endpoint (below `/api`) that owns an item, from its kind or else its id's prefix; `undefined` for an ordinary project. */
+const ownRoute = (id: string, kind?: ProjectKind): string | undefined =>
+  (MANAGED_ROUTE.find(([, k]) => k === kind) ?? MANAGED_ROUTE.find(([prefix]) => id.startsWith(prefix)))?.[2];
+
+/** An item that is not a project (listed as one): its label is changed by the route of its kind, never by `PATCH /projects/{id}`. */
+export const isManagedId = (id: string, kind?: ProjectKind): boolean => ownRoute(id, kind) !== undefined;
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -152,8 +168,8 @@ export class ApiService {
 
   // --- projects -----------------------------------------------------------
   listProjects(): Observable<ProjectSummary[]> {
-    // `managed=include`: the videos and edits the other dashboards make through the generation API are projects too.
-    return this.http.get<ProjectSummary[]>(`${this.base}/projects`, { params: { managed: 'include' } });
+    // `managed=all`: the videos and edits the other dashboards make through the generation API are projects too, and so are the animations of the music mode.
+    return this.http.get<ProjectSummary[]>(`${this.base}/projects`, { params: { managed: 'all' } });
   }
 
   createProject(id: string): Observable<{ id: string }> {
@@ -191,15 +207,36 @@ export class ApiService {
     return this.http.post<{ id: string }>(`${this.base}/projects/${projectId}/videoclip`, req);
   }
 
-  /** A generation API project (`api-gen-`, `api-edit-`, `api-vid-`) is deleted by its own endpoint; `DELETE /projects/{id}` refuses it. */
-  deleteProject(id: string): Observable<void> {
-    const own = MANAGED_DELETE.find(([prefix]) => id.startsWith(prefix));
-    return this.http.delete<void>(own ? `${this.base}/${own[1]}/${id}` : `${this.base}/projects/${id}`);
+  /** A generation API item or an animation is deleted by its own endpoint (by its `kind`, else its id's prefix); `DELETE /projects/{id}` refuses it. */
+  deleteProject(id: string, kind?: ProjectKind): Observable<void> {
+    const own = ownRoute(id, kind);
+    return this.http.delete<void>(own ? `${this.base}/${own}/${id}` : `${this.base}/projects/${id}`);
   }
 
   /** Changes the name, the client or the adult label of a project by field; only what is sent changes. The dialog explains `409` and `422`. */
   patchProject(id: string, body: ProjectPatch): Observable<ProjectSummary> {
     return this.http.patch<ProjectSummary>(`${this.base}/projects/${encodeURIComponent(id)}`, body, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
+  }
+
+  /**
+   * Changes the client label of a project, of an item of the generation API or of an animation, or removes it (`null`). Each kind has its own endpoint, chosen by
+   * the item's `kind` or else its id's prefix; the server refuses `client` on `PATCH /projects/{id}` for those items. The caller explains `400`, `404` and `409` (the item runs).
+   */
+  setClient(id: string, client: string | null, kind?: ProjectKind): Observable<{ client?: string }> {
+    const own = ownRoute(id, kind);
+    const url = own ? `${this.base}/${own}/${encodeURIComponent(id)}` : `${this.base}/projects/${encodeURIComponent(id)}`;
+    return this.http.patch<{ client?: string }>(url, { client }, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
+  }
+
+  // --- client labels --------------------------------------------------------
+  /** The labels in use with their colour and counts, newest use first; the screen explains a failure by drawing no chips, not with the snackbar. */
+  listClients(): Observable<ClientLabel[]> {
+    return this.http.get<ClientLabel[]>(`${this.base}/clients`, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
+  }
+
+  /** Keeps the colour of a label with the server (`#rrggbb`), or restores the default one (`null`). */
+  setClientColor(name: string, color: string | null): Observable<{ name: string; color: string }> {
+    return this.http.put<{ name: string; color: string }>(`${this.base}/clients/${encodeURIComponent(name)}`, { color }, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
   }
 
   /** The kept versions of a project's definition, newest first (the server keeps the 20 newest). */
@@ -386,8 +423,9 @@ export class ApiService {
   }
 
   listKeptClips(exclude?: string, project?: string): Observable<{ clips: KeptClip[] }> {
-    const params = [exclude ? `exclude=${encodeURIComponent(exclude)}` : '', project ? `project=${encodeURIComponent(project)}` : ''].filter(Boolean);
-    const q = params.length ? `?${params.join('&')}` : '';
+    // `managed=all`: the clips of the generation API's items and of the animations are kept clips too (each says its `project_kind`).
+    const params = ['managed=all', exclude ? `exclude=${encodeURIComponent(exclude)}` : '', project ? `project=${encodeURIComponent(project)}` : ''].filter(Boolean);
+    const q = `?${params.join('&')}`;
     return this.http.get<{ clips: KeptClip[] }>(`${this.base}/clips${q}`, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
   }
 
@@ -488,9 +526,9 @@ export class ApiService {
     return this.http.post<{ container: { state: 'stopped' | 'starting' | 'running'; error?: string } }>(`${this.base}/models3d/engines/${encodeURIComponent(engine)}/stop`, {}, this.quiet());
   }
 
-  /** Without `confirm` the plan of the install (nothing changes); with `confirm: true` the job (202). The backend and the parts are sent only when given. */
+  /** Without `confirm` the plan of the install (nothing changes); with `confirm: true` the job (202). The backend and the parts are sent only when given, and `accept_licence` only with the confirmation. */
   modelEngineInstall(engine: string, confirm: boolean, request: ModelInstallRequest = {}): Observable<{ plan?: ModelInstallPlanInfo; install?: ModelInstallInfo }> {
-    const body = { ...(request.backend ? { backend: request.backend } : {}), ...(request.parts ? { parts: request.parts } : {}), ...(confirm ? { confirm: true } : {}) };
+    const body = { ...(request.backend ? { backend: request.backend } : {}), ...(request.parts ? { parts: request.parts } : {}), ...(confirm ? { confirm: true, ...(request.accept_licence ? { accept_licence: request.accept_licence } : {}) } : {}) };
     return this.http.post<{ plan?: ModelInstallPlanInfo; install?: ModelInstallInfo }>(`${this.base}/models3d/engines/${encodeURIComponent(engine)}/install`, body, this.quiet());
   }
 
@@ -989,7 +1027,8 @@ export class ApiService {
 
   // --- storage ----------------------------------------------------------------
   getStorage(): Observable<StorageOverview> {
-    return this.http.get<StorageOverview>(`${this.base}/storage`, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
+    // `managed=all`: the generation API's items and the animations have a size of their own, shown beside their rows.
+    return this.http.get<StorageOverview>(`${this.base}/storage`, { params: { managed: 'all' }, context: new HttpContext().set(SKIP_ERROR_TOAST, true) });
   }
 
   getProjectStorage(projectId: string): Observable<ProjectStorage> {

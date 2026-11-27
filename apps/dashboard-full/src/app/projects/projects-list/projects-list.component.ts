@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DfCellDirective, DynamicFormComponent } from '@core/dynamic-forms';
@@ -13,6 +14,8 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { ImportResult, ProjectConfig, ProjectSummary, Scene } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
+import { ClientFilterStore, byClients } from '../../core/client-filter.store';
+import { ClientLabelsStore } from '../../core/client-labels.store';
 import { EnvironmentStore } from '../../core/environment.store';
 import { ServerModelLibrary } from '../../core/model-library.adapter';
 import { toModelsYaml } from '../../models3d/models3d-yaml';
@@ -20,6 +23,8 @@ import { ProjectsStore } from '../../core/projects.store';
 import { toYaml } from '../../shared/project-yaml';
 import { easyConfigForNewProject, machineOf } from '../../editor/auto-plan';
 import { applyEditEntry, applyStyleEntry, applyTier, loadOverrides, pickEditEntry, pickStyleEntry } from '../../editor/quality-tiers';
+import { ClientChipsComponent } from '../../shared/client-chips/client-chips.component';
+import { isAnimation, projectKindLabel } from '../../shared/project-kind';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { schemaFor } from '../../shared/dynamic/schema-loader';
 import { BytesPipe } from '../../shared/pipes/bytes.pipe';
@@ -35,7 +40,7 @@ import {
 } from '../project-name-dialog/project-name-dialog.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { AvailabilityStore } from '../../core/availability.store';
-import { ProjectMode, ModeFilterStore, hiddenModes, visibleProjects } from '../../core/mode-filter.store';
+import { ANIMATION_MODE, ProjectMode, ModeFilterStore, hiddenAnimations, hiddenModes, visibleProjects } from '../../core/mode-filter.store';
 import { SimpleModeStore } from '../../core/simple-mode.store';
 import { ModeSelectComponent } from '../../shared/mode-select/mode-select.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
@@ -52,6 +57,7 @@ import { SectionLinksService } from '../../shell/section-links.service';
   selector: 'app-projects-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ClientChipsComponent,
     EmptyStateComponent,
     ModeSelectComponent,
     PageHeaderComponent, AutoAnimateDirective, MatButtonModule, MatIconModule, MatMenuModule, MatTooltipModule, DynamicFormComponent, DfCellDirective, BytesPipe, RouterLink],
@@ -84,13 +90,31 @@ export class ProjectsListComponent implements OnInit {
     return only ? new Set<ProjectMode>([only]) : this.modes.active();
   });
 
+  /** The client labels the user chose to narrow the list by, and the colour of each label. */
+  protected readonly clients = inject(ClientFilterStore);
+  protected readonly labels = inject(ClientLabelsStore);
+
+  /** The animations are listed when the Animation option is on, and not while the address asks for one project mode on its own. */
+  private readonly showAnimations = computed(() => this.only() === null && this.modes.animations());
+
   /** The projects of the modes shown (and those with no mode). */
-  protected readonly visible = computed(() => visibleProjects(this.store.projects(), this.shown(), this.modes.origins()));
+  private readonly ofModes = computed(() => visibleProjects(this.store.projects(), this.shown(), this.modes.origins(), this.showAnimations()));
+  /** ...narrowed to the chosen client labels. */
+  protected readonly visible = computed(() => byClients(this.ofModes(), this.clients.chosen()));
+  /** The chosen labels, as text, for the message that says why nothing is listed. */
+  protected readonly chosenText = computed(() => [...this.clients.chosen()].join(', '));
+  /** The labels are chosen and they, not the modes, leave the list empty. */
+  protected readonly noneOfClients = computed(() => this.clients.chosen().size > 0 && this.ofModes().length > 0 && this.visible().length === 0);
   /** The modes with projects that are not shown. */
-  protected readonly hidden = computed(() => hiddenModes(this.store.projects(), this.shown(), this.modes.origins()));
+  protected readonly hidden = computed<{ mode: string; count: number }[]>(() => {
+    const animations = hiddenAnimations(this.store.projects(), this.showAnimations(), this.modes.origins());
+    return [...hiddenModes(this.store.projects(), this.shown(), this.modes.origins()), ...(animations > 0 ? [{ mode: ANIMATION_MODE as string, count: animations }] : [])];
+  });
+
+  protected readonly noLabels: ReadonlySet<string> = new Set();
 
   protected modeLabel(mode: string): string {
-    return mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : mode === 'models3d' ? $localize`:@@modes.models3d:3D models` : $localize`:@@modes.music:Music`;
+    return mode === ANIMATION_MODE ? $localize`:@@modes.animation:Animation` : mode === 'video' ? $localize`:@@modes.video:Video` : mode === 'images' ? $localize`:@@modes.images:Images` : mode === 'models3d' ? $localize`:@@modes.models3d:3D models` : $localize`:@@modes.music:Music`;
   }
   /** Goes back to the modes the user chose: the address stops asking for one. */
   protected clearOnly(): void {
@@ -144,6 +168,16 @@ export class ProjectsListComponent implements OnInit {
       if (now === this.chosen) return;
       this.chosen = now;
       if (this.only()) this.clearOnly();
+    });
+    // The labels and their counts are read again whenever the list is (a relabel or a deletion changes them), and a chosen label that is gone is dropped.
+    effect(() => {
+      if (!this.store.loaded()) return;
+      this.store.projects();
+      untracked(() => void this.labels.load());
+    });
+    effect(() => {
+      const known = this.labels.labels();
+      if (this.labels.loaded() && known.length > 0) untracked(() => this.clients.keepOnly(known.map((l) => l.name)));
     });
   }
 
@@ -430,17 +464,29 @@ export class ProjectsListComponent implements OnInit {
     }
   }
 
+  /** An animation of the music mode opens its piece instead of the scene editor and is deleted by the piece's own route; the rest is the project's (the server keeps one for it). */
+  protected readonly isAnimation = isAnimation;
+  protected readonly kindLabel = projectKindLabel;
+
   protected async deleteProject(p: ProjectSummary): Promise<void> {
+    const animation = isAnimation(p.kind);
     const ok = await firstValueFrom(
       openConfirm(this.dialog, {
         title: $localize`:@@projects.deleteTitle:Delete “${p.id}:project:”`,
-        message: $localize`:@@projects.deleteMessage:The project “${p.id}:project:” will be deleted with its scenes.yaml and its tmp/ (cache and intermediates) and out/ (results and the clips kept for each scene) folders. This cannot be undone.`,
-        confirmLabel: $localize`:@@projects.deleteAction:Delete project`,
+        message: animation
+          ? $localize`:@@projects.deleteAnimationMessage:The animation “${p.id}:project:” will be deleted with its script, its design and its renders. This cannot be undone.`
+          : $localize`:@@projects.deleteMessage:The project “${p.id}:project:” will be deleted with its scenes.yaml and its tmp/ (cache and intermediates) and out/ (results and the clips kept for each scene) folders. This cannot be undone.`,
+        confirmLabel: animation ? $localize`:@@projects.deleteAnimationAction:Delete animation` : $localize`:@@projects.deleteAction:Delete project`,
         destructive: true,
       }),
     );
-    if (ok) {
-      await this.store.remove(p.id);
+    if (!ok) return;
+    try {
+      await this.store.remove(p.id, p.kind);
+    } catch (err) {
+      // The notice of the error interceptor skips the music motion routes (their screens say the reason), so an animation says it here.
+      if (!animation) throw err;
+      this.snack.open((err as HttpErrorResponse)?.error?.error?.message ?? $localize`:@@projects.deleteAnimationFailed:The animation could not be deleted.`, $localize`:@@projects.exportClose:Close`, { duration: 8000 });
     }
   }
 

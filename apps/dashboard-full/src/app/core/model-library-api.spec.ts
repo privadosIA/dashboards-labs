@@ -118,6 +118,26 @@ describe('The 3D model library over the typed client', () => {
     expect(http.expectOne('/api/models3d/engines/triposr/install').request.body).toEqual({ backend: 'dotnet', parts: ['service', 'weights'], confirm: true });
   });
 
+  it('keeps the licence of the plan whole and its name, whether the server sends it as text or as an object', () => {
+    let seen: unknown;
+    library.installPlan('sf3d').subscribe((p) => (seen = p));
+    http.expectOne('/api/models3d/engines/sf3d/install').flush({ plan: { engine: 'sf3d', missing: [], bytes: 1, gated: true, path: 'p', free_bytes: 2, licence: { id: 'stability-community', name: 'Stability AI Community License', commercial: 'conditions', accepted: false } } });
+    expect(seen).toMatchObject({ licence: 'Stability AI Community License', licenceTerms: { id: 'stability-community', commercial: 'conditions', accepted: false } });
+    library.installPlan('triposr').subscribe((p) => (seen = p));
+    http.expectOne('/api/models3d/engines/triposr/install').flush({ plan: { engine: 'triposr', missing: [], bytes: 1, gated: false, path: 'p', free_bytes: 2, licence: 'MIT' } });
+    expect(seen).toMatchObject({ licence: 'MIT' });
+    expect('licenceTerms' in (seen as object)).toBe(false);
+  });
+
+  it('sends accept_licence only with the confirmation and only when the person accepted', () => {
+    library.installPlan('sf3d', { acceptLicence: 'stability-community' }).subscribe();
+    expect(http.expectOne('/api/models3d/engines/sf3d/install').request.body).toEqual({});
+    library.startInstall('sf3d', { backend: 'dotnet' }).subscribe();
+    expect(http.expectOne('/api/models3d/engines/sf3d/install').request.body).toEqual({ backend: 'dotnet', confirm: true });
+    library.startInstall('sf3d', { backend: 'dotnet', acceptLicence: 'stability-community' }).subscribe();
+    expect(http.expectOne('/api/models3d/engines/sf3d/install').request.body).toEqual({ backend: 'dotnet', confirm: true, accept_licence: 'stability-community' });
+  });
+
   it('keeps the refusal of a backend with the server’s words and reason', async () => {
     let got: unknown;
     library.setModelBackend('docker').subscribe({ error: (e) => (got = e) });

@@ -10,7 +10,10 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as fx from './fixtures.mjs';
-import { parseMultipart } from './generation.mjs';
+import { generationState, parseMultipart } from './generation.mjs';
+import * as bg from './music-backgrounds.mjs';
+import * as vt from './music-video-track.mjs';
+import * as vn from './music-verse-notes.mjs';
 import { clientFilter } from './listing.mjs';
 import { descriptionProblems, example as sceneExample } from './blender-descriptions.mjs';
 import { listOf, placedBy, putFile } from './models3d.mjs';
@@ -77,7 +80,7 @@ const manifestParams = (manifest) =>
   (Array.isArray(manifest.params) ? manifest.params : [])
     .filter((q) => q && typeof q === 'object' && typeof q.name === 'string')
     .map((q) => param(q.name, q.type ?? 'string', String(q.default ?? ''), { ...(q.description ? { description: q.description } : {}), ...(q.min !== undefined ? { min: q.min } : {}), ...(q.max !== undefined ? { max: q.max } : {}), ...(q.max_length !== undefined ? { max_length: q.max_length } : {}), ...(Array.isArray(q.options) ? { options: q.options } : {}) }));
-export const PARTS = [
+const BUILTIN_PARTS = [
   { name: 'toggle', description: 'A switch that flips on the beat', levels: LEVELS, cost_ms: 55, source: 'builtin', params: [param('label', 'string', 'allow', { max_length: 20 }), param('on', 'bool', 'true')] },
   { name: 'counter', description: 'A number that counts up with the loudness', levels: LEVELS, cost_ms: 55, source: 'builtin', params: [param('to', 'int', '100', { min: 1, max: 999 }), param('speed', 'number', '1.5', { min: 0.5, max: 4 })] },
   { name: 'glass-card', description: 'A frosted card with the verse on it', levels: LEVELS, cost_ms: 55, source: 'builtin', params: [param('title', 'string', '', { max_length: 30 })] },
@@ -107,6 +110,9 @@ export const PARTS = [
   { name: 'network-diagram', description: 'Nodes and links that light up on the beat', levels: ['medium', 'advanced'], cost_ms: 90, source: 'builtin', params: [param('nodes', 'int', '8', { min: 3, max: 20 })] },
   { name: 'blank', description: 'Draws nothing of its own: the piece is its stage', levels: LEVELS, cost_ms: 40, manual: true, source: 'builtin', params: [] },
 ];
+/** The parts that paint the whole frame, which would hide a video behind them: the rest of the parts that come with the program can go over one (`over_video`). */
+export const FILLS_FRAME = new Set(['sunburst', 'nebula']);
+export const PARTS = BUILTIN_PARTS.map((p) => ({ ...p, over_video: !FILLS_FRAME.has(p.name), ...(vn.BANDS[p.name] ? { bands: vn.BANDS[p.name] } : {}) }));
 export const CHARACTERS = [
   { name: 'bot', description: 'A small round robot', poses: ['idle', 'wave'], expressions: ['neutral', 'happy'], source: 'builtin' },
   { name: 'scientist', description: 'A scientist in a lab coat', poses: ['idle', 'point'], expressions: ['neutral', 'surprised'], source: 'builtin' },
@@ -134,11 +140,11 @@ export const FONT_FILES = Object.fromEntries(['Inter', 'Space Grotesk', 'Playfai
 
 /** The parts that come with the `theme` feature: a HUD drawn from the theme's corner labels and a film grain. Both are for layers. */
 export const THEME_PARTS = [
-  { name: 'hud-chrome', description: 'Four corner labels from the theme, drawn over every scene.', levels: LEVELS, cost_ms: 4, manual: true, source: 'builtin', params: [] },
-  { name: 'grain', description: 'A fine film grain over the whole frame.', levels: LEVELS, cost_ms: 6, manual: true, source: 'builtin', params: [{ name: 'amount', type: 'number', default: '0.08', min: 0, max: 1, description: 'How strong the grain is.' }] },
+  { name: 'hud-chrome', description: 'Four corner labels from the theme, drawn over every scene.', levels: LEVELS, cost_ms: 4, manual: true, over_video: true, source: 'builtin', params: [] },
+  { name: 'grain', description: 'A fine film grain over the whole frame.', levels: LEVELS, cost_ms: 6, manual: true, over_video: true, source: 'builtin', params: [{ name: 'amount', type: 'number', default: '0.08', min: 0, max: 1, description: 'How strong the grain is.' }] },
 ];
 
-export const catalog = () => ({ parts: PARTS, characters: CHARACTERS, backgrounds: BACKGROUNDS, levels: LEVELS, styles: STYLES, frame_rates: FRAME_RATES, actions: ACTIONS, fonts: FONTS, font_stacks: Object.fromEntries(FONTS.map((n) => [n, stackOf(n)])), modes: MODES, font_files: FONT_FILES, features: ['svg', 'scene', 'theme', 'review', 'word-timing', 'reference-breakdown', 'dataset', 'blender', 'blender-motion', 'blender-models'] });
+export const catalog = () => ({ parts: PARTS, characters: CHARACTERS, backgrounds: BACKGROUNDS, levels: LEVELS, styles: STYLES, frame_rates: FRAME_RATES, actions: ACTIONS, fonts: FONTS, font_stacks: Object.fromEntries(FONTS.map((n) => [n, stackOf(n)])), modes: MODES, font_files: FONT_FILES, features: ['svg', 'scene', 'theme', 'review', 'word-timing', 'reference-breakdown', 'dataset', 'blender', 'blender-motion', 'blender-models', 'video-background', 'video-track', 'verse-legibility'] });
 
 /** A fragment the mock gives to every part that comes with the program: the mock has no real ones, so each is a labelled card that follows the beat. */
 const builtinFragment = (name) =>
@@ -191,6 +197,8 @@ export function designProblem(d) {
   for (const [tag, mode] of Object.entries(d.modes ?? {})) if (!MODES.includes(mode)) return `the mode of ${tag} is neither dark nor light`;
   if (d.verse_style !== undefined && !VERSE_STYLES.includes(d.verse_style)) return `verse_style "${d.verse_style}" is not one of ${VERSE_STYLES.join(', ')}`;
   if (d.hit_style !== undefined && !HIT_STYLES.includes(d.hit_style)) return `hit_style "${d.hit_style}" is not one of ${HIT_STYLES.join(', ')}`;
+  const placed = vt.verseLayoutProblem(d.verse_layout);
+  if (placed) return placed;
   if (typeof d.concept !== 'string') return 'concept is missing';
   if (d.concept.length > 200) return 'concept is longer than 200 characters';
   const themed = themeProblem(d);
@@ -203,7 +211,7 @@ export function designProblem(d) {
   return '';
 }
 
-const OVERRIDE_KEYS = ['dark', 'light', 'accent', 'display', 'body', 'verse_style', 'hit_style'];
+const OVERRIDE_KEYS = ['dark', 'light', 'accent', 'display', 'body', 'verse_style', 'hit_style', 'verse_layout'];
 
 /** The reason a piece's own design is refused, or ''. It is laid over the song's and the result is checked as a whole design. */
 export function overrideProblem(own, song) {
@@ -297,7 +305,7 @@ export function readDefault(q) {
 }
 
 /** The reason a script is refused, or ''. Names the piece. */
-export function scriptProblem(script, map, level, song = PALETTES[0], parts = PARTS, models = {}) {
+export function scriptProblem(script, map, level, song = PALETTES[0], parts = PARTS, models = {}, backgrounds = {}) {
   if (!script || script.version !== 1 || !Array.isArray(script.pieces) || !script.pieces.length) return 'the script needs version 1 and at least one piece';
   let at = 0;
   for (const p of script.pieces) {
@@ -307,7 +315,7 @@ export function scriptProblem(script, map, level, song = PALETTES[0], parts = PA
     // A 3D piece is a scene Blender draws: no part and none of what goes with one, and a description that passes for the length of the piece (the server's words quote the piece by its id).
     if (p.blender !== undefined) {
       if (p.part) return `"${p.id}": a piece is a part or a 3D scene, not both`;
-      for (const field of ['params', 'animate', 'with', 'design', 'mode', 'lines', 'hit', 'stage']) if (p[field] !== undefined) return `"${p.id}": a 3D piece has no ${field}`;
+      for (const field of ['params', 'animate', 'with', 'design', 'mode', 'lines', 'hit', 'stage', 'background']) if (p[field] !== undefined) return `"${p.id}": a 3D piece has no ${field}`;
       const faults = descriptionProblems(p.blender?.description, p.end - p.start, { files: models, place: 'the models of the piece' });
       if (faults.length) return `"${p.id}": the 3D scene does not pass the checks: ${faults.join('; ')}`;
       continue;
@@ -354,7 +362,7 @@ export function scriptProblem(script, map, level, song = PALETTES[0], parts = PA
   }
   if (Math.abs(at - map.duration) > 0.01) return `the pieces end at ${at} seconds and the song at ${map.duration}`;
   void level;
-  return '';
+  return vt.trackProblem(script, map.duration, parts, backgrounds);
 }
 
 function paramProblem(q, v) {
@@ -903,9 +911,12 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
   const withCopy = (p) => {
     const text = db.partTexts?.[p.name]?.manifest;
     let says;
-    try { says = text ? JSON.parse(text).fixed_copy : undefined; } catch { says = undefined; }
+    let over;
+    try { const manifest = text ? JSON.parse(text) : {}; says = manifest.fixed_copy; over = manifest.over_video; } catch { says = undefined; over = undefined; }
     const fixed = typeof says === 'boolean' ? says : (p.params ?? []).some((x) => x.type === 'string' && x.default);
-    return fixed ? { ...p, fixed_copy: true } : p;
+    // A part of the user's is not marked over a video unless its manifest says so.
+    const marked = { ...p, over_video: typeof over === 'boolean' ? over : (p.over_video ?? false) };
+    return fixed ? { ...marked, fixed_copy: true } : marked;
   };
   const allParts = () => [...PARTS, ...THEME_PARTS, ...Object.values(db.parts)].map(withCopy);
 
@@ -1011,6 +1022,8 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
   /** For a fallback script: the pieces that still use a part the fixed rule chose, which is to say no scene of their own. */
   const fallbackPieces = (rec) => (rec.script?.pieces ?? []).filter((p) => !allParts().find((x) => x.name === p.part)?.scene).map((p) => p.id);
 
+  /** The advice about the saved script: about the pieces (by the bands of their part) and about the items of the track (by the rule of the mock). */
+  const notesOf = (rec) => [...vn.pieceNotes(rec.script, rec.design?.design, allParts()), ...vn.itemNotes(rec.script, rec.design?.design)];
   function view(rec, full) {
     const st = stateOf(rec);
     const v = {
@@ -1025,6 +1038,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       width: rec.width,
       height: rec.height,
       client: rec.client,
+      adult: rec.adult === true,
       created_at: rec.created_at,
       estimate: estimateOf(rec),
       size_bytes: st.state === 'done' ? Math.round(rec.song_map.duration * 700_000) : 0,
@@ -1040,7 +1054,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
     if (rec.run_id) v.run_id = rec.run_id;
     if (st.state === 'done') v.video = `/api/projects/${rec.id}/artifacts/out/${rec.id}.mp4`;
     if (st.error) v.error = st.error;
-    if (full) Object.assign(v, { design: rec.design, script: rec.script, script_source: rec.script_source, song_map: rec.song_map });
+    if (full) Object.assign(v, { design: rec.design, script: rec.script, script_source: rec.script_source, song_map: rec.song_map, verse_notes: notesOf(rec) });
     return v;
   }
   const newest = (a, b) => (a.created_at === b.created_at ? (a.id < b.id ? 1 : -1) : a.created_at < b.created_at ? 1 : -1);
@@ -1051,6 +1065,24 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
   };
   const notFound = (id) => err(404, 'not_found', `piece "${id}" not found`);
   const drawing = (id) => err(409, 'conflict', `piece "${id}" is being drawn: wait for it to end`);
+  /** Cut or join an item of the track: the answer of `run` is the script it makes (checked whole, saved and answered) or its refusal. */
+  const trackEdit = (params, body, run) => {
+    const rec = find(params);
+    if (!rec) return notFound(params.id);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return err(400, 'invalid_request', 'invalid JSON body');
+    if (busy(rec)) return drawing(rec.id);
+    if (proposing(rec)) return proposalBusy(rec.id);
+    const done = run(rec);
+    if (done.refused) return done.refused;
+    const why = scriptProblem(done.script, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {}, rec.backgrounds ?? {});
+    if (why) return invalid(why);
+    rec.script = done.script;
+    rec.script_source = 'user';
+    save();
+    return [200, rec.script];
+  };
+  /** A server that keeps adult content (`MOCK_ADULT=1`): without it a piece or a clip for adults is a 422 `content_not_allowed`. */
+  const adultKept = () => process.env.MOCK_ADULT === '1';
   const body422 = (body) => (body && typeof body === 'object' ? null : err(400, 'invalid_request', 'invalid JSON body'));
 
   return {
@@ -1076,6 +1108,8 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
         const why = designProblem(body.design);
         if (why) return invalid(`design: ${why}`);
       }
+      if (body.adult !== undefined && typeof body.adult !== 'boolean') return invalid('adult must be true or false');
+      if (body.adult === true && !adultKept()) return err(422, 'content_not_allowed', 'adult content is not kept on this server');
       if (body.transcribe !== undefined && typeof body.transcribe !== 'boolean') return invalid('transcribe must be true or false');
       if (body.separate !== undefined && !SEPARATE_VALUES.includes(body.separate)) return invalid('separate must be "auto", true or false');
       const badPrompt = promptProblem(body.prompt);
@@ -1103,6 +1137,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
         width: Number(size[1]),
         height: Number(size[2]),
         client: body.client ?? 'unknown',
+        adult: body.adult === true,
         design,
         script: scriptOf(song_map, level, design.design, preset?.parts),
         script_source: 'fallback',
@@ -1136,7 +1171,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
     'DELETE /api/music-motion/pieces/{id}': ({ params }) => {
       const rec = find(params);
       if (!rec) return notFound(params.id);
-      if (busy(rec)) return drawing(rec.id);
+      // as the server does: a piece that is being drawn is cancelled and deleted with its files and its run history
       delete db.pieces[rec.id];
       save();
       return [204];
@@ -1162,12 +1197,13 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       if (bad) return bad;
       if (busy(rec)) return drawing(rec.id);
       if (proposing(rec)) return proposalBusy(rec.id);
-      const why = scriptProblem(body, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {});
+      const script = vt.normalise(body);
+      const why = scriptProblem(script, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {}, rec.backgrounds ?? {});
       if (why) return invalid(why);
-      rec.script = body;
+      rec.script = script;
       rec.script_source = 'user';
       save();
-      return [200, rec.script];
+      return [200, { ...rec.script, verse_notes: notesOf(rec) }];
     },
     // The pages a render would draw, built from the saved design and script or from the ones in the body, saving nothing.
     'POST /api/music-motion/pieces/{id}/preview': ({ params, query, body }) => {
@@ -1179,12 +1215,13 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
         const why = designProblem(body.design);
         if (why) return invalid(why);
       }
-      const script = body?.script ?? rec.script;
-      const why = scriptProblem(script, rec.song_map, rec.level, design, allParts(), rec.models ?? {});
+      const script = vt.normalise(body?.script ?? rec.script);
+      const why = scriptProblem(script, rec.song_map, rec.level, design, allParts(), rec.models ?? {}, rec.backgrounds ?? {});
       if (why) return invalid(why);
       const only = (query?.get('scenes') ?? '').split(',').map((x) => x.trim()).filter(Boolean);
       for (const id of only) if (!script.pieces.some((p) => p.id === id)) return invalid(`scenes: "${id}" is not a piece of the script`);
       const chosen = script.pieces.filter((p) => only.length === 0 || only.includes(p.id));
+      const layered = vt.layerPieces(script);
       const scenes = chosen.map((p) => {
         // A 3D piece has no page: Blender draws it.
         if (p.blender !== undefined) return { id: p.id, start: p.start, end: p.end, html: '', song: {}, blender: true };
@@ -1197,9 +1234,14 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
         const fragment = (SAMPLE.parts.find((x) => x.name === p.part && x.fragment)?.fragment) ?? builtinFragment(p.part);
         const mode = p.mode ?? design.default_mode;
         const html = `<!doctype html><html><head><meta charset="utf-8"><style>:root{--bg:${mode === 'dark' ? design.dark : design.light};--fg:${mode === 'dark' ? design.light : design.dark};--accent:${design.accent};--display:${stackOf(design.display)};--body:${stackOf(design.body)}}html,body{margin:0;width:100%;height:100%;background:var(--bg);overflow:hidden;position:relative}</style></head><body>${fragment}<script>window.addEventListener('message',function(e){if(e.data&&e.data.type==='seek'&&window.__partSeek)window.__partSeek(e.data.t,{position:0});});</script></body></html>`;
-        return { id: p.id, start: p.start, end: p.end, html, song };
+        return { id: p.id, start: p.start, end: p.end, html, song, ...(layered.has(p.id) ? { layer: true } : {}) };
       });
-      return [200, { width: rec.width, height: rec.height, fps: rec.fps, scenes, replacements: [] }];
+      const track = vt.previewVideo(script, rec.backgrounds ?? {}, rec.id).map((v) => {
+        const item = (script.video ?? []).find((x) => x.id === v.id);
+        const local = item ? vn.localScrims(item, script, design) : [];
+        return local.length > 0 ? { ...v, local_scrims: local } : v;
+      });
+      return [200, { width: rec.width, height: rec.height, fps: rec.fps, scenes, ...(track.length > 0 ? { video: track } : {}), replacements: [] }];
     },
     // A PNG of the saved piece at second t. The mock has no browser: it is always the placeholder picture.
     'GET /api/music-motion/pieces/{id}/frame': ({ params, query }) => {
@@ -1353,6 +1395,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       if (other !== undefined) return err(400, 'invalid_request', `${other}: cannot be changed this way (title, client, prompt, world, hook and device can)`);
       if (!Object.keys(body).length) return err(400, 'invalid_request', `say at least one of ${allowed.join(', ')}`);
       if (proposing(rec)) return proposalBusy(params.id);
+      if ('client' in body && busy(rec)) return drawing(rec.id);
       const empty = (v) => v === null || v === '';
       if ('title' in body && !(typeof body.title === 'string' && body.title.trim() && body.title.length <= 200)) return invalid('title: 1 to 200 characters');
       if ('client' in body && !empty(body.client) && !(typeof body.client === 'string' && /^[a-z0-9-]{1,32}$/.test(body.client))) return invalid('client: not a valid client name');
@@ -1396,7 +1439,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       db.parts[params.name] = { ...part, description: JSON.parse(body.manifest).description ?? part.description };
       db.partTexts[params.name] = { manifest: body.manifest, fragment: body.fragment };
       save();
-      return [200, db.parts[params.name]];
+      return [200, withCopy(db.parts[params.name])];
     },
     // Deletes a part of the user's; a part that a piece or a style uses is refused, naming them, unless `force=true`.
     'DELETE /api/music-motion/parts/{name}': ({ params, query }) => {
@@ -1537,7 +1580,7 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       db.partTexts[name] = { manifest: rec.manifest, fragment: rec.fragment };
       delete db.drafts[rec.id];
       save();
-      return [200, part];
+      return [200, withCopy(part)];
     },
     'GET /api/music-motion/part-drafts/{id}/preview/{name}': ({ params }) => {
       const rec = db.drafts[params.id];
@@ -1867,11 +1910,107 @@ export function musicMotionHandlers({ db, save, ts, speed, models3d }) {
       save();
       return [204];
     },
+    // The videos a piece keeps to put behind its pieces. `MOCK_ADULT=1` is a server that keeps content for adults. Nothing changes while a render or a proposal runs.
+    'GET /api/music-motion/pieces/{id}/backgrounds': ({ params }) => {
+      const rec = find(params);
+      return rec ? [200, { backgrounds: bg.listOf((rec.backgrounds ??= {}), rec.script) }] : notFound(params.id);
+    },
+    'POST /api/music-motion/pieces/{id}/backgrounds': ({ params, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (!body || typeof body !== 'object') return err(400, 'invalid_request', 'invalid JSON body');
+      const from = bg.sourceOf(body.from, db.generations, (g) => generationState(g, speed), { adultKept: adultKept() });
+      if (from.refused) return from.refused;
+      const name = body.name ?? `${from.id}.mp4`;
+      if (typeof name !== 'string' || !bg.NAME.test(name)) return err(400, 'invalid_request', `name: "${name}" is not accepted; use a plain name ending in .mp4, .mov, .webm or .mkv`);
+      if (busy(rec)) return drawing(rec.id);
+      if (proposing(rec)) return proposalBusy(rec.id);
+      const files = (rec.backgrounds ??= {});
+      if (files[name]) return err(409, 'conflict', `"${name}" already exists: a file is never replaced`);
+      const [width, height] = bg.frameOf(from.rec.request?.aspect_ratio);
+      const seconds = from.rec.request?.duration ?? 5;
+      files[name] = { seconds, width, height, fps: 30, size: Math.round(seconds * 250_000), source: `generation:${from.id}` };
+      if (from.rec.request?.adult === true) rec.adult = true;
+      save();
+      return [201, bg.madeOf(name, files[name])];
+    },
+    'PUT /api/music-motion/pieces/{id}/backgrounds/{name}': ({ params, query, body }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (!bg.NAME.test(params.name)) return err(400, 'invalid_request', `name: "${params.name}" is not accepted; use a plain name ending in .mp4, .mov, .webm or .mkv`);
+      const buffer = body?.buffer;
+      if (buffer && buffer.length > bg.MAX_BYTES) return err(413, 'too_large', 'the file is larger than 256 MiB');
+      const adult = query?.get('adult') === 'true';
+      if (adult && !adultKept()) return err(422, 'content_not_allowed', 'adult content is not kept on this server');
+      const files = (rec.backgrounds ??= {});
+      if (files[params.name]) return err(409, 'conflict', `"${params.name}" already exists: a file is never replaced`);
+      if (busy(rec)) return drawing(rec.id);
+      if (proposing(rec)) return proposalBusy(rec.id);
+      if (!bg.looksLikeVideo(buffer)) return invalid(`${params.name}: ffprobe cannot read it as a video`);
+      files[params.name] = { seconds: 4, width: 1280, height: 720, fps: 30, size: buffer.length, source: 'upload' };
+      if (adult) rec.adult = true;
+      save();
+      return [201, bg.madeOf(params.name, files[params.name])];
+    },
+    'DELETE /api/music-motion/pieces/{id}/backgrounds/{name}': ({ params }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      const files = (rec.backgrounds ??= {});
+      if (!files[params.name]) return err(404, 'not_found', `piece "${rec.id}" has no background "${params.name}"`);
+      if (busy(rec)) return drawing(rec.id);
+      if (proposing(rec)) return proposalBusy(rec.id);
+      const users = vt.playedBy(rec.script, params.name);
+      if (users.length) return err(409, 'conflict', `the piece ${users.join(', ')} of the script plays ${params.name}: take it out of the script first`);
+      delete files[params.name];
+      save();
+      return [204];
+    },
+    // The video itself: the mock has one placeholder for every background. `Range`, `If-None-Match` and `?ticket=` as the server's file.
+    'GET /api/music-motion/pieces/{id}/backgrounds/{name}/file': ({ params, headers }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      if (!(rec.backgrounds ?? {})[params.name]) return err(404, 'not_found', `piece "${rec.id}" has no background "${params.name}"`);
+      return bg.fileAnswer(readFileSync(resolve(here, 'assets/placeholder.mp4')), headers ?? {});
+    },
+    // The picture of a clip the lane of the video track draws: one strip of `count` pictures (2 to 60), each `height` pixels high (16 to 240), and one picture at second `t` of the file.
+    'GET /api/music-motion/pieces/{id}/backgrounds/{name}/thumbs': ({ params, query }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      const file = (rec.backgrounds ?? {})[params.name];
+      if (!file) return err(404, 'not_found', `piece "${rec.id}" has no background "${params.name}"`);
+      const whole = (name, fallback, min, max) => {
+        const raw = query?.get(name);
+        if (raw === null || raw === undefined || raw === '') return { value: fallback };
+        const n = Number(raw);
+        return Number.isInteger(n) && n >= min && n <= max ? { value: n } : { bad: `${name} must be a whole number from ${min} to ${max}` };
+      };
+      const count = whole('count', 12, 2, 60);
+      const height = whole('height', 60, 16, 240);
+      if (count.bad || height.bad) return invalid(count.bad ?? height.bad);
+      const strip = vt.thumbsStrip(count.value, height.value, file);
+      return [200, strip.image, 'image/png', { 'X-Frame-Count': String(strip.count), 'X-Frame-Width': String(strip.width) }];
+    },
+    'GET /api/music-motion/pieces/{id}/backgrounds/{name}/frame': ({ params, query }) => {
+      const rec = find(params);
+      if (!rec) return notFound(params.id);
+      const file = (rec.backgrounds ?? {})[params.name];
+      if (!file) return err(404, 'not_found', `piece "${rec.id}" has no background "${params.name}"`);
+      const raw = query?.get('t');
+      const t = raw === null || raw === undefined || raw.trim() === '' ? Number.NaN : Number(raw);
+      if (!Number.isFinite(t) || t < 0 || t > file.seconds) return invalid(`t must be a number of seconds from 0 to ${file.seconds}`);
+      const w = query?.get('width');
+      const width = w === null || w === undefined || w === '' ? 640 : Number(w);
+      if (!Number.isInteger(width) || width < 32 || width > 1920) return invalid('width must be a whole number from 32 to 1920');
+      return [200, vt.framePicture(t, width, file, file.seconds), 'image/png'];
+    },
+    // Cut and join the items of the video track: each acts on the saved script, saves it whole and answers it.
+    'POST /api/music-motion/pieces/{id}/video/split': ({ params, body }) => trackEdit(params, body, (rec) => vt.splitItem(rec.script, rec.backgrounds ?? {}, body.item, body.at, body.ids)),
+    'POST /api/music-motion/pieces/{id}/video/join': ({ params, body }) => trackEdit(params, body, (rec) => vt.joinItems(rec.script, rec.backgrounds ?? {}, body.first, body.second)),
     'POST /api/music-motion/pieces/{id}/render': ({ params }) => {
       const rec = find(params);
       if (!rec) return notFound(params.id);
       if (busy(rec)) return drawing(rec.id);
-      const why = scriptProblem(rec.script, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {});
+      const why = scriptProblem(rec.script, rec.song_map, rec.level, rec.design.design, allParts(), rec.models ?? {}, rec.backgrounds ?? {});
       if (why) return invalid(why);
       rec.rendered_at = ts();
       rec.run_id = `run-mock-mm-${Object.keys(db.pieces).length}${randomBytes(2).toString('hex')}`;

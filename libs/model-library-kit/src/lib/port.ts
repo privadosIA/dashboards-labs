@@ -139,6 +139,19 @@ export interface ModelBackend {
 export interface InstallOptions {
   readonly backend?: BackendId;
   readonly parts?: readonly PartId[];
+  /** The `id` of the plan's licence, sent with the confirmation only after the person read the licence and agreed: the dashboard never sets it by itself. */
+  readonly acceptLicence?: string;
+}
+
+/** A licence as the server describes it: show `name`, `commercial` and `summary`, link `url`. Where `id` is set the install is refused until the request carries it as `accept_licence`. */
+export interface LicenceTerms {
+  readonly id?: string;
+  readonly name: string;
+  readonly url?: string;
+  readonly summary?: string;
+  readonly commercial: 'yes' | 'conditions' | 'no' | 'unknown';
+  /** An acceptance was recorded on the server; present only where one is required. */
+  readonly accepted?: boolean;
 }
 
 /** Whether an engine can be used now and, if not, why (`reason` is the server's code, `detail` its words). */
@@ -166,7 +179,10 @@ export interface InstallPlan {
   readonly parts?: readonly string[];
   readonly missing: readonly string[];
   readonly bytes: number;
+  /** The licence's name. */
   readonly licence: string;
+  /** The whole licence, from a server that sends it as an object (older ones send the name as text: this is absent then, and no acceptance is asked). */
+  readonly licenceTerms?: LicenceTerms;
   /** The weights come from a repository whose licence the person's own Hugging Face account has to accept. */
   readonly gated: boolean;
   readonly path: string;

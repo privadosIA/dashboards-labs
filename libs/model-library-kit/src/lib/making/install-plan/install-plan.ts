@@ -19,7 +19,8 @@ export interface InstallPlanData {
 
 /**
  * Shows what an install of an engine needs, for a backend and by parts (the service, the image, the weights: the ones that are missing, which the person may untick), with the size, the licence, whether the weights are
- * gated and the free disk, and starts nothing until the person confirms. It asks the plan again when the parts change. It has no field for a key and accepts no licence: for a gated engine it says whose that is.
+ * gated and the free disk, and starts nothing until the person confirms. It asks the plan again when the parts change. It has no field for a key and never accepts a licence by itself: where the plan's
+ * licence has an `id` it shows the licence and an unticked checkbox, and only the person's tick lets the confirmation carry `accept_licence`. For a gated engine it says whose that is.
  * The install itself is followed in the engines panel.
  */
 @Component({
@@ -52,7 +53,21 @@ export class InstallPlanDialog {
     return !!p && p.bytes > p.free_bytes;
   });
   protected readonly noneTicked = computed(() => this.offered().length > 0 && this.ticked().size === 0);
-  protected readonly canConfirm = computed(() => this.plan() !== null && !this.noRoom() && !this.noneTicked() && !this.loading() && !this.starting());
+  /** The licence of the plan, whole: only a server that sends it as an object has it. */
+  protected readonly terms = computed(() => this.plan()?.licenceTerms ?? null);
+  /** The licence needs the person's acceptance (it has an `id`): the dialog shows it and the tick. */
+  protected readonly needsAcceptance = computed(() => !!this.terms()?.id);
+  /** The `id` of the licence the person ticked for: another licence (another plan) starts unticked, and nothing is ticked beforehand or remembered. */
+  private readonly agreedId = signal('');
+  protected readonly agreed = computed(() => !!this.terms()?.id && this.agreedId() === this.terms()!.id);
+  /** Where the licence's text is, only when it is a web address. */
+  protected readonly link = computed(() => {
+    const url = this.terms()?.url ?? '';
+    return /^https?:\/\//i.test(url) ? url : '';
+  });
+  protected readonly canConfirm = computed(
+    () => this.plan() !== null && !this.noRoom() && !this.noneTicked() && !this.loading() && !this.starting() && (!this.needsAcceptance() || this.agreed()),
+  );
 
   constructor() {
     void this.ask({ ...(this.data.backend ? { backend: this.data.backend } : {}) }).then(() => {
@@ -83,9 +98,19 @@ export class InstallPlanDialog {
     await this.ask(this.options(next));
   }
 
+  /** The person says they read the licence and agree, or takes it back. */
+  protected agree(on: boolean): void {
+    this.agreedId.set(on && this.terms()?.id ? this.terms()!.id! : '');
+  }
+
   private options(ticked: ReadonlySet<string>): InstallOptions {
     const backend = (this.plan()?.backend ?? this.data.backend) as BackendId | undefined;
-    return { ...(backend ? { backend } : {}), ...(this.offered().length ? { parts: this.offered().filter((p) => ticked.has(p)) as PartId[] } : {}) };
+    return {
+      ...(backend ? { backend } : {}),
+      ...(this.offered().length ? { parts: this.offered().filter((p) => ticked.has(p)) as PartId[] } : {}),
+      // Only the person's tick sends the licence's id back: the dashboard never accepts for them.
+      ...(this.agreed() ? { acceptLicence: this.terms()!.id! } : {}),
+    };
   }
 
   protected async confirm(): Promise<void> {

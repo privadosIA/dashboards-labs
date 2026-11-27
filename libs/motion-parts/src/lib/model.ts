@@ -19,6 +19,13 @@ export interface PartParam {
   readonly animatable?: boolean;
 }
 
+/** Where a part paints: the share of each third of the frame that it fills. */
+export interface PartBands {
+  readonly top: number;
+  readonly center: number;
+  readonly bottom: number;
+}
+
 export interface Part {
   readonly name: string;
   readonly description: string;
@@ -36,6 +43,10 @@ export interface Part {
   readonly scene?: { readonly piece: string; readonly scriptPiece: string };
   /** The part draws example text of its own (a name, a label, a title): the fixed rule of the script and the level substitution do not choose it. Absent when it does not. */
   readonly fixedCopy?: boolean;
+  /** The part leaves what is behind it visible (it draws no opaque background over the whole frame), so a piece with a video behind it may use it. Absent when the server does not mark it. */
+  readonly overVideo?: boolean;
+  /** How much of each third of the frame the part paints opaque (0 to 1). Absent when nobody measured the part: that is not the same as clear. */
+  readonly bands?: PartBands;
   readonly params: readonly PartParam[];
 }
 

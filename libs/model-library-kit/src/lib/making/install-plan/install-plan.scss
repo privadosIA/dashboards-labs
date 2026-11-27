@@ -63,3 +63,36 @@
 .data {
   font-family: var(--lab-font-mono);
 }
+
+.licence {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lab-space-2);
+  padding: var(--lab-space-3);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface-high);
+}
+
+.licence-name {
+  margin: 0;
+  color: var(--lab-ink);
+  font-size: var(--lab-fs-body);
+  font-weight: var(--lab-fw-control);
+}
+
+.commercial {
+  margin: 0;
+  color: var(--lab-warn);
+  font-size: var(--lab-fs-meta);
+  font-weight: var(--lab-fw-control);
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lab-space-1);
+  color: var(--lab-accent);
+  font-size: var(--lab-fs-meta);
+}

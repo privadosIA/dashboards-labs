@@ -15,8 +15,21 @@ export interface ProjectSummary {
   error?: string;
   /** Who made the project: a client name, `embedded` (a normal project) or `unknown`. */
   client?: string;
-  /** Only on a generation API project (listed with `managed=include`). */
-  kind?: 'generation' | 'image_edit' | 'video_edit';
+  /** Only on a generation API project (listed with `managed=include`) or an animation of the music mode (`managed=all`). */
+  kind?: ProjectKind;
+}
+
+/** What a managed item is: a generation API one, or an animation of the music mode (`music_motion`, only with `managed=all`). */
+export type ProjectKind = 'generation' | 'image_edit' | 'video_edit' | 'model_generation' | 'music_motion';
+
+/** One client label in use (`GET /api/clients`): its colour (`#rrggbb`, the owner's or the default one worked out from the name) and how many items of each kind carry it. */
+export interface ClientLabel {
+  name: string;
+  color: string;
+  counts: { projects: number; animations: number; generations: number; image_edits: number; video_edits: number; model_generations: number };
+  total: number;
+  /** RFC 3339: the latest creation or update among the items with this label. */
+  last_used: string;
 }
 
 /** What `PATCH /api/projects/{id}` changes: only the fields sent. `null` removes the client or the label. */
@@ -326,6 +339,10 @@ export interface KeptClip {
   kind?: 'clip' | 'animation';
   size: number;
   modified: string;
+  /** Who made the clip's project (a client name, `embedded` or `unknown`). */
+  client?: string;
+  /** Only when the project is a managed one: an animation of the music mode is `music_motion` (asked with `managed=all`). */
+  project_kind?: ProjectKind;
   /** How a motion-graphic scene's page was made (the model that wrote it, the browser); absent for any other scene. */
   motion?: string;
 }
@@ -1725,7 +1742,7 @@ export interface ProjectStorage {
 
 /** The size of every project and the disk that holds them (GET /api/storage). */
 export interface StorageOverview {
-  projects: { id: string; total_bytes: number }[];
+  projects: { id: string; total_bytes: number; client?: string; kind?: ProjectKind }[];
   disk: DiskReport;
   /** Only when the server keeps the projects in a media directory: its absolute path and the free space of its disk. */
   media?: MediaDirectory;
@@ -2126,6 +2143,8 @@ export interface ModelBackendInfo {
 export interface ModelInstallRequest {
   backend?: 'dotnet' | 'docker';
   parts?: ('service' | 'image' | 'weights')[];
+  /** The `id` of the plan's licence, sent only with the confirmation and only after the person read the licence and agreed. */
+  accept_licence?: string;
 }
 
 /** What an install of an engine needs (`Model3DInstallPlan`). */
@@ -2135,7 +2154,8 @@ export interface ModelInstallPlanInfo {
   parts?: string[];
   missing: string[];
   bytes: number;
-  licence: string;
+  /** The licence's name as text (older servers) or the licence as an object (`LicenceTerms`). */
+  licence: string | { id?: string; name?: string; url?: string; summary?: string; commercial?: 'yes' | 'conditions' | 'no' | 'unknown'; accepted?: boolean };
   gated: boolean;
   path: string;
   free_bytes: number;

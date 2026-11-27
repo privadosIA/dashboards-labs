@@ -499,3 +499,75 @@ test('a part that fails ends the job naming it', async () => {
     await mock.stop();
   }
 });
+
+test('the plan describes the licence of the engine as an object, with the name and whether it allows commercial use', async () => {
+  const mock = await startMock({ env: { ...fast, MOCK_MODEL3D: 'bare' } });
+  try {
+    const triposr = (await mock.json('POST', `${E}/triposr/install`, {})).body.plan.licence;
+    assert.deepEqual([triposr.name, triposr.commercial, triposr.id], ['MIT', 'yes', undefined]);
+    fits(`${E}/{engine}/install`, 'post', 200, (await mock.json('POST', `${E}/triposr/install`, {})).body);
+  } finally {
+    mock.stop();
+  }
+});
+
+test('the plan of sf3d carries a licence with an id and says it is not accepted yet; the licence of triposr has no id and no accepted', async () => {
+  const mock = await startMock({ env: { ...fast, MOCK_MODEL3D_SF3D: 'key', MOCK_MODEL3D: 'bare' } });
+  try {
+    const sf3d = await mock.json('POST', `${E}/sf3d/install`, {});
+    assert.equal(sf3d.status, 200, JSON.stringify(sf3d.body));
+    fits(`${E}/{engine}/install`, 'post', 200, sf3d.body);
+    assert.deepEqual([sf3d.body.plan.licence.id, sf3d.body.plan.licence.commercial, sf3d.body.plan.licence.accepted], ['stability-community', 'conditions', false]);
+    const triposr = (await mock.json('POST', `${E}/triposr/install`, {})).body.plan.licence;
+    assert.equal('id' in triposr, false);
+    assert.equal('accepted' in triposr, false);
+  } finally {
+    mock.stop();
+  }
+});
+
+test('the install of sf3d is refused without the acceptance of its licence, or with another id (400 licence_acceptance_required), and nothing starts', async () => {
+  const mock = await startMock({ env: { ...fast, MOCK_MODEL3D_SF3D: 'key', MOCK_MODEL3D: 'bare' } });
+  try {
+    const without = await mock.json('POST', `${E}/sf3d/install`, { confirm: true });
+    assert.equal(without.status, 400);
+    assert.equal(without.body.error.reason, 'licence_acceptance_required');
+    assert.ok(without.body.error.message.includes('stability-community'));
+    assert.ok(without.body.error.message.includes('https://huggingface.co/stabilityai/stable-fast-3d'));
+    const other = await mock.json('POST', `${E}/sf3d/install`, { confirm: true, accept_licence: 'other' });
+    assert.equal(other.status, 400);
+    assert.equal(other.body.error.reason, 'licence_acceptance_required');
+    assert.equal((await mock.json('POST', `${E}/sf3d/install`, {})).body.plan.licence.accepted, false, 'a refusal records nothing');
+    // nothing started: another confirmation with the acceptance is not refused for a download that runs
+    assert.equal((await mock.json('POST', `${E}/sf3d/install`, { confirm: true, accept_licence: 'stability-community' })).status, 202);
+  } finally {
+    mock.stop();
+  }
+});
+
+test('the install of sf3d starts with the acceptance, which is recorded: once the download ends without finishing the next plan says accepted', async () => {
+  const mock = await startMock({ env: { ...fast, MOCK_MODEL3D_SF3D: 'key', MOCK_MODEL3D: 'bare', MOCK_INSTALL_FAIL: 'weights' } });
+  try {
+    const started = await mock.json('POST', `${E}/sf3d/install`, { confirm: true, accept_licence: 'stability-community', client: 'dashboard-full' });
+    assert.equal(started.status, 202, JSON.stringify(started.body));
+    assert.equal(started.body.install.engine, 'sf3d');
+    assert.equal((await mock.json('POST', `${E}/sf3d/install`, {})).status, 409, 'while it runs the plan is not asked again');
+    const id = started.body.install.id;
+    await until(async () => (await mock.json('GET', `/api/models3d/installs/${id}`)).body.state !== 'running');
+    const plan = await mock.json('POST', `${E}/sf3d/install`, {});
+    assert.equal(plan.status, 200, JSON.stringify(plan.body));
+    assert.equal(plan.body.plan.licence.accepted, true);
+  } finally {
+    mock.stop();
+  }
+});
+
+test('an engine whose licence has no id is installed with a bare confirmation, as before', async () => {
+  const mock = await startMock({ env: { ...fast, MOCK_MODEL3D: 'bare' } });
+  try {
+    const job = await mock.json('POST', `${E}/triposr/install`, { confirm: true });
+    assert.equal(job.status, 202, JSON.stringify(job.body));
+  } finally {
+    mock.stop();
+  }
+});

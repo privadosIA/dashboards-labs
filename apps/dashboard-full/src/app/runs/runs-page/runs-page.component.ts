@@ -122,7 +122,7 @@ export class RunsPageComponent implements OnInit {
    * list can be cut down to videos, pictures or songs. The project already picked stays, whatever its mode.
    */
   protected readonly launchProjects = computed(() => {
-    const list = visibleProjects(this.projects.projects(), this.modes.active(), this.modes.origins());
+    const list = visibleProjects(this.projects.workable(), this.modes.active(), this.modes.origins());
     const picked = this.selectedProject();
     const current = picked && !list.some((p) => p.id === picked) ? this.projects.projects().find((p) => p.id === picked) : undefined;
     return current ? [current, ...list] : list;

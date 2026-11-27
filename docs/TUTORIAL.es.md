@@ -210,6 +210,17 @@ Cada botón pide confirmación diciendo lo que cuesta, y un proyecto con un run 
 3. **Limpiar** quita solo esa parte, tras preguntar.
 4. **Vídeo final y exportaciones** y **Orígenes** se muestran, pero su botón está desactivado: son tuyos.
 
+### Etiquetas: quién hizo cada elemento
+
+![La lista de proyectos filtrada por una etiqueta de cliente](tutorial/es/63-etiquetas-cliente.png)
+
+Cada elemento lleva una **etiqueta de cliente** que dice quién lo hizo: `dashboard-full` lo que haces aquí, el nombre de otro programa que usa el mismo servidor, `embedded` para un proyecto normal y `unknown` para lo que no pidió ninguna. Las etiquetas son una categoría que se ve y por la que se filtra.
+
+1. Un **chip** por cada etiqueta sobre la tabla, con su **color** y cuántos elementos la llevan, el de uso más reciente primero. Elige uno para dejar en la lista solo lo suyo (puedes elegir varios a la vez, y se combinan con los modos y la búsqueda); **Quitar** los quita todos. La elección se recuerda.
+2. La **paleta** de un chip cambia su color (un formulario que acepta `#rrggbb`) o restaura el de por defecto, que el servidor calcula a partir del nombre. El color es el del servidor: todos los paneles que lo usan enseñan el mismo.
+3. La **insignia** junto al nombre de un proyecto tiene el color de su etiqueta. Sus **detalles** (el botón de los deslizadores) cambian la etiqueta: las conocidas se ofrecen al escribir, se acepta cualquier otro nombre válido (de una a 32 letras minúsculas, cifras o guiones) y una vacía la quita. Una negativa (un elemento en marcha no puede cambiar de etiqueta) se escribe con las palabras del servidor y no cambia nada.
+4. **Animación** es una opción más del selector **Modos que se ven** (el mismo que en Runs): apagada, las animaciones del modo música no salen en la lista; encendida, cada una es una fila con la marca *Animación*. **Abre la pieza** en lugar del editor de escenas y conserva detalles, historial, almacenamiento, copia y exportación; su etiqueta va por la ruta propia de la animación.
+
 ## 6. El editor, por secciones
 
 El editor tiene varias tarjetas apiladas, plegadas al abrirlo: Salida, Estilo y calidad, Defaults, Animación, Música de fondo, Escenas con partes del catálogo (ver [Escenas dibujadas por una parte del catálogo](../apps/dashboard-full/README.md#scenes-drawn-by-a-part-of-the-catalog)) y la lista de Escenas. Todo lo que cambias se guarda en el `scenes.yaml` del proyecto.

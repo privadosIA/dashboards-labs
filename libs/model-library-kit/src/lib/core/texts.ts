@@ -161,6 +161,13 @@ export interface Texts {
       files: string;
       size: (bytes: number) => string;
       licence: (licence: string) => string;
+      /** The licence that needs the person's acceptance: its words, the tick and what it is for. */
+      licenceTitle: string;
+      commercial: Record<'yes' | 'conditions' | 'no' | 'unknown', string>;
+      licenceRead: string;
+      licenceRecorded: string;
+      licenceAgree: (name: string) => string;
+      licenceNeeded: string;
       free: (bytes: number) => string;
       path: (path: string) => string;
       gated: string;
@@ -201,6 +208,7 @@ export interface Texts {
       cancel: string;
       remove: string;
       removeNote: string;
+      relabel: string;
       model: (id: string) => string;
     };
   };
@@ -383,6 +391,12 @@ const es: Texts = {
       files: 'Ficheros que faltan',
       size: (bytes) => `Unos ${kb(bytes)}`,
       licence: (licence) => `Licencia: ${licence}`,
+      licenceTitle: 'Licencia que hay que aceptar',
+      commercial: { yes: 'Permite el uso comercial.', conditions: 'El uso comercial tiene condiciones: léelas.', no: 'No permite el uso comercial.', unknown: 'No se sabe si permite el uso comercial.' },
+      licenceRead: 'Leer la licencia',
+      licenceRecorded: 'Este servidor ya guardó una aceptación de esta licencia. Aun así, confirma que la has leído.',
+      licenceAgree: (name) => `He leído la licencia «${name}» y la acepto`,
+      licenceNeeded: 'El servidor no instala este motor sin tu aceptación: marca la casilla para poder instalar.',
       free: (bytes) => `Libre en el disco: ${kb(bytes)}`,
       path: (path) => `Van a ${path}`,
       gated: 'Estos pesos están en un repositorio que pide a cada cuenta aceptar su licencia. Hazlo con tu propia cuenta de Hugging Face y guarda la clave de esa cuenta en los tokens del servidor: esta página nunca acepta una licencia ni pide una clave.',
@@ -423,6 +437,7 @@ const es: Texts = {
       cancel: 'Cancelar',
       remove: 'Quitar de la lista',
       removeNote: 'El modelo sigue en la biblioteca.',
+      relabel: 'Etiqueta',
       model: (id) => `Modelo ${id}`,
     },
   },
@@ -603,6 +618,12 @@ const en: Texts = {
       files: 'Files that are missing',
       size: (bytes) => `About ${kb(bytes)}`,
       licence: (licence) => `Licence: ${licence}`,
+      licenceTitle: 'Licence to accept',
+      commercial: { yes: 'It allows commercial use.', conditions: 'Commercial use has conditions: read them.', no: 'It does not allow commercial use.', unknown: 'It is not known whether it allows commercial use.' },
+      licenceRead: 'Read the licence',
+      licenceRecorded: 'This server already recorded an acceptance of this licence. Confirm anyway that you read it.',
+      licenceAgree: (name) => `I have read the “${name}” licence and I accept it`,
+      licenceNeeded: 'The server does not install this engine without your acceptance: tick the box to be able to install.',
       free: (bytes) => `Free on the disk: ${kb(bytes)}`,
       path: (path) => `They go to ${path}`,
       gated: 'These weights are on a repository that asks every account to accept its licence. Do it with your own Hugging Face account and save that account’s key in the server’s tokens: this page never accepts a licence or asks for a key.',
@@ -643,6 +664,7 @@ const en: Texts = {
       cancel: 'Cancel',
       remove: 'Remove from the list',
       removeNote: 'The model stays in the library.',
+      relabel: 'Label',
       model: (id) => `Model ${id}`,
     },
   },

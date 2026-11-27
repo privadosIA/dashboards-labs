@@ -1,9 +1,9 @@
 {
   "source": "../veritmo/internal/server/openapi.yaml",
-  "fetchedAt": "2026-11-25T08:44:52.349Z",
-  "sha256": "64771dd29a9137d9e6b8c4cd712f49aadcaf93b8c4f6075f39a687bf674b76ce",
+  "fetchedAt": "2026-11-27T07:56:32.365Z",
+  "sha256": "ad6443aabb87e113f5a216471cb7e3d02e85e7ba0b49e457ce5824ba3e737d76",
   "openapi": "3.0.3",
   "title": "Veritmo API",
   "version": "1",
-  "operations": 269
+  "operations": 284
 }

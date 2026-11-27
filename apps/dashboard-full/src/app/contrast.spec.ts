@@ -88,3 +88,26 @@ describe('theme contrast (WCAG AA)', () => {
   }
 });
 
+
+// A client label brings its own colour (the owner's, kept by the server), which may be any `#rrggbb`. The chips and the badges tint the surface with it
+// and never put text on the raw colour, so the dashboard's ink must stay legible on the strongest tint whatever colour comes.
+describe('the colour of a client label', () => {
+  const LABEL_COLORS = ['#ffffff', '#000000', '#ffee00', '#00ffff', '#ff00ff', '#0000ff', '#808080'];
+  const TINTS: Array<[string, number]> = [['idle chip', 0.08], ['badge', 0.12], ['chosen chip', 0.24]];
+  const mix = (a: string, b: string, share: number): string =>
+    '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * share + parseInt(b.slice(i, i + 2), 16) * (1 - share)).toString(16).padStart(2, '0')).join('');
+
+  for (const theme of ['dark', 'light'] as const) {
+    it(`keeps the ink (and the dim ink on the idle chip) legible on the tints of any label colour in the ${theme} theme`, () => {
+      const failures = LABEL_COLORS.flatMap((color) =>
+        TINTS.flatMap(([what, share]) =>
+          SURFACES.flatMap((s) =>
+            // the dim ink is drawn only on the idle chip (its count); the badge and the chosen chip use the ink
+            (what === 'idle chip' ? ['lab-ink', 'lab-ink-dim'] : ['lab-ink']).map((fg) => ({ what: `${fg} on ${what} of ${color} over ${s}`, v: contrast(t(fg, theme), mix(color, t(s, theme), share)) })),
+          ),
+        ),
+      ).filter((x) => x.v < 4.5);
+      expect(failures.map((f) => `${f.what}: ${f.v.toFixed(2)}`)).toEqual([]);
+    });
+  }
+});

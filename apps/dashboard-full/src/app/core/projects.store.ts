@@ -1,8 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ProjectPatch, ProjectRestored, ProjectSummary } from './api.models';
-import { ApiService } from './api.service';
+import { ProjectKind, ProjectPatch, ProjectRestored, ProjectSummary } from './api.models';
+import { ApiService, isManagedId } from './api.service';
 import { ModeFilterStore } from './mode-filter.store';
 
 /**
@@ -16,6 +16,11 @@ export class ProjectsStore {
   private readonly modes = inject(ModeFilterStore);
 
   readonly projects = signal<ProjectSummary[]>([]);
+  /**
+   * What can be opened, run and shown as a project: the list without the animations of the music mode (`managed=all`). The server gives an animation a project
+   * mode (`video`) although it has no project to open, so the gallery and the run launcher read this one; only the projects list shows the animations.
+   */
+  readonly workable = computed(() => this.projects().filter((p) => p.kind !== 'music_motion'));
   readonly loading = signal(false);
   readonly loaded = signal(false);
 
@@ -41,11 +46,30 @@ export class ProjectsStore {
     await this.load();
   }
 
-  /** Changes a project's name, client or label by field, then reads the list again so every screen sees the new values. */
-  async patch(id: string, body: ProjectPatch): Promise<ProjectSummary> {
-    const project = await firstValueFrom(this.api.patchProject(id, body));
-    await this.load();
-    return project;
+  /**
+   * Changes a project's name, client or label by field, then reads the list again so every screen sees the new values. An item of the generation API
+   * (`api-gen-`, `api-edit-`, `api-vid-`, `api-m3d-`) takes its client label by the route of its kind and its name and adult label by the project one, so a change of
+   * both is sent in two requests; the list is read again whatever was applied.
+   */
+  async patch(id: string, body: ProjectPatch, kind?: ProjectKind): Promise<ProjectSummary> {
+    if (body.client === undefined || !isManagedId(id, kind)) {
+      const project = await firstValueFrom(this.api.patchProject(id, body));
+      await this.load();
+      return project;
+    }
+    const { client, ...rest } = body;
+    let applied = false;
+    try {
+      if (Object.keys(rest).length > 0) {
+        await firstValueFrom(this.api.patchProject(id, rest));
+        applied = true;
+      }
+      await firstValueFrom(this.api.setClient(id, client, kind));
+      applied = true;
+    } finally {
+      if (applied) await this.load();
+    }
+    return this.projects().find((p) => p.id === id) ?? { id, name: id, mode: '', scene_count: 0, client: client ?? 'unknown' };
   }
 
   /** Restores a version of a project's definition, then reads the list again. */
@@ -55,8 +79,8 @@ export class ProjectsStore {
     return answer;
   }
 
-  async remove(id: string): Promise<void> {
-    await firstValueFrom(this.api.deleteProject(id));
+  async remove(id: string, kind?: ProjectKind): Promise<void> {
+    await firstValueFrom(this.api.deleteProject(id, kind));
     await this.load();
   }
 }

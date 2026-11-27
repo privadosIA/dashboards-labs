@@ -2,6 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import {
   LibraryFailed,
+  installPlanOf,
+  type PlanAnswer,
   type BackendId,
   type CatalogPage,
   type CatalogQuery,
@@ -118,11 +120,16 @@ export class ServerModelLibrary implements ModelLibraryPort {
   }
 
   installPlan(engine: string, options: InstallOptions = {}): Observable<InstallPlan> {
-    return this.api.modelEngineInstall(engine, false, options as ModelInstallRequest).pipe(map((r) => r.plan as InstallPlan), catchError(libraryFailure));
+    return this.api.modelEngineInstall(engine, false, this.request(options)).pipe(map((r) => installPlanOf(r.plan as PlanAnswer)), catchError(libraryFailure));
   }
 
   startInstall(engine: string, options: InstallOptions = {}): Observable<InstallJob> {
-    return this.api.modelEngineInstall(engine, true, options as ModelInstallRequest).pipe(map((r) => r.install as InstallJob), catchError(libraryFailure));
+    return this.api.modelEngineInstall(engine, true, this.request(options)).pipe(map((r) => r.install as InstallJob), catchError(libraryFailure));
+  }
+
+  /** The install request of the library's options: the acceptance of a licence goes with them only when the person gave it. */
+  private request(options: InstallOptions): ModelInstallRequest {
+    return { ...(options.backend ? { backend: options.backend } : {}), ...(options.parts ? { parts: [...options.parts] } : {}), ...(options.acceptLicence ? { accept_licence: options.acceptLicence } : {}) };
   }
 
   installJob(id: string): Observable<InstallJob> {

@@ -22,6 +22,7 @@ import { apiErrorInterceptor } from './core/api-error.interceptor';
 import { authInterceptor } from './core/auth.interceptor';
 import { isDesktopShell } from './core/desktop-shell';
 import { provideBlenderGate } from './core/blender-gate';
+import { provideGenerationRelabel } from './core/generation-relabel';
 import { ServerModelLibrary } from './core/model-library.adapter';
 import { activeLang } from './core/language';
 import { PaginatorIntl } from './core/paginator-intl';
@@ -49,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     provideBlenderGate(),
     provideModelLibrary({ lang: activeLang() }),
     { provide: MODEL_LIBRARY_PORT, useExisting: ServerModelLibrary },
+    provideGenerationRelabel(),
     provideAppDynamicForms(),
     { provide: MatPaginatorIntl, useClass: PaginatorIntl },
     // Outlined fields with no reserved error gap: the default filled style rendered as a tinted block.

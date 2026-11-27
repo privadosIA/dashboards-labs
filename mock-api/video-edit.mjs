@@ -6,6 +6,7 @@
 import { randomBytes } from 'node:crypto';
 import { parseMultipart } from './generation.mjs';
 import { clientFilter } from './listing.mjs';
+import { readClientPatch } from './clients.mjs';
 
 const RUN_STEPS = 8;
 const err = (status, code, message) => [status, { error: { code, message } }];
@@ -150,6 +151,16 @@ export function videoEditHandlers({ db, save, ts, speed }) {
     'GET /api/video-edits/{id}': ({ params }) => {
       const rec = db.videoEdits[params.id];
       return rec ? [200, editView(rec)] : err(404, 'not_found', `video edit "${params.id}" not found`);
+    },
+    'PATCH /api/video-edits/{id}': ({ params, body }) => {
+      const rec = db.videoEdits[params.id];
+      if (!rec) return err(404, 'not_found', `video edit "${params.id}" not found`);
+      const read = readClientPatch(body);
+      if (read.error) return read.error;
+      if (['queued', 'running'].includes(stateOf(rec).state)) return err(409, 'conflict', `video edit "${params.id}" has an active run`);
+      rec.request.client = read.client;
+      save();
+      return [200, editView(rec)];
     },
     'DELETE /api/video-edits/{id}': ({ params }) => {
       if (!db.videoEdits[params.id]) return err(404, 'not_found', `video edit "${params.id}" not found`);

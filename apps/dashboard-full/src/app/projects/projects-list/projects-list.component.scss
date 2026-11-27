@@ -86,14 +86,22 @@
   font-weight: 600;
 }
 
-// Who made the project, when it is not an ordinary one (the clients of the generation API, the dashboards): quiet, beside the name.
+// Who made the project, when it is not an ordinary one (the clients of the generation API, the dashboards): quiet, beside the name. The label's own
+// colour (`--chip-color`, data from the server, the same one the chips show) tints the border and the surface; the text keeps the dashboard's ink.
 .client-badge {
+  --chip-color: var(--lab-line);
   margin-inline-start: var(--lab-space-2);
   padding: 1px var(--lab-space-2);
-  border: 1px solid var(--lab-line);
+  border: 1px solid color-mix(in srgb, var(--chip-color) 55%, var(--lab-line));
   border-radius: 999px;
-  color: var(--lab-ink-dim);
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--lab-surface));
+  color: var(--lab-ink);
   font-size: var(--lab-fs-meta);
+  white-space: nowrap;
+}
+
+.clients {
+  margin-bottom: var(--lab-space-3);
 }
 
 // Long identifiers and names are cut with an ellipsis; the tooltip shows them whole.

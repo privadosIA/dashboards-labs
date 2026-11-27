@@ -7,6 +7,7 @@ import { LanguageService } from '../../core/language';
 import { textsFor } from '../../core/texts';
 import type { Generation } from '../../port';
 import { ModelViewer } from '../../viewer/open-viewer';
+import { GENERATION_RELABEL } from '../generation-relabel';
 import { MakingStore } from '../making.store';
 
 /** The generations, newest first: state and step while one runs, what it was made from, the engine, the error in the server's words; cancel a queued or running one, take a finished one off the list (its model stays) and go to the model of a done one. */
@@ -25,6 +26,12 @@ export class ModelGenerations {
   protected readonly removing = signal<string | null>(null);
   protected readonly v = textsFor(inject(LanguageService).lang).viewer;
   private readonly viewer = inject(ModelViewer);
+  /** The host's client labels, when it keeps them: only then each generation says its label and offers to change it. */
+  protected readonly labels = inject(GENERATION_RELABEL, { optional: true });
+
+  protected async relabel(g: Generation): Promise<void> {
+    if (this.labels && (await this.labels.relabel(g))) await this.store.refreshGeneration(g.id);
+  }
 
   protected look(id: string): void {
     const [pack, ...rest] = id.split('/');

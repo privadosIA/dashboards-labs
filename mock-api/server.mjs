@@ -21,6 +21,7 @@ import * as yaml from 'js-yaml';
 import * as fx from './fixtures.mjs';
 import { generationHandlers } from './generation.mjs';
 import { videoEditHandlers } from './video-edit.mjs';
+import { clientsHandlers } from './clients.mjs';
 import { motionPageHandlers } from './motion-pages.mjs';
 import { blenderDescriptionHandlers, descriptionProblems, filesOf, isSceneName } from './blender-descriptions.mjs';
 import { datasetAssistHandlers } from './dataset-assist.mjs';
@@ -85,6 +86,13 @@ if (process.env.MOCK_BULK) {
   if (Number.isInteger(n) && n >= 1) seedBulk(db, n);
   else console.warn(`MOCK_BULK=${process.env.MOCK_BULK}: ignored, it must be a whole number of 1 or more`);
 }
+// MOCK_CLIENT_LABELS=1 labels the seed projects with different clients and gives one label the colour its owner chose, so the chips of a dashboard have something to show.
+if (process.env.MOCK_CLIENT_LABELS === '1') {
+  for (const [id, client] of Object.entries({ demo: 'dashboard-full', 'demo-musica': 'other-app', 'demo-modelos': 'claude-test' })) {
+    if (db.projects[id] && !/^client:/m.test(db.projects[id])) db.projects[id] = db.projects[id].replace(/^(.*\n)/, `$1client: ${client}\n`);
+  }
+  db.clientColors = { 'claude-test': '#d9822b', ...db.clientColors };
+}
 const save = () => PERSIST && writeFileSync(PERSIST, JSON.stringify(db, null, 2));
 
 const parse = (text) => {
@@ -129,10 +137,10 @@ const clientOf = (id) => {
   const c = parse(db.projects[id]).value?.client;
   return typeof c === 'string' && CLIENT_RE.test(c) ? c : 'embedded';
 };
-// ?managed=include and ?client=a,b as the server reads them: anything else is a 400 (null when fine, else the answer).
+// ?managed=include|all and ?client=a,b as the server reads them: anything else is a 400 (null when fine, else the answer).
 const listQuery = (query) => {
   const m = query.get('managed');
-  if (m !== null && m !== 'include') return err(400, 'invalid_request', 'managed: the only value is include');
+  if (m !== null && m !== 'include' && m !== 'all') return err(400, 'invalid_request', `managed: "${m}" is not a value: include or all`);
   const c = query.get('client');
   if (c !== null && !c.split(',').every((n) => CLIENT_RE.test(n))) return err(400, 'invalid_request', 'client: a list of client names (or embedded, unknown) separated by commas');
   return null;
@@ -157,7 +165,7 @@ const summary = (id) => {
 // The generation API projects (`api-gen-`, `api-edit-`, `api-vid-`) that `?managed=include` adds to the listing: ordinary rows with
 // their `client` (`unknown` when the request named none) and their `kind`; `?client=` keeps only those clients.
 const managedProjects = (query) => {
-  if (query.get('managed') !== 'include') return [];
+  if (!['include', 'all'].includes(query.get('managed'))) return [];
   const c = query.get('client');
   const set = c === null ? null : new Set(c.split(','));
   const rows = [
@@ -165,10 +173,16 @@ const managedProjects = (query) => {
     ...Object.values(db.edits).map((r) => ({ r, mode: 'images', kind: 'image_edit' })),
     ...Object.values(db.videoEdits ?? {}).map((r) => ({ r, mode: 'video', kind: 'video_edit' })),
   ];
-  return rows
+  const listed = rows
     .map(({ r, mode, kind }) => ({ id: r.id, name: r.id, mode, scene_count: 1, client: r.request?.client ?? r.client ?? 'unknown', kind }))
     .filter((p) => !set || set.has(p.client));
+  return [...listed, ...animationRows(query, (p) => !set || set.has(p.client))];
 };
+// The animations of the music mode (`api-mm-` pieces): rows only with `managed=all`; `include` never lists one. The real server names the row by its id and gives it the mode `video`.
+// The row of an animation, as `GET /api/projects` and `GET /api/projects/{id}` give it (the server keeps a project for each: the routes of a project answer for it too).
+const pieceRow = (r) => ({ id: r.id, name: r.projectName ?? r.id, mode: 'video', scene_count: (r.script?.pieces ?? []).length, client: r.client ?? 'embedded', ...(typeof r.adult === 'boolean' ? { adult: r.adult } : {}), kind: 'music_motion' });
+const animationRows = (query, keep = () => true) =>
+  query.get('managed') !== 'all' ? [] : Object.values(db.pieces ?? {}).map(pieceRow).filter(keep);
 const listedProjects = (query) => [...Object.keys(db.projects).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).filter(wanted(query)).map(summary), ...managedProjects(query).sort((a, b) => (a.id < b.id ? -1 : 1))];
 
 // ---------------------------------------------------------------- runs + SSE
@@ -286,7 +300,7 @@ const badId = (id) => typeof id !== 'string' || !/^[\w][\w.-]*$/.test(id);
 const hasActiveRun = (id) => db.runs.some((r) => r.project === id && ['queued', 'running'].includes(r.state));
 // What the database keeps: versions of a definition, the song library with its stars and the playlists.
 const musicBackend = musicBackendHandlers({ db, save, ts, speed: SPEED });
-const database = databaseHandlers({ db, save, ts, parse, summary, clientOf, listQuery, wanted, hasActiveRun });
+const database = databaseHandlers({ db, save, ts, parse, summary, clientOf, listQuery, wanted, hasActiveRun, pieceRow });
 const { recordVersion } = database;
 // The library of 3D models and the models of a project's sources (the piece's own are in music-motion.mjs).
 const models3d = models3dHandlers({ db, save, speed: SPEED, fallback: (method, path) => generic(method, path), hasActiveRun });
@@ -317,6 +331,15 @@ const handlers = {
     return [204];
   },
   'POST /api/projects/{id}/duplicate': ({ params, body }) => {
+    // an animation has a project too: its copy is an ordinary video project with one scene for each piece of the script
+    const piece = db.pieces?.[params.id];
+    if (piece && !badId(body?.new_id) && !db.projects[body.new_id]) {
+      const scenes = (piece.script?.pieces ?? []).map((q, i) => `  - id: scene${i + 1}\n    prompt: ${q.part ?? 'piece'}\n`).join('') || '  - id: scene1\n    prompt: piece\n';
+      db.projects[body.new_id] = `project: ${params.id}\n${piece.client ? `client: ${piece.client}\n` : ''}output:\n  mode: video\n  file: out/${body.new_id}.mp4\nscenes:\n${scenes}`;
+      db.updated[body.new_id] = ts();
+      save();
+      return [201, { id: body.new_id }];
+    }
     if (!db.projects[params.id]) return noProject(params.id);
     if (badId(body?.new_id)) return err(400, 'invalid_request', 'invalid new_id');
     if (db.projects[body.new_id]) return err(409, 'conflict', `project "${body.new_id}" already exists`);
@@ -483,7 +506,27 @@ const handlers = {
   'GET /api/assets': () => [200, fx.assets()],
   'GET /api/assets/catalog': () => [200, fx.catalog()],
   'GET /api/downloads': () => [200, { downloads: db.downloads }],
-  'GET /api/storage': ({ query }) => listQuery(query) ?? [200, fx.storage(Object.keys(db.projects).filter(wanted(query)), clientOf)],
+  'GET /api/storage': ({ query }) => {
+    const bad = listQuery(query);
+    if (bad) return bad;
+    const overview = fx.storage(Object.keys(db.projects).filter(wanted(query)), clientOf);
+    // The animations (managed=all) have a size of their own and their folder, like any project.
+    const pieces = animationRows(query, (p) => !query.get('client') || query.get('client').split(',').includes(p.client));
+    overview.projects.push(...pieces.map((p) => ({ id: p.id, client: p.client, kind: p.kind, total_bytes: 8 * 1024 * 1024 })));
+    overview.media.projects.push(...pieces.map((p) => ({ id: p.id, folder: `/srv/demo/media/${p.id}` })));
+    return [200, overview];
+  },
+  // The clips the projects kept: the ones of a rendered animation appear with `managed=all` (a piece keeps one clip, `piece`, with `project_kind: music_motion`).
+  'GET /api/clips': ({ query }) => {
+    const bad = listQuery(query);
+    if (bad) return bad;
+    const only = query.get('project');
+    const clips = animationRows(query)
+      .map((p) => ({ p, rec: db.pieces[p.id] }))
+      .filter(({ p, rec }) => rec?.rendered_at && p.id !== query.get('exclude') && (!only || only === p.id))
+      .map(({ p, rec }) => ({ project: p.id, scene: 'piece', kind: 'clip', size: 6 * 1024 * 1024, modified: rec.rendered_at, client: p.client, project_kind: 'music_motion' }));
+    return [200, { clips }];
+  },
   'GET /api/projects/{id}/storage': () => [200, fx.projectStorage()],
   'GET /api/stats': ({ query }) => {
     const modes = modesOf(query.get('mode'));
@@ -496,6 +539,19 @@ const handlers = {
   ...database.handlers,
   ...dataHandlers({ db, save, ts, speed: SPEED }).handlers,
   ...catalogHandlers({ db, save, ts }).handlers,
+  ...clientsHandlers({
+    db,
+    save,
+    // everything the server shows with a label: the projects, the animations, the generations, the edits and the 3D generations
+    items: () => [
+      ...Object.keys(db.projects).map((id) => ({ client: clientOf(id), kind: 'projects', at: db.updated?.[id] ?? '' })),
+      ...Object.values(db.pieces ?? {}).map((r) => ({ client: r.client ?? 'embedded', kind: 'animations', at: r.updated_at ?? r.created_at ?? '' })),
+      ...Object.values(db.generations ?? {}).map((r) => ({ client: r.request?.client ?? 'unknown', kind: 'generations', at: r.created_at })),
+      ...Object.values(db.edits ?? {}).map((r) => ({ client: r.request?.client ?? 'unknown', kind: 'image_edits', at: r.created_at })),
+      ...Object.values(db.videoEdits ?? {}).map((r) => ({ client: r.request?.client ?? 'unknown', kind: 'video_edits', at: r.created_at })),
+      ...Object.values(db.models3d?.generations ?? {}).map((r) => ({ client: r.client ?? 'unknown', kind: 'model_generations', at: r.finished_at ?? r.created_at })),
+    ],
+  }),
   ...generationHandlers({ db, save, ts, speed: SPEED }),
   ...videoEditHandlers({ db, save, ts, speed: SPEED }),
   ...motionPageHandlers({ db }),

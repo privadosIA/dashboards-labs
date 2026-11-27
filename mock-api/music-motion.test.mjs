@@ -256,7 +256,7 @@ test('proposing a design or a script answers its source, and the fixed rule is n
   }
 });
 
-test('a render goes through its states to done with a video, and a busy piece answers 409', async () => {
+test('a render goes through its states to done with a video, and a busy piece refuses a second render and a new design with 409', async () => {
   const mock = await start();
   try {
     const piece = await (await mock.json('POST', P, SONG)).json();
@@ -267,7 +267,7 @@ test('a render goes through its states to done with a video, and a busy piece an
     assert.ok(started.run_id);
     assert.equal((await mock.json('POST', `${P}/${piece.id}/render`)).status, 409);
     assert.equal((await mock.json('PUT', `${P}/${piece.id}/design`, piece.design.design)).status, 409);
-    assert.equal((await mock.json('DELETE', `${P}/${piece.id}`)).status, 409);
+    // (deleting it is not refused: the server cancels the render and deletes the piece, see managed.test.mjs)
     const done = await until(async () => (await mock.json('GET', `${P}/${piece.id}`)).json(), (p) => p.state === 'done', 'the piece is done');
     fits(`${P}/{id}`, 'get', 200, done);
     assert.equal(done.progress, 100);
@@ -1652,5 +1652,43 @@ test('a piece follows a reference: it is kept when made and proposed, an empty t
     assert.equal((await (await mock.json('GET', `${P}/${plain.id}`)).json()).reference, undefined);
   } finally {
     mock.stop();
+  }
+});
+
+test('every part says whether it can go over a video: the ones that fill the frame cannot, a part of the user\'s is not marked unless its manifest says so', async () => {
+  const mock = await start();
+  try {
+    const parts = (await (await mock.json('GET', '/api/music-motion/catalog')).json()).parts;
+    assert.ok(parts.every((p) => typeof p.over_video === 'boolean'));
+    assert.deepEqual(parts.filter((p) => !p.over_video).map((p) => p.name).sort(), ['nebula', 'sunburst']);
+    assert.equal(parts.find((p) => p.name === 'blank').over_video, true);
+    assert.equal(parts.find((p) => p.name === 'grain').over_video, true);
+  } finally {
+    mock.stop();
+  }
+});
+
+test('a piece says whether it is for adults, and asking for one is refused (422 content_not_allowed) on a server that does not keep adult content', async () => {
+  const mock = await start();
+  try {
+    const made = await (await mock.json('POST', P, SONG)).json();
+    assert.equal(made.adult, false);
+    const refused = await mock.json('POST', P, { ...SONG, adult: true });
+    assert.equal(refused.status, 422);
+    assert.equal((await refused.json()).error.code, 'content_not_allowed');
+    assert.equal((await mock.json('POST', P, { ...SONG, adult: 'yes' })).status, 422);
+  } finally {
+    mock.stop();
+  }
+  process.env.MOCK_ADULT = '1';
+  const open = await start();
+  delete process.env.MOCK_ADULT;
+  try {
+    const made = await (await open.json('POST', P, { ...SONG, adult: true })).json();
+    fits(P, 'post', 201, made);
+    assert.equal(made.adult, true);
+    assert.equal((await (await open.json('GET', `${P}/${made.id}`)).json()).adult, true);
+  } finally {
+    open.stop();
   }
 });

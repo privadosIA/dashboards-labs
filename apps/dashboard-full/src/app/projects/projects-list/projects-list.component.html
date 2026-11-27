@@ -66,8 +66,11 @@
 
 @if (store.loaded() && store.projects().length > 0) {
   <div class="modes" data-testid="projects-modes">
-    <app-mode-select />
+    <app-mode-select [animations]="true" />
   </div>
+}
+@if (store.loaded() && store.projects().length > 0) {
+  <app-client-chips class="clients" [selected]="clients.chosen()" (selectedChange)="clients.set($event)" />
 }
 @if (store.loaded() && store.projects().length === 0) {
   <mo-empty-state
@@ -101,6 +104,12 @@
       </button>
     }
   </p>
+} @else if (store.loaded() && noneOfClients()) {
+  <p class="hidden-modes" role="status" data-testid="projects-none-clients">
+    <mat-icon inline>filter_alt</mat-icon>
+    <span i18n="@@projects.noneOfClients">No project has the chosen labels: <strong>{{ chosenText() }}</strong>.</span>
+    <button mat-button type="button" data-testid="projects-none-clients-clear" (click)="clients.set(noLabels)" i18n="@@projects.noneOfClientsClear">Clear the labels</button>
+  </p>
 } @else if (store.loaded() && visible().length === 0) {
   <p class="hidden-modes" role="status" data-testid="projects-hidden">
     <mat-icon inline>visibility_off</mat-icon>
@@ -128,8 +137,11 @@
               @if (p.adult === true) {
                 <span class="adult-badge" data-testid="adult-badge" i18n="@@projects.adult">+18</span>
               }
-              @if (p.client && p.client !== 'embedded') {
-                <span class="client-badge" data-testid="client-badge" [matTooltip]="p.client">{{ p.client }}</span>
+              @if (p.client && (p.client !== 'embedded' || clients.chosen().size > 0)) {
+                <span class="client-badge" data-testid="client-badge" [style.--chip-color]="labels.colorOf(p.client)" [matTooltip]="p.client">{{ p.client }}</span>
+              }
+              @if (isAnimation(p.kind)) {
+                <span class="client-badge" data-testid="kind-badge">{{ kindLabel(p.kind) }}</span>
               }
               @if (needsBlender(p)) {
                 <span class="client-badge" data-testid="needs-blender" i18n="@@blender.needed">Needs Blender</span>
@@ -140,31 +152,45 @@
       </ng-template>
       <ng-template dfCell="actions" let-p>
         <span class="row-actions">
-              @if (!needsBlender(p)) {
+              @if (isAnimation(p.kind)) {
                 <a
                   mat-icon-button
-                  [routerLink]="editLink(p)"
-                  [attr.data-testid]="'edit-' + p.id"
-                  i18n-matTooltip="@@projects.edit"
-                  matTooltip="Edit scenes or tracks"
-                  i18n-aria-label="@@projects.edit"
-                  aria-label="Edit scenes or tracks"
+                  [routerLink]="['/animation/pieces', p.id]"
+                  [attr.data-testid]="'open-piece-' + p.id"
+                  i18n-matTooltip="@@projects.openPiece"
+                  matTooltip="Open the animation"
+                  i18n-aria-label="@@projects.openPiece"
+                  aria-label="Open the animation"
                 >
-                  <mat-icon>edit</mat-icon>
+                  <mat-icon>animation</mat-icon>
                 </a>
-              }
-              @if (p.mode === 'video') {
-                <a
-                  mat-icon-button
-                  [routerLink]="['/projects', p.id, 'review']"
-                  [attr.data-testid]="'review-' + p.id"
-                  i18n-matTooltip="@@projects.review"
-                  matTooltip="Review the clips"
-                  i18n-aria-label="@@projects.review"
-                  aria-label="Review the clips"
-                >
-                  <mat-icon>fact_check</mat-icon>
-                </a>
+              } @else {
+                @if (!needsBlender(p)) {
+                  <a
+                    mat-icon-button
+                    [routerLink]="editLink(p)"
+                    [attr.data-testid]="'edit-' + p.id"
+                    i18n-matTooltip="@@projects.edit"
+                    matTooltip="Edit scenes or tracks"
+                    i18n-aria-label="@@projects.edit"
+                    aria-label="Edit scenes or tracks"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </a>
+                }
+                @if (p.mode === 'video') {
+                  <a
+                    mat-icon-button
+                    [routerLink]="['/projects', p.id, 'review']"
+                    [attr.data-testid]="'review-' + p.id"
+                    i18n-matTooltip="@@projects.review"
+                    matTooltip="Review the clips"
+                    i18n-aria-label="@@projects.review"
+                    aria-label="Review the clips"
+                  >
+                    <mat-icon>fact_check</mat-icon>
+                  </a>
+                }
               }
               <button
                 mat-icon-button

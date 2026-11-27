@@ -44,6 +44,11 @@ Options: `--spec <fichero o URL>` (by default, `contract/openapi.yaml` of this r
   (a `.glb` read as the server reads it: clips, triangles, the pictures it names; `POST .../sources/model` copies one of the library with its pictures as
   `<pack>--<picture>`) and the models of a piece (`GET`, `PUT`, `DELETE`, `POST .../models`, with `blender-models` in the catalog's features). A description that places a
   model is refused by its place: no project, a file that is not there, a clip it does not have, a picture it misses.
+- **Video behind a piece** (`music-backgrounds.mjs`, with `video-background` in the catalog's features): each part says `over_video` (`sunburst` and `nebula` fill the frame and say `false`), a piece keeps backgrounds
+  (`GET`/`POST .../backgrounds`, `PUT`/`DELETE .../backgrounds/{name}`, `GET .../{name}/file` with `Range`, `ETag` and `?ticket=`; every background plays the one placeholder video) copied from a `done` generation
+  of this mock (`from: "generation:<id>"`) or uploaded (an MP4 or WebM by its first bytes), the script's `background` is checked like the server checks it (a clip the piece keeps, the part of it, `clip_speed` 0.25 to 4,
+  `scrim` 0 to 0.8, no 3D piece, only `over_video` parts), `used_by` says which pieces of the saved script play a clip and deleting one that is played is `409`. A piece says `adult`; `adult: true` in the request or
+  `?adult=true` on an upload is `422 content_not_allowed` unless `MOCK_ADULT=1`. What it does not do: a new proposal does not keep the videos (it writes a script without them), and the preview scenes carry no `background` (the contract does not describe it).
 - **Making 3D models** (`models3d-generation.mjs`): the engines `GET /api/models3d/engines` with the server's reasons and, for each, the `backends` (TripoSR and Stable Fast 3D run as a .NET service, the default, or in the
   Docker container, by one saved setting for both; the weights of Stable Fast 3D need the saved Hugging Face key whatever the backend), the setting `model3d_backend` and the block `model3d` of `GET /api/settings` (422 for another value and `no_docker`, 409 for an external service;
   what ran on the old backend stops), start and stop of each engine's own service (`starting` for `MOCK_MODEL3D_START_MS` ms), the install by backend and parts (`POST .../install` answers the plan with
@@ -94,6 +99,10 @@ Options: `--spec <fichero o URL>` (by default, `contract/openapi.yaml` of this r
 - **A mock with a lot in it:** `MOCK_BULK=170 npm run mock` adds 170 generated projects, songs and part drafts (a third of the drafts failed
   and every fourth is a scene written for a piece), so a screen that pages, filters or searches has something to work on. The data is the same
   every time (a seeded generator) and without the variable the sample data is exactly what it was.
+- **Client labels** (`clients.mjs`): `GET /api/clients` (the labels in use, their counts per kind and their colour, newest use first), `PUT /api/clients/{name}`
+- **`managed=all`** (`server.mjs`, `managed.test.mjs`): `include` and `all` on `/api/projects`, `/api/storage`, `/api/clips` and the library; `all` adds the pieces as rows (`kind: music_motion`, `project_kind` in the clips, a size in the storage), `include` never lists one and any other value is a `400` that names both. `PATCH` of a piece's `client` answers `409` while it is being drawn.
+  (the colour kept, `null` for the default one worked out from the name) and the `PATCH {client}` of generations, image edits, video edits and 3D generations
+  (`409` while the item runs). `MOCK_CLIENT_LABELS=1 npm run mock` labels the seed projects (`dashboard-full`, `other-app`, `claude-test`) and gives `claude-test` a colour.
 - It starts with two projects: `demo` (video) and `demo-musica`.
 
 ## So that it does not lie

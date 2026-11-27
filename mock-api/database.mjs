@@ -15,7 +15,16 @@ const MAX_NAME = 80;
 /** The songs of the library: the ones of the fixtures and, with `MOCK_BULK`, the generated ones. */
 export const allSongs = (db) => [...fx.LIBRARY_SONGS, ...(db.bulk?.songs ?? [])];
 
-export function databaseHandlers({ db, save, ts, parse, summary, clientOf, listQuery, wanted, hasActiveRun }) {
+/** Where the label of each kind of item is changed: its own route, not the one of projects. */
+const OWN_CLIENT_ROUTE = {
+  'api-gen-': '/api/generations/{id}',
+  'api-edit-': '/api/image-edits/{id}',
+  'api-vid-': '/api/video-edits/{id}',
+  'api-m3d-': '/api/models3d/generations/{id}',
+  'api-mm-': '/api/music-motion/pieces/{id}',
+};
+
+export function databaseHandlers({ db, save, ts, parse, summary, clientOf, listQuery, wanted, hasActiveRun, pieceRow }) {
   db.versions ??= {};
   db.updated ??= {};
   db.ratings ??= {};
@@ -64,8 +73,21 @@ export function databaseHandlers({ db, save, ts, parse, summary, clientOf, listQ
 
   const handlers = {
     // ---------------------------------------------------------- one project and its definition
-    'GET /api/projects/{id}': ({ params }) => (db.projects[params.id] === undefined ? noProject(params.id) : [200, summary(params.id)]),
+    'GET /api/projects/{id}': ({ params }) => (db.pieces?.[params.id] ? [200, pieceRow(db.pieces[params.id])] : db.projects[params.id] === undefined ? noProject(params.id) : [200, summary(params.id)]),
     'PATCH /api/projects/{id}': ({ params, body }) => {
+      // the label of an item of the generation API or of an animation is changed by the route of its kind, as the server says (name and adult still go this way)
+      const own = Object.entries(OWN_CLIENT_ROUTE).find(([prefix]) => params.id.startsWith(prefix));
+      if (own && body && typeof body === 'object' && 'client' in body) return err(400, 'invalid_request', `client: change the label of this item with PATCH ${own[1]}`);
+      // an animation keeps its name and its adult label in its project (its client goes by its own route, refused above)
+      const piece = db.pieces?.[params.id];
+      if (piece && body && typeof body === 'object' && !Array.isArray(body)) {
+        const unknown = Object.keys(body).find((k) => !['name', 'adult'].includes(k));
+        if (unknown !== undefined) return err(400, 'invalid_request', `${unknown}: cannot be changed this way (name and adult can)`);
+        if ('name' in body) piece.projectName = String(body.name);
+        if ('adult' in body) body.adult === null ? delete piece.adult : (piece.adult = body.adult === true);
+        save();
+        return [200, pieceRow(piece)];
+      }
       const text = db.projects[params.id];
       if (text === undefined) return noProject(params.id);
       if (!body || typeof body !== 'object' || Array.isArray(body)) return err(400, 'invalid_request', 'invalid JSON body');
@@ -96,6 +118,7 @@ export function databaseHandlers({ db, save, ts, parse, summary, clientOf, listQ
       return [200, summary(params.id)];
     },
     'GET /api/projects/{id}/versions': ({ params, page }) => {
+      if (db.pieces?.[params.id]) return page([]); // the project of an animation has no versions of a definition
       if (db.projects[params.id] === undefined) return noProject(params.id);
       // newest first, as the list is answered when nothing is asked
       return page((db.versions[params.id] ?? []).map(versionView).reverse());

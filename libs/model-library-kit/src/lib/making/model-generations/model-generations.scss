@@ -62,6 +62,19 @@
   }
 }
 
+// The client label, drawn with the colour the host gives it (`--chip-color`: data, not a token); the text keeps the ink.
+.client {
+  --chip-color: var(--lab-line);
+  align-self: flex-start;
+  padding: 0 var(--lab-space-2);
+  font-size: var(--lab-fs-meta);
+  color: var(--lab-ink);
+  border: 1px solid color-mix(in srgb, var(--chip-color) 55%, var(--lab-line));
+  border-radius: var(--lab-radius-pill, var(--lab-radius));
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--lab-surface));
+  white-space: nowrap;
+}
+
 .meta,
 .note {
   margin: 0;

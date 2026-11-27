@@ -77,7 +77,7 @@ describe('GalleryPageComponent', () => {
     fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
     http
-      .expectOne('/api/projects?managed=include')
+      .expectOne('/api/projects?managed=all')
       .flush([{ id: 'demo-stills', name: 'demo-stills', mode: 'images', scene_count: 2 }]);
     await fixture.whenStable();
     fixture.detectChanges();
@@ -188,7 +188,7 @@ describe('GalleryPageComponent preselection (?project=)', () => {
     if (project !== undefined) fixture.componentRef.setInput('project', project);
     fixture.detectChanges();
     http
-      .expectOne('/api/projects?managed=include')
+      .expectOne('/api/projects?managed=all')
       .flush([{ id: 'demo-stills', name: 'demo-stills', mode: 'images', scene_count: 2 }]);
     for (let i = 0; i < 6; i++) await Promise.resolve();
     return { http, fixture };
@@ -240,7 +240,7 @@ describe('GalleryPageComponent: music projects', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([
+    http.expectOne('/api/projects?managed=all').flush([
       { id: 'balada', name: 'balada', mode: 'music', scene_count: 0, track_count: 2 },
       { id: 'demo-stills', name: 'demo-stills', mode: 'images', scene_count: 2 },
     ]);
@@ -340,7 +340,7 @@ describe('GalleryPageComponent: video projects', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([{ id: 'live', name: 'live', mode: 'video', scene_count: 2 }]);
+    http.expectOne('/api/projects?managed=all').flush([{ id: 'live', name: 'live', mode: 'video', scene_count: 2 }]);
     await fixture.whenStable();
     fixture.detectChanges();
     cmp = fixture.componentInstance as unknown as VideoApi;
@@ -355,7 +355,7 @@ describe('GalleryPageComponent: video projects', () => {
       yaml: '', valid: true,
       parsed: { project: 'live', output: { mode: 'video', file: 'out/live.mp4', contact_sheet: false }, defaults: {}, scenes: [{ id: 'b' }, { id: 'a' }] },
     });
-    http.expectOne('/api/clips?project=live').flush({ clips });
+    http.expectOne('/api/clips?managed=all&project=live').flush({ clips });
     await done;
     fixture.detectChanges();
   }
@@ -413,7 +413,7 @@ describe('GalleryPageComponent: the modes the user chose', () => {
     fixture = TestBed.createComponent(GalleryPageComponent);
     if (project) fixture.componentRef.setInput('project', project);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush(MIXED);
+    http.expectOne('/api/projects?managed=all').flush(MIXED);
     await fixture.whenStable();
     answerAll();
     await fixture.whenStable();
@@ -492,7 +492,7 @@ describe('GalleryPageComponent: the modes the user chose', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([MIXED[2], MIXED[3]]);
+    http.expectOne('/api/projects?managed=all').flush([MIXED[2], MIXED[3]]);
     await fixture.whenStable();
     fixture.detectChanges();
     const notice = el().querySelector('[data-testid=gallery-hidden]');

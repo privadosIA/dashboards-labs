@@ -2236,7 +2236,7 @@
         <source>complete animation (forward and back)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/editor/clip-picker/clip-picker.component.ts</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="clip.from" datatype="html">
@@ -3792,7 +3792,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">485</context>
+          <context context-type="linenumber">531</context>
         </context-group>
       </trans-unit>
       <trans-unit id="music.starterPrompt" datatype="html">
@@ -3803,7 +3803,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">486</context>
+          <context context-type="linenumber">532</context>
         </context-group>
       </trans-unit>
       <trans-unit id="meta.title" datatype="html">
@@ -5381,7 +5381,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">135,139</context>
+          <context context-type="linenumber">147,151</context>
         </context-group>
       </trans-unit>
       <trans-unit id="scene.narration" datatype="html">
@@ -6391,7 +6391,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
@@ -6414,7 +6414,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
@@ -6437,7 +6437,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
@@ -6460,7 +6460,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
@@ -12058,11 +12058,19 @@ Vuelvo a casa, vuelvo a ti</source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-details-dialog/project-details-dialog.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-name-dialog/project-name-dialog.component.html</context>
           <context context-type="linenumber">55,57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.html</context>
+          <context context-type="linenumber">17,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.html</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shared/confirm-dialog/confirm-dialog.component.html</context>
@@ -12715,21 +12723,28 @@ Vuelvo a casa, vuelvo a ti</source>
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-details-dialog/project-details-dialog.component.html</context>
-          <context context-type="linenumber">14,16</context>
+          <context context-type="linenumber">19,21</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projectDetails.nameEmpty" datatype="html">
         <source>The name cannot be empty.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-details-dialog/project-details-dialog.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectDetails.clientInvalid" datatype="html">
+        <source>A client label has one to 32 lowercase letters, digits or hyphens.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-details-dialog/project-details-dialog.component.ts</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projectDetails.failed" datatype="html">
         <source>The project could not be changed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/project-details-dialog/project-details-dialog.component.ts</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projectHistory.title" datatype="html">
@@ -12968,11 +12983,11 @@ Vuelvo a casa, vuelvo a ti</source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">82,85</context>
+          <context context-type="linenumber">85,88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">212</context>
+          <context context-type="linenumber">246</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createShort" datatype="html">
@@ -12990,7 +13005,7 @@ Vuelvo a casa, vuelvo a ti</source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">100,104</context>
+          <context context-type="linenumber">103,108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.musicShort" datatype="html">
@@ -13036,7 +13051,7 @@ Vuelvo a casa, vuelvo a ti</source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">86,89</context>
+          <context context-type="linenumber">89,92</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.importFullShort" datatype="html">
@@ -13054,7 +13069,7 @@ Vuelvo a casa, vuelvo a ti</source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">90,93</context>
+          <context context-type="linenumber">93,96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.openModels3dAria" datatype="html">
@@ -13089,331 +13104,400 @@ Vuelvo a casa, vuelvo a ti</source>
         <source>There are no projects yet.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">75,77</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.emptyHint" datatype="html">
         <source>Create an empty one with “Create project” or convert a JSON/HTML dataset with “Import dataset”.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">77,80</context>
+          <context context-type="linenumber">80,83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.noneOfMode" datatype="html">
         <source>There are no projects of mode <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ modeLabel(mode) }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">96,97</context>
+          <context context-type="linenumber">99,100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.noneOfClients" datatype="html">
+        <source>No project has the chosen labels: <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ chosenText() }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
+          <context context-type="linenumber">110,111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.noneOfClientsClear" datatype="html">
+        <source>Clear the labels</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
+          <context context-type="linenumber">111,114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.hiddenIntro" datatype="html">
         <source>The chosen modes have no projects. Hidden:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">107,109</context>
+          <context context-type="linenumber">116,118</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.showAllModes" datatype="html">
         <source>Show all modes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">111,114</context>
+          <context context-type="linenumber">120,123</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.invalid" datatype="html">
         <source>Invalid scenes.yaml</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">123,126</context>
+          <context context-type="linenumber">132,135</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.adult" datatype="html">
         <source>+18</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">129,132</context>
+          <context context-type="linenumber">138,140</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.openPiece" datatype="html">
+        <source>Open the animation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
+          <context context-type="linenumber">161,163</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
+          <context context-type="linenumber">163,167</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.edit" datatype="html">
         <source>Edit scenes or tracks</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">149,151</context>
+          <context context-type="linenumber">174,176</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">151,155</context>
+          <context context-type="linenumber">176,179</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.review" datatype="html">
         <source>Review the clips</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">162,164</context>
+          <context context-type="linenumber">187,189</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">164,168</context>
+          <context context-type="linenumber">189,192</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.detailsAction" datatype="html">
         <source>Details: name, client and content label</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">175,177</context>
+          <context context-type="linenumber">201,203</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">177,181</context>
+          <context context-type="linenumber">203,207</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.historyAction" datatype="html">
         <source>History: earlier versions of the definition</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">187,189</context>
+          <context context-type="linenumber">213,215</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">189,193</context>
+          <context context-type="linenumber">215,219</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.storageAction" datatype="html">
         <source>Storage: what takes space, and clean</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">199,201</context>
+          <context context-type="linenumber">225,227</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">201,205</context>
+          <context context-type="linenumber">227,231</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.duplicateAction" datatype="html">
         <source>Duplicate project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">209,211</context>
+          <context context-type="linenumber">235,237</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">211,215</context>
+          <context context-type="linenumber">237,241</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">381</context>
+          <context context-type="linenumber">415</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportAction" datatype="html">
         <source>Export project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">220,222</context>
+          <context context-type="linenumber">246,248</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">222,226</context>
+          <context context-type="linenumber">248,252</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportZip" datatype="html">
         <source>Full project (.zip: settings, models used and recipe)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">229,231</context>
+          <context context-type="linenumber">255,257</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportDataset" datatype="html">
         <source>Scenes only (JSON, without settings or models)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">233,237</context>
+          <context context-type="linenumber">259,263</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.deleteAction" datatype="html">
         <source>Delete project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">241,243</context>
+          <context context-type="linenumber">267,269</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">243,247</context>
+          <context context-type="linenumber">269,273</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">438</context>
+          <context context-type="linenumber">479</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.diskFree" datatype="html">
         <source>Free space on the projects disk:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">256,258</context>
+          <context context-type="linenumber">282,284</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.mediaDir" datatype="html">
         <source>· media folder:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">260,264</context>
+          <context context-type="linenumber">286,290</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.diskLow" datatype="html">
         <source>(low: free some with the storage button of each project)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.html</context>
-          <context context-type="linenumber">265,270</context>
+          <context context-type="linenumber">291,296</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="modes.animation" datatype="html">
+        <source>Animation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/mode-select/mode-select.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/stats/stats-page/stats-page.component.ts</context>
+          <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createTitle" datatype="html">
         <source>New project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">211</context>
+          <context context-type="linenumber">245</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createModelsTitle" datatype="html">
         <source>New 3D models project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">276</context>
+          <context context-type="linenumber">310</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createModelsAction" datatype="html">
         <source>Create 3D models project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">277</context>
+          <context context-type="linenumber">311</context>
         </context-group>
       </trans-unit>
       <trans-unit id="m3p.starterPrompt" datatype="html">
         <source>A small wooden chair, painted red</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">288</context>
+          <context context-type="linenumber">322</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createMusicTitle" datatype="html">
         <source>New music project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">311</context>
+          <context context-type="linenumber">345</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createMusicAction" datatype="html">
         <source>Create music project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">346</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createMotionTitle" datatype="html">
         <source>New motion graphics project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">343</context>
+          <context context-type="linenumber">377</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.createMotionAction" datatype="html">
         <source>Create project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">344</context>
+          <context context-type="linenumber">378</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.duplicateTitle" datatype="html">
         <source>Duplicate “<x id="source" equiv-text="p.id"/>”</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">380</context>
+          <context context-type="linenumber">414</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exported" datatype="html">
         <source>Exported “<x id="file" equiv-text="name"/>” with all its settings and the recipe of what it uses (RECIPE.md)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">417</context>
+          <context context-type="linenumber">451</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportedCount" datatype="html">
         <source>Exported “<x id="file" equiv-text="name"/>” (<x id="count" equiv-text="count"/> entries, scenes only: to take the settings and the models too, export the full project)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">417</context>
+          <context context-type="linenumber">451</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportClose" datatype="html">
         <source>Close</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">418</context>
+          <context context-type="linenumber">452</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">429</context>
+          <context context-type="linenumber">463</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
+          <context context-type="linenumber">489</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.exportFailed" datatype="html">
         <source>Could not export: <x id="reason" equiv-text="message"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">429</context>
+          <context context-type="linenumber">463</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.deleteTitle" datatype="html">
         <source>Delete “<x id="project" equiv-text="p.id"/>”</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">436</context>
+          <context context-type="linenumber">475</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.deleteAnimationMessage" datatype="html">
+        <source>The animation “<x id="project" equiv-text="p.id"/>” will be deleted with its script, its design and its renders. This cannot be undone.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
+          <context context-type="linenumber">477</context>
         </context-group>
       </trans-unit>
       <trans-unit id="projects.deleteMessage" datatype="html">
         <source>The project “<x id="project" equiv-text="p.id"/>” will be deleted with its scenes.yaml and its tmp/ (cache and intermediates) and out/ (results and the clips kept for each scene) folders. This cannot be undone.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">437</context>
+          <context context-type="linenumber">478</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.deleteAnimationAction" datatype="html">
+        <source>Delete animation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
+          <context context-type="linenumber">479</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projects.deleteAnimationFailed" datatype="html">
+        <source>The animation could not be deleted.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
+          <context context-type="linenumber">489</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterTitleId" datatype="html">
         <source>title</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">504</context>
+          <context context-type="linenumber">550</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterTitle" datatype="html">
         <source>A big title in the center, “My video”, with a thin golden line under it that draws from left to right, on a dark blue background</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">505</context>
+          <context context-type="linenumber">551</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterListId" datatype="html">
         <source>ideas</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">509</context>
+          <context context-type="linenumber">555</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterList" datatype="html">
         <source>Three ideas that appear one by one with a soft animation, each with a big number on the left, on the same dark blue background</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">510</context>
+          <context context-type="linenumber">556</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterCreditsId" datatype="html">
         <source>closing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">514</context>
+          <context context-type="linenumber">560</context>
         </context-group>
       </trans-unit>
       <trans-unit id="motion.starterCredits" datatype="html">
         <source>Closing credits that rise slowly: “Thanks for watching”, and below it the author&apos;s name, on the same dark blue background</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/projects/projects-list/projects-list.component.ts</context>
-          <context context-type="linenumber">515</context>
+          <context context-type="linenumber">561</context>
         </context-group>
       </trans-unit>
       <trans-unit id="storage.title" datatype="html">
@@ -14545,21 +14629,6 @@ Vuelvo a casa, vuelvo a ti</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.html</context>
           <context context-type="linenumber">269,275</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="modes.animation" datatype="html">
-        <source>Animation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">apps/dashboard-full/src/app/runs/runs-page/runs-page.component.ts</context>
-          <context context-type="linenumber">138</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/mode-select/mode-select.component.ts</context>
-          <context context-type="linenumber">56</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">apps/dashboard-full/src/app/stats/stats-page/stats-page.component.ts</context>
-          <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="runs.deleteTitle" datatype="html">
@@ -16473,6 +16542,115 @@ Vuelvo a casa, vuelvo a ti</source>
           <context context-type="linenumber">17,22</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="clientChips.aria" datatype="html">
+        <source>Filter by client label</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.html</context>
+          <context context-type="linenumber">2,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientChips.menu" datatype="html">
+        <source>Colour of the label</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.html</context>
+          <context context-type="linenumber">23,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientChips.clear" datatype="html">
+        <source>Clear</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.html</context>
+          <context context-type="linenumber">30,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientChips.change" datatype="html">
+        <source>Change colour</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientChips.restore" datatype="html">
+        <source>Restore the default colour</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.html</context>
+          <context context-type="linenumber">41,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientColor.failed" datatype="html">
+        <source>The colour could not be saved.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-chips.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientColor.title" datatype="html">
+        <source>Colour of the label</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.html</context>
+          <context context-type="linenumber">1,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientColor.hint" datatype="html">
+        <source>Every dashboard shows the colour you choose here.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientColor.save" datatype="html">
+        <source>Save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.html</context>
+          <context context-type="linenumber">18,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientColor.invalid" datatype="html">
+        <source>Write the colour as #rrggbb, for example #3366cc.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-chips/client-color-dialog/client-color-dialog.component.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientLabel.title" datatype="html">
+        <source>Client label</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientLabel.save" datatype="html">
+        <source>Save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.html</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientLabel.invalid" datatype="html">
+        <source>A client label has one to 32 lowercase letters, digits or hyphens.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientLabel.running" datatype="html">
+        <source>The label cannot be changed while it is running.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.ts</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="clientLabel.failed" datatype="html">
+        <source>The label could not be changed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/client-label-dialog/client-label-dialog.component.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="demo.notice" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Demo with simulated data:<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> nothing here is real. What you create is shared with other visitors and is erased every few hours.</source>
         <context-group purpose="location">
@@ -16611,6 +16789,41 @@ Vuelvo a casa, vuelvo a ti</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/dashboard-full/src/app/shared/model-notice/model-notice.component.html</context>
           <context context-type="linenumber">20,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectKind.generation" datatype="html">
+        <source>Generation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/project-kind.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectKind.imageEdit" datatype="html">
+        <source>Image edit</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/project-kind.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectKind.videoEdit" datatype="html">
+        <source>Video edit</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/project-kind.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectKind.model" datatype="html">
+        <source>3D model</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/project-kind.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectKind.animation" datatype="html">
+        <source>Animation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/dashboard-full/src/app/shared/project-kind.ts</context>
+          <context context-type="linenumber">18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="badge.external" datatype="html">

@@ -6,6 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { KeptClip } from '../../core/api.models';
 import { ApiService } from '../../core/api.service';
+import { projectKindLabel } from '../../shared/project-kind';
 import { ClipTrimComponent } from '../clip-trim/clip-trim.component';
 import { EditorStore } from '../editor.store';
 
@@ -60,7 +61,9 @@ export class ClipPickerComponent implements OnInit {
   }
 
   protected keptLabel(c: KeptClip): string {
-    const name = `${c.project} · ${c.scene}`;
+    // A clip of an item that is not a project (an animation of the music mode, a generation) says what its project is.
+    const origin = projectKindLabel(c.project_kind);
+    const name = origin ? `${c.project} · ${c.scene} · ${origin}` : `${c.project} · ${c.scene}`;
     if (c.kind === 'animation') return `${name} · ${this.animationNote}`;
     return c.motion ? `${name} · ${c.motion}` : name;
   }

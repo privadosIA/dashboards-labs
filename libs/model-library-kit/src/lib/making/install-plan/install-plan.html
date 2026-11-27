@@ -33,6 +33,27 @@
         <span data-testid="plan-free">{{ t.free(p.free_bytes) }}</span>
         <span class="data">{{ t.path(p.path) }}</span>
       </p>
+      @if (terms(); as l) {
+        @if (needsAcceptance()) {
+          <section class="licence" data-testid="plan-licence-terms" [attr.aria-label]="t.licenceTitle">
+            <h3 class="licence-name">{{ l.name }}</h3>
+            <p class="commercial" data-testid="plan-licence-commercial">{{ t.commercial[l.commercial] }}</p>
+            @if (l.summary) {
+              <p class="note" data-testid="plan-licence-summary">{{ l.summary }}</p>
+            }
+            @if (link(); as href) {
+              <a class="text-link" data-testid="plan-licence-link" [href]="href" target="_blank" rel="noopener noreferrer">{{ t.licenceRead }}<mat-icon inline>open_in_new</mat-icon></a>
+            }
+            @if (l.accepted) {
+              <p class="note" data-testid="plan-licence-recorded">{{ t.licenceRecorded }}</p>
+            }
+            <mat-checkbox class="agree" data-testid="plan-licence-agree" [checked]="agreed()" (change)="agree($event.checked)">{{ t.licenceAgree(l.name) }}</mat-checkbox>
+            @if (!agreed()) {
+              <p class="note" data-testid="plan-licence-needed">{{ t.licenceNeeded }}</p>
+            }
+          </section>
+        }
+      }
       @if (p.gated && p.missing.length) {
         <p class="gated" data-testid="plan-gated"><mat-icon inline>info</mat-icon>{{ t.gated }}</p>
       } @else {

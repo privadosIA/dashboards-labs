@@ -1,0 +1,45 @@
+@if (labels.labels().length > 0) {
+  <div class="chips" appAutoAnimate role="group" i18n-aria-label="@@clientChips.aria" aria-label="Filter by client label" data-testid="client-chips">
+    @for (l of labels.labels(); track l.name) {
+      <span class="chip" [class.on]="isOn(l.name)" [style.--chip-color]="labels.colorOf(l.name)" [attr.data-testid]="'client-chip-' + l.name">
+        <button
+          type="button"
+          class="chip-main lab-pressable transition-transform duration-200 ease-lab active:scale-[0.98] hover:-translate-y-0.5"
+          [attr.aria-pressed]="isOn(l.name)"
+          (click)="toggle(l.name)"
+        >
+          <span class="dot" aria-hidden="true"></span>
+          <span class="name">{{ l.name }}</span>
+          <span class="count mo-data">{{ l.total }}</span>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          class="chip-menu"
+          [matMenuTriggerFor]="menu"
+          [matMenuTriggerData]="{ name: l.name }"
+          [attr.data-testid]="'client-chip-menu-' + l.name"
+          i18n-aria-label="@@clientChips.menu"
+          aria-label="Colour of the label"
+        >
+          <mat-icon>palette</mat-icon>
+        </button>
+      </span>
+    }
+    @if (selected().size > 0) {
+      <button mat-button type="button" class="clear" data-testid="client-chips-clear" (click)="clear()" i18n="@@clientChips.clear">Clear</button>
+    }
+  </div>
+  <mat-menu #menu="matMenu">
+    <ng-template matMenuContent let-name="name">
+      <button mat-menu-item type="button" data-testid="client-color-change" (click)="changeColor(name)">
+        <mat-icon>palette</mat-icon>
+        <span i18n="@@clientChips.change">Change colour</span>
+      </button>
+      <button mat-menu-item type="button" data-testid="client-color-restore" (click)="restore(name)">
+        <mat-icon>restart_alt</mat-icon>
+        <span i18n="@@clientChips.restore">Restore the default colour</span>
+      </button>
+    </ng-template>
+  </mat-menu>
+}

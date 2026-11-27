@@ -15,11 +15,33 @@ import {
   type InstallOptions,
   type InstallPlan,
   LibraryFailed,
+  type LicenceTerms,
   type ModelBackend,
   type ModelLibraryPort,
   type ModelFileStep,
   type ModelPack,
 } from './port';
+
+/** A plan as the server sends it: its `licence` is text on older servers and an object on newer ones. */
+export type PlanAnswer = Omit<InstallPlan, 'licence' | 'licenceTerms'> & { readonly licence?: string | Partial<LicenceTerms> };
+
+/**
+ * The plan's `licence` is the licence's name as text on older servers and an object (`id`, `name`, `url`, `summary`, `commercial`, `accepted`) on newer ones: the plan keeps the name and, from the object,
+ * the whole licence (which says whether an acceptance is asked). Shared with the hosts that have their own adapter for the port.
+ */
+export function installPlanOf(plan: PlanAnswer): InstallPlan {
+  const { licence, ...rest } = plan;
+  if (typeof licence === 'string' || !licence) return { ...rest, licence: licence ?? '' };
+  const terms: LicenceTerms = {
+    ...(licence.id ? { id: licence.id } : {}),
+    name: licence.name ?? '',
+    ...(licence.url ? { url: licence.url } : {}),
+    ...(licence.summary ? { summary: licence.summary } : {}),
+    commercial: licence.commercial ?? 'unknown',
+    ...(licence.accepted !== undefined ? { accepted: licence.accepted } : {}),
+  };
+  return { ...rest, licence: terms.name, licenceTerms: terms };
+}
 
 /** What the adapter uses of the API client. */
 export type LibraryApi = Pick<ApiClient, 'get' | 'getBlob' | 'post' | 'postForm' | 'put' | 'delete' | 'downloadAt'>;
@@ -119,15 +141,19 @@ export class ApiModelLibrary implements ModelLibraryPort {
   }
 
   installPlan(engine: string, options: InstallOptions = {}): Observable<InstallPlan> {
-    return this.api.post('/api/models3d/engines/{engine}/install', { path: { engine }, body: this.installBody(options, false) } as never).pipe(map((r) => (r as { plan: InstallPlan }).plan), failing());
+    return this.api.post('/api/models3d/engines/{engine}/install', { path: { engine }, body: this.installBody(options, false) } as never).pipe(map((r) => this.planOf((r as unknown as { plan: PlanAnswer }).plan)), failing());
   }
 
   startInstall(engine: string, options: InstallOptions = {}): Observable<InstallJob> {
     return this.api.post('/api/models3d/engines/{engine}/install', { path: { engine }, body: this.installBody(options, true) } as never).pipe(map((r) => (r as { install: InstallJob }).install), failing());
   }
 
+  private planOf(plan: PlanAnswer): InstallPlan {
+    return installPlanOf(plan);
+  }
+
   private installBody(options: InstallOptions, confirm: boolean): Record<string, unknown> {
-    return { ...(options.backend ? { backend: options.backend } : {}), ...(options.parts ? { parts: options.parts } : {}), ...(confirm ? { confirm: true } : {}) };
+    return { ...(options.backend ? { backend: options.backend } : {}), ...(options.parts ? { parts: options.parts } : {}), ...(confirm ? { confirm: true, ...(options.acceptLicence ? { accept_licence: options.acceptLicence } : {}) } : {}) };
   }
 
   installJob(id: string): Observable<InstallJob> {

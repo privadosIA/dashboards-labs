@@ -1,0 +1,26 @@
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--lab-space-2);
+  margin: 0 0 var(--lab-space-3);
+}
+
+// The only colour that is not a token is the label's own, which is data from the server.
+.swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  background: var(--swatch);
+}
+
+.hint {
+  margin: var(--lab-space-3) 0 0;
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+}
+
+.problem {
+  margin: var(--lab-space-3) 0 0;
+  color: var(--lab-danger);
+}

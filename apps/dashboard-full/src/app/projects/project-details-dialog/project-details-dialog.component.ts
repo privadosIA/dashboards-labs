@@ -7,6 +7,7 @@ import { DfFormSchema, DynamicFormComponent } from '@core/dynamic-forms';
 
 import { ProjectSummary } from '../../core/api.models';
 import { EnvironmentStore } from '../../core/environment.store';
+import { ClientLabelsStore, validClient } from '../../core/client-labels.store';
 import { ProjectsStore } from '../../core/projects.store';
 import { schemaFor } from '../../shared/dynamic/schema-loader';
 import formsEn from './dynamic/forms.en.json';
@@ -34,6 +35,8 @@ export class ProjectDetailsDialogComponent {
   private readonly ref = inject<MatDialogRef<ProjectDetailsDialogComponent, ProjectSummary | undefined>>(MatDialogRef);
   private readonly store = inject(ProjectsStore);
   private readonly env = inject(EnvironmentStore);
+  /** The labels the server knows: offered while the client is typed (any valid name may still be written). */
+  protected readonly labels = inject(ClientLabelsStore);
 
   private readonly start = detailsOf(this.data.project);
   protected readonly model = signal<Record<string, unknown>>({ ...this.start });
@@ -62,10 +65,14 @@ export class ProjectDetailsDialogComponent {
       this.problem.set($localize`:@@projectDetails.nameEmpty:The name cannot be empty.`);
       return;
     }
+    if (patch.client && !validClient(patch.client)) {
+      this.problem.set($localize`:@@projectDetails.clientInvalid:A client label has one to 32 lowercase letters, digits or hyphens.`);
+      return;
+    }
     this.saving.set(true);
     this.problem.set('');
     try {
-      this.ref.close(await this.store.patch(this.data.project.id, patch));
+      this.ref.close(await this.store.patch(this.data.project.id, patch, this.data.project.kind));
     } catch (e) {
       this.problem.set((e as HttpErrorResponse)?.error?.error?.message ?? $localize`:@@projectDetails.failed:The project could not be changed.`);
     } finally {

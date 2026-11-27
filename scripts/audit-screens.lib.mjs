@@ -34,6 +34,8 @@ export const FORM_PLAN = {
     screens: [
       // the Details dialog of a project: three fields one under the other
       { name: 'project-details', path: '/projects', steps: [{ click: '[data-testid="details-demo"]' }, { wait: 700 }] },
+      // the colour of a client label: one field, so nothing to measure between fields, but it must open and draw without errors
+      { name: 'client-color', path: '/projects', steps: [{ click: '[data-testid="client-chip-menu-embedded"]' }, { wait: 300 }, { click: '[data-testid="client-color-change"]' }, { wait: 700 }] },
       // the form that imports a zip of 3D models as a pack: id, name, author, licence and where it comes from
       { name: 'import-pack', path: '/models/3d', steps: [{ click: '[data-testid="packs-import"]' }, { wait: 700 }] },
       // the form that makes a 3D model from a text: the text, the engine, the detail, the name and the adult mark

@@ -4,6 +4,7 @@ import { provideLabForms } from '@lab/forms-kit';
 import { map, of } from 'rxjs';
 
 import { MODEL_LIBRARY_OPTIONS } from '../../core/options';
+import { GENERATION_RELABEL, type GenerationRelabel } from '../generation-relabel';
 import { InMemoryModelLibrary, type ServiceKind } from '../../memory.adapter';
 import { MODEL_LIBRARY_PORT } from '../../port';
 import { ModelViewer } from '../../viewer/open-viewer';
@@ -27,10 +28,18 @@ describe('ModelMaking', () => {
     await new Promise((done) => setTimeout(done, 0));
   }
 
-  async function open(service: ServiceKind = 'default', lang: 'es' | 'en' = 'en', extra: { docker?: boolean; external?: boolean } = {}): Promise<void> {
+  async function open(service: ServiceKind = 'default', lang: 'es' | 'en' = 'en', extra: { docker?: boolean; external?: boolean; relabel?: GenerationRelabel } = {}): Promise<void> {
     TestBed.resetTestingModule();
-    library = new InMemoryModelLibrary({ service, ...extra });
-    TestBed.configureTestingModule({ providers: [provideLabForms({ lang }), { provide: MODEL_LIBRARY_OPTIONS, useValue: { lang, pollMs: 3 } }, { provide: MODEL_LIBRARY_PORT, useValue: library }] });
+    const { relabel, ...options } = extra;
+    library = new InMemoryModelLibrary({ service, ...options });
+    TestBed.configureTestingModule({
+      providers: [
+        provideLabForms({ lang }),
+        { provide: MODEL_LIBRARY_OPTIONS, useValue: { lang, pollMs: 3 } },
+        { provide: MODEL_LIBRARY_PORT, useValue: library },
+        ...(relabel ? [{ provide: GENERATION_RELABEL, useValue: relabel }] : []),
+      ],
+    });
     fixture = TestBed.createComponent(ModelMaking);
     made = 0;
     shown = [];
@@ -298,5 +307,53 @@ describe('ModelMaking', () => {
     await settle();
     expect(root().querySelector('[data-testid="generation-remove-yes"]')?.textContent).toContain('Remove from the list');
     expect(root().textContent).toContain('The model stays in the library');
+  });
+  describe('client labels', () => {
+    async function withGeneration(relabel?: GenerationRelabel, lang: 'es' | 'en' = 'en'): Promise<void> {
+      await open('running', lang, { relabel });
+      await library.generate({ prompt: 'a chair' }).toPromise();
+      await fixture.componentRef.injector.get(MatDialog).closeAll();
+      fixture.destroy();
+      fixture = TestBed.createComponent(ModelMaking);
+      fixture.detectChanges();
+      await settle(5);
+      // wait for the generation to finish: a running one cannot be relabelled
+      for (let i = 0; i < 80 && !root().querySelector('[data-testid="model-generations"] [data-state="done"]'); i++) await settle(5);
+    }
+
+    it('shows no label and no action when the host keeps none', async () => {
+      await withGeneration();
+      expect(root().querySelector('[data-testid="model-generations"] [data-state]')).not.toBeNull();
+      expect(q('generation-client')).toBeNull();
+      expect(q('generation-relabel')).toBeNull();
+    });
+
+    it('shows the label of each generation with the colour of the host, and an action to change it once it is not running', async () => {
+      const host: GenerationRelabel = { relabel: vi.fn(() => Promise.resolve(false)), colorOf: (c) => (c === 'unknown' ? '#d9822b' : '#336699') };
+      await withGeneration(host);
+      const label = q('generation-client') as HTMLElement;
+      expect(label.textContent?.trim()).toBe('unknown');
+      expect(label.style.getPropertyValue('--chip-color')).toBe('#d9822b');
+      expect(q('generation-relabel')?.textContent).toContain('Label');
+    });
+
+    it('asks the host to change the label and reads the generation again only when it changed', async () => {
+      const relabel = vi.fn(() => Promise.resolve(false));
+      await withGeneration({ relabel, colorOf: () => '#336699' });
+      const read = vi.spyOn(library, 'generation');
+      button('generation-relabel').click();
+      await settle(5);
+      expect(relabel).toHaveBeenCalledWith(expect.objectContaining({ client: 'unknown' }));
+      expect(read).not.toHaveBeenCalled();
+      relabel.mockResolvedValueOnce(true);
+      button('generation-relabel').click();
+      await settle(5);
+      expect(read).toHaveBeenCalledTimes(1);
+    });
+
+    it('puts the action in Spanish', async () => {
+      await withGeneration({ relabel: () => Promise.resolve(false), colorOf: () => '#336699' }, 'es');
+      expect(q('generation-relabel')?.textContent).toContain('Etiqueta');
+    });
   });
 });

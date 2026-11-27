@@ -1,0 +1,12 @@
+.id {
+  margin: 0 0 var(--lab-space-3);
+  color: var(--lab-ink-dim);
+  font-size: var(--lab-fs-meta);
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  margin: var(--lab-space-3) 0 0;
+  color: var(--lab-danger);
+  font-size: var(--lab-fs-meta);
+}

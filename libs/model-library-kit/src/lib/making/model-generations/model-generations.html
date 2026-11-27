@@ -16,6 +16,9 @@
             <span class="data">{{ g.prompt ?? t.fromPicture }}</span>
           </p>
           <p class="meta"><span class="data">{{ g.engine }} · {{ g.detail }}</span></p>
+          @if (labels) {
+            <span class="client" data-testid="generation-client" [style.--chip-color]="labels.colorOf(g.client)">{{ g.client }}</span>
+          }
           @if (g.error) {
             <p class="problem" role="alert" data-testid="generation-error"><mat-icon inline>error</mat-icon><span class="data">{{ g.error }}</span></p>
           }
@@ -30,6 +33,11 @@
             </button>
             <button mat-stroked-button type="button" data-testid="generation-show" (click)="showModel.emit(g.model)">
               <mat-icon>deployed_code</mat-icon>{{ t.model(g.model) }}
+            </button>
+          }
+          @if (labels && !live(g)) {
+            <button mat-button type="button" data-testid="generation-relabel" [disabled]="store.busy().has(g.id)" (click)="relabel(g)">
+              <mat-icon>sell</mat-icon>{{ t.relabel }}
             </button>
           }
           @if (live(g)) {

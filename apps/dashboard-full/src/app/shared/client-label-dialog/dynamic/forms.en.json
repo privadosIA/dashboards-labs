@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "id": "client-label",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "client",
+      "type": "text",
+      "label": "Client (who made it; empty for none)",
+      "placeholder": "dashboard-full",
+      "props": { "attributes": { "data-testid": "client-label-input", "autocomplete": "off", "list": "client-label-options" } }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<h2 mat-dialog-title i18n="@@clientColor.title">Colour of the label</h2>
+<mat-dialog-content>
+  <p class="label" data-testid="client-color-name">
+    <span class="swatch" [style.--swatch]="typed() ?? labels.colorOf(data.name)" aria-hidden="true"></span>
+    <span class="mo-data">{{ data.name }}</span>
+  </p>
+  <dynamic-form [schema]="schema" [(model)]="model" [showDefaultActions]="false" showErrors="always" />
+  <p class="hint" i18n="@@clientColor.hint">Every dashboard shows the colour you choose here.</p>
+  @if (problem(); as why) {
+    <p class="problem" role="alert" data-testid="client-color-problem">{{ why }}</p>
+  }
+</mat-dialog-content>
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+<mat-dialog-actions align="end">
+  <button mat-button type="button" data-testid="client-color-cancel" [mat-dialog-close]="undefined" i18n="@@confirm.cancel">Cancel</button>
+  <button mat-flat-button type="button" data-testid="client-color-save" [disabled]="saving()" (click)="save()" i18n="@@clientColor.save">Save</button>
+</mat-dialog-actions>

@@ -52,7 +52,7 @@ describe('GalleryPageComponent on a phone', () => {
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([{ id: 'mobile-stills', name: 'mobile-stills', mode: 'images', scene_count: 1 }]);
+    http.expectOne('/api/projects?managed=all').flush([{ id: 'mobile-stills', name: 'mobile-stills', mode: 'images', scene_count: 1 }]);
     await fixture.whenStable();
     fixture.detectChanges();
     const done = (fixture.componentInstance as unknown as { selectProject(id: string): Promise<void> }).selectProject('mobile-stills');
@@ -163,7 +163,7 @@ describe('GalleryPageComponent on a phone: songs', () => {
     const http = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(GalleryPageComponent);
     fixture.detectChanges();
-    http.expectOne('/api/projects?managed=include').flush([{ id: 'balada', name: 'balada', mode: 'music', scene_count: 0, track_count: 1 }]);
+    http.expectOne('/api/projects?managed=all').flush([{ id: 'balada', name: 'balada', mode: 'music', scene_count: 0, track_count: 1 }]);
     await fixture.whenStable();
     fixture.detectChanges();
     const done = (fixture.componentInstance as unknown as { selectProject(id: string): Promise<void> }).selectProject('balada');

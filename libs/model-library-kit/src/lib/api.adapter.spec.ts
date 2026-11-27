@@ -102,6 +102,46 @@ describe('ApiModelLibrary', () => {
     expect(api.calls.map((c) => c.options?.body)).toEqual([{}, { backend: 'docker', parts: ['weights'] }, { backend: 'dotnet', parts: ['service', 'weights'], confirm: true }]);
   });
 
+  it('shows the name of the plan’s licence whether the server sends it as text or as an object', async () => {
+    api.answer = { plan: { engine: 'sf3d', licence: { id: 'stability-community', name: 'Stability AI Community', commercial: 'conditions' } } };
+    expect((await firstValueFrom(library.installPlan('sf3d'))).licence).toBe('Stability AI Community');
+    api.answer = { plan: { engine: 'triposr', licence: 'MIT' } };
+    expect((await firstValueFrom(library.installPlan('triposr'))).licence).toBe('MIT');
+  });
+
+  it('keeps the whole licence of the plan next to its name, and only what the server sent', async () => {
+    api.answer = { plan: { engine: 'sf3d', licence: { id: 'stability-community', name: 'Stability AI Community', url: 'https://example.org/licence', summary: 'Free under a revenue limit.', commercial: 'conditions', accepted: false } } };
+    const plan = await firstValueFrom(library.installPlan('sf3d'));
+    expect(plan.licence).toBe('Stability AI Community');
+    expect(plan.licenceTerms).toEqual({ id: 'stability-community', name: 'Stability AI Community', url: 'https://example.org/licence', summary: 'Free under a revenue limit.', commercial: 'conditions', accepted: false });
+    api.answer = { plan: { engine: 'triposr', licence: { name: 'MIT', commercial: 'yes' } } };
+    expect((await firstValueFrom(library.installPlan('triposr'))).licenceTerms).toEqual({ name: 'MIT', commercial: 'yes' });
+  });
+
+  it('has no licence terms for a server that sends the licence as text, so no acceptance is asked', async () => {
+    api.answer = { plan: { engine: 'sf3d', licence: 'Stability AI Community' } };
+    const plan = await firstValueFrom(library.installPlan('sf3d'));
+    expect(plan.licence).toBe('Stability AI Community');
+    expect('licenceTerms' in plan).toBe(false);
+  });
+
+  it('sends accept_licence only with the confirmation and only when the person accepted: the plan request never carries it', async () => {
+    api.answer = { plan: {}, install: {} };
+    await firstValueFrom(library.installPlan('sf3d', { acceptLicence: 'stability-community' }));
+    await firstValueFrom(library.startInstall('sf3d', { backend: 'dotnet' }));
+    await firstValueFrom(library.startInstall('sf3d', { backend: 'dotnet', acceptLicence: 'stability-community' }));
+    expect(api.calls.map((c) => c.options?.body)).toEqual([{}, { backend: 'dotnet', confirm: true }, { backend: 'dotnet', confirm: true, accept_licence: 'stability-community' }]);
+  });
+
+  it('keeps the reason of a refusal that asks for the licence, apart from the one of Hugging Face', async () => {
+    api.fail = new ApiError(400, 'invalid_request', 'the licence of stability-community has to be accepted: https://example.org/licence', 'licence_acceptance_required');
+    const asked = await firstValueFrom(library.startInstall('sf3d')).catch((e) => e);
+    expect([asked.status, asked.reason]).toEqual([400, 'licence_acceptance_required']);
+    api.fail = new ApiError(422, 'validation_failed', 'Hugging Face refuses the key', 'licence_not_accepted');
+    const refused = await firstValueFrom(library.startInstall('sf3d')).catch((e) => e);
+    expect(refused.reason).toBe('licence_not_accepted');
+  });
+
   it('keeps the server’s refusal of the backend with its reason', async () => {
     api.fail = new ApiError(422, 'validation_failed', 'Docker does not answer on this machine', 'no_docker');
     const failure = await firstValueFrom(library.setModelBackend('docker')).catch((e) => e);

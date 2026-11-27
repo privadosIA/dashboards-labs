@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "id": "client-color",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "key": "color",
+      "type": "text",
+      "label": "Colour (#rrggbb)",
+      "placeholder": "#3366cc",
+      "validation": {
+        "required": true,
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "messages": { "required": "Choose a colour.", "pattern": "Write the colour as #rrggbb, for example #3366cc." }
+      },
+      "props": { "attributes": { "data-testid": "client-color-input", "autocomplete": "off", "spellcheck": "false" } }
+    }
+  ]
+}

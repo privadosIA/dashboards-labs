@@ -279,6 +279,13 @@ export class MakingStore {
     });
   }
 
+  /** Reads one generation again (its label changed, say) and puts it in the list in its place. */
+  refreshGeneration(id: string): Promise<void> {
+    return this.run(id, async () => {
+      this.replace(await firstValueFrom(this.port.generation(id)));
+    });
+  }
+
   removeGeneration(id: string): Promise<void> {
     return this.run(id, async () => {
       await firstValueFrom(this.port.deleteGeneration(id));

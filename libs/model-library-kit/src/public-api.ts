@@ -17,6 +17,7 @@ export {
   type InstallJob,
   type InstallOptions,
   type InstallPlan,
+  type LicenceTerms,
   type LibraryModel,
   type ModelBackend,
   type PartId,
@@ -38,8 +39,9 @@ export { ModelCard } from './lib/catalog/model-card/model-card';
 export { Thumbnails } from './lib/catalog/thumbnails';
 export { ModelPacks } from './lib/packs/model-packs/model-packs';
 export { ModelMaking } from './lib/making/model-making/model-making';
+export { GENERATION_RELABEL, type GenerationRelabel } from './lib/making/generation-relabel';
 export { ModelPicker } from './lib/picker/model-picker';
 export { PieceModelPlace, type PieceModelsApi } from './lib/piece-place';
-export { ApiModelLibrary, type LibraryApi } from './lib/api.adapter';
+export { ApiModelLibrary, installPlanOf, type LibraryApi, type PlanAnswer } from './lib/api.adapter';
 export { ModelViewer } from './lib/viewer/open-viewer';
 export { ModelViewerDialog, type ViewerData } from './lib/viewer/model-viewer/model-viewer';

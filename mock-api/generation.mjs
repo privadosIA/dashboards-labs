@@ -4,6 +4,7 @@
 // has to be cancelled when it is deleted and a restarted mock keeps counting. A prompt with `[fail]` ends failed.
 import { randomBytes } from 'node:crypto';
 import { clientFilter } from './listing.mjs';
+import { readClientPatch } from './clients.mjs';
 import * as fx from './fixtures.mjs';
 import { descriptionProblems } from './blender-descriptions.mjs';
 
@@ -93,19 +94,23 @@ const inputsOfFiles = (id, files) =>
     .filter((f) => INPUT_PARTS[f.field])
     .map((f) => ({ kind: INPUT_PARTS[f.field].kind, name: f.filename, address: `/api/projects/${id}/artifacts/sources/${f.filename}` }));
 
+/** The state of a generation of the mock as the clock leaves it: queued for one step, running for RUN_STEPS and then done (or failed, when the request asked for it). */
+export function generationState(rec, speed) {
+  const step = 600 / speed;
+  const elapsed = Date.now() - Date.parse(rec.created_at);
+  if (elapsed < step) return { state: 'queued', progress: 0 };
+  const progress = Math.floor(((elapsed - step) / (step * RUN_STEPS)) * 100);
+  if (progress < 100) return { state: 'running', progress: Math.min(99, progress) };
+  return rec.fails ? { state: 'failed', progress: 99, error: 'the model ran out of memory (simulated)' } : { state: 'done', progress: 100 };
+}
+
 export function generationHandlers({ db, save, ts, speed }) {
   const step = 600 / speed;
   let counter = Object.keys(db.generations).length + Object.keys(db.edits).length;
   const newId = (prefix) => `${prefix}${ts().replace(/[-:.TZ]/g, '').slice(0, 14)}-${randomBytes(3).toString('hex')}`;
 
   // queued for one step, running for RUN_STEPS and then done (or failed, when the request asked for it).
-  function stateOf(rec) {
-    const elapsed = Date.now() - Date.parse(rec.created_at);
-    if (elapsed < step) return { state: 'queued', progress: 0 };
-    const progress = Math.floor(((elapsed - step) / (step * RUN_STEPS)) * 100);
-    if (progress < 100) return { state: 'running', progress: Math.min(99, progress) };
-    return rec.fails ? { state: 'failed', progress: 99, error: 'the model ran out of memory (simulated)' } : { state: 'done', progress: 100 };
-  }
+  const stateOf = (rec) => generationState(rec, speed);
   const size = (rec, st) => (st.state === 'done' ? rec.bytes : 0);
 
   // The name a dashboard gives itself (the pattern of the contract); a request without one is `unknown`.
@@ -221,6 +226,16 @@ export function generationHandlers({ db, save, ts, speed }) {
       const rec = db.generations[params.id];
       return rec ? [200, generationView(rec)] : err(404, 'not_found', `generation "${params.id}" not found`);
     },
+    'PATCH /api/generations/{id}': ({ params, body }) => {
+      const rec = db.generations[params.id];
+      if (!rec) return err(404, 'not_found', `generation "${params.id}" not found`);
+      const read = readClientPatch(body);
+      if (read.error) return read.error;
+      if (['queued', 'running'].includes(stateOf(rec).state)) return err(409, 'conflict', `generation "${params.id}" has an active run`);
+      rec.request.client = read.client;
+      save();
+      return [200, generationView(rec)];
+    },
     'DELETE /api/generations/{id}': ({ params }) => {
       if (!db.generations[params.id]) return err(404, 'not_found', `generation "${params.id}" not found`);
       delete db.generations[params.id];
@@ -260,6 +275,16 @@ export function generationHandlers({ db, save, ts, speed }) {
     'GET /api/image-edits/{id}': ({ params }) => {
       const rec = db.edits[params.id];
       return rec ? [200, editView(rec)] : err(404, 'not_found', `image edit "${params.id}" not found`);
+    },
+    'PATCH /api/image-edits/{id}': ({ params, body }) => {
+      const rec = db.edits[params.id];
+      if (!rec) return err(404, 'not_found', `image edit "${params.id}" not found`);
+      const read = readClientPatch(body);
+      if (read.error) return read.error;
+      if (['queued', 'running'].includes(stateOf(rec).state)) return err(409, 'conflict', `image edit "${params.id}" has an active run`);
+      rec.request.client = read.client;
+      save();
+      return [200, editView(rec)];
     },
     'DELETE /api/image-edits/{id}': ({ params }) => {
       if (!db.edits[params.id]) return err(404, 'not_found', `image edit "${params.id}" not found`);

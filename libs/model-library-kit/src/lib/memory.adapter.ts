@@ -15,6 +15,7 @@ import {
   type InstallJob,
   type InstallOptions,
   type InstallPlan,
+  type LicenceTerms,
   type LibraryModel,
   LibraryFailed,
   type ModelBackend,
@@ -65,6 +66,11 @@ const WEIGHTS: Record<string, { files: string[]; bytes: number; licence: string;
   triposr: { files: ['triposr/config.yaml', 'triposr/model.ckpt'], bytes: 1_900_000_000, licence: 'MIT', gated: false, path: 'models/model3d/triposr' },
   sf3d: { files: ['sf3d/config.yaml', 'sf3d/model.safetensors', 'sf3d/160_tets.npz'], bytes: 3_900_000_000, licence: 'Stability AI Community License', gated: true, path: 'models/model3d/sf3d' },
 };
+/** The licence of each engine as the server describes it. sf3d's has an `id`: an install is refused until the request carries it as `accept_licence`. */
+const LICENCES: Record<string, LicenceTerms> = {
+  triposr: { name: 'MIT', url: 'https://huggingface.co/stabilityai/TripoSR', summary: 'Use, copy and change freely, keeping the notice.', commercial: 'yes' },
+  sf3d: { id: 'stability-community', name: 'Stability AI Community License', url: 'https://huggingface.co/stabilityai/stable-fast-3d', summary: 'Free for personal use and for companies under a yearly revenue limit.', commercial: 'conditions' },
+};
 const VERSION: Record<string, string> = { triposr: 'triposr@3f1c9a2', sf3d: 'sf3d@8d41e07' };
 const GB = 1e9;
 /** What each way of running needs, in the order a person fixes it; what each part takes on the disk; the reason code and the words of each thing that can be missing. */
@@ -103,19 +109,21 @@ export class InMemoryModelLibrary implements ModelLibraryPort {
     backend: string;
   };
   private readonly installs = new Map<string, InstallJob & { steps: number }>();
+  /** The ids of the licences whose acceptance was recorded, as the server records one. */
+  private readonly accepted = new Set<string>();
   private readonly gens = new Map<string, Generation & { steps: number; hasPrompt: boolean; adult: boolean }>();
   private readonly made: LibraryModel[] = [];
   private seq = 0;
 
-  /** `docker: false` is a machine where Docker does not answer; `external: true` a service that `MODEL3D_HOST` names. */
-  constructor(private readonly options: { failing?: string; service?: ServiceKind; docker?: boolean; external?: boolean; modelFile?: 'missing' } = {}) {
+  /** `docker: false` is a machine where Docker does not answer; `external: true` a service that `MODEL3D_HOST` names; `sf3dKey: true` a machine with the Hugging Face key saved, so sf3d can be installed (and its licence accepted). */
+  constructor(private readonly options: { failing?: string; service?: ServiceKind; docker?: boolean; external?: boolean; modelFile?: 'missing'; sf3dKey?: boolean } = {}) {
     const kind = options.service ?? 'default';
     this.service = {
       parts: {
         triposr: { service: kind !== 'noservice', image: true, weights: kind !== 'bare' && kind !== 'noservice' },
         sf3d: { service: kind !== 'noservice', image: true, weights: false },
       },
-      keys: { triposr: true, sf3d: false },
+      keys: { triposr: true, sf3d: options.sf3dKey === true },
       container: { triposr: { state: kind === 'running' ? 'running' : 'stopped', reads: 0 }, sf3d: { state: 'stopped', reads: 0 } },
       backend: '',
     };
@@ -357,6 +365,12 @@ export class InMemoryModelLibrary implements ModelLibraryPort {
     });
   }
 
+  /** The licence of an engine, with `accepted` once an acceptance was recorded (only where one is required). */
+  private termsOf(engine: string): LicenceTerms {
+    const terms = LICENCES[engine];
+    return terms.id ? { ...terms, accepted: this.accepted.has(terms.id) } : terms;
+  }
+
   /** The plan: the backend, the parts it would run (those that are missing, in order, among those asked) and what they take. */
   private plan(engine: string, options: InstallOptions): { plan: InstallPlan } | { error: LibraryFailed } {
     const w = WEIGHTS[engine];
@@ -369,7 +383,7 @@ export class InMemoryModelLibrary implements ModelLibraryPort {
     // the weights of sf3d need the saved key, for the .NET service too: refused before anything is downloaded
     if (engine === 'sf3d' && parts.includes('weights') && !this.service.keys['sf3d']) return { error: new LibraryFailed(422, 'engine "sf3d" cannot be installed now: key_missing', 'key_missing') };
     if (!parts.length) return { error: new LibraryFailed(409, `nothing is missing for ${engine} with the ${backend} backend`) };
-    return { plan: { engine, backend, parts, missing: parts.includes('weights') ? w.files : [], bytes: Math.round(this.bytesOf(engine, parts)), licence: w.licence, gated: w.gated, path: w.path, free_bytes: 214_000_000_000 } };
+    return { plan: { engine, backend, parts, missing: parts.includes('weights') ? w.files : [], bytes: Math.round(this.bytesOf(engine, parts)), licence: w.licence, licenceTerms: this.termsOf(engine), gated: w.gated, path: w.path, free_bytes: 214_000_000_000 } };
   }
 
   installPlan(engine: string, options: InstallOptions = {}): Observable<InstallPlan> {
@@ -381,10 +395,14 @@ export class InMemoryModelLibrary implements ModelLibraryPort {
 
   startInstall(engine: string, options: InstallOptions = {}): Observable<InstallJob> {
     return defer(() => {
-      this.calls.push(`install ${engine}${options.backend ? ` ${options.backend}` : ''}${options.parts ? ` ${options.parts.join('+')}` : ''}`);
+      this.calls.push(`install ${engine}${options.backend ? ` ${options.backend}` : ''}${options.parts ? ` ${options.parts.join('+')}` : ''}${options.acceptLicence ? ` accept:${options.acceptLicence}` : ''}`);
       const made = this.plan(engine, options);
       if ('error' in made) return throwError(() => made.error);
+      // An engine whose licence has an id is never installed on the strength of the confirmation alone: the person's acceptance has to come with it, and the server records it.
+      const needed = LICENCES[engine]?.id;
+      if (needed && options.acceptLicence !== needed) return throwError(() => new LibraryFailed(400, `the licence ${needed} (${LICENCES[engine].name}, ${LICENCES[engine].url}) has to be accepted: send accept_licence after the person agreed`, 'licence_acceptance_required'));
       if ([...this.installs.values()].some((j) => j.state === 'running')) return throwError(() => new LibraryFailed(409, 'another install is running'));
+      if (needed) this.accepted.add(needed);
       const parts = made.plan.parts ?? [];
       const job = { id: `m3d-install-${++this.seq}`, engine, backend: made.plan.backend, parts, part: parts[0], state: 'running' as const, log: [] as string[], created_at: new Date().toISOString(), steps: 0 };
       this.installs.set(job.id, job);
